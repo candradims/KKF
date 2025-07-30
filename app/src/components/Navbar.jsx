@@ -8,10 +8,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [pageTitle, setPageTitle] = useState("Dashboard");
 
-  // Create ref for dropdown container
   const profileMenuRef = useRef(null);
 
-  // Update page title based on current route
   useEffect(() => {
     const routeTitles = {
       "/dashboard": "Dashboard",
@@ -19,14 +17,12 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       "/data-layanan": "Data Layanan",
       "/data-pemasangan": "Data Pemasangan",
       "/laporan-lelak": "Laporan Lelak",
-      "/profile": "Profile",
       "/login": "Login",
     };
 
     setPageTitle(routeTitles[location.pathname] || "Dashboard");
   }, [location.pathname]);
 
-  // Handle click outside to close dropdowns
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -213,24 +209,6 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                   </p>
                 </div>
                 <div>
-                  <button
-                    onClick={() => navigate("/profile")}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '0.75rem 1rem',
-                      border: 'none',
-                      backgroundColor: 'transparent',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      color: '#374151',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#F9FAFB'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
-                    Profile
-                  </button>
                   <button
                     onClick={handleLogout}
                     style={{

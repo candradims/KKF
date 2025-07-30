@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import logoImage from '../assets/logo.jpg';
+import logoImage from '../assets/logo-pln.jpg';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   
-  // Determine active route
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
@@ -24,7 +23,6 @@ const Sidebar = () => {
     setShowLogoutModal(false);
   };
 
-  // Menu items sesuai dengan gambar referensi
   const menuItems = [
     {
       title: "Dashboard",
@@ -45,14 +43,14 @@ const Sidebar = () => {
       isActive: false
     },
     {
-      title: "Data Pemasangan",
-      path: "/data-pemasangan",
+      title: "Data Penawaran",
+      path: "/data-penawaran",
       icon: "🔧",
       isActive: false
     },
     {
-      title: "Laporan Lelak",
-      path: "/laporan-lelak",
+      title: "Laporan Laba",
+      path: "/laporan-laba",
       icon: "📄",
       isActive: false
     }
@@ -76,22 +74,17 @@ const Sidebar = () => {
           borderBottom: '1px solid #E5E7EB',
           backgroundColor: '#E8F4FD'
         }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            backgroundColor: '#FFD700',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: '8px'
-          }}>
-            <span style={{
-              fontSize: '18px',
-              fontWeight: 'bold',
-              color: '#DC2626'
-            }}>#</span>
-          </div>
+          <img 
+            src={logoImage}
+            alt="PLN Logo"
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '4px',
+              objectFit: 'contain',
+              marginRight: '8px'
+            }}
+          />
           <div>
             <div style={{
               fontSize: '18px',
