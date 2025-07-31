@@ -1,11 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import logoImage from '../assets/Logo_PLN_Icon_Plus.png';
+// Import MUI Icons
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import BuildIcon from '@mui/icons-material/Build';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  
+  // Determine role based on current path (like in reference)
+  const path = location.pathname.toLowerCase();
+  let userRole = "admin"; // default
+  
+  if (path.startsWith("/sales")) {
+    userRole = "sales";
+  } else if (path.startsWith("/admin")) {
+    userRole = "admin";
+  }
   
   const isActive = (path) => location.pathname === path;
 
@@ -23,38 +41,61 @@ const Sidebar = () => {
     setShowLogoutModal(false);
   };
 
-  const menuItems = [
+  // Menu items untuk admin
+  const adminMenuItems = [
     {
       title: "Dashboard",
-      path: "/dashboard",
-      icon: "📊",
-      isActive: true
+      path: "/admin/dashboard",
+      icon: <DashboardIcon />,
     },
     {
       title: "Management Data User",
-      path: "/management-data-user",
-      icon: "👥",
-      isActive: false
+      path: "/admin/management-data-user",
+      icon: <PeopleIcon />,
     },
     {
       title: "Data Layanan",
-      path: "/data-layanan",
-      icon: "📋",
-      isActive: false
+      path: "/admin/data-layanan",
+      icon: <AssignmentIcon />,
     },
     {
       title: "Data Penawaran",
-      path: "/data-penawaran",
-      icon: "🔧",
-      isActive: false
+      path: "/admin/data-penawaran",
+      icon: <BuildIcon />,
     },
     {
       title: "Laporan Laba",
-      path: "/laporan-laba",
-      icon: "📄",
-      isActive: false
+      path: "/admin/laporan-laba",
+      icon: <AssessmentIcon />,
     }
   ];
+
+  // Menu items untuk sales
+  const salesMenuItems = [
+    {
+      title: "Dashboard",
+      path: "/sales/dashboard",
+      icon: <DashboardIcon />,
+    },
+    {
+      title: "Data Penawaran",
+      path: "/sales/data-penawaran",
+      icon: <BuildIcon />,
+    },
+    {
+      title: "Pengeluaran Lain-lain",
+      path: "/sales/pengeluaran-lain-lain",
+      icon: <ReceiptIcon />,
+    },
+    {
+      title: "Laporan Laba",
+      path: "/sales/laporan-laba",
+      icon: <AssessmentIcon />,
+    }
+  ];
+
+  // Pilih menu items berdasarkan role
+  const menuItems = userRole === 'sales' ? salesMenuItems : adminMenuItems;
 
   return (
     <>
@@ -120,26 +161,28 @@ const Sidebar = () => {
                 margin: '4px 8px',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                backgroundColor: item.title === 'Dashboard' ? '#00AEEF' : 'transparent',
-                color: item.title === 'Dashboard' ? 'white' : '#374151',
+                backgroundColor: isActive(item.path) ? '#00AEEF' : 'transparent',
+                color: isActive(item.path) ? 'white' : '#374151',
                 fontSize: '14px',
                 fontWeight: '500',
                 transition: 'all 0.2s ease'
               }}
               onMouseOver={(e) => {
-                if (item.title !== 'Dashboard') {
+                if (!isActive(item.path)) {
                   e.target.style.backgroundColor = '#F3F4F6';
                 }
               }}
               onMouseOut={(e) => {
-                if (item.title !== 'Dashboard') {
+                if (!isActive(item.path)) {
                   e.target.style.backgroundColor = 'transparent';
                 }
               }}
             >
               <span style={{ 
                 marginRight: '12px',
-                fontSize: '16px'
+                fontSize: '20px',
+                display: 'flex',
+                alignItems: 'center'
               }}>
                 {item.icon}
               </span>
@@ -156,7 +199,7 @@ const Sidebar = () => {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: '0.5rem'
+            marginBottom: '1rem'
           }}>
             <div style={{
               width: '32px',
@@ -173,7 +216,7 @@ const Sidebar = () => {
                 fontSize: '14px',
                 fontWeight: 'bold'
               }}>
-                A
+                {userRole === 'sales' ? 'S' : 'A'}
               </span>
             </div>
             <div>
@@ -182,16 +225,49 @@ const Sidebar = () => {
                 fontWeight: '500',
                 color: '#374151'
               }}>
-                Admin
+                {userRole === 'sales' ? 'Sales' : 'Admin'}
               </div>
               <div style={{
                 fontSize: '12px',
                 color: '#6B7280'
               }}>
-                admin@pln.co.id
+                {userRole === 'sales' ? 'sales@pln.co.id' : 'admin@pln.co.id'}
               </div>
             </div>
           </div>
+          
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '12px 16px',
+              backgroundColor: '#00AEEF',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'background-color 0.2s',
+              boxSizing: 'border-box',
+              margin: '0',
+              outline: 'none'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#0088CC'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#00AEEF'}
+          >
+            <span style={{ 
+              marginRight: '8px',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <LogoutIcon fontSize="small" />
+            </span>
+            Logout
+          </button>
         </div>
       </div>
 
