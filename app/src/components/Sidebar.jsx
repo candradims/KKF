@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import logoImage from '../assets/logo-pln.jpg';
+import logoImage from '../assets/Logo_PLN_Icon_Plus.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
