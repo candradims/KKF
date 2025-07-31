@@ -7,6 +7,8 @@ import Layout from "./components/Layout";
 
 // Import components
 import Login from "./components/Login";
+import LupaPassword from './components/LupaPassword';
+
 
 // Import pages
 import SalesDashboard from "./pages/sales/Dashboard";
@@ -56,6 +58,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/lupa-password" element={<LupaPassword />} />
         </Route>
       </Routes>
     </Router>
