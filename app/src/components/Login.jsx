@@ -16,40 +16,67 @@ const App = () => {
 
   useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
     
     const style = document.createElement('style');
     style.innerHTML = `
       html, body {
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
         margin: 0;
         padding: 0;
         font-family: 'Poppins', sans-serif;
         font-weight: 500;
+        overflow-x: hidden;
       }
       
-      @media (min-width: 1024px) {
-        h2 {
-          font-size: 2.25rem !important;
-        }
-        input, select {
-          font-size: 1rem !important;
-        }
+      * {
+        box-sizing: border-box;
       }
 
       @media (max-width: 768px) {
         .form-row {
           flex-direction: column !important;
           align-items: stretch !important;
+          gap: 0.5rem !important;
         }
 
         .form-row label {
           width: 100% !important;
-          margin-bottom: 0.25rem;
+        }
+
+        .form-container {
+          padding: 1.5rem !important;
+          margin: 1rem !important;
+        }
+
+        .login-button {
+          width: 100% !important;
+        }
+
+        .welcome-title {
+          font-size: 1.5rem !important;
+        }
+
+        .logo-img {
+          height: 4rem !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .welcome-title {
+          font-size: 1.25rem !important;
+        }
+
+        .form-container {
+          padding: 1rem !important;
+          margin: 0.5rem !important;
+        }
+
+        .checkbox-forgot-container {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          gap: 1rem !important;
         }
       }
     `;
@@ -92,19 +119,11 @@ const App = () => {
 
   return (
     <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
+      minHeight: '100vh',
       backgroundColor: '#E2EAFF',
       fontFamily: 'Poppins, sans-serif'
     }}>
+      {/* Fixed Top Bar */}
       <div style={{
         width: '100%',
         height: '4rem',
@@ -112,140 +131,65 @@ const App = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 1000
+        zIndex: 1000,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }} />
 
-      <div style={{ 
-        width: '100%',
-        maxWidth: '1200px',
-        padding: '1rem',
-        boxSizing: 'border-box',
-        overflowY: 'auto',
+      {/* Main Content Container */}
+      <div style={{
+        paddingTop: '5rem',
+        paddingBottom: '2rem',
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
+        minHeight: 'calc(100vh - 4rem)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        flex: 1
+        justifyContent: 'flex-start',
+        position: 'relative',
+        zIndex: 1
       }}>
+        
         {/* Logo & Welcome */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '4rem',
-          animation: 'fadeInDown 1s ease-out',
-          width: '100%'
+          marginBottom: '3rem',
+          width: '100%',
+          maxWidth: '800px'
         }}>
           <img
             src={logoImage}
             alt="PLN Icon Plus Logo"
+            className="logo-img"
             style={{
-              height: '6.5rem',
+              height: '6rem',
               width: 'auto',
               objectFit: 'contain',
               filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))'
             }}
           />
-          <h2 style={{
+          <h2 className="welcome-title" style={{
             fontSize: '2rem',
             color: '#2D396B',
-            fontWeight: '500',
-            marginTop: '3.25rem',
+            fontWeight: '600',
+            marginTop: '2rem',
             background: 'linear-gradient(90deg, #00AEEF, #2D396B)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             letterSpacing: '1px',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.05)'
+            textShadow: '1px 1px 2px rgba(0,0,0,0.05)',
+            lineHeight: '1.2'
           }}>
             Selamat Datang di Sistem PLN Icon Plus
           </h2>
           <p style={{
             color: '#2D396B',
-            fontSize: '1.05rem',
+            fontSize: '1rem',
             marginTop: '0.5rem',
             fontWeight: '500'
           }}>
             Silakan masuk untuk melanjutkan akses sistem
           </p>
-          {showModal && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 9999
-            }}>
-              <div style={{
-                backgroundColor: '#F9FAFF',
-                borderRadius: '1rem',
-                padding: '2rem 4rem',
-                textAlign: 'center',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                maxWidth: '350px',
-                width: '90%',
-                position: 'relative'
-              }}>
-                <div style={{
-                  backgroundColor: '#00AEEF',
-                  borderRadius: '50%',
-                  width: '60px',
-                  height: '60px',
-                  margin: '0 auto',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '1rem'
-                }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="#fff" viewBox="0 0 20 20" >
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.004 8.004a1 1 0 01-1.414 0L3.293 10.707a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                  </svg>
-                </div>
-                <h3 style={{ color: '#2D396B', fontSize: '1.25rem', marginBottom: '0.5rem' }}>Selamat!</h3>
-                <p style={{ color: '#2D396B', marginBottom: '1.5rem' }}>Login Anda Berhasil ...</p>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    if (formData.role === 'sales') {
-                      navigate('/sales/dashboard');
-                    } else if (formData.role === 'admin') {
-                      navigate('/admin/dashboard');
-                    }
-                  }}
-                  style={{
-                    backgroundColor: '#00AEEF',
-                    border: 'none',
-                    borderRadius: '9999px',
-                    padding: '0.6rem 4rem',
-                    color: 'white',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontSize: '0.95rem'
-                  }}
-                >
-                  Oke
-                </button>
-                <button
-                  onClick={() => setShowModal(false)}
-                  style={{
-                    position: 'absolute',
-                    top: '0.75rem',
-                    right: '0.75rem',
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '1.25rem',
-                    color: '#333',
-                    cursor: 'pointer'
-                  }}
-                >
-                  &times;
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Message Box */}
@@ -254,7 +198,7 @@ const App = () => {
             style={{
               padding: '0.75rem',
               marginBottom: '1rem',
-              borderRadius: '0.375rem',
+              borderRadius: '0.5rem',
               fontSize: '0.875rem',
               fontWeight: '500',
               border: '1px solid',
@@ -262,8 +206,7 @@ const App = () => {
               color: message.type === 'error' ? '#DC2626' : message.type === 'success' ? '#059669' : '#2563EB',
               borderColor: message.type === 'error' ? '#FCA5A5' : message.type === 'success' ? '#6EE7B7' : '#93C5FD',
               maxWidth: '780px',
-              width: '100%',
-              margin: '0 auto'
+              width: '100%'
             }}
           >
             {message.text}
@@ -271,17 +214,15 @@ const App = () => {
         )}
 
         {/* Form Container */}
-        <div style={{
+        <div className="form-container" style={{
           backgroundColor: '#E9EDF7',
-          borderRadius: '1.85rem',
+          borderRadius: '1.5rem',
           boxShadow: '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)',
-          padding: '2.5rem 3rem',
+          padding: '2.5rem',
           border: '2px solid #2D396B',
           width: '100%',
           maxWidth: '780px',
-          margin: '0 auto',
-          transition: 'all 0.3s ease-in-out',
-          boxSizing: 'border-box'
+          transition: 'all 0.3s ease-in-out'
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -289,15 +230,14 @@ const App = () => {
             <div className="form-row" style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap'
+              gap: '1rem'
             }}>
               <label htmlFor="email" style={{
                 width: '30%',
                 minWidth: '120px',
                 fontSize: '0.95rem',
                 fontWeight: '500',
-                color: '#2D396B',
+                color: '#2D396B'
               }}>
                 Email
               </label>
@@ -310,17 +250,20 @@ const App = () => {
                 onChange={handleInputChange}
                 style={{
                   flex: 1,
-                  minWidth: '250px',
+                  minWidth: '200px',
                   padding: '0.85rem 1rem',
                   border: '1px solid #D1D5DB',
                   borderRadius: '0.5rem',
                   fontSize: '0.95rem',
                   backgroundColor: '#F9FAFB',
                   color: '#2D396B',
-                  boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
                 }}
+                onFocus={(e) => e.target.style.borderColor = '#00AEEF'}
+                onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
                 required
               />
             </div>
@@ -329,19 +272,18 @@ const App = () => {
             <div className="form-row" style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap'
+              gap: '1rem'
             }}>
               <label htmlFor="password" style={{
                 width: '30%',
                 minWidth: '120px',
                 fontSize: '0.95rem',
                 fontWeight: '500',
-                color: '#2D396B',
+                color: '#2D396B'
               }}>
                 Password
               </label>
-              <div style={{ flex: 1, position: 'relative', minWidth: '250px' }}>
+              <div style={{ flex: 1, position: 'relative', minWidth: '200px' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
@@ -358,10 +300,13 @@ const App = () => {
                     fontSize: '0.95rem',
                     backgroundColor: '#F9FAFB',
                     color: '#2D396B',
-                    boxSizing: 'border-box',
                     fontFamily: 'Poppins, sans-serif',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
                   }}
+                  onFocus={(e) => e.target.style.borderColor = '#00AEEF'}
+                  onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
                   required
                 />
                 <button
@@ -378,7 +323,8 @@ const App = () => {
                     cursor: 'pointer',
                     fontSize: '1.1rem',
                     fontFamily: 'Poppins, sans-serif',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    padding: '0.25rem'
                   }}
                 >
                 {showPassword ? (
@@ -400,19 +346,18 @@ const App = () => {
             <div className="form-row" style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap'
+              gap: '1rem'
             }}>
               <label htmlFor="role" style={{
                 width: '30%',
                 minWidth: '120px',
                 fontSize: '0.95rem',
                 fontWeight: '500',
-                color: '#2D396B',
+                color: '#2D396B'
               }}>
                 Role
               </label>
-              <div style={{ flex: 1, position: 'relative', minWidth: '250px' }}>
+              <div style={{ flex: 1, position: 'relative', minWidth: '200px' }}>
                 <select
                   id="role"
                   name="role"
@@ -431,10 +376,12 @@ const App = () => {
                     WebkitAppearance: 'none',
                     cursor: 'pointer',
                     outline: 'none',
-                    boxSizing: 'border-box',
                     fontFamily: 'Poppins, sans-serif',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    transition: 'border-color 0.2s'
                   }}
+                  onFocus={(e) => e.target.style.borderColor = '#00AEEF'}
+                  onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
                   required
                 >
                   <option value="">Pilih Role</option>
@@ -460,7 +407,7 @@ const App = () => {
             </div>
 
             {/* Checkbox & Forgot Password */}
-            <div style={{
+            <div className="checkbox-forgot-container" style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -518,7 +465,8 @@ const App = () => {
                   cursor: 'pointer',
                   padding: '0.25rem 0.5rem',
                   borderRadius: '0.25rem',
-                  fontFamily: 'Poppins, sans-serif'
+                  fontFamily: 'Poppins, sans-serif',
+                  transition: 'text-decoration 0.2s'
                 }}
                 onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
                 onMouseOut={(e) => e.target.style.textDecoration = 'none'}
@@ -530,14 +478,17 @@ const App = () => {
             {/* Submit Button */}
             <button
               type="submit"
+              className="login-button"
               style={{
-                width: '30%',
+                width: '40%',
+                maxWidth: '200px',
+                minWidth: '150px',
                 padding: '1rem',
                 borderRadius: '0.95rem',
                 alignSelf: 'center',
                 color: '#FCFEFF',
                 fontSize: '1rem',
-                fontWeight: '500',
+                fontWeight: '600',
                 backgroundColor: '#00AEEF',
                 border: 'none',
                 cursor: 'pointer',
@@ -566,17 +517,127 @@ const App = () => {
 
         {/* Footer */}
         <footer style={{
-          position: 'fixed',
-          left: '1rem',
-          bottom: '1rem',
+          marginTop: '3rem',
           fontSize: '0.85rem',
           color: '#6B7280',
           fontFamily: 'Poppins, sans-serif',
-          fontWeight: '500'
+          fontWeight: '500',
+          textAlign: 'center'
         }}>
           &copy; {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
         </footer>
       </div>
+
+      {/* Success Modal */}
+      {showModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '1rem'
+        }}>
+          <div style={{
+            backgroundColor: '#F9FAFF',
+            borderRadius: '1rem',
+            padding: '2rem',
+            textAlign: 'center',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+            maxWidth: '350px',
+            width: '100%',
+            position: 'relative'
+          }}>
+            <div style={{
+              backgroundColor: '#00AEEF',
+              borderRadius: '50%',
+              width: '60px',
+              height: '60px',
+              margin: '0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '1rem'
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#fff" viewBox="0 0 20 20" >
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.004 8.004a1 1 0 01-1.414 0L3.293 10.707a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+              </svg>
+            </div>
+            <h3 style={{ 
+              color: '#2D396B', 
+              fontSize: '1.25rem', 
+              marginBottom: '0.5rem',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: '600'
+            }}>
+              Selamat!
+            </h3>
+            <p style={{ 
+              color: '#2D396B', 
+              marginBottom: '1.5rem',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: '500'
+            }}>
+              Login Anda Berhasil ...
+            </p>
+            <button
+              onClick={() => {
+                setShowModal(false);
+                if (formData.role === 'sales') {
+                  navigate('/sales/dashboard');
+                } else if (formData.role === 'admin') {
+                  navigate('/admin/dashboard');
+                }
+              }}
+              style={{
+                backgroundColor: '#00AEEF',
+                border: 'none',
+                borderRadius: '9999px',
+                padding: '0.75rem 3rem',
+                color: 'white',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontFamily: 'Poppins, sans-serif',
+                fontSize: '0.95rem',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#0088CC'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#00AEEF'}
+            >
+              Oke
+            </button>
+            <button
+              onClick={() => setShowModal(false)}
+              style={{
+                position: 'absolute',
+                top: '0.75rem',
+                right: '0.75rem',
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                color: '#666',
+                cursor: 'pointer',
+                width: '30px',
+                height: '30px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
