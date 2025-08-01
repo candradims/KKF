@@ -108,11 +108,16 @@ const App = () => {
       <div style={{
         width: '100%',
         height: '4rem',
-        backgroundColor: '#00AEEF',
+        background: 'linear-gradient(90deg, #00AEEF 0%, #0088CC 50%, #0066AA 100%)',
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 1000
+        zIndex: 1000,
+        transition: 'all 0.3s ease',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        ':hover': {
+          background: 'linear-gradient(90deg, #00C6FB 0%, #00AEEF 50%, #0088CC 100%)'
+        }
       }} />
 
       <div style={{ 
