@@ -16,7 +16,7 @@ const Sidebar = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   
   // Determine role based on current path (like in reference)
-  const path = location.pathname.toLowerCase();
+  const path = location.pathname.toLowerCase();  
   let userRole = "admin"; // default
   
   if (path.startsWith("/sales")) {
