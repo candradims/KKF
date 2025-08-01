@@ -165,16 +165,15 @@ const App = () => {
       fontFamily: 'Poppins, sans-serif',
       position: 'relative'
     }}>
-      {/* Top Blue Bar - Fixed */}
+      {/* Top Blue Bar */}
       <div style={{
         width: '100%',
         height: '4rem',
-        backgroundColor: '#00AEEF',
+        background: 'linear-gradient(90deg, #00AEEF 0%, #0088CC 50%, #0066AA 100%)',
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 1000,
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+        zIndex: 1000
       }} />
 
       {/* Scrollable Content */}
