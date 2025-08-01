@@ -16,20 +16,18 @@ const App = () => {
 
   useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
     
     const style = document.createElement('style');
     style.innerHTML = `
       html, body {
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
         margin: 0;
         padding: 0;
         font-family: 'Poppins', sans-serif;
         font-weight: 500;
+        overflow-x: hidden;
       }
       
       @keyframes fadeIn {
@@ -49,23 +47,79 @@ const App = () => {
       }
 
       @media (min-width: 1024px) {
-        h2 {
+        .main-title {
           font-size: 2.25rem !important;
         }
-        input, select {
+        .form-input {
           font-size: 1rem !important;
         }
       }
 
       @media (max-width: 768px) {
+        .main-title {
+          font-size: 1.5rem !important;
+          margin-top: 2rem !important;
+        }
+        
+        .logo-img {
+          height: 4.5rem !important;
+        }
+        
+        .welcome-section {
+          margin-bottom: 2rem !important;
+        }
+        
+        .form-container {
+          padding: 1.5rem 1.5rem !important;
+          margin: 0 0.5rem !important;
+        }
+        
         .form-row {
           flex-direction: column !important;
           align-items: stretch !important;
+          gap: 0.5rem !important;
         }
 
         .form-row label {
           width: 100% !important;
           margin-bottom: 0.25rem;
+          font-size: 0.9rem !important;
+        }
+        
+        .form-input {
+          font-size: 0.9rem !important;
+          padding: 0.75rem 0.875rem !important;
+        }
+        
+        .submit-btn {
+          width: 60% !important;
+          font-size: 0.9rem !important;
+          padding: 0.875rem !important;
+        }
+        
+        .footer-text {
+          font-size: 0.75rem !important;
+          bottom: 0.5rem !important;
+          left: 0.5rem !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .main-title {
+          font-size: 1.25rem !important;
+        }
+        
+        .logo-img {
+          height: 4rem !important;
+        }
+        
+        .form-container {
+          padding: 1.25rem 1rem !important;
+          border-radius: 1.25rem !important;
+        }
+        
+        .submit-btn {
+          width: 80% !important;
         }
       }
     `;
@@ -103,20 +157,15 @@ const App = () => {
 
   return (
     <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      overflow: 'hidden',
+      minHeight: '100vh',
+      width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: '#E2EAFF',
-      fontFamily: 'Poppins, sans-serif'
+      fontFamily: 'Poppins, sans-serif',
+      position: 'relative'
     }}>
-      {/* Top Blue Bar */}
+      {/* Top Blue Bar - Fixed */}
       <div style={{
         width: '100%',
         height: '4rem',
@@ -124,47 +173,57 @@ const App = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 1000
+        zIndex: 1000,
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
       }} />
 
+      {/* Scrollable Content */}
       <div style={{ 
         width: '100%',
-        maxWidth: '1200px',
-        padding: '1rem',
+        minHeight: '100vh',
+        paddingTop: '5rem', // Space for fixed header
+        paddingBottom: '2rem',
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
         boxSizing: 'border-box',
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        flex: 1
+        justifyContent: 'flex-start'
       }}>
         {/* Logo & Welcome */}
-        <div style={{
+        <div className="welcome-section" style={{
           textAlign: 'center',
-          marginBottom: '4rem',
-          width: '100%'
+          marginBottom: '3rem',
+          width: '100%',
+          maxWidth: '1200px',
+          padding: '1rem 0'
         }}>
           <img
             src={logoImage}
             alt="PLN Icon Plus Logo"
+            className="logo-img"
             style={{
               height: '6.5rem',
               width: 'auto',
               objectFit: 'contain',
-              filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))'
+              filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))',
+              animation: 'fadeIn 0.8s ease-out'
             }}
           />
-          <h2 style={{
+          <h2 className="main-title" style={{
             fontSize: '2rem',
             color: '#2D396B',
             fontWeight: '500',
-            marginTop: '3.25rem',
+            marginTop: '2.5rem',
+            marginBottom: '0.5rem',
             background: 'linear-gradient(90deg, #00AEEF, #2D396B)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             letterSpacing: '1px',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.05)'
+            textShadow: '1px 1px 2px rgba(0,0,0,0.05)',
+            animation: 'scaleIn 0.8s ease-out 0.2s both'
           }}>
             Selamat Datang di Sistem PLN Icon Plus
           </h2>
@@ -172,7 +231,9 @@ const App = () => {
             color: '#2D396B',
             fontSize: '1.05rem',
             marginTop: '0.5rem',
-            fontWeight: '500'
+            fontWeight: '500',
+            animation: 'fadeIn 0.8s ease-out 0.4s both',
+            opacity: 0
           }}>
             Silakan Ubah Password untuk melanjutkan akses sistem
           </p>
@@ -193,7 +254,8 @@ const App = () => {
               borderColor: message.type === 'error' ? '#FCA5A5' : message.type === 'success' ? '#6EE7B7' : '#93C5FD',
               maxWidth: '780px',
               width: '100%',
-              margin: '0 auto'
+              margin: '0 auto',
+              animation: 'scaleIn 0.3s ease-out'
             }}
           >
             {message.text}
@@ -201,7 +263,7 @@ const App = () => {
         )}
 
         {/* Form Container */}
-        <div style={{
+        <div className="form-container" style={{
           backgroundColor: '#E9EDF7',
           borderRadius: '1.85rem',
           boxShadow: '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)',
@@ -209,9 +271,11 @@ const App = () => {
           border: '2px solid #2D396B',
           width: '100%',
           maxWidth: '780px',
-          margin: '0 auto',
+          margin: '0 auto 2rem auto',
           transition: 'all 0.3s ease-in-out',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          animation: 'scaleIn 0.8s ease-out 0.6s both',
+          opacity: 0
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -238,6 +302,7 @@ const App = () => {
                 placeholder="Masukkan Email"
                 value={formData.email}
                 onChange={handleInputChange}
+                className="form-input"
                 style={{
                   flex: 1,
                   minWidth: '250px',
@@ -249,7 +314,16 @@ const App = () => {
                   color: '#2D396B',
                   boxSizing: 'border-box',
                   fontFamily: 'Poppins, sans-serif',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#00AEEF';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 174, 239, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#D1D5DB';
+                  e.target.style.boxShadow = 'none';
                 }}
                 required
               />
@@ -279,6 +353,7 @@ const App = () => {
                   placeholder="Masukkan Password Baru"
                   value={formData.password}
                   onChange={handleInputChange}
+                  className="form-input"
                   style={{
                     width: '100%',
                     padding: '0.85rem 1rem',
@@ -290,7 +365,16 @@ const App = () => {
                     color: '#2D396B',
                     boxSizing: 'border-box',
                     fontFamily: 'Poppins, sans-serif',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#00AEEF';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(0, 174, 239, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#D1D5DB';
+                    e.target.style.boxShadow = 'none';
                   }}
                   required
                 />
@@ -305,8 +389,12 @@ const App = () => {
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    padding: '0.25rem'
+                    padding: '0.25rem',
+                    borderRadius: '0.25rem',
+                    transition: 'background-color 0.2s ease'
                   }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(0, 174, 239, 0.1)'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
                 >
                   {showPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
@@ -347,6 +435,7 @@ const App = () => {
                   placeholder="Ulangi Password Baru"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
+                  className="form-input"
                   style={{
                     width: '100%',
                     padding: '0.85rem 1rem',
@@ -358,7 +447,16 @@ const App = () => {
                     color: '#2D396B',
                     boxSizing: 'border-box',
                     fontFamily: 'Poppins, sans-serif',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#00AEEF';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(0, 174, 239, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#D1D5DB';
+                    e.target.style.boxShadow = 'none';
                   }}
                   required
                 />
@@ -373,8 +471,12 @@ const App = () => {
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    padding: '0.25rem'
+                    padding: '0.25rem',
+                    borderRadius: '0.25rem',
+                    transition: 'background-color 0.2s ease'
                   }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(0, 174, 239, 0.1)'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
                 >
                   {showPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
@@ -394,6 +496,7 @@ const App = () => {
             {/* Submit Button */}
             <button
               type="submit"
+              className="submit-btn"
               style={{
                 width: '30%',
                 padding: '1rem',
@@ -429,14 +532,17 @@ const App = () => {
         </div>
 
         {/* Footer */}
-        <footer style={{
-          position: 'fixed',
-          left: '1rem',
-          bottom: '1rem',
+        <footer className="footer-text" style={{
+          position: 'relative',
+          width: '100%',
+          textAlign: 'center',
           fontSize: '0.85rem',
           color: '#6B7280',
           fontFamily: 'Poppins, sans-serif',
-          fontWeight: '500'
+          fontWeight: '500',
+          marginTop: 'auto',
+          paddingTop: '2rem',
+          paddingBottom: '1rem'
         }}>
           &copy; {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
         </footer>
