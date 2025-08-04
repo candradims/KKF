@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw } from 'lucide-react';
-import Tambah from '../admin/crud-pengeluaran/Tambah';
+import Tambah from '../sales/crud-pengeluaran/Tambah';
 
 const Pengeluaran = () => {
   const [filterDate, setFilterDate] = useState('');
