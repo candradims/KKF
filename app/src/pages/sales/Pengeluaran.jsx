@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw } from 'lucide-react';
+import Tambah from '../admin/crud-pengeluaran/Tambah';
 
 const Pengeluaran = () => {
   const [filterDate, setFilterDate] = useState('');
+  const [showTambahModal, setShowTambahModal] = useState(false);
 
   // Sample data for pengeluaran
   const pengeluaranData = [
@@ -88,6 +90,20 @@ const Pengeluaran = () => {
     }
   };
 
+  const handleTambahData = () => {
+    setShowTambahModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowTambahModal(false);
+  };
+
+  const handleSaveData = (newData) => {
+    // Di sini Anda bisa menambahkan logika untuk menyimpan data
+    console.log('Data baru:', newData);
+    // Misalnya update pengeluaranData atau kirim ke API
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -105,21 +121,23 @@ const Pengeluaran = () => {
         }} className="mb-6">
           {/* Action Button */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '24px' }}>
-            <button style={{
-              backgroundColor: '#00AEEF',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'background-color 0.2s',
-              whiteSpace: 'nowrap'
-            }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-colors">
+            <button 
+              onClick={handleTambahData}
+              style={{
+                backgroundColor: '#00AEEF',
+                color: 'white',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'background-color 0.2s',
+                whiteSpace: 'nowrap'
+              }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-colors">
               <Plus style={{ width: '16px', height: '16px' }} className="w-4 h-4" />
               Tambah Data
             </button>
@@ -514,6 +532,13 @@ const Pengeluaran = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Tambah Data */}
+      <Tambah
+        isOpen={showTambahModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveData}
+      />
     </div>
   );
 };

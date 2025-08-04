@@ -56,17 +56,17 @@ const Dashboard = () => {
 
   // Data untuk pie chart regional
   const regionalData = [
-    { name: 'NTT JAWA-BALI', value: 37, color: '#00AEEF' },
-    { name: 'NTT SUMATRA', value: 28, color: '#2D396B' },
-    { name: 'NTT JABODETABEK', value: 24, color: '#60A5FA' },
-    { name: 'NTT RNTM', value: 11, color: '#93C5FD' }
+    { name: 'HJT JAWA-BALI', value: 37, color: '#00AEEF' },
+    { name: 'HJT SUMATRA', value: 28, color: '#2D396B' },
+    { name: 'HJT JABODETABEK', value: 24, color: '#60A5FA' },
+    { name: 'HJT RNTM', value: 11, color: '#93C5FD' }
   ];
 
   const penawananData = [
-    { name: 'NTT JAWA-BALI', value: 37, color: '#00AEEF' },
-    { name: 'NTT SUMATRA', value: 28, color: '#2D396B' },
-    { name: 'NTT JABODETABEK', value: 24, color: '#60A5FA' },
-    { name: 'NTT RNTM', value: 11, color: '#93C5FD' }
+    { name: 'HJT JAWA-BALI', value: 37, color: '#00AEEF' },
+    { name: 'HJT SUMATRA', value: 28, color: '#2D396B' },
+    { name: 'HJT JABODETABEK', value: 24, color: '#60A5FA' },
+    { name: 'HJT RNTM', value: 11, color: '#93C5FD' }
   ];
 
   const COLORS = ['#00AEEF', '#2D396B', '#60A5FA', '#93C5FD'];
