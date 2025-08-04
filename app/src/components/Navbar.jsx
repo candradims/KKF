@@ -10,10 +10,20 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
   useEffect(() => {
     const routeTitles = {
       "/dashboard": "Dashboard",
+      "/admin/dashboard": "Dashboard",
+      "/sales/dashboard": "Dashboard",
       "/management-data-user": "Management Data User",
+      "/admin/management-data-user": "Management Data User",
       "/data-layanan": "Data Layanan",
-      "/data-pemasangan": "Data Pemasangan",
-      "/laporan-lelak": "Laporan Lelak",
+      "/admin/data-layanan": "Data Layanan",
+      "/data-penawaran": "Data Penawaran",
+      "/admin/data-penawaran": "Data Penawaran",
+      "/sales/data-penawaran": "Data Penawaran",
+      "/laporan-laba": "Laporan Laba",
+      "/admin/laporan-laba": "Laporan Laba",
+      "/sales/laporan-laba": "Laporan Laba",
+      "/pengeluaran-lain-lain": "Pengeluaran Lain-lain",
+      "/sales/pengeluaran-lain-lain": "Pengeluaran Lain-lain",
       "/login": "Login",
     };
 
