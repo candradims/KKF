@@ -59,14 +59,14 @@ const Dashboard = () => {
     { name: 'HJT JAWA-BALI', value: 37, color: '#00AEEF' },
     { name: 'HJT SUMATRA', value: 28, color: '#2D396B' },
     { name: 'HJT JABODETABEK', value: 24, color: '#60A5FA' },
-    { name: 'HJT RNTM', value: 11, color: '#93C5FD' }
+    { name: 'HJT iNTiM', value: 11, color: '#93C5FD' }
   ];
 
   const penawananData = [
     { name: 'HJT JAWA-BALI', value: 37, color: '#00AEEF' },
     { name: 'HJT SUMATRA', value: 28, color: '#2D396B' },
     { name: 'HJT JABODETABEK', value: 24, color: '#60A5FA' },
-    { name: 'HJT RNTM', value: 11, color: '#93C5FD' }
+    { name: 'HJT INTIM', value: 11, color: '#93C5FD' }
   ];
 
   const COLORS = ['#00AEEF', '#2D396B', '#60A5FA', '#93C5FD'];
