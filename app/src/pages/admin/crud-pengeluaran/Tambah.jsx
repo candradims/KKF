@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronDown } from 'lucide-react';
 
 const Tambah = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -324,21 +324,31 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               }}>
                 Referensi HJT
               </label>
-              <input
-                type="text"
+              <select
                 name="referensiHjt"
                 value={formData.referensiHjt}
                 onChange={handleChange}
-                placeholder="HJT"
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  outline: 'none',
+                  backgroundColor: 'white',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 8px center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '16px'
                 }}
-              />
+              >
+                <option value="">HJT</option>
+                <option value="JAWA-BALI">JAWA-BALI</option>
+                <option value="SUMATRA">SUMATRA</option>
+                <option value="JABODETABEK">JABODETABEK</option>
+                <option value="INTIM">INTIM</option>
+              </select>
             </div>
 
             {/* Discount */}
@@ -357,21 +367,30 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               }}>
                 Discount
               </label>
-              <input
-                type="text"
+              <select
                 name="discount"
                 value={formData.discount}
                 onChange={handleChange}
-                placeholder="Discount"
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  outline: 'none',
+                  backgroundColor: 'white',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 8px center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '16px'
                 }}
-              />
+              >
+                <option value="">Discount</option>
+                <option value="0">0</option>
+                <option value="MB Niaga">MB Niaga</option>
+                <option value="GM SBU">GM SBU</option>
+              </select>
             </div>
 
             {/* Durasi kontrak (in thn) */}
@@ -390,21 +409,32 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               }}>
                 Durasi kontrak (in thn)
               </label>
-              <input
-                type="text"
+              <select
                 name="durasiKontrak"
                 value={formData.durasiKontrak}
                 onChange={handleChange}
-                placeholder="Durasi kontrak (in thn)"
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  outline: 'none',
+                  backgroundColor: 'white',
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 8px center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '16px'
                 }}
-              />
+              >
+                <option value="">Durasi kontrak (in thn)</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
             </div>
 
             {/* Target IRR */}
