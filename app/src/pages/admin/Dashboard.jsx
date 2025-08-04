@@ -40,18 +40,18 @@ const Dashboard = () => {
 
   // Data untuk line chart Margin Trend
   const marginTrendData = [
-    { month: 'JAN', margin1: 45, margin2: 35 },
-    { month: 'FEB', margin1: 48, margin2: 40 },
-    { month: 'MAR', margin1: 52, margin2: 45 },
-    { month: 'APR', margin1: 57, margin2: 50 },
-    { month: 'MAY', margin1: 55, margin2: 48 },
-    { month: 'JUN', margin1: 53, margin2: 46 },
-    { month: 'JUL', margin1: 56, margin2: 49 },
-    { month: 'AUG', margin1: 60, margin2: 52 },
-    { month: 'SEP', margin1: 58, margin2: 50 },
-    { month: 'OCT', margin1: 62, margin2: 55 },
-    { month: 'NOV', margin1: 65, margin2: 58 },
-    { month: 'DEC', margin1: 68, margin2: 60 }
+    { month: 'JAN', margin1: 45.2, margin2: 35.8 },
+    { month: 'FEB', margin1: 48.1, margin2: 40.3 },
+    { month: 'MAR', margin1: 52.7, margin2: 45.1 },
+    { month: 'APR', margin1: 57.3, margin2: 50.6 },
+    { month: 'MAY', margin1: 55.9, margin2: 48.2 },
+    { month: 'JUN', margin1: 53.4, margin2: 46.7 },
+    { month: 'JUL', margin1: 56.8, margin2: 49.5 },
+    { month: 'AUG', margin1: 60.2, margin2: 52.3 },
+    { month: 'SEP', margin1: 58.7, margin2: 50.9 },
+    { month: 'OCT', margin1: 62.1, margin2: 55.4 },
+    { month: 'NOV', margin1: 65.3, margin2: 58.7 },
+    { month: 'DEC', margin1: 68.5, margin2: 60.2 }
   ];
 
   // Data untuk pie chart regional
@@ -82,11 +82,16 @@ const Dashboard = () => {
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
         }}>
           <p style={{ color: '#6b7280' }}>{`Month: ${label}`}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ color: '#00AEEF', fontWeight: '600' }}>
-              {`${entry.dataKey}: ${entry.value}`}
-            </p>
-          ))}
+          {payload.map((entry, index) => {
+            // Add percentage symbol for margin data
+            const isMarginData = entry.dataKey.includes('margin');
+            const displayValue = isMarginData ? `${entry.value}%` : entry.value;
+            return (
+              <p key={index} style={{ color: '#00AEEF', fontWeight: '600' }}>
+                {`${entry.dataKey}: ${displayValue}`}
+              </p>
+            );
+          })}
         </div>
       );
     }
@@ -427,7 +432,7 @@ const Dashboard = () => {
                 fontSize: '18px',
                 fontWeight: '600',
                 color: '#1f2937'
-              }} className="text-lg font-semibold text-gray-800">Tren Margin Rata-Rata</h3>
+              }} className="text-lg font-semibold text-gray-800">Tren Margin Rata-Rata </h3>
               <select style={{
                 padding: '4px 12px',
                 border: '1px solid #d1d5db',
@@ -455,6 +460,7 @@ const Dashboard = () => {
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#666' }}
                     domain={[0, 100]}
+                    tickFormatter={(value) => `${value}%`}
                   />
                   <Tooltip content={renderCustomTooltip} />
                   <Line 
