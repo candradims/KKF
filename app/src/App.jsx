@@ -13,30 +13,7 @@ import LupaPassword from './components/LupaPassword';
 // Import pages
 import SalesDashboard from "./pages/sales/Dashboard";
 
-// Buat komponen Dashboard sederhana untuk admin
-const AdminDashboard = () => (
-  <div style={{
-    padding: '2rem',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-  }}>
-    <h1 style={{
-      fontSize: '2rem',
-      fontWeight: 'bold',
-      color: '#1F2937',
-      marginBottom: '1rem'
-    }}>
-      Admin Dashboard
-    </h1>
-    <p style={{
-      color: '#6B7280',
-      fontSize: '1rem'
-    }}>
-      Selamat datang di dashboard admin PLN Icon Plus
-    </p>
-  </div>
-);
+import AdminDashboard from "./pages/admin/Dashboard";
 
 function App() {
   return (
