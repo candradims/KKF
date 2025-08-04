@@ -149,7 +149,7 @@ const App = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         position: 'relative',
         zIndex: 1
       }}>
@@ -518,15 +518,14 @@ const App = () => {
             </button>
           </form>
         </div>
-
-        {/* Footer */}
+      {/* Footer */}
         <footer style={{
           marginTop: '3rem',
           fontSize: '0.85rem',
           color: '#6B7280',
           fontFamily: 'Poppins, sans-serif',
           fontWeight: '500',
-          textAlign: 'center'
+          textAlign: 'center',
         }}>
           &copy; {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
         </footer>
