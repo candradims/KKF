@@ -10,9 +10,11 @@ import Login from "./components/Login";
 import LupaPassword from './components/LupaPassword';
 
 
-// Import pages
+// Import pages sales
 import SalesDashboard from "./pages/sales/Dashboard";
 
+// Import pages admin
+import ManagementDataUser from "./pages/admin/DataUser";
 import AdminDashboard from "./pages/admin/Dashboard";
 
 function App() {
@@ -26,7 +28,7 @@ function App() {
           
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          
+          <Route path="/admin/management-data-user" element={<ManagementDataUser />} />
           {/* General Routes */}
           <Route path="/dashboard" element={<SalesDashboard />} />
         </Route>
