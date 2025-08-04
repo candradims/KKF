@@ -27,7 +27,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       "/login": "Login",
     };
 
-    setPageTitle(routeTitles[location.pathname] || "Dashboard");
+    setPageTitle(routeTitles[location.pathname] || "Dashboard");  
   }, [location.pathname]);
 
   return (
