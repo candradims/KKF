@@ -169,12 +169,12 @@ const Sidebar = () => {
               }}
               onMouseOver={(e) => {
                 if (!isActive(item.path)) {
-                  e.target.style.backgroundColor = '#F3F4F6';
+                  e.currentTarget.style.backgroundColor = '#F3F4F6';
                 }
               }}
               onMouseOut={(e) => {
                 if (!isActive(item.path)) {
-                  e.target.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.backgroundColor = 'transparent';
                 }
               }}
             >
@@ -182,11 +182,16 @@ const Sidebar = () => {
                 marginRight: '12px',
                 fontSize: '20px',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                color: isActive(item.path) ? 'white' : '#374151'
               }}>
                 {item.icon}
               </span>
-              <span>{item.title}</span>
+              <span style={{ 
+                color: isActive(item.path) ? 'white' : '#374151' 
+              }}>
+                {item.title}
+              </span>
             </div>
           ))}
         </div>
