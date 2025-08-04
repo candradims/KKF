@@ -180,7 +180,7 @@ const App = () => {
       <div style={{ 
         width: '100%',
         minHeight: '100vh',
-        paddingTop: '5rem', // Space for fixed header
+        paddingTop: '13rem', 
         paddingBottom: '2rem',
         paddingLeft: '1rem',
         paddingRight: '1rem',
