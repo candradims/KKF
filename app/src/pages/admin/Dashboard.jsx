@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LineChart,
   Line,
@@ -11,9 +11,17 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { TrendingUp, Users, DollarSign, BarChart3 } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 
 const Dashboard = () => {
+  const [showStatusModal, setShowStatusModal] = useState(false);
+
+  // Data untuk status penawaran
+  const statusData = [
+    { status: 'Menunggu', count: 20, icon: Clock, color: '#F59E0B' },
+    { status: 'Setuju', count: 25, icon: CheckCircle, color: '#10B981' },
+    { status: 'Tidak Setuju', count: 5, icon: XCircle, color: '#EF4444' }
+  ];
   // Data untuk line chart Total Profit
   const totalProfitData = [
     { month: 'JAN', value: 15000 },
@@ -146,14 +154,15 @@ const Dashboard = () => {
           </div>
 
           {/* Card 2 - Status Penawaran */}
-          <div style={{
-            background: 'linear-gradient(to right, #00AEEF, #2D396B)',
-            borderRadius: '12px',
-            padding: '24px',
-            color: 'white',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'box-shadow 0.2s'
-          }} className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+          <div 
+            style={{
+              background: 'linear-gradient(to right, #00AEEF, #2D396B)',
+              borderRadius: '12px',
+              padding: '24px',
+              color: 'white',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              transition: 'box-shadow 0.2s'
+            }} className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -172,6 +181,20 @@ const Dashboard = () => {
                     fontWeight: '500',
                     opacity: '0.9'
                   }} className="text-sm font-medium opacity-90">Status Penawaran</span>
+                  <ChevronDown 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowStatusModal(true);
+                    }}
+                    style={{ 
+                      width: '16px', 
+                      height: '16px',
+                      marginLeft: '4px',
+                      opacity: '0.8',
+                      cursor: 'pointer',
+                      transition: 'opacity 0.2s'
+                    }} 
+                    className="w-4 h-4 ml-1 opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
                 </div>
                 <div style={{
                   fontSize: '30px',
@@ -536,6 +559,159 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Status Penawaran Modal */}
+      {showStatusModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={() => setShowStatusModal(false)}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }} className="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[80vh] overflow-auto shadow-2xl"
+          onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '24px'
+            }} className="flex items-center justify-between mb-6">
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#1f2937'
+              }} className="text-2xl font-bold text-gray-800">Detail Status Penawaran</h2>
+              <button
+                onClick={() => setShowStatusModal(false)}
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: '#f3f4f6',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                <X style={{ width: '20px', height: '20px', color: '#6b7280' }} className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Status Cards */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }} className="space-y-4">
+              {statusData.map((item, index) => {
+                const IconComponent = item.icon;
+                return (
+                  <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '20px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '12px',
+                    backgroundColor: '#f9fafb',
+                    transition: 'box-shadow 0.2s'
+                  }} className="flex items-center justify-between p-5 border border-gray-200 rounded-xl bg-gray-50 hover:shadow-md transition-shadow">
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px'
+                    }} className="flex items-center gap-4">
+                      <div style={{
+                        padding: '12px',
+                        borderRadius: '12px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                      }} className="p-3 rounded-xl bg-white shadow-sm">
+                        <IconComponent style={{ 
+                          width: '24px', 
+                          height: '24px', 
+                          color: item.color 
+                        }} className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 style={{
+                          fontSize: '18px',
+                          fontWeight: '600',
+                          color: '#1f2937',
+                          marginBottom: '4px'
+                        }} className="text-lg font-semibold text-gray-800">{item.status}</h3>
+                        <p style={{
+                          fontSize: '14px',
+                          color: '#6b7280'
+                        }} className="text-sm text-gray-600">Status penawaran</p>
+                      </div>
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }} className="flex items-center gap-2">
+                      <span style={{
+                        fontSize: '28px',
+                        fontWeight: 'bold',
+                        color: item.color
+                      }} className="text-3xl font-bold">{item.count}</span>
+                      <span style={{
+                        fontSize: '14px',
+                        color: '#6b7280'
+                      }} className="text-sm text-gray-600">items</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              marginTop: '24px',
+              padding: '16px',
+              backgroundColor: '#eff6ff',
+              borderRadius: '12px'
+            }} className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }} className="flex items-center justify-between">
+                <span style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#1f2937'
+                }} className="text-lg font-semibold text-gray-800">Total Penawaran:</span>
+                <span style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#00AEEF'
+                }} className="text-2xl font-bold text-blue-600">
+                  {statusData.reduce((total, item) => total + item.count, 0)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
