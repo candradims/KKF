@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Eye, Edit2, Trash2, Plus, RotateCcw } from 'lucide-react';
+import { Eye, Edit2, Trash2, Plus, RotateCcw, Edit } from 'lucide-react';
 import Tambah from '../sales/crud-pengeluaran/Tambah';
+import EditModal from '../sales/crud-pengeluaran/Edit';
 
 const Pengeluaran = () => {
   const [filterDate, setFilterDate] = useState('');
   const [showTambahModal, setShowTambahModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedEditData, setSelectedEditData] = useState(null);
 
   // Sample data for pengeluaran
   const pengeluaranData = [
@@ -98,10 +101,27 @@ const Pengeluaran = () => {
     setShowTambahModal(false);
   };
 
+  const handleEditData = (item) => {
+    setSelectedEditData(item);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setSelectedEditData(null);
+  };
+
+  const handleSaveEditData = (updatedData) => {
+    
+    console.log('Data yang diedit:', updatedData);
+    
+    handleCloseEditModal();
+  };
+
   const handleSaveData = (newData) => {
-    // Di sini Anda bisa menambahkan logika untuk menyimpan data
+   
     console.log('Data baru:', newData);
-    // Misalnya update pengeluaranData atau kirim ke API
+   
   };
 
   return (
@@ -406,7 +426,9 @@ const Pengeluaran = () => {
                         </button>
 
                         {/* Edit Button */}
-                        <button style={{
+                        <button 
+                          onClick={() => handleEditData(item)}
+                          style={{
                           backgroundColor: '#fef3c7',
                           color: '#d97706',
                           padding: '6px',
@@ -538,6 +560,14 @@ const Pengeluaran = () => {
         isOpen={showTambahModal}
         onClose={handleCloseModal}
         onSave={handleSaveData}
+      />
+
+      {/* Modal Edit Data */}
+      <EditModal
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveEditData}
+        editData={selectedEditData}
       />
     </div>
   );
