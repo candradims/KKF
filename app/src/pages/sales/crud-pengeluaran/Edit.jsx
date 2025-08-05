@@ -451,7 +451,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     </label>
                     <input
                       type="text"
-                      value="0.00%"
+                      value="0.00%"  
                       readOnly
                       style={{
                         flex: 1,
