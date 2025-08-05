@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw, Edit } from 'lucide-react';
 import Tambah from '../sales/crud-pengeluaran/Tambah';
 import EditModal from '../sales/crud-pengeluaran/Edit';
+import HapusModal from '../sales/crud-pengeluaran/Hapus';
 
 const Pengeluaran = () => {
   const [filterDate, setFilterDate] = useState('');
   const [showTambahModal, setShowTambahModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEditData, setSelectedEditData] = useState(null);
+  const [showHapusModal, setShowHapusModal] = useState(false);
+  const [selectedDeleteData, setSelectedDeleteData] = useState(null);
 
   // Sample data for pengeluaran
   const pengeluaranData = [
@@ -112,10 +115,28 @@ const Pengeluaran = () => {
   };
 
   const handleSaveEditData = (updatedData) => {
-    
+    // Di sini Anda bisa menambahkan logika untuk menyimpan data yang diedit
     console.log('Data yang diedit:', updatedData);
-    
+    // Misalnya update pengeluaranData atau kirim ke API
     handleCloseEditModal();
+  };
+
+  const handleDeleteData = (item) => {
+    setSelectedDeleteData(item);
+    setShowHapusModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowHapusModal(false);
+    setSelectedDeleteData(null);
+  };
+
+  const handleConfirmDelete = (deleteData) => {
+    // Di sini Anda bisa menambahkan logika untuk menghapus data
+    console.log('Data yang dihapus:', deleteData);
+    // Misalnya hapus dari pengeluaranData atau kirim ke API
+    // Contoh: setPengeluaranData(prev => prev.filter(item => item.id !== deleteData.id));
+    handleCloseDeleteModal();
   };
 
   const handleSaveData = (newData) => {
@@ -443,7 +464,9 @@ const Pengeluaran = () => {
                         </button>
 
                         {/* Delete Button */}
-                        <button style={{
+                        <button 
+                          onClick={() => handleDeleteData(item)}
+                          style={{
                           backgroundColor: '#fee2e2',
                           color: '#dc2626',
                           padding: '6px',
@@ -567,6 +590,14 @@ const Pengeluaran = () => {
         onClose={handleCloseEditModal}
         onSave={handleSaveEditData}
         editData={selectedEditData}
+      />
+
+      {/* Modal Hapus Data */}
+      <HapusModal
+        isOpen={showHapusModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        deleteData={selectedDeleteData}
       />
     </div>
   );

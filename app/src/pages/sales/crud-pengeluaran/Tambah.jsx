@@ -209,39 +209,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               />
             </div>
 
-            {/* Pekerjaan Field */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              marginBottom: '12px',
-              minHeight: '40px'
-            }}>
-              <label style={{
-                width: '140px',
-                fontSize: '12px',
-                color: '#333',
-                fontWeight: '500',
-                flexShrink: 0
-              }}>
-                Pekerjaan
-              </label>
-              <input
-                type="text"
-                name="pelangganField"
-                value={formData.pelangganField}
-                onChange={handleChange}
-                placeholder="Pekerjaan"
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
             {/* Nomor Kontrak / BAKB */}
             <div style={{ 
               display: 'flex', 
@@ -470,7 +437,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               />
             </div>
 
-            {/* One Time Booking */}
+            {/* Disc thdp Backbone */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -484,7 +451,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                One Time Booking
+                Disc thdp Backbone
               </label>
               <input
                 type="text"
@@ -503,7 +470,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               />
             </div>
 
-            {/* One Time Start From 50% */}
+            {/* Disc thdp Port Max 60% */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -517,7 +484,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                One Time Start From 50%
+                Disc thdp Port Max 60%
               </label>
               <input
                 type="text"

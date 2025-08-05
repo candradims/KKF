@@ -3,7 +3,6 @@ import { X, ChevronDown } from 'lucide-react';
 
 const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const [formData, setFormData] = useState({
-    pelanggan: '',
     tanggal: '',
     pelangganField: '',
     nomorKontrak: '',
@@ -24,7 +23,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   useEffect(() => {
     if (editData && isOpen) {
       setFormData({
-        pelanggan: editData.namaPelanggan || '',
         tanggal: editData.tanggal || '',
         pelangganField: editData.namaPelanggan || '',
         nomorKontrak: editData.nomorKontrak || '',
@@ -55,7 +53,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     e.preventDefault();
     onSave(formData);
     setFormData({
-      pelanggan: '',
       tanggal: '',
       pelangganField: '',
       nomorKontrak: '',
@@ -76,7 +73,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
 
   const handleCancel = () => {
     setFormData({
-      pelanggan: '',
       tanggal: '',
       pelangganField: '',
       nomorKontrak: '',
@@ -159,45 +155,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         <div style={{ padding: '20px' }}>
           {/* Form fields - single column layout */}
           <div style={{ marginBottom: '20px' }}>
-            {/* Pelanggan */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              marginBottom: '12px',
-              minHeight: '40px'
-            }}>
-              <label style={{
-                width: '140px',
-                fontSize: '12px',
-                color: '#333',
-                fontWeight: '500',
-                flexShrink: 0
-              }}>
-                Pelanggan*
-              </label>
-              <select
-                name="pelanggan"
-                value={formData.pelanggan}
-                onChange={handleChange}
-                required
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white'
-                }}
-              >
-                <option value="">Pilih nama Pelanggan</option>
-                <option value="audrey">Audrey</option>
-                <option value="riki">Riki</option>
-                <option value="hasian">Hasian</option>
-                <option value="hisyam">Hisyam</option>
-              </select>
-            </div>
-
             {/* Tanggal */}
             <div style={{ 
               display: 'flex', 
@@ -246,7 +203,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                Pekerjaan
+                Pelanggan
               </label>
               <input
                 type="text"
@@ -493,7 +450,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
               />
             </div>
 
-            {/* One Time Booking */}
+            {/* Disc thdp Backbone */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -507,7 +464,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                One Time Booking
+                Disc thdp Backbone
               </label>
               <input
                 type="text"
@@ -526,7 +483,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
               />
             </div>
 
-            {/* One Time Start From 50% */}
+            {/* Disc thdp Port Max 60% */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -540,7 +497,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                One Time Start From 50%
+                Disc thdp Port Max 60%
               </label>
               <input
                 type="text"
