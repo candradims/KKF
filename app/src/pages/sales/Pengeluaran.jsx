@@ -3,12 +3,15 @@ import { Eye, Edit2, Trash2, Plus, RotateCcw, Edit } from 'lucide-react';
 import Tambah from '../sales/crud-pengeluaran/Tambah';
 import EditModal from '../sales/crud-pengeluaran/Edit';
 import HapusModal from '../sales/crud-pengeluaran/Hapus';
+import DetailModal from '../sales/crud-pengeluaran/Detail';
 
 const Pengeluaran = () => {
   const [filterDate, setFilterDate] = useState('');
   const [showTambahModal, setShowTambahModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEditData, setSelectedEditData] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedDetailData, setSelectedDetailData] = useState(null);
   const [showHapusModal, setShowHapusModal] = useState(false);
   const [selectedDeleteData, setSelectedDeleteData] = useState(null);
 
@@ -119,6 +122,16 @@ const Pengeluaran = () => {
     console.log('Data yang diedit:', updatedData);
     // Misalnya update pengeluaranData atau kirim ke API
     handleCloseEditModal();
+  };
+
+  const handleDetailData = (item) => {
+    setSelectedDetailData(item);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedDetailData(null);
   };
 
   const handleDeleteData = (item) => {
@@ -430,7 +443,9 @@ const Pengeluaran = () => {
                         gap: '8px'
                       }} className="flex items-center justify-center gap-2">
                         {/* View Button */}
-                        <button style={{
+                        <button 
+                          onClick={() => handleDetailData(item)}
+                          style={{
                           backgroundColor: '#e0f2fe',
                           color: '#0284c7',
                           padding: '6px',
@@ -598,6 +613,13 @@ const Pengeluaran = () => {
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
         deleteData={selectedDeleteData}
+      />
+
+      {/* Modal Detail Data */}
+      <DetailModal
+        isOpen={showDetailModal}
+        onClose={handleCloseDetailModal}
+        detailData={selectedDetailData}
       />
     </div>
   );
