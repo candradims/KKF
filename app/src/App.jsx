@@ -15,7 +15,7 @@ import SalesDashboard from "./pages/sales/Dashboard";
 import Pengeluaran from "./pages/sales/Pengeluaran";
 
 // Import pages admin
-import ManagementDataUser from "./pages/admin/DataUser";
+import ManagementDataUser from "./pages/admin/DataUser/Index";
 import AdminDashboard from "./pages/admin/Dashboard";
 
 function App() {
