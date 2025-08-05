@@ -1,80 +1,9 @@
-import React, { useState } from 'react';
-import { X, ChevronDown, Check } from 'lucide-react';
+import React from 'react';
+import { X } from 'lucide-react';
 
-const Tambah = ({ isOpen, onClose, onSave }) => {
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [formData, setFormData] = useState({
-    pelanggan: '',
-    tanggal: '',
-    pelangganField: '',
-    nomorKontrak: '',
-    kontrakKe: '',
-    referensiHjt: '',
-    discount: '',
-    durasiKontrak: '',
-    targetIrr: '',
-    oneTimeBooking: '',
-    oneTimeStart: '',
-    item: '',
-    keterangan: '',
-    harga: '',
-    jumlah: ''
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData);
-    setShowSuccessModal(true);
-  };
-
-  const handleSuccessClose = () => {
-    setShowSuccessModal(false);
-    setFormData({
-      pelanggan: '',
-      tanggal: '',
-      pelangganField: '',
-      nomorKontrak: '',
-      kontrakKe: '',
-      referensiHjt: '',
-      discount: '',
-      durasiKontrak: '',
-      targetIrr: '',
-      oneTimeBooking: '',
-      oneTimeStart: '',
-      item: '',
-      keterangan: '',
-      harga: '',
-      jumlah: ''
-    });
-    onClose();
-  };
-
+const Detail = ({ isOpen, onClose, detailData }) => {
+  
   const handleCancel = () => {
-    setFormData({
-      pelanggan: '',
-      tanggal: '',
-      pelangganField: '',
-      nomorKontrak: '',
-      kontrakKe: '',
-      referensiHjt: '',
-      discount: '',
-      durasiKontrak: '',
-      targetIrr: '',
-      oneTimeBooking: '',
-      oneTimeStart: '',
-      item: '',
-      keterangan: '',
-      harga: '',
-      jumlah: ''
-    });
     onClose();
   };
 
@@ -120,7 +49,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
             color: '#333',
             margin: 0
           }}>
-            Tambah Data Pengeluaran
+            Detail Data Penawaran
           </h2>
           <button
             onClick={onClose}
@@ -138,7 +67,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
           </button>
         </div>
 
-        {/* Form */}
+        {/* Content */}
         <div style={{ padding: '20px' }}>
           {/* Form fields - single column layout */}
           <div style={{ marginBottom: '20px' }}>
@@ -156,29 +85,22 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                Pelanggan*
+                Pelanggan
               </label>
-              <select
-                name="pelanggan"
-                value={formData.pelanggan}
-                onChange={handleChange}
-                required
+              <input
+                type="text"
+                value={detailData?.namaPelanggan || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
-              >
-                <option value="">Pilih nama Pelanggan</option>
-                <option value="audrey">Audrey</option>
-                <option value="riki">Riki</option>
-                <option value="hasian">Hasian</option>
-                <option value="hisyam">Hisyam</option>
-              </select>
+              />
             </div>
 
             {/* Tanggal */}
@@ -198,19 +120,17 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 Tanggal
               </label>
               <input
-                type="date"
-                name="tanggal"
-                value={formData.tanggal}
-                onChange={handleChange}
-                placeholder="dd/mm/yyyy"
+                type="text"
+                value={detailData?.tanggal || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  color: '#999'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
               />
             </div>
@@ -233,17 +153,16 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               </label>
               <input
                 type="text"
-                name="nomorKontrak"
-                value={formData.nomorKontrak}
-                onChange={handleChange}
-                placeholder="Nomor kontrak"
+                value={detailData?.nomorKontrak || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
               />
             </div>
@@ -266,17 +185,16 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               </label>
               <input
                 type="text"
-                name="kontrakKe"
-                value={formData.kontrakKe}
-                onChange={handleChange}
-                placeholder="Kontrak tahun ke berapa"
+                value={detailData?.kontrakKe || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
               />
             </div>
@@ -297,31 +215,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               }}>
                 Referensi HJT
               </label>
-              <select
-                name="referensiHjt"
-                value={formData.referensiHjt}
-                onChange={handleChange}
+              <input
+                type="text"
+                value={detailData?.referensi || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: 'right 8px center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '16px'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
-              >
-                <option value="">HJT</option>
-                <option value="JAWA-BALI">JAWA-BALI</option>
-                <option value="SUMATRA">SUMATRA</option>
-                <option value="JABODETABEK">JABODETABEK</option>
-                <option value="INTIM">INTIM</option>
-              </select>
+              />
             </div>
 
             {/* Discount */}
@@ -340,30 +247,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               }}>
                 Discount
               </label>
-              <select
-                name="discount"
-                value={formData.discount}
-                onChange={handleChange}
+              <input
+                type="text"
+                value={detailData?.discount || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: 'right 8px center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '16px'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
-              >
-                <option value="">Discount</option>
-                <option value="0">0</option>
-                <option value="MB Niaga">MB Niaga</option>
-                <option value="GM SBU">GM SBU</option>
-              </select>
+              />
             </div>
 
             {/* Durasi kontrak (in thn) */}
@@ -382,32 +279,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               }}>
                 Durasi kontrak (in thn)
               </label>
-              <select
-                name="durasiKontrak"
-                value={formData.durasiKontrak}
-                onChange={handleChange}
+              <input
+                type="text"
+                value={detailData?.durasi || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: 'right 8px center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '16px'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
-              >
-                <option value="">Durasi kontrak (in thn)</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
+              />
             </div>
 
             {/* Target IRR */}
@@ -428,17 +313,16 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               </label>
               <input
                 type="text"
-                name="targetIrr"
-                value={formData.targetIrr}
-                onChange={handleChange}
-                placeholder="Target IRR"
+                value={detailData?.targetIRR || ''}
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
               />
             </div>
@@ -461,17 +345,16 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               </label>
               <input
                 type="text"
-                name="oneTimeBooking"
-                value={formData.oneTimeBooking}
-                onChange={handleChange}
-                placeholder="0.00%"
+                value="0.00%"
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
               />
             </div>
@@ -494,17 +377,16 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               </label>
               <input
                 type="text"
-                name="oneTimeStart"
-                value={formData.oneTimeStart}
-                onChange={handleChange}
-                placeholder="0.00%"
+                value="0.00%"
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none'
+                  backgroundColor: '#f9f9f9',
+                  color: '#666'
                 }}
               />
             </div>
@@ -532,23 +414,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                Item*
+                Item
               </label>
               <input
                 type="text"
-                name="item"
-                value={formData.item}
-                onChange={handleChange}
-                placeholder="Masukkan Item"
-                required
+                value=""
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  color: '#666'
                 }}
               />
             </div>
@@ -567,23 +446,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                Keterangan*
+                Keterangan
               </label>
               <input
                 type="text"
-                name="keterangan"
-                value={formData.keterangan}
-                onChange={handleChange}
-                placeholder="Masukkan keterangan"
-                required
+                value=""
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  color: '#666'
                 }}
               />
             </div>
@@ -602,23 +478,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                Harga*
+                Harga
               </label>
               <input
                 type="text"
-                name="harga"
-                value={formData.harga}
-                onChange={handleChange}
-                placeholder="Masukkan harga satuan"
-                required
+                value=""
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  color: '#666'
                 }}
               />
             </div>
@@ -636,33 +509,29 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontWeight: '500',
                 flexShrink: 0
               }}>
-                Jumlah*
+                Jumlah
               </label>
               <input
                 type="text"
-                name="jumlah"
-                value={formData.jumlah}
-                onChange={handleChange}
-                placeholder="Masukkan Jumlah"
-                required
+                value=""
+                readOnly
                 style={{
                   flex: 1,
                   padding: '8px 12px',
                   border: '1px solid #ddd',
                   borderRadius: '4px',
                   fontSize: '12px',
-                  outline: 'none',
-                  backgroundColor: 'white'
+                  backgroundColor: 'white',
+                  color: '#666'
                 }}
               />
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Button */}
           <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
-            gap: '8px',
             paddingTop: '16px',
             borderTop: '1px solid #e0e0e0'
           }}>
@@ -683,109 +552,11 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
             >
               Batal
             </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              style={{
-                padding: '8px 20px',
-                fontSize: '12px',
-                fontWeight: '500',
-                color: 'white',
-                backgroundColor: '#00BCD4',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                minWidth: '70px'
-              }}
-            >
-              Simpan
-            </button>
           </div>
         </div>
       </div>
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1001
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            textAlign: 'center',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-            maxWidth: '300px',
-            width: '90%'
-          }}>
-            {/* Success Icon */}
-            <div style={{
-              width: '60px',
-              height: '60px',
-              backgroundColor: '#00AEEF',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 16px auto'
-            }}>
-              <Check style={{ 
-                width: '30px', 
-                height: '30px', 
-                color: 'white' 
-              }} />
-            </div>
-
-            {/* Success Message */}
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#333',
-              margin: '0 0 8px 0'
-            }}>
-              Selamat!
-            </h3>
-            
-            <p style={{
-              fontSize: '14px',
-              color: '#666',
-              margin: '0 0 20px 0',
-              lineHeight: '1.4'
-            }}>
-              Data Pengeluaran Berhasil Disimpan
-            </p>
-
-            {/* OK Button */}
-            <button
-              onClick={handleSuccessClose}
-              style={{
-                backgroundColor: '#00AEEF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 24px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                minWidth: '80px'
-              }}
-            >
-              Oke
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default Tambah;
+export default Detail;
