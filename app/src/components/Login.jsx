@@ -121,7 +121,10 @@ const App = () => {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#E2EAFF',
-      fontFamily: 'Poppins, sans-serif'
+      fontFamily: 'Poppins, sans-serif',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative'
     }}>
       {/* Fixed Top Bar */}
       <div style={{
@@ -141,7 +144,7 @@ const App = () => {
 
       {/* Main Content Container */}
       <div style={{
-        paddingTop: '5rem',
+        paddingTop: '10rem',
         paddingBottom: '2rem',
         paddingLeft: '1rem',
         paddingRight: '1rem',
@@ -151,7 +154,8 @@ const App = () => {
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        zIndex: 1
+        zIndex: 1,
+        flex: 1
       }}>
         
         {/* Logo & Welcome */}
@@ -159,14 +163,15 @@ const App = () => {
           textAlign: 'center',
           marginBottom: '3rem',
           width: '100%',
-          maxWidth: '800px'
+          maxWidth: '800px',
+          padding: '2rem 0'
         }}>
           <img
             src={logoImage}
             alt="PLN Icon Plus Logo"
             className="logo-img"
             style={{
-              height: '6rem',
+              height: '7rem',
               width: 'auto',
               objectFit: 'contain',
               filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))'
@@ -226,7 +231,7 @@ const App = () => {
           border: '2px solid #2D396B',
           width: '100%',
           maxWidth: '780px',
-          transition: 'all 0.3s ease-in-out'
+          transition: 'all 0.3s ease-in-out',
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -518,14 +523,18 @@ const App = () => {
             </button>
           </form>
         </div>
-      {/* Footer */}
+        {/* Footer */}
         <footer style={{
-          marginTop: '3rem',
+          position: 'relative',
+          width: '100%',
+          textAlign: 'center',
           fontSize: '0.85rem',
           color: '#6B7280',
           fontFamily: 'Poppins, sans-serif',
           fontWeight: '500',
-          textAlign: 'center',
+          marginTop: 'auto',
+          paddingTop: '2rem',
+          paddingBottom: '1rem'
         }}>
           &copy; {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
         </footer>
