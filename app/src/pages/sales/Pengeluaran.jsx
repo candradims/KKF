@@ -123,7 +123,6 @@ const Pengeluaran = () => {
     console.log('Data baru:', newData);
    
   };
-
   return (
     <div style={{
       minHeight: '100vh',
