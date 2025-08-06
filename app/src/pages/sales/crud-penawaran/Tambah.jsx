@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, Plus, Calculator } from 'lucide-react';
+import { X, Plus, Calculator, Check } from 'lucide-react';
 
 const Tambah = ({ isOpen, onClose, onSave }) => {
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     sales: '',
     tanggal: '',
@@ -33,6 +34,11 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
+    setShowSuccessModal(true);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
     onClose();
   };
 
@@ -62,29 +68,32 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-      padding: '20px'
-    }}>
-      <div style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: '12px',
-        width: '600px',
-        maxHeight: '90vh',
-        overflow: 'auto',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-        position: 'relative'
-      }}>
-        {/* Close Button */}
+    <>
+      {/* Main Modal */}
+      {!showSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            width: '600px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            position: 'relative'
+          }}>
+            {/* Close Button */}
         <button
           onClick={onClose}
           style={{
@@ -841,7 +850,80 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            padding: '40px',
+            textAlign: 'center',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+            position: 'relative',
+            width: '400px'
+          }}>
+            <div style={{
+              backgroundColor: '#00AEEF',
+              borderRadius: '50%',
+              width: '60px',
+              height: '60px',
+              margin: '0 auto 20px auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Check size={30} color="white" strokeWidth={3} />
+            </div>
+            <h3 style={{
+              color: '#1F2937',
+              fontSize: '20px',
+              fontWeight: '600',
+              marginBottom: '10px'
+            }}>
+              Selamat!
+            </h3>
+            <p style={{
+              color: '#6B7280',
+              marginBottom: '30px',
+              fontSize: '16px'
+            }}>
+              Data Penawaran Berhasil Disimpan
+            </p>
+            <button
+              onClick={handleCloseSuccessModal}
+              style={{
+                backgroundColor: '#00AEEF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '25px',
+                padding: '12px 30px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              Oke
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

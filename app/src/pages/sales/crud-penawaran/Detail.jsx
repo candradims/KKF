@@ -506,4 +506,4 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   );
 };
 
-export default DetailPenawaran;
+export default DetailPenawaran; 
