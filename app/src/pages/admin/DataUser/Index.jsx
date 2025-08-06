@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { Eye, Edit2, Trash2, Plus, FileText, RotateCcw, FileSpreadsheet } from 'lucide-react';
+import { Eye, Edit2, Trash2, Plus, FileSpreadsheet, RotateCcw } from 'lucide-react';
+import TambahData from './TambahData';
+import EditData from './EditData';
+import DetailData from './DetailData';
 
-const App = () => {
+const Index = () => {
   const [filterRole, setFilterRole] = useState('');
   const [filterDate, setFilterDate] = useState('');
+  const [showTambahModal, setShowTambahModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailUser, setDetailUser] = useState(null);
 
-  // Sample data for users
-  const usersData = [
+  const [usersData, setUsersData] = useState([
     {
       id: 1,
       date: '15/05/2023',
       email: 'maulana@gmail.com',
-      password: '••••••••',
+      password: 'password123',
       role: 'Admin',
       actions: ['view', 'edit', 'delete']
     },
@@ -19,7 +26,7 @@ const App = () => {
       id: 2,
       date: '16/05/2023',
       email: 'ahmadazaki@gmail.com',
-      password: '••••••••',
+      password: 'userpass456',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     },
@@ -27,7 +34,7 @@ const App = () => {
       id: 3,
       date: '16/05/2023',
       email: 'sonimasako@gmail.com',
-      password: '••••••••',
+      password: 'sonipass789',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     },
@@ -35,7 +42,7 @@ const App = () => {
       id: 4,
       date: '16/05/2023',
       email: 'marywarwati01@gmail.com',
-      password: '••••••••',
+      password: 'marypass01',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     },
@@ -43,7 +50,7 @@ const App = () => {
       id: 5,
       date: '16/05/2023',
       email: 'ovnza8@gmail.com',
-      password: '••••••••',
+      password: 'ovnzapass08',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     },
@@ -51,7 +58,7 @@ const App = () => {
       id: 6,
       date: '16/05/2023',
       email: 'dimasuindrudi@gmail.com',
-      password: '••••••••',
+      password: 'dimaspass12',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     },
@@ -59,7 +66,7 @@ const App = () => {
       id: 7,
       date: '17/05/2023',
       email: 'penhimathan@gmail.com',
-      password: '••••••••',
+      password: 'penhipass34',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     },
@@ -67,7 +74,7 @@ const App = () => {
       id: 8,
       date: '17/05/2023',
       email: 'astilkellina@gmail.com',
-      password: '••••••••',
+      password: 'astilpass56',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     },
@@ -75,11 +82,75 @@ const App = () => {
       id: 9,
       date: '17/05/2023',
       email: 'markusukuai@gmail.com',
-      password: '••••••••',
+      password: 'markuspass78',
       role: 'Sales',
       actions: ['view', 'edit', 'delete']
     }
-  ];
+  ]);
+
+  const handleOpenModal = () => {
+    setShowTambahModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowTambahModal(false);
+  };
+
+  const handleOpenEditModal = (user) => {
+    setEditingUser(user);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEditingUser(null);
+  };
+
+  const handleOpenDetailModal = (user) => {
+    setDetailUser(user);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setDetailUser(null);
+  };
+
+  const handleSaveData = (newUserData) => {
+    const newId = usersData.length > 0 ? Math.max(...usersData.map(user => user.id)) + 1 : 1;
+    const today = new Date();
+    const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
+    const newUser = {
+      id: newId,
+      date: formattedDate,
+      email: newUserData.email,
+      password: newUserData.password,
+      role: newUserData.role,
+      actions: ['view', 'edit', 'delete'],
+      createdAt: newUserData.createdAt
+    };
+
+    setUsersData(prevUsers => [...prevUsers, newUser]);
+    setShowTambahModal(false);
+  };
+
+  const handleUpdateData = (updatedData) => {
+    setUsersData(prevUsers =>
+      prevUsers.map(user =>
+        user.id === editingUser.id
+          ? {
+              ...user,
+              email: updatedData.email,
+              password: updatedData.password,
+              role: updatedData.role,
+            }
+          : user
+      )
+    );
+    setShowEditModal(false);
+    setEditingUser(null);
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -154,21 +225,23 @@ const App = () => {
               <FileSpreadsheet style={{ width: '16px', height: '16px' }} className="w-4 h-4" />
               Import Excel
             </button>
-            <button style={{
-              backgroundColor: '#00AEEF',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'background-color 0.2s',
-              whiteSpace: 'nowrap'
-            }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-colors">
+            <button
+              onClick={handleOpenModal}
+              style={{
+                backgroundColor: '#00AEEF',
+                color: 'white',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'background-color 0.2s',
+                whiteSpace: 'nowrap'
+              }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-colors">
               <Plus style={{ width: '16px', height: '16px' }} className="w-4 h-4" />
               Tambah User
             </button>
@@ -189,7 +262,7 @@ const App = () => {
             gap: '24px',
             alignItems: 'end'
           }} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-            
+
             {/* Filter By Role */}
             <div>
               <label style={{
@@ -282,10 +355,10 @@ const App = () => {
           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
         }} className="bg-white rounded-xl overflow-hidden shadow-sm">
           <div style={{ overflowX: 'auto' }} className="overflow-x-auto">
-            <table style={{ 
-              width: '100%', 
+            <table style={{
+              width: '100%',
               borderCollapse: 'collapse',
-              border: '1px solid #e5e7eb' 
+              border: '1px solid #e5e7eb'
             }} className="w-full">
               <thead style={{ backgroundColor: '#e0f2fe' }} className="bg-blue-50">
                 <tr>
@@ -306,7 +379,7 @@ const App = () => {
                     fontSize: '14px',
                     fontWeight: '600',
                     color: '#374151',
-                    border: '1px solid #e5e7eb', 
+                    border: '1px solid #e5e7eb',
                     width: '120px'
                   }}>
                     Tanggal
@@ -380,7 +453,7 @@ const App = () => {
                       padding: '16px',
                       fontSize: '14px',
                       color: '#374151',
-                      border: '1px solid #e5e7eb' 
+                      border: '1px solid #e5e7eb'
                     }} className="px-4 py-4 text-sm text-gray-700">
                       {user.email}
                     </td>
@@ -390,7 +463,7 @@ const App = () => {
                       color: '#374151',
                       border: '1px solid #e5e7eb'
                     }} className="px-4 py-4 text-sm text-gray-700">
-                      {user.password}
+                      ••••••••
                     </td>
                     <td style={{
                       padding: '16px',
@@ -406,8 +479,8 @@ const App = () => {
                         fontSize: '12px',
                         fontWeight: '500'
                       }} className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        user.role === 'Admin' 
-                          ? 'bg-blue-100 text-blue-800' 
+                        user.role === 'Admin'
+                          ? 'bg-blue-100 text-blue-800'
                           : 'bg-green-100 text-green-800'
                       }`}>
                         {user.role}
@@ -424,33 +497,38 @@ const App = () => {
                         justifyContent: 'center',
                         gap: '8px'
                       }} className="flex items-center justify-center gap-2">
-                        <button style={{
-                          backgroundColor: '#e0f2fe',
-                          color: '#0284c7',
-                          padding: '6px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'background-color 0.2s'
-                        }} className="bg-blue-50 hover:bg-blue-100 text-blue-600 p-1.5 rounded-md transition-colors">
+                        {/* Tombol Detail/View */}
+                        <button
+                          onClick={() => handleOpenDetailModal(user)} 
+                          style={{
+                            backgroundColor: '#e0f2fe',
+                            color: '#0284c7',
+                            padding: '6px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background-color 0.2s'
+                          }} className="bg-blue-50 hover:bg-blue-100 text-blue-600 p-1.5 rounded-md transition-colors">
                           <Eye style={{ width: '14px', height: '14px' }} className="w-3.5 h-3.5" />
                         </button>
 
-                        <button style={{
-                          backgroundColor: '#fef3c7',
-                          color: '#d97706',
-                          padding: '6px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'background-color 0.2s'
-                        }} className="bg-yellow-50 hover:bg-yellow-100 text-yellow-600 p-1.5 rounded-md transition-colors">
+                        <button
+                          onClick={() => handleOpenEditModal(user)} 
+                          style={{
+                            backgroundColor: '#fef3c7',
+                            color: '#d97706',
+                            padding: '6px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background-color 0.2s'
+                          }} className="bg-yellow-50 hover:bg-yellow-100 text-yellow-600 p-1.5 rounded-md transition-colors">
                           <Edit2 style={{ width: '14px', height: '14px' }} className="w-3.5 h-3.5" />
                         </button>
                         <button style={{
@@ -497,8 +575,8 @@ const App = () => {
                 transition: 'all 0.2s'
               }}
               className={`px-3 py-2 border border-gray-300 rounded-md text-sm transition-colors ${
-                currentPage === 1 
-                  ? 'bg-gray-50 text-gray-400 cursor-not-allowed' 
+                currentPage === 1
+                  ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
                   : 'bg-white text-gray-700 hover:bg-gray-50 cursor-pointer'
               }`}
             >
@@ -508,7 +586,7 @@ const App = () => {
             {[...Array(totalPages)].map((_, index) => {
               const page = index + 1;
               const isCurrentPage = page === currentPage;
-              
+
               return (
                 <button
                   key={page}
@@ -559,8 +637,24 @@ const App = () => {
           </div>
         </div>
       </div>
+      <TambahData
+        isOpen={showTambahModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveData}
+      />
+        <EditData
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        onUpdate={handleUpdateData}
+        initialData={editingUser}
+      />
+      <DetailData
+        isOpen={showDetailModal}
+        onClose={handleCloseDetailModal}
+        initialData={detailUser}
+      />
     </div>
   );
 };
 
-export default App;
+export default Index;
