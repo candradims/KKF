@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw, Download } from 'lucide-react';
+import Tambah from './crud-penawaran/Tambah';
 
 const Penawaran = () => {
   const [filterDate, setFilterDate] = useState('');
@@ -716,6 +717,13 @@ const Penawaran = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Components */}
+      <Tambah
+        isOpen={showTambahModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveData}
+      />
     </div>
   );
 };
