@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw, Download } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import Tambah from './crud-penawaran/Tambah';
 import Edit from './crud-penawaran/Edit';
 import Hapus from './crud-penawaran/Hapus';
@@ -168,9 +170,104 @@ const Penawaran = () => {
   };
 
   const handleExportPDF = () => {
-    console.log('Exporting to PDF...');
-    // Add PDF export logic here
-    alert('Export PDF functionality will be implemented');
+    try {
+      console.log('Starting PDF export...');
+      console.log('Filtered data:', filteredData);
+      
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.text('Data Penawaran', 14, 22);
+      
+      // Add current date
+      doc.setFontSize(10);
+      const currentDate = new Date().toLocaleDateString('id-ID');
+      doc.text(`Tanggal Export: ${currentDate}`, 14, 32);
+      
+      // Prepare table data
+      const tableColumns = [
+        'No',
+        'Tanggal',
+        'Nama Pelanggan', 
+        'Nomor Kontrak/BAKB',
+        'Kontrak Ke-',
+        'Referensi',
+        'Discount',
+        'Durasi',
+        'Target IRR',
+        'Status'
+      ];
+      
+      const tableRows = filteredData.map((item, index) => [
+        (index + 1).toString(),
+        item.tanggal || '',
+        item.namaPelanggan || '',
+        item.nomorKontrak || '',
+        item.kontrakKe ? item.kontrakKe.toString() : '',
+        item.referensi || '',
+        item.discount || '',
+        item.durasi ? item.durasi.toString() : '',
+        item.targetIRR || '',
+        item.status || ''
+      ]);
+      
+      console.log('Table columns:', tableColumns);
+      console.log('Table rows:', tableRows);
+      
+      // Add table with autoTable function
+      autoTable(doc, {
+        head: [tableColumns],
+        body: tableRows,
+        startY: 40,
+        margin: { top: 40, right: 14, bottom: 20, left: 14 },
+        styles: {
+          fontSize: 8,
+          cellPadding: 3,
+          overflow: 'linebreak',
+          halign: 'left',
+          valign: 'middle'
+        },
+        headStyles: {
+          fillColor: [0, 174, 239], // PLN blue color
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245]
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 15 }, // No
+          1: { cellWidth: 25 }, // Tanggal
+          2: { cellWidth: 30 }, // Nama Pelanggan
+          3: { cellWidth: 30 }, // Nomor Kontrak
+          4: { halign: 'center', cellWidth: 20 }, // Kontrak Ke
+          5: { cellWidth: 25 }, // Referensi
+          6: { halign: 'center', cellWidth: 20 }, // Discount
+          7: { halign: 'center', cellWidth: 15 }, // Durasi
+          8: { halign: 'right', cellWidth: 25 }, // Target IRR
+          9: { halign: 'center', cellWidth: 25 } // Status
+        },
+        tableWidth: 'auto'
+      });
+      
+      // Create safe filename
+      const safeDate = currentDate.replace(/[\/\\:*?"<>|]/g, '-');
+      const filename = `Data_Penawaran_${safeDate}.pdf`;
+      
+      console.log('Saving PDF with filename:', filename);
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      console.log('PDF exported successfully');
+      alert('PDF berhasil diexport!');
+    } catch (error) {
+      console.error('Detailed error exporting PDF:', error);
+      console.error('Error stack:', error.stack);
+      alert(`Terjadi kesalahan saat mengexport PDF: ${error.message}`);
+    }
   };
 
   const getStatusStyle = (status) => {
