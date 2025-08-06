@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw, Download } from 'lucide-react';
 import Tambah from './crud-penawaran/Tambah';
 import Edit from './crud-penawaran/Edit';
+import Hapus from './crud-penawaran/Hapus';
 
 const Penawaran = () => {
   const [filterDate, setFilterDate] = useState('');
@@ -731,6 +732,13 @@ const Penawaran = () => {
         onClose={handleCloseEditModal}
         onSave={handleSaveEditData}
         editData={selectedEditData}
+      />
+      
+      <Hapus
+        isOpen={showHapusModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        deleteData={selectedDeleteData}
       />
     </div>
   );
