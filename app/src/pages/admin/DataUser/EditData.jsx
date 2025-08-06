@@ -278,7 +278,6 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     padding: '12px 32px',
                     borderRadius: '50px',
                     fontWeight: '600',
-                    cursor: 'pointer',
                     cursor: (!isDirty || isSubmitting) ? 'not-allowed' : 'pointer'
                   }}
                 >
