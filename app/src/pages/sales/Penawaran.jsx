@@ -220,10 +220,10 @@ const Penawaran = () => {
         head: [tableColumns],
         body: tableRows,
         startY: 40,
-        margin: { top: 40, right: 14, bottom: 20, left: 14 },
+        margin: { top: 40, right: 10, bottom: 20, left: 10 },
         styles: {
-          fontSize: 8,
-          cellPadding: 3,
+          fontSize: 7,
+          cellPadding: 2,
           overflow: 'linebreak',
           halign: 'left',
           valign: 'middle'
@@ -232,24 +232,25 @@ const Penawaran = () => {
           fillColor: [0, 174, 239], // PLN blue color
           textColor: [255, 255, 255],
           fontStyle: 'bold',
-          halign: 'center'
+          halign: 'center',
+          fontSize: 7
         },
         alternateRowStyles: {
           fillColor: [245, 245, 245]
         },
         columnStyles: {
-          0: { halign: 'center', cellWidth: 15 }, // No
-          1: { cellWidth: 25 }, // Tanggal
-          2: { cellWidth: 30 }, // Nama Pelanggan
-          3: { cellWidth: 30 }, // Nomor Kontrak
-          4: { halign: 'center', cellWidth: 20 }, // Kontrak Ke
-          5: { cellWidth: 25 }, // Referensi
-          6: { halign: 'center', cellWidth: 20 }, // Discount
-          7: { halign: 'center', cellWidth: 15 }, // Durasi
-          8: { halign: 'right', cellWidth: 25 }, // Target IRR
-          9: { halign: 'center', cellWidth: 25 } // Status
+          0: { halign: 'center', cellWidth: 12 }, // No
+          1: { cellWidth: 20 }, // Tanggal
+          2: { cellWidth: 25 }, // Nama Pelanggan
+          3: { cellWidth: 25 }, // Nomor Kontrak
+          4: { halign: 'center', cellWidth: 15 }, // Kontrak Ke
+          5: { cellWidth: 22 }, // Referensi
+          6: { halign: 'center', cellWidth: 18 }, // Discount
+          7: { halign: 'center', cellWidth: 12 }, // Durasi
+          8: { halign: 'right', cellWidth: 20 }, // Target IRR
+          9: { halign: 'center', cellWidth: 20 } // Status
         },
-        tableWidth: 'auto'
+        tableWidth: 'wrap'
       });
       
       // Create safe filename
