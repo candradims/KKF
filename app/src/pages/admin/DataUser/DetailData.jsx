@@ -172,27 +172,18 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                     fontWeight: '600',
                     color: '#2D3A76'
                   }}>Role</label>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    readOnly
-                    disabled
+                  <div
                     style={{
-                    padding: '12px 32px 12px 16px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(45, 58, 118, 0.5)',
-                    fontSize: '14px',
-                    backgroundColor: '#e0e0e0',
-                    width: '100%',
-                    appearance: 'none',
-                    backgroundImage: 'none',
-                    color: '#2D396B'
-                  }}
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#e0e0e0',
+                      color: '#2D396B'
+                    }}
                   >
-                    <option value="">Pilih role</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Sales">Sales</option>
-                  </select>
+                    {formData.role}
+                  </div>
                 </div>
               </form>
 
