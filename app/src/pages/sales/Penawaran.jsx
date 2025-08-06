@@ -5,6 +5,7 @@ import autoTable from 'jspdf-autotable';
 import Tambah from './crud-penawaran/Tambah';
 import Edit from './crud-penawaran/Edit';
 import Hapus from './crud-penawaran/Hapus';
+import Detail from './crud-penawaran/Detail';
 
 const Penawaran = () => {
   const [filterDate, setFilterDate] = useState('');
@@ -830,6 +831,12 @@ const Penawaran = () => {
         onClose={handleCloseEditModal}
         onSave={handleSaveEditData}
         editData={selectedEditData}
+      />
+      
+      <Detail
+        isOpen={showDetailModal}
+        onClose={handleCloseDetailModal}
+        detailData={selectedDetailData}
       />
       
       <Hapus
