@@ -3,6 +3,7 @@ import { Eye, Edit2, Trash2, Plus, FileSpreadsheet, RotateCcw } from 'lucide-rea
 import TambahData from './TambahData';
 import EditData from './EditData';
 import DetailData from './DetailData';
+import HapusData from './HapusData';
 
 const Index = () => {
   const [filterRole, setFilterRole] = useState('');
@@ -12,6 +13,8 @@ const Index = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailUser, setDetailUser] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(null);
 
   const [usersData, setUsersData] = useState([
     {
@@ -116,6 +119,16 @@ const Index = () => {
     setDetailUser(null);
   };
 
+  const handleOpenDeleteModal = (user) => {
+    setDeletingUser(user);
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeletingUser(null);
+  };
+
   const handleSaveData = (newUserData) => {
     const newId = usersData.length > 0 ? Math.max(...usersData.map(user => user.id)) + 1 : 1;
     const today = new Date();
@@ -150,6 +163,11 @@ const Index = () => {
     );
     setShowEditModal(false);
     setEditingUser(null);
+  };
+
+  const handleDeleteData = (userId) => {
+    setUsersData(prevUsers => prevUsers.filter(user => user.id !== userId));
+    handleCloseDeleteModal();
   };
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -463,7 +481,7 @@ const Index = () => {
                       color: '#374151',
                       border: '1px solid #e5e7eb'
                     }} className="px-4 py-4 text-sm text-gray-700">
-                      ••••••••
+                      ********
                     </td>
                     <td style={{
                       padding: '16px',
@@ -514,7 +532,7 @@ const Index = () => {
                           }} className="bg-blue-50 hover:bg-blue-100 text-blue-600 p-1.5 rounded-md transition-colors">
                           <Eye style={{ width: '14px', height: '14px' }} className="w-3.5 h-3.5" />
                         </button>
-
+                        {/* Tombol Edit */}
                         <button
                           onClick={() => handleOpenEditModal(user)} 
                           style={{
@@ -531,18 +549,21 @@ const Index = () => {
                           }} className="bg-yellow-50 hover:bg-yellow-100 text-yellow-600 p-1.5 rounded-md transition-colors">
                           <Edit2 style={{ width: '14px', height: '14px' }} className="w-3.5 h-3.5" />
                         </button>
-                        <button style={{
-                          backgroundColor: '#fee2e2',
-                          color: '#dc2626',
-                          padding: '6px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'background-color 0.2s'
-                        }} className="bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded-md transition-colors">
+                        {/* Tombol Hapus */}
+                        <button
+                          onClick={() => handleOpenDeleteModal(user)}
+                          style={{
+                            backgroundColor: '#fee2e2',
+                            color: '#dc2626',
+                            padding: '6px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'background-color 0.2s'
+                          }} className="bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded-md transition-colors">
                           <Trash2 style={{ width: '14px', height: '14px' }} className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -652,6 +673,12 @@ const Index = () => {
         isOpen={showDetailModal}
         onClose={handleCloseDetailModal}
         initialData={detailUser}
+      />
+      <HapusData
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        onDelete={handleDeleteData}
+        initialData={deletingUser}
       />
     </div>
   );
