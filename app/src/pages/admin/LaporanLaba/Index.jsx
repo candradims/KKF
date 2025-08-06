@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LineChart,
   Line,
@@ -8,9 +8,25 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, ChevronDown } from 'lucide-react';
 
 const LaporanLaba = () => {
+  const [selectedSales, setSelectedSales] = useState('Semua Sales');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Dummy sales data
+  const salesList = [
+    'Semua Sales',
+    'Ahmad Rizki',
+    'Siti Nurhaliza', 
+    'Budi Santoso',
+    'Diana Putri',
+    'Eko Prasetyo',
+    'Fitri Ramadhani',
+    'Gunawan Wijaya',
+    'Hana Sari'
+  ];
+
   // Data untuk line chart Total Profit
   const totalProfitData = [
     { month: 'JAN', value: 15000 },
@@ -76,12 +92,14 @@ const LaporanLaba = () => {
       backgroundColor: '#f9fafb',
       minHeight: '100vh'
     }}>
-      {/* Top Section with Amount Display */}
+      {/* Top Section with Amount Display and Sales Dropdown */}
       <div style={{
         marginBottom: '24px',
         display: 'flex',
-        justifyContent: 'flex-start'
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
+        {/* Amount Display */}
         <div style={{
           backgroundColor: '#00AEEF',
           borderRadius: '20px',
@@ -102,6 +120,98 @@ const LaporanLaba = () => {
           }}>
             Rp. 52.000.000,-
           </span>
+        </div>
+
+        {/* Sales Dropdown */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              backgroundColor: 'white',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#374151',
+              cursor: 'pointer',
+              minWidth: '180px',
+              justifyContent: 'space-between',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              outline: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.backgroundColor = '#f9fafb';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.backgroundColor = 'white';
+            }}
+          >
+            <span>{selectedSales}</span>
+            <ChevronDown 
+              style={{
+                width: '16px',
+                height: '16px',
+                color: '#6b7280',
+                transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease'
+              }}
+            />
+          </button>
+
+          {/* Dropdown Menu */}
+          {isDropdownOpen && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              backgroundColor: 'white',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              marginTop: '4px',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              zIndex: 10,
+              maxHeight: '200px',
+              overflowY: 'auto'
+            }}>
+              {salesList.map((sales, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setSelectedSales(sales);
+                    setIsDropdownOpen(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '8px 16px',
+                    textAlign: 'left',
+                    backgroundColor: selectedSales === sales ? '#eff6ff' : 'transparent',
+                    color: selectedSales === sales ? '#1d4ed8' : '#374151',
+                    border: 'none',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => {
+                    if (selectedSales !== sales) {
+                      e.target.style.backgroundColor = '#f9fafb';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (selectedSales !== sales) {
+                      e.target.style.backgroundColor = 'transparent';
+                    }
+                  }}
+                >
+                  {sales}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
