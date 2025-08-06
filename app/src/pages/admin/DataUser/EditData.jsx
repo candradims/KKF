@@ -11,6 +11,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -21,6 +22,16 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
       });
     }
   }, [initialData]);
+
+  useEffect(() => {
+    if (initialData && formData) {
+      const formHasChanged = 
+        initialData.email !== formData.email ||
+        initialData.password !== formData.password ||
+        initialData.role !== formData.role;
+      setIsDirty(formHasChanged);
+    }
+  }, [formData, initialData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -259,15 +270,16 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                 <button
                   type="submit"
                   form="form-edit-data"
-                  disabled={isSubmitting}
+                  disabled={!isDirty || isSubmitting}
                   style={{
-                    backgroundColor: '#00AEEF',
+                    backgroundColor: (!isDirty || isSubmitting) ? '#A0B0D5' : '#00AEEF',
                     color: '#ffffff',
                     border: 'none',
                     padding: '12px 32px',
                     borderRadius: '50px',
                     fontWeight: '600',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    cursor: (!isDirty || isSubmitting) ? 'not-allowed' : 'pointer'
                   }}
                 >
                   {isSubmitting ? 'Menyimpan...' : 'Simpan'}
