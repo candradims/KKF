@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Calculator } from 'lucide-react';
+import { X, Plus, Calculator, Check } from 'lucide-react';
 
 const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     sales: '',
     tanggal: '',
@@ -49,25 +50,32 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
 
   const handleConfirm = () => {
     onConfirm(deleteData);
+    setShowSuccessModal(true);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-      padding: '20px'
-    }}>
+    <>
+      {!showSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
       <div style={{
         backgroundColor: '#FFFFFF',
         borderRadius: '12px',
@@ -846,7 +854,87 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+        )}
+
+      {showSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            padding: '24px',
+            textAlign: 'center',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            maxWidth: '300px',
+            width: '90%'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              backgroundColor: '#00AEEF',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px auto'
+            }}>
+              <Check style={{ 
+                width: '30px', 
+                height: '30px', 
+                color: 'white'
+              }} />
+            </div>
+
+            <h3 style={{
+              margin: '0 0 8px 0',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#333'
+            }}>
+              Selamat!
+            </h3>
+
+            <p style={{
+              margin: '0 0 20px 0',
+              fontSize: '14px',
+              color: '#666',
+              lineHeight: '1.4'
+            }}>
+              Data Pengeluaran Berhasil Dihapus
+            </p>
+
+            <button
+              onClick={handleCloseSuccessModal}
+              style={{
+                backgroundColor: '#00AEEF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '8px 24px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                minWidth: '80px'
+              }}
+            >
+              Oke
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
