@@ -3,14 +3,16 @@ import { X, AlertTriangle, Check } from 'lucide-react';
 
 const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const handleConfirm = () => {
+    setIsDeleting(true);
     onConfirm(deleteData);
-    onClose(); // Close main modal first
-    // Show success popup after small delay
-    setTimeout(() => {
-      setShowSuccessModal(true);
-    }, 100);
+    
+    // Immediately transition to success modal without delay
+    onClose(); 
+    setShowSuccessModal(true);
+    setIsDeleting(false);
   };
 
   const handleSuccessClose = () => {
@@ -38,7 +40,8 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
-          padding: '20px'
+          padding: '20px',
+          transition: 'opacity 0.2s ease-in-out'
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -48,7 +51,9 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
             maxHeight: '90vh',
             overflow: 'auto',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-            border: '1px solid #e0e0e0'
+            border: '1px solid #e0e0e0',
+            transform: isDeleting ? 'scale(0.95)' : 'scale(1)',
+            transition: 'transform 0.2s ease-in-out'
           }}>
             {/* Header */}
             <div style={{
@@ -562,49 +567,51 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
               }}>
                 <button
                   onClick={handleCancel}
+                  disabled={isDeleting}
                   style={{
                     padding: '10px 24px',
                     fontSize: '12px',
                     fontWeight: '500',
                     color: 'white',
-                    backgroundColor: '#2196F3',
+                    backgroundColor: isDeleting ? '#ccc' : '#2196F3',
                     border: 'none',
                     borderRadius: '4px',
-                    cursor: 'pointer',
+                    cursor: isDeleting ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
                     minWidth: '80px'
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.backgroundColor = '#1976D2';
+                    if (!isDeleting) e.target.style.backgroundColor = '#1976D2';
                   }}
                   onMouseOut={(e) => {
-                    e.target.style.backgroundColor = '#2196F3';
+                    if (!isDeleting) e.target.style.backgroundColor = '#2196F3';
                   }}
                 >
                   Batal
                 </button>
                 <button
                   onClick={handleConfirm}
+                  disabled={isDeleting}
                   style={{
                     padding: '10px 24px',
                     fontSize: '12px',
                     fontWeight: '500',
                     color: 'white',
-                    backgroundColor: '#00BCD4',
+                    backgroundColor: isDeleting ? '#ccc' : '#00BCD4',
                     border: 'none',
                     borderRadius: '4px',
-                    cursor: 'pointer',
+                    cursor: isDeleting ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
                     minWidth: '80px'
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.backgroundColor = '#0097A7';
+                    if (!isDeleting) e.target.style.backgroundColor = '#0097A7';
                   }}
                   onMouseOut={(e) => {
-                    e.target.style.backgroundColor = '#00BCD4';
+                    if (!isDeleting) e.target.style.backgroundColor = '#00BCD4';
                   }}
                 >
-                  Hapus
+                  {isDeleting ? 'Menghapus...' : 'Hapus'}
                 </button>
               </div>
             </div>
@@ -624,7 +631,8 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1001
+          zIndex: 1001,
+          animation: 'fadeIn 0.3s ease-in-out'
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -633,7 +641,8 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
             textAlign: 'center',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             maxWidth: '300px',
-            width: '90%'
+            width: '90%',
+            animation: 'slideUp 0.3s ease-out'
           }}>
             {/* Success Icon */}
             <div style={{
@@ -684,7 +693,14 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
                 fontSize: '14px',
                 fontWeight: '500',
                 cursor: 'pointer',
-                minWidth: '80px'
+                minWidth: '80px',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#0088CC';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = '#00AEEF';
               }}
             >
               Oke
@@ -692,6 +708,24 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+          from { 
+            transform: translateY(20px); 
+            opacity: 0; 
+          }
+          to { 
+            transform: translateY(0); 
+            opacity: 1; 
+          }
+        }
+      `}</style>
     </div>
   );
 };

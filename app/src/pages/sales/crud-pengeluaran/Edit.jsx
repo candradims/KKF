@@ -3,6 +3,7 @@ import { X, ChevronDown, Check } from 'lucide-react';
 
 const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     tanggal: '',
     pelangganField: '',
@@ -52,7 +53,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSaving(true);
     onSave(formData);
+    
     setFormData({
       tanggal: '',
       pelangganField: '',
@@ -69,13 +72,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       harga: '',
       jumlah: ''
     });
-    // Show success popup instead of closing immediately
+    
+    // Immediately transition to success modal
     setShowSuccessModal(true);
+    setIsSaving(false);
   };
 
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
-    onClose(); // Close the edit modal after success popup
+    onClose();
   };
 
   const handleCancel = () => {
@@ -95,7 +100,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       harga: '',
       jumlah: ''
     });
-    setShowSuccessModal(false); // Reset success modal state
+    setShowSuccessModal(false);
     onClose();
   };
 
@@ -104,7 +109,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   return (
     <div>
       {/* Main Edit Modal */}
-      {isOpen && (
+      {isOpen && !showSuccessModal && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -116,7 +121,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000,
-          padding: '20px'
+          padding: '20px',
+          transition: 'opacity 0.2s ease-in-out'
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -126,7 +132,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
             maxHeight: '90vh',
             overflow: 'auto',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-            border: '1px solid #e0e0e0'
+            border: '1px solid #e0e0e0',
+            transform: isSaving ? 'scale(0.95)' : 'scale(1)',
+            transition: 'transform 0.2s ease-in-out'
           }}>
             {/* Header */}
             <div style={{
@@ -148,14 +156,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
               </h2>
               <button
                 onClick={handleCancel}
+                disabled={isSaving}
                 style={{
                   padding: '4px',
                   backgroundColor: 'transparent',
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
                   color: '#666',
                   fontSize: '18px',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  opacity: isSaving ? 0.5 : 1
                 }}
               >
                 ×
@@ -164,7 +174,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
 
             {/* Content */}
             <div style={{ padding: '20px' }}>
-              <form onSubmit={handleSubmit}>
                 {/* Basic Information Section */}
                 <div style={{ marginBottom: '20px' }}>
                   
@@ -188,13 +197,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="tanggal"
                       value={formData.tanggal}
                       onChange={handleChange}
+                      disabled={isSaving}
                       required
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -219,6 +231,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         name="pelangganField"
                         value={formData.pelangganField}
                         onChange={handleChange}
+                        disabled={isSaving}
                         required
                         style={{
                           width: '100%',
@@ -226,8 +239,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           border: '1px solid #ddd',
                           borderRadius: '4px',
                           fontSize: '12px',
-                          backgroundColor: 'white',
-                          appearance: 'none'
+                          backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                          appearance: 'none',
+                          cursor: isSaving ? 'not-allowed' : 'pointer'
                         }}
                       >
                         <option value="">Pilih Pelanggan</option>
@@ -242,7 +256,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         transform: 'translateY(-50%)',
                         width: '16px',
                         height: '16px',
-                        color: '#666',
+                        color: isSaving ? '#999' : '#666',
                         pointerEvents: 'none'
                       }} />
                     </div>
@@ -268,13 +282,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="nomorKontrak"
                       value={formData.nomorKontrak}
                       onChange={handleChange}
+                      disabled={isSaving}
                       required
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -299,13 +316,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="kontrakKe"
                       value={formData.kontrakKe}
                       onChange={handleChange}
+                      disabled={isSaving}
                       required
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -330,13 +350,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="referensiHjt"
                       value={formData.referensiHjt}
                       onChange={handleChange}
+                      disabled={isSaving}
                       required
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -361,13 +384,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="discount"
                       value={formData.discount}
                       onChange={handleChange}
+                      disabled={isSaving}
                       required
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -392,13 +418,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="durasiKontrak"
                       value={formData.durasiKontrak}
                       onChange={handleChange}
+                      disabled={isSaving}
                       required
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -423,13 +452,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="targetIrr"
                       value={formData.targetIrr}
                       onChange={handleChange}
+                      disabled={isSaving}
                       required
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -516,12 +548,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="oneTimeBooking"
                       value={formData.oneTimeBooking}
                       onChange={handleChange}
+                      disabled={isSaving}
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -545,12 +580,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="oneTimeStart"
                       value={formData.oneTimeStart}
                       onChange={handleChange}
+                      disabled={isSaving}
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -584,13 +622,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="item"
                       value={formData.item}
                       onChange={handleChange}
+                      disabled={isSaving}
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
                         fontSize: '12px',
-                        backgroundColor: 'white'
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -615,13 +655,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="keterangan"
                       value={formData.keterangan}
                       onChange={handleChange}
+                      disabled={isSaving}
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
                         fontSize: '12px',
-                        backgroundColor: 'white'
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -646,13 +688,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="harga"
                       value={formData.harga}
                       onChange={handleChange}
+                      disabled={isSaving}
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
                         fontSize: '12px',
-                        backgroundColor: 'white'
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -676,13 +720,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="jumlah"
                       value={formData.jumlah}
                       onChange={handleChange}
+                      disabled={isSaving}
                       style={{
                         flex: 1,
                         padding: '8px 12px',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
                         fontSize: '12px',
-                        backgroundColor: 'white'
+                        backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                        cursor: isSaving ? 'not-allowed' : 'text'
                       }}
                     />
                   </div>
@@ -699,16 +745,24 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                   <button
                     type="button"
                     onClick={handleCancel}
+                    disabled={isSaving}
                     style={{
                       padding: '8px 20px',
                       fontSize: '12px',
                       fontWeight: '500',
                       color: 'white',
-                      backgroundColor: '#2196F3',
+                      backgroundColor: isSaving ? '#ccc' : '#2196F3',
                       border: 'none',
                       borderRadius: '4px',
-                      cursor: 'pointer',
-                      minWidth: '70px'
+                      cursor: isSaving ? 'not-allowed' : 'pointer',
+                      minWidth: '70px',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => {
+                      if (!isSaving) e.target.style.backgroundColor = '#1976D2';
+                    }}
+                    onMouseOut={(e) => {
+                      if (!isSaving) e.target.style.backgroundColor = '#2196F3';
                     }}
                   >
                     Batal
@@ -716,22 +770,29 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                   <button
                     type="button"
                     onClick={handleSubmit}
+                    disabled={isSaving}
                     style={{
                       padding: '8px 20px',
                       fontSize: '12px',
                       fontWeight: '500',
                       color: 'white',
-                      backgroundColor: '#00BCD4',
+                      backgroundColor: isSaving ? '#ccc' : '#00BCD4',
                       border: 'none',
                       borderRadius: '4px',
-                      cursor: 'pointer',
-                      minWidth: '70px'
+                      cursor: isSaving ? 'not-allowed' : 'pointer',
+                      minWidth: '70px',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => {
+                      if (!isSaving) e.target.style.backgroundColor = '#0097A7';
+                    }}
+                    onMouseOut={(e) => {
+                      if (!isSaving) e.target.style.backgroundColor = '#00BCD4';
                     }}
                   >
-                    Simpan
+                    {isSaving ? 'Menyimpan...' : 'Simpan'}
                   </button>
                 </div>
-              </form>
             </div>
           </div>
         </div>
@@ -749,7 +810,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1001
+          zIndex: 1001,
+          animation: 'fadeIn 0.3s ease-in-out'
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -758,7 +820,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
             textAlign: 'center',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             maxWidth: '300px',
-            width: '90%'
+            width: '90%',
+            animation: 'slideUp 0.3s ease-out'
           }}>
             {/* Success Icon */}
             <div style={{
@@ -809,7 +872,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                 fontSize: '14px',
                 fontWeight: '500',
                 cursor: 'pointer',
-                minWidth: '80px'
+                minWidth: '80px',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#0088CC';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = '#00AEEF';
               }}
             >
               Oke
@@ -817,6 +887,24 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+          from { 
+            transform: translateY(20px); 
+            opacity: 0; 
+          }
+          to { 
+            transform: translateY(0); 
+            opacity: 1; 
+          }
+        }
+      `}</style>
     </div>
   );
 };
