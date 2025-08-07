@@ -871,36 +871,41 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '12px',
-            padding: '40px',
+            padding: '24px',
             textAlign: 'center',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-            position: 'relative',
-            width: '400px'
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            maxWidth: '300px',
+            width: '90%'
           }}>
             <div style={{
               backgroundColor: '#00AEEF',
               borderRadius: '50%',
               width: '60px',
               height: '60px',
-              margin: '0 auto 20px auto',
+              margin: '0 auto 16px auto',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Check size={30} color="white" strokeWidth={3} />
+              <Check style={{ 
+                width: '30px', 
+                height: '30px', 
+                color: 'white'
+              }} />
             </div>
             <h3 style={{
-              color: '#1F2937',
-              fontSize: '20px',
+              margin: '0 0 8px 0',
+              fontSize: '18px',
               fontWeight: '600',
-              marginBottom: '10px'
+              color: '#333'
             }}>
               Selamat!
             </h3>
             <p style={{
-              color: '#6B7280',
-              marginBottom: '30px',
-              fontSize: '16px'
+              margin: '0 0 20px 0',
+              fontSize: '14px',
+              color: '#666',
+              lineHeight: '1.4'
             }}>
               Data Penawaran Berhasil Disimpan
             </p>
@@ -910,12 +915,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 backgroundColor: '#00AEEF',
                 color: 'white',
                 border: 'none',
-                borderRadius: '25px',
-                padding: '12px 30px',
+                borderRadius: '6px',
+                padding: '8px 24px',
                 fontSize: '14px',
                 fontWeight: '500',
                 cursor: 'pointer',
-                minWidth: '100px'
+                minWidth: '80px'
               }}
             >
               Oke
