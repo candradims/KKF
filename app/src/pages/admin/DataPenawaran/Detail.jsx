@@ -139,13 +139,15 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Sales*</span>
               <input
                 type="text"
-                value="Sales Team"
+                value="Admin"
+                readOnly
                 style={{
                   width: '200px',
                   padding: '8px 12px',
                   border: '1px solid #D1D5DB',
                   borderRadius: '6px',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  backgroundColor: '#F9FAFB'
                 }}
               />
             </div>
@@ -175,7 +177,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.tanggal || '23/07/2025'}
+                  value={detailData?.tanggal || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -199,7 +202,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.namaPelanggan || 'Nama Pelanggan'}
+                  value={detailData?.namaPelanggan || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -223,7 +227,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value="Pekerjaan"
+                  value="-"
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -247,7 +252,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.nomorKontrak || 'Nomor kontrak'}
+                  value={detailData?.nomorKontrak || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -271,7 +277,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.kontrakKe || 'Kontrak tahun ke berapa'}
+                  value={detailData?.kontrakKe || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -295,7 +302,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.referensi || 'HJT'}
+                  value={detailData?.referensi || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -319,7 +327,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.discount || 'Discount'}
+                  value={detailData?.discount || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -343,7 +352,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.durasi || 'Durasi kontrak (n thn)'}
+                  value={detailData?.durasi || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -367,7 +377,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.targetIRR || 'Target IRR'}
+                  value={detailData?.targetIRR || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -391,7 +402,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.status || 'Status'}
+                  value={detailData?.status || '-'}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -420,6 +432,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 <input
                   type="text"
                   value="0,00%"
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -444,6 +457,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 <input
                   type="text"
                   value="0,00%"
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -519,6 +533,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         <input
                           type="text"
                           value={row.jenisLayanan}
+                          readOnly
                           style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
                         />
                       </td>
@@ -526,6 +541,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         <input
                           type="text"
                           value={row.keterangan}
+                          readOnly
                           style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
                         />
                       </td>
@@ -533,6 +549,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         <input
                           type="text"
                           value={row.kapasitas}
+                          readOnly
                           style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
                         />
                       </td>
@@ -540,6 +557,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         <input
                           type="text"
                           value={row.satuan}
+                          readOnly
                           style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
                         />
                       </td>
@@ -547,6 +565,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         <input
                           type="text"
                           value={row.qty}
+                          readOnly
                           style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
                         />
                       </td>
@@ -687,6 +706,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         <input
                           type="text"
                           value={row.item}
+                          readOnly
                           style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
                         />
                       </td>
@@ -694,6 +714,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         <input
                           type="text"
                           value={row.keterangan}
+                          readOnly
                           style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
                         />
                       </td>
@@ -740,19 +761,6 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
             >
               Tutup
             </button>
-            <button
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#00AEEF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                cursor: 'pointer'
-              }}
-            >
-              Simpan
-            </button>
           </div>
         </div>
       </div>
@@ -760,4 +768,4 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   );
 };
 
-export default DetailPenawaran; 
+export default DetailPenawaran;

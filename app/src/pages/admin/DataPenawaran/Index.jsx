@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, RotateCcw } from 'lucide-react';
-import Detail from '../../sales/crud-penawaran/Detail';
+import Detail from './Detail';
 
 const Index = () => {
   const [filterDate, setFilterDate] = useState('');
@@ -164,7 +164,7 @@ const Index = () => {
       backgroundColor: '#f8f9fa',
       minHeight: '100vh'
     }}>
-      {/* Filter Section */}
+      {/* Filter Section */}  
       <div style={{
         display: 'grid',
         gridTemplateColumns: '2fr 1fr',
