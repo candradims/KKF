@@ -3,6 +3,7 @@ import { X, Plus, Calculator, Check } from 'lucide-react';
 
 const Tambah = ({ isOpen, onClose, onSave }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     sales: '',
     tanggal: '',
@@ -33,12 +34,35 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSaving(true);
     onSave(formData);
+    
+    // Immediately transition to success modal
     setShowSuccessModal(true);
+    setIsSaving(false);
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+    setFormData({
+      sales: '',
+      tanggal: '',
+      pelanggan: '',
+      nomorKontrak: '',
+      kontrakTahunKe: '',
+      referensiHJT: '',
+      discount: '',
+      durasiKontrak: '',
+      targetIRR: '',
+      discBackbone: '0,00%',
+      discPort: '0,00%',
+      piliLayanan: '',
+      keterangan: '',
+      kapasitas: '',
+      qty: '',
+      aksesExisting: '',
+      hargaFinalSebelumPPN: ''
+    });
     onClose();
   };
 
@@ -65,12 +89,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !showSuccessModal) return null;
 
   return (
-    <>
+    <div>
       {/* Main Modal */}
-      {!showSuccessModal && (
+      {isOpen && !showSuccessModal && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -82,7 +106,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1000,
-          padding: '20px'
+          padding: '20px',
+          transition: 'opacity 0.2s ease-in-out'
         }}>
           <div style={{
             backgroundColor: '#FFFFFF',
@@ -91,21 +116,25 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
             maxHeight: '90vh',
             overflow: 'auto',
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-            position: 'relative'
+            position: 'relative',
+            transform: isSaving ? 'scale(0.95)' : 'scale(1)',
+            transition: 'transform 0.2s ease-in-out'
           }}>
             {/* Close Button */}
         <button
           onClick={onClose}
+          disabled={isSaving}
           style={{
             position: 'absolute',
             top: '20px',
             right: '20px',
             background: 'none',
             border: 'none',
-            cursor: 'pointer',
+            cursor: isSaving ? 'not-allowed' : 'pointer',
             padding: '4px',
             color: '#374151',
-            zIndex: 10
+            zIndex: 10,
+            opacity: isSaving ? 0.5 : 1
           }}
         >
           <X style={{ width: '24px', height: '24px' }} />
@@ -149,6 +178,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 name="sales"
                 value={formData.sales}
                 onChange={handleInputChange}
+                disabled={isSaving}
                 placeholder="Masukkan Nama"
                 required
                 style={{
@@ -158,8 +188,10 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   borderRadius: '8px',
                   fontSize: '14px',
                   outline: 'none',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
+                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                  boxSizing: 'border-box',
+                  cursor: isSaving ? 'not-allowed' : 'text',
+                  transition: 'all 0.2s ease-in-out'
                 }}
               />
             </div>
@@ -183,6 +215,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 name="tanggal"
                 value={formData.tanggal}
                 onChange={handleInputChange}
+                disabled={isSaving}
                 required
                 style={{
                   width: '100%',
@@ -191,8 +224,10 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   borderRadius: '8px',
                   fontSize: '14px',
                   outline: 'none',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
+                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                  boxSizing: 'border-box',
+                  cursor: isSaving ? 'not-allowed' : 'text',
+                  transition: 'all 0.2s ease-in-out'
                 }}
               />
             </div>
@@ -213,6 +248,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 name="pelanggan"
                 value={formData.pelanggan}
                 onChange={handleInputChange}
+                disabled={isSaving}
                 placeholder="Masukkan nama Pelanggan"
                 required
                 style={{
@@ -222,8 +258,10 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   borderRadius: '8px',
                   fontSize: '14px',
                   outline: 'none',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
+                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                  boxSizing: 'border-box',
+                  cursor: isSaving ? 'not-allowed' : 'text',
+                  transition: 'all 0.2s ease-in-out'
                 }}
               />
             </div>
@@ -244,6 +282,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 name="nomorKontrak"
                 value={formData.nomorKontrak}
                 onChange={handleInputChange}
+                disabled={isSaving}
                 placeholder="Masukkan nomor kontrak"
                 required
                 style={{
@@ -253,8 +292,10 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   borderRadius: '8px',
                   fontSize: '14px',
                   outline: 'none',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
+                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                  boxSizing: 'border-box',
+                  cursor: isSaving ? 'not-allowed' : 'text',
+                  transition: 'all 0.2s ease-in-out'
                 }}
               />
             </div>
@@ -275,6 +316,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 name="kontrakTahunKe"
                 value={formData.kontrakTahunKe}
                 onChange={handleInputChange}
+                disabled={isSaving}
                 placeholder="Masukkan kontrak tahun ke berapa"
                 required
                 style={{
@@ -284,8 +326,10 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   borderRadius: '8px',
                   fontSize: '14px',
                   outline: 'none',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
+                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                  boxSizing: 'border-box',
+                  cursor: isSaving ? 'not-allowed' : 'text',
+                  transition: 'all 0.2s ease-in-out'
                 }}
               />
             </div>
@@ -306,6 +350,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   name="referensiHJT"
                   value={formData.referensiHJT}
                   onChange={handleInputChange}
+                  disabled={isSaving}
                   required
                   style={{
                     width: '100%',
@@ -314,9 +359,11 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     borderRadius: '8px',
                     fontSize: '14px',
                     outline: 'none',
-                    backgroundColor: 'white',
+                    backgroundColor: isSaving ? '#f5f5f5' : 'white',
                     boxSizing: 'border-box',
-                    appearance: 'none'
+                    appearance: 'none',
+                    cursor: isSaving ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease-in-out'
                   }}
                 >
                   <option value="">Pilih HJT</option>
@@ -353,6 +400,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   name="discount"
                   value={formData.discount}
                   onChange={handleInputChange}
+                  disabled={isSaving}
                   required
                   style={{
                     width: '100%',
@@ -361,9 +409,11 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     borderRadius: '8px',
                     fontSize: '14px',
                     outline: 'none',
-                    backgroundColor: 'white',
+                    backgroundColor: isSaving ? '#f5f5f5' : 'white',
                     boxSizing: 'border-box',
-                    appearance: 'none'
+                    appearance: 'none',
+                    cursor: isSaving ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease-in-out'
                   }}
                 >
                   <option value="">Discount</option>
@@ -816,35 +866,51 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               <button
                 type="button"
                 onClick={handleCancel}
+                disabled={isSaving}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: '#6B9BD2',
+                  backgroundColor: isSaving ? '#ccc' : '#6B9BD2',
                   color: 'white',
                   border: 'none',
                   borderRadius: '25px',
-                  cursor: 'pointer',
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
-                  minWidth: '100px'
+                  minWidth: '100px',
+                  transition: 'all 0.2s ease-in-out'
+                }}
+                onMouseOver={(e) => {
+                  if (!isSaving) e.target.style.backgroundColor = '#5A8BC2';
+                }}
+                onMouseOut={(e) => {
+                  if (!isSaving) e.target.style.backgroundColor = '#6B9BD2';
                 }}
               >
                 Batal
               </button>
               <button
                 onClick={handleSubmit}
+                disabled={isSaving}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: '#00BFFF',
+                  backgroundColor: isSaving ? '#ccc' : '#00BFFF',
                   color: 'white',
                   border: 'none',
                   borderRadius: '25px',
-                  cursor: 'pointer',
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
-                  minWidth: '100px'
+                  minWidth: '100px',
+                  transition: 'all 0.2s ease-in-out'
+                }}
+                onMouseOver={(e) => {
+                  if (!isSaving) e.target.style.backgroundColor = '#00AAEF';
+                }}
+                onMouseOut={(e) => {
+                  if (!isSaving) e.target.style.backgroundColor = '#00BFFF';
                 }}
               >
-                Simpan
+                {isSaving ? 'Menyimpan...' : 'Simpan'}
               </button>
             </div>
           </div>
@@ -865,8 +931,9 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: 1000,
-          padding: '20px'
+          zIndex: 1001,
+          padding: '20px',
+          animation: 'fadeIn 0.3s ease-in-out'
         }}>
           <div style={{
             backgroundColor: '#FFFFFF',
@@ -875,7 +942,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
             textAlign: 'center',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             maxWidth: '300px',
-            width: '90%'
+            width: '90%',
+            animation: 'slideUp 0.3s ease-out'
           }}>
             <div style={{
               backgroundColor: '#00AEEF',
@@ -920,7 +988,14 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 fontSize: '14px',
                 fontWeight: '500',
                 cursor: 'pointer',
-                minWidth: '80px'
+                minWidth: '80px',
+                transition: 'all 0.2s ease-in-out'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#0088CC';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = '#00AEEF';
               }}
             >
               Oke
@@ -928,7 +1003,26 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
           </div>
         </div>
       )}
-    </>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+          from { 
+            transform: translateY(20px); 
+            opacity: 0; 
+          }
+          to { 
+            transform: translateY(0); 
+            opacity: 1; 
+          }
+        }
+      `}
+      </style>
+    </div>
   );
 };
 
