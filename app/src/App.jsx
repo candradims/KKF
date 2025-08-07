@@ -20,6 +20,7 @@ import Penawaran from "./pages/sales/Penawaran";
 import ManagementDataUser from "./pages/admin/DataUser/Index";
 import AdminDashboard from "./pages/admin/Dashboard";
 import LabaLaporan from "./pages/admin/LaporanLaba/Index";
+import DataPenawaran from "./pages/admin/DataPenawaran/Index";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/management-data-user" element={<ManagementDataUser />} />
+          <Route path="/admin/data-penawaran" element={<DataPenawaran />} />
           <Route path="/admin/laporan-laba" element={<LabaLaporan />} />
           {/* General Routes */}
           <Route path="/dashboard" element={<SalesDashboard />} />
