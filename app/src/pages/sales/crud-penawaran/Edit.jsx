@@ -4,6 +4,7 @@ import { X, Plus, Calculator, Check } from 'lucide-react';
 const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [originalData, setOriginalData] = useState({});
   const [formData, setFormData] = useState({
     sales: '',
     tanggal: '',
@@ -27,7 +28,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   // Pre-fill form with existing data when editing
   useEffect(() => {
     if (editData) {
-      setFormData({
+      const initialData = {
         sales: editData.sales || '',
         tanggal: editData.tanggal || '',
         pelanggan: editData.namaPelanggan || editData.pelanggan || '',
@@ -45,7 +46,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         qty: editData.qty || '',
         aksesExisting: editData.aksesExisting || '',
         hargaFinalSebelumPPN: editData.hargaFinalSebelumPPN || ''
-      });
+      };
+      
+      setFormData(initialData);
+      setOriginalData(initialData);
     }
   }, [editData]);
 
@@ -57,8 +61,19 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }));
   };
 
+  // Function to check if form data has changed
+  const hasDataChanged = () => {
+    return JSON.stringify(formData) !== JSON.stringify(originalData);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Check if any data has changed
+    if (!hasDataChanged()) {
+      return; // Don't proceed if no changes
+    }
+    
     setIsSaving(true);
     onSave({ ...editData, ...formData });
     
@@ -912,24 +927,24 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={isSaving}
+                disabled={isSaving || !hasDataChanged()}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: isSaving ? '#ccc' : '#00BFFF',
+                  backgroundColor: (isSaving || !hasDataChanged()) ? '#ccc' : '#00BFFF',
                   color: 'white',
                   border: 'none',
                   borderRadius: '25px',
-                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  cursor: (isSaving || !hasDataChanged()) ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
                   minWidth: '100px',
                   transition: 'all 0.2s ease-in-out'
                 }}
                 onMouseOver={(e) => {
-                  if (!isSaving) e.target.style.backgroundColor = '#00AAEF';
+                  if (!isSaving && hasDataChanged()) e.target.style.backgroundColor = '#00AAEF';
                 }}
                 onMouseOut={(e) => {
-                  if (!isSaving) e.target.style.backgroundColor = '#00BFFF';
+                  if (!isSaving && hasDataChanged()) e.target.style.backgroundColor = '#00BFFF';
                 }}
               >
                 {isSaving ? 'Menyimpan...' : 'Simpan'}
