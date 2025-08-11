@@ -4,6 +4,7 @@ import TambahData from './TambahData';
 import EditData from './EditData';
 import DetailData from './DetailData';
 import HapusData from './HapusData';
+import ImportData from './ImportData';
 
 const Index = () => {
   const [filterRole, setFilterRole] = useState('');
@@ -15,6 +16,8 @@ const Index = () => {
   const [detailUser, setDetailUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingUser, setDeletingUser] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const [usersData, setUsersData] = useState([
     {
@@ -170,6 +173,42 @@ const Index = () => {
     handleCloseDeleteModal();
   };
 
+  const handleOpenImportModal = () => {
+    setShowImportModal(true);
+  };
+
+  const handleCloseImportModal = () => {
+    setShowImportModal(false);
+  };
+
+  const handleImportData = async (file) => {
+    setIsImporting(true);
+    console.log('Mulai mengimpor file:', file.name);
+
+    try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const importedUsers = [
+            { id: 10, date: '01/06/2023', email: 'budi@example.com', password: 'budi_pass', role: 'Sales', actions: ['view', 'edit', 'delete'] },
+            { id: 11, date: '01/06/2023', email: 'siti@example.com', password: 'siti_pass', role: 'Sales', actions: ['view', 'edit', 'delete'] },
+        ];
+        
+        const maxId = usersData.length > 0 ? Math.max(...usersData.map(user => user.id)) : 0;
+        const newUsersWithId = importedUsers.map((user, index) => ({
+            ...user,
+            id: maxId + index + 1,
+        }));
+
+        setUsersData(prevUsers => [...prevUsers, ...newUsersWithId]);
+        console.log('Data berhasil diimpor!');
+
+    } catch (error) {
+        console.error('Gagal mengimpor file:', error);
+    } finally {
+        setIsImporting(false);
+    }
+  }
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -225,7 +264,9 @@ const Index = () => {
           marginBottom: '24px'
         }} className="mb-6">
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '24px' }}>
-            <button style={{
+            <button 
+            onClick={handleOpenImportModal}
+            style={{
               backgroundColor: '#00AEEF',
               color: 'white',
               padding: '10px 20px',
@@ -679,6 +720,11 @@ const Index = () => {
         onClose={handleCloseDeleteModal}
         onDelete={handleDeleteData}
         initialData={deletingUser}
+      />
+      <ImportData
+        isOpen={showImportModal}
+        onClose={handleCloseImportModal}
+        onImport={handleImportData}
       />
     </div>
   );
