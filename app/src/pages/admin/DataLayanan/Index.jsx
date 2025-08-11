@@ -3,6 +3,7 @@ import { Eye, Edit2, Trash2, Plus, RotateCcw } from 'lucide-react';
 import TambahLayanan from './TambahLayanan';
 import EditLayanan from './EditLayanan';
 import DetailLayanan from './DetailLayanan';
+import HapusLayanan from './HapusLayanan'; 
 
 const Index = () => {
   const [filterHJT, setFilterHJT] = useState('');
@@ -10,6 +11,7 @@ const Index = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedLayanan, setSelectedLayanan] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showHapusModal, setShowHapusModal] = useState(false);
 
   const [layananData, setLayananData] = useState([
     {
@@ -161,6 +163,20 @@ const Index = () => {
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedLayanan(null);
+  };
+
+  const handleOpenDeleteModal = (layanan) => {
+    setSelectedLayanan(layanan);
+    setShowHapusModal(true);
+  };
+  
+  const handleCloseDeleteModal = () => {
+    setShowHapusModal(false);
+    setSelectedLayanan(null);
+  };
+  
+  const handleDeleteConfirm = (id) => {
+    setLayananData(prev => prev.filter(layanan => layanan.id !== id));
   };
 
   const handleSaveEdit = (updatedLayanan) => {
@@ -673,6 +689,14 @@ const Index = () => {
           isOpen={showDetailModal}
           onClose={handleCloseDetailModal}
           initialData={selectedLayanan} 
+        />
+      )}
+      {showHapusModal && (
+        <HapusLayanan
+          isOpen={showHapusModal}
+          onClose={handleCloseDeleteModal}
+          onDelete={handleDeleteConfirm}
+          initialData={selectedLayanan}
         />
       )}
     </div>
