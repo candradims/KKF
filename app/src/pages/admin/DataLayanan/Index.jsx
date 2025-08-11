@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw } from 'lucide-react';
 import TambahLayanan from './TambahLayanan';
+import EditLayanan from './EditLayanan';
 
 const Index = () => {
   const [filterHJT, setFilterHJT] = useState('');
   const [showTambahModal, setShowTambahModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedLayanan, setSelectedLayanan] = useState(null);
 
   const [layananData, setLayananData] = useState([
     {
         id: 1,
-        hjt: 'Sumatera',
+        hjt: 'Sumatra',
         namaLayanan: 'IP VPN (1 sd 10 Mbps)',
         satuan: 'Mbps',
         backbone: '76600',
@@ -49,7 +52,7 @@ const Index = () => {
     },
     {
         id: 5,
-        hjt: 'Sumatera',
+        hjt: 'Sumatra',
         namaLayanan: 'IP VPN (11 sd 50 Mbps)',
         satuan: 'Mbps',
         backbone: '73300',
@@ -89,7 +92,7 @@ const Index = () => {
     },
     {
         id: 9,
-        hjt: 'Sumatera',
+        hjt: 'Sumatra',
         namaLayanan: 'IP VPN Premium (2 Mbps)',
         satuan: 'Units',
         backbone: '0',
@@ -136,6 +139,26 @@ const Index = () => {
 
   const handleCloseModal = () => {
     setShowTambahModal(false);
+  };
+
+  const handleOpenEditModal = (layanan) => {
+    setSelectedLayanan(layanan);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setSelectedLayanan(null);
+  };
+
+  const handleSaveEdit = (updatedLayanan) => {
+    setLayananData(prev => 
+      prev.map(layanan => 
+        layanan.id === updatedLayanan.id ? updatedLayanan : layanan
+      )
+    );
+    setShowEditModal(false);
+    setSelectedLayanan(null);
   };
 
   const handleSaveData = (newDataLayanan) => {
@@ -265,7 +288,7 @@ const Index = () => {
                 <option value="">-- Pilih HJT --</option>
                 <option value="Jawa Bali">Jawa Bali</option>
                 <option value="Jabodetabek">Jabodetabek</option>
-                <option value="Sumatera">Sumatera</option>
+                <option value="Sumatra">Sumatra</option>
                 <option value="Intim">Intim</option>
             </select>
             </div>
@@ -619,6 +642,14 @@ const Index = () => {
           isOpen={showTambahModal}
           onClose={handleCloseModal}
           onSave={handleSaveData}
+        />
+      )}
+      {showEditModal && (
+        <EditLayanan
+          isOpen={showEditModal}
+          onClose={handleCloseEditModal}
+          onSave={handleSaveEdit}
+          initialData={selectedLayanan} 
         />
       )}
     </div>
