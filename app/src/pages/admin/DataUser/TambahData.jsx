@@ -302,12 +302,12 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
               style={{
                 backgroundColor: '#ffffff',
                 borderRadius: '16px',
-                padding: '39px',
+                padding: '24px',
                 textAlign: 'center',
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
                 position: 'relative',
                 width: '100%',
-                maxWidth: '500px'
+                maxWidth: '300px'
               }}
             >
               <div style={{
@@ -315,27 +315,30 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                 borderRadius: '50%',
                 width: '60px',
                 height: '60px',
-                margin: '0 auto',
+                margin: '0 auto 16px auto',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '1rem'
+                justifyContent: 'center'
               }}>
-                <Check size={46} strokeWidth={3} color="#fff" />
+                <Check style={{ 
+                  width: '30px', 
+                  height: '30px', 
+                  color: 'white'
+                }} />
               </div>
               <h3 style={{
-                color: '#2D396B',
-                fontSize: '26px',
-                fontWeight: '800',
-                marginBottom: '0.5rem',
+                margin: '0 0 8px 0',
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#333'
               }}>
                 Selamat!
               </h3>
               <p style={{
-                color: '#2D396B',
-                marginBottom: '1.5rem',
-                fontSize: '23px',
-                fontWeight: '525'
+                margin: '0 0 20px 0',
+                fontSize: '14px',
+                color: '#666',
+                lineHeight: '1.4'
               }}>
                 Data User Berhasil Disimpan
               </p>
@@ -343,15 +346,21 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                 onClick={handleCloseSuccessModal}
                 style={{
                   backgroundColor: '#00AEEF',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.75rem 3rem',
                   color: 'white',
-                  fontWeight: '600',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '8px 24px',
+                  fontSize: '14px',
+                  fontWeight: '500',
                   cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  transition: 'background-color 0.2s',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  minWidth: '80px',
+                  transition: 'all 0.2s ease-in-out'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#0088CC';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#00AEEF';
                 }}
               >
                 Oke
