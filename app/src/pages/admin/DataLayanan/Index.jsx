@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw } from 'lucide-react';
 import TambahLayanan from './TambahLayanan';
 import EditLayanan from './EditLayanan';
+import DetailLayanan from './DetailLayanan';
 
 const Index = () => {
   const [filterHJT, setFilterHJT] = useState('');
   const [showTambahModal, setShowTambahModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedLayanan, setSelectedLayanan] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const [layananData, setLayananData] = useState([
     {
@@ -151,6 +153,16 @@ const Index = () => {
     setSelectedLayanan(null);
   };
 
+  const handleOpenDetailModal = (layanan) => {
+    setSelectedLayanan(layanan);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedLayanan(null);
+  };
+
   const handleSaveEdit = (updatedLayanan) => {
     setLayananData(prev => 
       prev.map(layanan => 
@@ -204,8 +216,12 @@ const Index = () => {
     setCurrentPage(1);
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value).replace(/\D00(?=\D*$)/, '');
+   const formatCurrency = (value) => {
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (!isNaN(numericValue) && numericValue !== null) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(numericValue);
+    }
+    return value;
   };
 
   return (
@@ -649,6 +665,13 @@ const Index = () => {
           isOpen={showEditModal}
           onClose={handleCloseEditModal}
           onSave={handleSaveEdit}
+          initialData={selectedLayanan} 
+        />
+      )}
+      {showDetailModal && (
+        <DetailLayanan
+          isOpen={showDetailModal}
+          onClose={handleCloseDetailModal}
           initialData={selectedLayanan} 
         />
       )}
