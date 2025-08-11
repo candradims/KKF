@@ -231,7 +231,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
         ...formData,
         createdAt: new Date().toISOString(),
       };
-      await onSave(dataToSave);
       setShowSuccessModal(true);
     } finally {
       setIsSubmitting(false);
