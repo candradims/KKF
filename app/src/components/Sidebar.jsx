@@ -50,7 +50,7 @@ const Sidebar = () => {
     },
     {
       title: "Management Data User",
-      path: "/admin/management-data-user",
+      path: "/admin/data-user",
       icon: <PeopleIcon />,
     },
     {
