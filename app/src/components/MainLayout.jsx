@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 
 const MainLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);        
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -71,4 +71,3 @@ const MainLayout = () => {
 };
 
 export default MainLayout;
-
