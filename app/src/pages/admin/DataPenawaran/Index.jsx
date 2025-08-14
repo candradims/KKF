@@ -7,9 +7,12 @@ const Index = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetailData, setSelectedDetailData] = useState(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedStatusItem, setSelectedStatusItem] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
 
   // Sample data for penawaran with status
-  const penawaranData = [
+  const [penawaranData, setPenawaranData] = useState([
     {
       id: 1,
       tanggal: '16/06/04',
@@ -75,7 +78,7 @@ const Index = () => {
       status: 'Menunggu',
       actions: ['view']
     }
-  ];
+  ]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -115,6 +118,33 @@ const Index = () => {
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedDetailData(null);
+  };
+
+  const handleStatusClick = (item) => {
+    setSelectedStatusItem(item);
+    setNewStatus(item.status);
+    setShowStatusModal(true);
+  };
+
+  const handleStatusChange = () => {
+    if (selectedStatusItem && newStatus) {
+      setPenawaranData(prevData =>
+        prevData.map(item =>
+          item.id === selectedStatusItem.id
+            ? { ...item, status: newStatus }
+            : item
+        )
+      );
+      setShowStatusModal(false);
+      setSelectedStatusItem(null);
+      setNewStatus('');
+    }
+  };
+
+  const handleCloseStatusModal = () => {
+    setShowStatusModal(false);
+    setSelectedStatusItem(null);
+    setNewStatus('');
   };
 
   const getStatusStyle = (status) => {
@@ -457,9 +487,27 @@ const Index = () => {
                     fontSize: '14px',
                     color: '#374151'
                   }}>
-                    <span style={getStatusStyle(item.status)}>
+                    <button
+                      onClick={() => handleStatusClick(item)}
+                      style={{
+                        ...getStatusStyle(item.status),
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        outline: 'none'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.opacity = '0.8';
+                        e.target.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.opacity = '1';
+                        e.target.style.transform = 'scale(1)';
+                      }}
+                      title="Klik untuk mengubah status"
+                    >
                       {item.status}
-                    </span>
+                    </button>
                   </td>
                   <td style={{
                     padding: '12px 16px',
@@ -582,6 +630,153 @@ const Index = () => {
         onClose={handleCloseDetailModal}
         detailData={selectedDetailData}
       />
+
+      {/* Status Change Modal */}
+      {showStatusModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '400px',
+            maxWidth: '90vw',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#374151',
+              margin: '0 0 16px 0'
+            }}>
+              Ubah Status Penawaran
+            </h3>
+            
+            <div style={{
+              marginBottom: '16px'
+            }}>
+              <p style={{
+                fontSize: '14px',
+                color: '#6B7280',
+                margin: '0 0 8px 0'
+              }}>
+                Pelanggan: <strong>{selectedStatusItem?.namaPelanggan}</strong>
+              </p>
+              <p style={{
+                fontSize: '14px',
+                color: '#6B7280',
+                margin: '0 0 16px 0'
+              }}>
+                Nomor Kontrak: <strong>{selectedStatusItem?.nomorKontrak}</strong>
+              </p>
+            </div>
+
+            <div style={{
+              marginBottom: '20px'
+            }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Status Baru:
+              </label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '2px solid #D1D5DB',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#00AEEF';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#D1D5DB';
+                }}
+              >
+                <option value="Menunggu">Menunggu</option>
+                <option value="Disetujui">Disetujui</option>
+                <option value="Ditolak">Ditolak</option>
+              </select>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={handleCloseStatusModal}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#F3F4F6',
+                  color: '#374151',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#E5E7EB';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#F3F4F6';
+                }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleStatusChange}
+                disabled={!newStatus || newStatus === selectedStatusItem?.status}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: (!newStatus || newStatus === selectedStatusItem?.status) ? '#D1D5DB' : '#00AEEF',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: (!newStatus || newStatus === selectedStatusItem?.status) ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  if (newStatus && newStatus !== selectedStatusItem?.status) {
+                    e.target.style.backgroundColor = '#0097A7';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (newStatus && newStatus !== selectedStatusItem?.status) {
+                    e.target.style.backgroundColor = '#00AEEF';
+                  }
+                }}
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
