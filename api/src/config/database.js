@@ -39,12 +39,13 @@ export const db = {
 
   selectColumns: (table, columns) => supabase.from(table).select(columns),
 
-  insert: (table, data) => supabase.from(table).insert(data),
+  insert: (table, data) => supabase.from(table).insert(data).select(),
 
   update: (table, data, condition) =>
-    supabase.from(table).update(data).match(condition),
+    supabase.from(table).update(data).match(condition).select(),
 
-  delete: (table, condition) => supabase.from(table).delete().match(condition),
+  delete: (table, condition) =>
+    supabase.from(table).delete().match(condition).select(),
 
   findOne: (table, condition) =>
     supabase.from(table).select("*").match(condition).single(),
@@ -54,8 +55,6 @@ export const db = {
       .from(table)
       .select("*", { count: "exact", head: true })
       .match(condition),
-
-  query: (query) => supabase.rpc(query),
 };
 
 export { supabase };

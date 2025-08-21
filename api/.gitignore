@@ -11,6 +11,9 @@ yarn-error.log*
 # Environment variables
 .env
 
+# API
+API_DOCUMENTATION.md
+
 # OS-specific files
 .DS_Store
 Thumbs.db
