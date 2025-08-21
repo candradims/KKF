@@ -315,59 +315,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                   minWidth: '200px',
                   textAlign: 'left'
                 }}>
-                  Discount
-                </label>
-                <input
-                  type="text"
-                  value={detailData?.discount || 'Discount'}
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
                   Durasi Kontrak (n thn)
                 </label>
                 <input
                   type="text"
                   value={detailData?.durasi || 'Durasi kontrak (n thn)'}
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
-                  Target IRR
-                </label>
-                <input
-                  type="text"
-                  value={detailData?.targetIRR || 'Target IRR'}
                   style={{
                     flex: 1,
                     padding: '8px 12px',
@@ -403,54 +355,6 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                     color: detailData?.status === 'Disetujui' ? '#065F46' : 
                            detailData?.status === 'Menunggu' ? '#92400E' : 
                            detailData?.status === 'Ditolak' ? '#991B1B' : '#374151'
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
-                  Disc thdp Backbone
-                </label>
-                <input
-                  type="text"
-                  value="0,00%"
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
-                  Disc thdp Port (max 60%)
-                </label>
-                <input
-                  type="text"
-                  value="0,00%"
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
                   }}
                 />
               </div>
