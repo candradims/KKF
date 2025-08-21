@@ -62,14 +62,15 @@ const Dashboard = () => {
     { name: 'HJT INTIM', value: 11, color: '#93C5FD' }
   ];
 
-  const penawananData = [
-    { name: 'HJT JAWA-BALI', value: 37, color: '#00AEEF' },
-    { name: 'HJT SUMATRA', value: 28, color: '#2D396B' },
-    { name: 'HJT JABODETABEK', value: 24, color: '#60A5FA' },
-    { name: 'HJT iNTIM', value: 11, color: '#93C5FD' }
+  // Data untuk pie chart status penawaran
+  const statusPenawaranData = [
+    { name: 'Menunggu', value: 40, color: '#F59E0B' },
+    { name: 'Disetujui', value: 50, color: '#10B981' },
+    { name: 'Ditolak', value: 10, color: '#EF4444' }
   ];
 
   const COLORS = ['#00AEEF', '#2D396B', '#60A5FA', '#93C5FD'];
+  const STATUS_COLORS = ['#F59E0B', '#10B981', '#EF4444'];
 
   const renderCustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -498,7 +499,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Penawaran Pie Chart */}
+          {/* Status Penawaran Pie Chart */}
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -510,12 +511,12 @@ const Dashboard = () => {
               fontWeight: '600',
               color: '#1f2937',
               marginBottom: '16px'
-            }} className="text-lg font-semibold text-gray-800 mb-4">Penawaran</h3>
+            }} className="text-lg font-semibold text-gray-800 mb-4">Status Penawaran</h3>
             <div style={{ height: '192px', marginBottom: '16px' }} className="h-48 mb-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={penawananData}
+                    data={statusPenawaranData}
                     cx="50%"
                     cy="50%"
                     innerRadius={40}
@@ -523,8 +524,8 @@ const Dashboard = () => {
                     paddingAngle={2}
                     dataKey="value"
                   >
-                    {penawananData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {statusPenawaranData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -532,7 +533,7 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }} className="space-y-2">
-              {penawananData.map((item, index) => (
+              {statusPenawaranData.map((item, index) => (
                 <div key={index} style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -549,7 +550,7 @@ const Dashboard = () => {
                         width: '12px',
                         height: '12px',
                         borderRadius: '50%',
-                        backgroundColor: COLORS[index]
+                        backgroundColor: STATUS_COLORS[index]
                       }}
                       className="w-3 h-3 rounded-full"
                     ></div>
