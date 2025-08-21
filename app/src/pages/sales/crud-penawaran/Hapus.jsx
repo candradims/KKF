@@ -11,11 +11,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     nomorKontrak: '',
     kontrakTahunKe: '',
     referensiHJT: '',
-    discount: '',
     durasiKontrak: '',
-    targetIRR: '',
-    discBackbone: '0,00%',
-    discPort: '0,00%',
     piliLayanan: '',
     keterangan: '',
     kapasitas: '',
@@ -34,11 +30,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
         nomorKontrak: deleteData.nomorKontrak || '',
         kontrakTahunKe: deleteData.kontrakKe || deleteData.kontrakTahunKe || '',
         referensiHJT: deleteData.referensi || deleteData.referensiHJT || '',
-        discount: deleteData.discount || '',
         durasiKontrak: deleteData.durasi || deleteData.durasiKontrak || '',
-        targetIRR: deleteData.targetIRR || '',
-        discBackbone: deleteData.discBackbone || '0,00%',
-        discPort: deleteData.discPort || '0,00%',
         piliLayanan: deleteData.piliLayanan || '',
         keterangan: deleteData.keterangan || '',
         kapasitas: deleteData.kapasitas || '',
@@ -67,11 +59,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
       nomorKontrak: '',
       kontrakTahunKe: '',
       referensiHJT: '',
-      discount: '',
       durasiKontrak: '',
-      targetIRR: '',
-      discBackbone: '0,00%',
-      discPort: '0,00%',
       piliLayanan: '',
       keterangan: '',
       kapasitas: '',
@@ -389,52 +377,6 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
               </div>
             </div>
 
-            {/* Discount */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Discount*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  name="discount"
-                  value={formData.discount}
-                  disabled
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: '#F9FAFB',
-                    boxSizing: 'border-box',
-                    appearance: 'none',
-                    color: '#6B7280'
-                  }}
-                >
-                  <option value="">Discount</option>
-                  <option value="0">0</option>
-                  <option value="MB Niaga">MB Niaga</option>
-                  <option value="GM SBU">GM SBU</option>
-                </select>
-                <div style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  fontSize: '12px',
-                  color: '#9CA3AF'
-                }}>▼</div>
-              </div>
-            </div>
-
             {/* Durasi Kontrak */}
             <div>
               <label style={{
@@ -480,120 +422,6 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
                   fontSize: '12px',
                   color: '#9CA3AF'
                 }}>▼</div>
-              </div>
-            </div>
-
-            {/* Target IRR */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Target IRR*
-              </label>
-              <input
-                type="text"
-                name="targetIRR"
-                value={formData.targetIRR}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: '#F9FAFB',
-                  boxSizing: 'border-box',
-                  color: '#6B7280'
-                }}
-              />
-            </div>
-
-            {/* Disc thdp Backbone */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Disc thdp Backbone*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  name="discBackbone"
-                  value={formData.discBackbone}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px 40px 10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: '#F9FAFB',
-                    boxSizing: 'border-box',
-                    color: '#6B7280'
-                  }}
-                />
-                <div style={{
-                  position: 'absolute',
-                  right: '8px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  color: '#9CA3AF'
-                }}>
-                  <Calculator style={{ width: '16px', height: '16px' }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Disc thdp Port */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Disc thdp Port (max 60%)*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  name="discPort"
-                  value={formData.discPort}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px 40px 10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: '#F9FAFB',
-                    boxSizing: 'border-box',
-                    color: '#6B7280'
-                  }}
-                />
-                <div style={{
-                  position: 'absolute',
-                  right: '8px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  color: '#9CA3AF'
-                }}>
-                  <Calculator style={{ width: '16px', height: '16px' }} />
-                </div>
               </div>
             </div>
 
@@ -678,7 +506,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
                 </div>
               </div>
 
-              {/* Keterangan */}
+              {/* Detail Layanan */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={{
                   display: 'block',
@@ -687,7 +515,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
                   color: '#374151',
                   marginBottom: '6px'
                 }}>
-                  Keterangan*
+                  Detail Layanan*
                 </label>
                 <input
                   type="text"

@@ -709,7 +709,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                 </div>
               </div>
 
-              {/* Keterangan */}
+              {/* Detail Layanan */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={{
                   display: 'block',
@@ -718,14 +718,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                   color: '#374151',
                   marginBottom: '6px'
                 }}>
-                  Keterangan*
+                  Detail Layanan*
                 </label>
                 <input
                   type="text"
                   name="keterangan"
                   value={formData.keterangan}
                   onChange={handleInputChange}
-                  placeholder="Masukkan keterangan"
+                  placeholder="Masukkan detail layanan"
                   required
                   style={{
                     width: '100%',

@@ -380,7 +380,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                       Detail Layanan
                     </th>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Keterangan
+                      Detail Layanan
                     </th>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
                       Kapasitas
@@ -571,7 +571,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                       Item ↓
                     </th>
                     <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Keterangan ↓
+                      Detail Layanan ↓
                     </th>
                     <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
                       Hasrat ↓
