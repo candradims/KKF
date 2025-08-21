@@ -95,7 +95,7 @@ const App = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.email || !formData.password || !formData.role) {
@@ -103,15 +103,35 @@ const App = () => {
       return;
     }
 
-    console.log('Login data submitted:', formData);
-    setShowModal(true);
-    
-    if (formData.role === 'sales') {
-      console.log('Simulating navigation to /sales/dashboard');
-    } else if (formData.role === 'admin') {
-      console.log('Simulating navigation to /admin/dashboard');
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email_user: formData.email,
+          kata_sandi: formData.password,
+          role_user: formData.role
+        })
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        setMessage({ type: "error", text: result.message });
+        return;
+      }
+
+      localStorage.setItem("user", JSON.stringify(result.data));
+
+      setMessage({ type: "success", text: result.message });
+      setShowModal(true);
+    } catch (error) {
+      setMessage({ type: "error", text: "Terjadi kesalahan server" });
     }
   };
+
 
   const handleForgotPassword = () => {
     navigate('/lupa-password');
@@ -624,7 +644,14 @@ const App = () => {
               Oke
             </button>
             <button
-              onClick={() => setShowModal(false)}
+              onClick={() => {
+                setShowModal(false);
+                if (formData.role === 'sales') {
+                  navigate('/sales/dashboard');
+                } else if (formData.role === 'admin') {
+                  navigate('/admin/dashboard');
+                }
+              }}
               style={{
                 position: 'absolute',
                 top: '0.75rem',
