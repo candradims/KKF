@@ -3,7 +3,7 @@ import { UserModel } from "../models/UserModel.js";
 // Middleware untuk autentikasi sederhana
 export const authenticate = async (req, res, next) => {
   try {
-    const { email, password } = req.headers;
+    const { email_user, kata_sandi } = req.headers;
 
     if (!email || !password) {
       return res.status(401).json({
@@ -12,14 +12,17 @@ export const authenticate = async (req, res, next) => {
       });
     }
 
-    const user = await UserModel.getUserByEmail(email);
+    const user = await UserModel.getUserByEmail(email_user);
 
-    if (!user || user.kata_sandi !== password) {
+    if (!user || user.kata_sandi !== kata_sandi) {
       return res.status(401).json({
         success: false,
-        message: "Kredensial tidak valid",
+        message: "Email atau kata sandi salah",
       });
     }
+
+    req.user = user;
+    next();
 
     // Attach user to request
     req.user = user;
