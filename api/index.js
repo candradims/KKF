@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { AuthController } from './src/controllers/AuthController.js';
 
 // Load environment variables
 dotenv.config();
@@ -31,38 +32,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Auth routes
-app.post("/api/auth/login", (req, res) => {
-  const { email_user, kata_sandi } = req.body;
-
-  // Simple validation for testing
-  if (email_user === "admin@pln.co.id" && kata_sandi === "123") {
-    res.json({
-      success: true,
-      message: "Login berhasil",
-      data: {
-        id_user: 1,
-        email_user: "admin@pln.co.id",
-        role_user: "admin",
-      },
-    });
-  } else if (email_user === "sales@pln.co.id" && kata_sandi === "123") {
-    res.json({
-      success: true,
-      message: "Login berhasil",
-      data: {
-        id_user: 2,
-        email_user: "sales@pln.co.id",
-        role_user: "sales",
-      },
-    });
-  } else {
-    res.status(401).json({
-      success: false,
-      message: "Kredensial tidak valid",
-    });
-  }
-});
+app.post("/api/auth/login", AuthController.login);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
