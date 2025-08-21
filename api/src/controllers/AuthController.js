@@ -4,25 +4,29 @@ export class AuthController {
   // Login
   static async login(req, res) {
     try {
-      const { email_user, kata_sandi } = req.body;
+      const { email_user, kata_sandi, role_user } = req.body;
 
-      if (!email_user || !kata_sandi) {
+      if (!email_user || !kata_sandi || !role_user) {
         return res.status(400).json({
           success: false,
-          message: "Email dan kata sandi wajib diisi",
+          message: "Email, kata sandi, dan role wajib diisi",
         });
       }
 
       const user = await UserModel.getUserByEmail(email_user);
-
-      if (!user || user.kata_sandi !== kata_sandi) {
+      if (user.kata_sandi !== kata_sandi) {
         return res.status(401).json({
           success: false,
-          message: "Email atau kata sandi salah",
+          message: "Password salah",
+        });
+      }
+      if (user.role_user !== role_user) {
+        return res.status(403).json({
+          success: false,
+          message: `Role tidak sesuai`,
         });
       }
 
-      // Hapus password dari response
       const { kata_sandi: _, ...userWithoutPassword } = user;
 
       res.status(200).json({
@@ -33,7 +37,7 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: "Login gagal",
+        message: "Data Tidak Ditemukan",
         error: error.message,
       });
     }
