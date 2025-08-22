@@ -183,11 +183,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     nomorKontrak: '',
     kontrakTahunKe: '',
     referensiHJT: '',
-    discount: '',
     durasiKontrak: '',
-    targetIRR: '',
-    discBackbone: '0,00%',
-    discPort: '0,00%',
     piliLayanan: '',
     keterangan: '',
     kapasitas: '',
@@ -223,11 +219,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       nomorKontrak: '',
       kontrakTahunKe: '',
       referensiHJT: '',
-      discount: '',
       durasiKontrak: '',
-      targetIRR: '',
-      discBackbone: '0,00%',
-      discPort: '0,00%',
       piliLayanan: '',
       keterangan: '',
       kapasitas: '',
@@ -246,11 +238,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       nomorKontrak: '',
       kontrakTahunKe: '',
       referensiHJT: '',
-      discount: '',
       durasiKontrak: '',
-      targetIRR: '',
-      discBackbone: '0,00%',
-      discPort: '0,00%',
       piliLayanan: '',
       keterangan: '',
       kapasitas: '',
@@ -556,55 +544,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
               </div>
             </div>
 
-            {/* Discount */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Discount*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  name="discount"
-                  value={formData.discount}
-                  onChange={handleInputChange}
-                  disabled={isSaving}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #B0BEC5',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: isSaving ? '#f5f5f5' : 'white',
-                    boxSizing: 'border-box',
-                    appearance: 'none',
-                    cursor: isSaving ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease-in-out'
-                  }}
-                >
-                  <option value="">Discount</option>
-                  <option value="0">0</option>
-                  <option value="MB Niaga">MB Niaga</option>
-                  <option value="GM SBU">GM SBU</option>
-                </select>
-                <div style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  fontSize: '12px',
-                  color: '#666'
-                }}>▼</div>
-              </div>
-            </div>
-
             {/* Durasi Kontrak */}
             <div>
               <label style={{
@@ -650,131 +589,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   fontSize: '12px',
                   color: '#666'
                 }}>▼</div>
-              </div>
-            </div>
-
-            {/* Target IRR */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Target IRR*
-              </label>
-              <input
-                type="text"
-                name="targetIRR"
-                value={formData.targetIRR}
-                onChange={handleInputChange}
-                placeholder="Masukkan target IRR"
-                required
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #B0BEC5',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            {/* Disc thdp Backbone */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Disc thdp Backbone*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  name="discBackbone"
-                  value={formData.discBackbone}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 40px 10px 12px',
-                    border: '2px solid #B0BEC5',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: 'white',
-                    boxSizing: 'border-box'
-                  }}
-                />
-                <button
-                  type="button"
-                  style={{
-                    position: 'absolute',
-                    right: '8px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    color: '#666'
-                  }}
-                >
-                  <Calculator style={{ width: '16px', height: '16px' }} />
-                </button>
-              </div>
-            </div>
-
-            {/* Disc thdp Port */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Disc thdp Port (max 60%)*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  name="discPort"
-                  value={formData.discPort}
-                  onChange={handleInputChange}
-                  style={{
-                    width: '100%',
-                    padding: '10px 40px 10px 12px',
-                    border: '2px solid #B0BEC5',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: 'white',
-                    boxSizing: 'border-box'
-                  }}
-                />
-                <button
-                  type="button"
-                  style={{
-                    position: 'absolute',
-                    right: '8px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '4px',
-                    color: '#666'
-                  }}
-                >
-                  <Calculator style={{ width: '16px', height: '16px' }} />
-                </button>
               </div>
             </div>
 
@@ -859,7 +673,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 </div>
               </div>
 
-              {/* Keterangan */}
+              {/* Detail Layanan */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={{
                   display: 'block',
@@ -868,14 +682,14 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   color: '#374151',
                   marginBottom: '6px'
                 }}>
-                  Keterangan*
+                  Detail Layanan*
                 </label>
                 <input
                   type="text"
                   name="keterangan"
                   value={formData.keterangan}
                   onChange={handleInputChange}
-                  placeholder="Masukkan keterangan"
+                  placeholder="Masukkan detail layanan"
                   required
                   style={{
                     width: '100%',

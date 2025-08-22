@@ -194,9 +194,7 @@ const Penawaran = () => {
         'Nomor Kontrak/BAKB',
         'Kontrak Ke-',
         'Referensi',
-        'Discount',
         'Durasi',
-        'Target IRR',
         'Status'
       ];
       
@@ -207,9 +205,7 @@ const Penawaran = () => {
         item.nomorKontrak || '',
         item.kontrakKe ? item.kontrakKe.toString() : '',
         item.referensi || '',
-        item.discount || '',
         item.durasi ? item.durasi.toString() : '',
-        item.targetIRR || '',
         item.status || ''
       ]);
       
@@ -241,15 +237,13 @@ const Penawaran = () => {
         },
         columnStyles: {
           0: { halign: 'center', cellWidth: 12 }, // No
-          1: { cellWidth: 20 }, // Tanggal
-          2: { cellWidth: 25 }, // Nama Pelanggan
-          3: { cellWidth: 25 }, // Nomor Kontrak
-          4: { halign: 'center', cellWidth: 15 }, // Kontrak Ke
-          5: { cellWidth: 22 }, // Referensi
-          6: { halign: 'center', cellWidth: 18 }, // Discount
-          7: { halign: 'center', cellWidth: 12 }, // Durasi
-          8: { halign: 'right', cellWidth: 20 }, // Target IRR
-          9: { halign: 'center', cellWidth: 20 } // Status
+          1: { cellWidth: 25 }, // Tanggal
+          2: { cellWidth: 35 }, // Nama Pelanggan
+          3: { cellWidth: 35 }, // Nomor Kontrak
+          4: { halign: 'center', cellWidth: 20 }, // Kontrak Ke
+          5: { cellWidth: 30 }, // Referensi
+          6: { halign: 'center', cellWidth: 20 }, // Durasi
+          7: { halign: 'center', cellWidth: 25 } // Status
         },
         tableWidth: 'wrap'
       });
@@ -562,23 +556,7 @@ const Penawaran = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
-                }}>Discount</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
                 }}>Durasi</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Target IRR</th>
                 <th style={{
                   padding: '12px 16px',
                   textAlign: 'left',
@@ -649,21 +627,7 @@ const Penawaran = () => {
                     fontSize: '14px',
                     color: '#374151'
                   }}>
-                    {item.discount}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
                     {item.durasi}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.targetIRR}
                   </td>
                   <td style={{
                     padding: '12px 16px',

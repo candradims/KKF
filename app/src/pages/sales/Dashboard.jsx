@@ -22,8 +22,8 @@ const Dashboard = () => {
     { status: 'Setuju', count: 25, icon: CheckCircle, color: '#10B981' },
     { status: 'Tidak Setuju', count: 5, icon: XCircle, color: '#EF4444' }
   ];
-  // Data untuk line chart Total Profit
-  const totalProfitData = [
+  // Data untuk line chart Total Revenue
+  const totalRevenueData = [
     { month: 'JAN', value: 15000 },
     { month: 'FEB', value: 18000 },
     { month: 'MAR', value: 22000 },
@@ -224,7 +224,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Card 3 - Total Profit */}
+          {/* Card 3 - Total Revenue */}
           <div style={{
             background: 'linear-gradient(to right, #00AEEF, #2D396B)',
             borderRadius: '12px',
@@ -250,7 +250,7 @@ const Dashboard = () => {
                     fontSize: '14px',
                     fontWeight: '500',
                     opacity: '0.9'
-                  }} className="text-sm font-medium opacity-90">Total Profit</span>
+                  }} className="text-sm font-medium opacity-90">Total Revenue</span>
                 </div>
                 <div style={{
                   fontSize: '24px',
@@ -275,7 +275,7 @@ const Dashboard = () => {
           gap: '24px',
           marginBottom: '24px'
         }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Total Profit Chart */}
+          {/* Total Revenue Chart */}
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -292,7 +292,7 @@ const Dashboard = () => {
                 fontSize: '18px',
                 fontWeight: '600',
                 color: '#1f2937'
-              }} className="text-lg font-semibold text-gray-800">Tren Total Profit</h3>
+              }} className="text-lg font-semibold text-gray-800">Tren Total Revenue</h3>
               <select style={{
                 padding: '4px 12px',
                 border: '1px solid #d1d5db',
@@ -307,7 +307,7 @@ const Dashboard = () => {
             </div>
             <div style={{ height: '320px' }} className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={totalProfitData}>
+                <LineChart data={totalRevenueData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
                     dataKey="month" 
@@ -350,7 +350,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Total Profit Pie Chart */}
+          {/* Total Revenue Pie Chart */}
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -362,7 +362,7 @@ const Dashboard = () => {
               fontWeight: '600',
               color: '#1f2937',
               marginBottom: '16px'
-            }} className="text-lg font-semibold text-gray-800 mb-4">Total profit</h3>
+            }} className="text-lg font-semibold text-gray-800 mb-4">Total revenue</h3>
             <div style={{ height: '192px', marginBottom: '16px' }} className="h-48 mb-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
