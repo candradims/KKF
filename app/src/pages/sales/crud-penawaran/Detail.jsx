@@ -23,7 +23,38 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   ]);
 
   const [pengeluaranLain, setPengeluaranLain] = useState([
-    { id: 1, item: '', keterangan: '', hasrat: '', jumlah: '', total: '' }
+    { 
+      id: 1, 
+      item: 'Biaya Instalasi', 
+      keterangan: 'Pemasangan kabel fiber optik', 
+      hasrat: '1', 
+      jumlah: '2', 
+      total: '5.000.000' 
+    },
+    { 
+      id: 2, 
+      item: 'Biaya Maintenance', 
+      keterangan: 'Pemeliharaan rutin perangkat', 
+      hasrat: '12', 
+      jumlah: '1', 
+      total: '2.400.000' 
+    },
+    { 
+      id: 3, 
+      item: 'Biaya Training', 
+      keterangan: 'Pelatihan operator', 
+      hasrat: '1', 
+      jumlah: '3', 
+      total: '1.500.000' 
+    },
+    { 
+      id: 4, 
+      item: 'Biaya Dokumentasi', 
+      keterangan: 'Pembuatan manual dan dokumentasi', 
+      hasrat: '1', 
+      jumlah: '1', 
+      total: '800.000' 
+    }
   ]);
 
   const totals = {
@@ -32,11 +63,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
     grandTotal12Bulan: '50.700.000',
     grandTotal12Bulan2: '95.500.000',
     discount: '-',
-    totalPengeluaranLain: '-',
-    grandTotalDisc: '50.700.000',
-    grandTotalDisc2: '95.500.000',
-    profitDariHJT: '25.100.000',
-    marginDariHJT: '50.20%'
+    totalPengeluaranLain: '9.700.000',
+    grandTotalDisc: '41.000.000',
+    grandTotalDisc2: '85.800.000',
+    profitDariHJT: '20.400.000',
+    marginDariHJT: '49.76%'
   };
 
   if (!isOpen) return null;
@@ -602,19 +633,22 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                         />
                       </td>
                       <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.hasrat || '-'}
+                        {row.hasrat}
                       </td>
                       <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.jumlah || '-'}
+                        {row.jumlah}
                       </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.total || '-'}
+                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
+                        {row.total}
                       </td>
                     </tr>
                   ))}
-                  <tr>
-                    <td colSpan="5" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                      -
+                  <tr style={{ backgroundColor: '#F3F4F6', fontWeight: '600' }}>
+                    <td colSpan="4" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
+                      <strong>Total Pengeluaran Lain-lain:</strong>
+                    </td>
+                    <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
+                      <strong>9.700.000</strong>
                     </td>
                   </tr>
                 </tbody>
