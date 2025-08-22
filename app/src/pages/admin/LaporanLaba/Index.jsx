@@ -1,63 +1,80 @@
 import React, { useState } from 'react';
+import { CircleDollarSign } from "lucide-react";
 import {
+  BarChart,
+  Bar,
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
-import { DollarSign, ChevronDown } from 'lucide-react';
+import { Users, TrendingUp } from 'lucide-react';
 
 const LaporanLaba = () => {
-  const [selectedSales, setSelectedSales] = useState('Semua Sales');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedYearProfit, setSelectedYearProfit] = useState('2023');
+  const [selectedYearSales, setSelectedYearSales] = useState('2023');
 
-  // Dummy sales data
-  const salesList = [
-    'Semua Sales',
-    'Ahmad Rizki',
-    'Siti Nurhaliza', 
-    'Budi Santoso',
-    'Diana Putri',
-    'Eko Prasetyo',
-    'Fitri Ramadhani',
-    'Gunawan Wijaya',
-    'Hana Sari'
-  ];
+  const profitDataByYear = {
+    '2023': [
+      { month: 'JAN', value: 500 },
+      { month: 'FEB', value: 300 },
+      { month: 'MAR', value: 200 },
+      { month: 'APR', value: 300 },
+      { month: 'MAY', value: 400 },
+      { month: 'JUN', value: 450 },
+      { month: 'JUL', value: 550 },
+      { month: 'AUG', value: 600 },
+      { month: 'SEP', value: 700 },
+      { month: 'OCT', value: 800 },
+      { month: 'NOV', value: 900 },
+      { month: 'DEC', value: 1000 }
+    ],
+    '2024': [
+      { month: 'JAN', value: 600 },
+      { month: 'FEB', value: 400 },
+      { month: 'MAR', value: 350 },
+      { month: 'APR', value: 450 },
+      { month: 'MAY', value: 550 },
+      { month: 'JUN', value: 650 },
+      { month: 'JUL', value: 750 },
+      { month: 'AUG', value: 850 },
+      { month: 'SEP', value: 800 },
+      { month: 'OCT', value: 900 },
+      { month: 'NOV', value: 950 },
+      { month: 'DEC', value: 1100 }
+    ]
+  };
 
-  // Data untuk line chart Total Profit
-  const totalProfitData = [
-    { month: 'JAN', value: 15000 },
-    { month: 'FEB', value: 18000 },
-    { month: 'MAR', value: 22000 },
-    { month: 'APR', value: 25200 },
-    { month: 'MAY', value: 28000 },
-    { month: 'JUN', value: 24000 },
-    { month: 'JUL', value: 26000 },
-    { month: 'AUG', value: 30000 },
-    { month: 'SEP', value: 32000 },
-    { month: 'OCT', value: 29000 },
-    { month: 'NOV', value: 35000 },
-    { month: 'DEC', value: 38000 }
-  ];
+  const salesPerformanceByYear = {
+    '2023': [
+      { name: 'Avgui', value: 25000 },
+      { name: 'Pay', value: 1001 },
+      { name: 'Yapen', value: 2502 },
+      { name: 'Dinos', value: 1003 },
+      { name: 'Adis', value: 2504 },
+      { name: 'Nvid', value: 1005 },
+      { name: 'Russia', value: 2506 }
+    ],
+    '2024': [
+      { name: 'Avgui', value: 28000 },
+      { name: 'Pay', value: 1500 },
+      { name: 'Yapen', value: 3000 },
+      { name: 'Dinos', value: 1800 },
+      { name: 'Adis', value: 3200 },
+      { name: 'Nvid', value: 2000 },
+      { name: 'Russia', value: 3500 }
+    ]
+  };
 
-  // Data untuk line chart Margin Trend
-  const marginTrendData = [
-    { month: 'JAN', margin1: 45.2, margin2: 35.8 },
-    { month: 'FEB', margin1: 48.1, margin2: 40.3 },
-    { month: 'MAR', margin1: 52.7, margin2: 45.1 },
-    { month: 'APR', margin1: 57.3, margin2: 50.6 },
-    { month: 'MAY', margin1: 55.9, margin2: 48.2 },
-    { month: 'JUN', margin1: 53.4, margin2: 46.7 },
-    { month: 'JUL', margin1: 56.8, margin2: 49.5 },
-    { month: 'AUG', margin1: 60.2, margin2: 52.3 },
-    { month: 'SEP', margin1: 58.7, margin2: 50.9 },
-    { month: 'OCT', margin1: 62.1, margin2: 55.4 },
-    { month: 'NOV', margin1: 65.3, margin2: 58.7 },
-    { month: 'DEC', margin1: 68.5, margin2: 60.2 }
-  ];
+  const formatNumber = (num) => {
+    if (Math.abs(num) >= 1000) {
+      return (Math.abs(num) / 1000).toFixed(1) + 'K';
+    }
+    return Math.abs(num);
+  };
 
   const renderCustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -69,22 +86,21 @@ const LaporanLaba = () => {
           borderRadius: '8px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
         }}>
-          <p style={{ color: '#6b7280' }}>{`Month: ${label}`}</p>
-          {payload.map((entry, index) => {
-            // Add percentage symbol for margin data
-            const isMarginData = entry.dataKey.includes('margin');
-            const displayValue = isMarginData ? `${entry.value}%` : entry.value;
-            return (
-              <p key={index} style={{ color: '#00AEEF', fontWeight: '600' }}>
-                {`${entry.dataKey}: ${displayValue}`}
-              </p>
-            );
-          })}
+          <p style={{ color: '#6b7280', fontWeight: 'bold' }}>{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color, fontWeight: '600' }}>
+              {`${entry.name || 'Value'}: Rp. ${entry.value.toLocaleString('id-ID')},-`}
+            </p>
+          ))}
         </div>
       );
     }
     return null;
   };
+
+  const totalProfit = profitDataByYear[selectedYearProfit].reduce(
+    (sum, item) => sum + item.value, 0
+  );
 
   return (
     <div style={{
@@ -92,138 +108,45 @@ const LaporanLaba = () => {
       backgroundColor: '#f9fafb',
       minHeight: '100vh'
     }}>
-      {/* Top Section with Amount Display and Sales Dropdown */}
       <div style={{
-        marginBottom: '24px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        backgroundColor: '#E6F2FB',
+        borderRadius: '100px',
+        padding: '8px 40px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '16px',
       }}>
-        {/* Amount Display */}
         <div style={{
-          backgroundColor: '#00AEEF',
-          borderRadius: '20px',
-          padding: '8px 16px',
-          display: 'inline-flex',
+          backgroundColor: '#0066CC',
+          borderRadius: '40%',
+          padding: '6px',
+          display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          justifyContent: 'center'
         }}>
-          <DollarSign style={{
-            width: '16px',
-            height: '16px',
-            color: 'white'
-          }} />
-          <span style={{
-            color: 'white',
-            fontSize: '14px',
-            fontWeight: '500'
-          }}>
-            Rp. 52.000.000,-
-          </span>
+          <CircleDollarSign style={{ width: '18px', height: '18px', color: 'white' }} />
         </div>
 
-        {/* Sales Dropdown */}
-        <div style={{ position: 'relative' }}>
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              backgroundColor: 'white',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              cursor: 'pointer',
-              minWidth: '180px',
-              justifyContent: 'space-between',
-              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-              outline: 'none'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.backgroundColor = '#f9fafb';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.backgroundColor = 'white';
-            }}
-          >
-            <span>{selectedSales}</span>
-            <ChevronDown 
-              style={{
-                width: '16px',
-                height: '16px',
-                color: '#6b7280',
-                transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease'
-              }}
-            />
-          </button>
-
-          {/* Dropdown Menu */}
-          {isDropdownOpen && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              backgroundColor: 'white',
-              border: '1px solid #d1d5db',
-              borderRadius: '8px',
-              marginTop: '4px',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-              zIndex: 10,
-              maxHeight: '200px',
-              overflowY: 'auto'
-            }}>
-              {salesList.map((sales, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setSelectedSales(sales);
-                    setIsDropdownOpen(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '8px 16px',
-                    textAlign: 'left',
-                    backgroundColor: selectedSales === sales ? '#eff6ff' : 'transparent',
-                    color: selectedSales === sales ? '#1d4ed8' : '#374151',
-                    border: 'none',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseOver={(e) => {
-                    if (selectedSales !== sales) {
-                      e.target.style.backgroundColor = '#f9fafb';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (selectedSales !== sales) {
-                      e.target.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  {sales}
-                </button>
-              ))}
-            </div>
-          )}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Label */}
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>
+            Total Revenue
+          </div>
+          {/* Nominal */}
+          <div style={{ fontSize: '18px', fontWeight: '600', color: '#2D396B' }}>
+            Rp. {formatNumber(totalProfit)},-
+          </div>
         </div>
       </div>
 
-      {/* Charts Grid */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(600px, 1fr))',
         gap: '24px'
       }}>
-        {/* Tren Total Profit Chart */}
         <div style={{
-          backgroundColor: 'white',
+          backgroundColor: '#E6F2FB',
           borderRadius: '12px',
           padding: '24px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
@@ -237,74 +160,61 @@ const LaporanLaba = () => {
             <h3 style={{
               fontSize: '18px',
               fontWeight: '600',
-              color: '#1f2937'
+              color: '#1f2937',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}>
-              Tren Total Profit
+              <TrendingUp size={20} />
+              Total Revenue
             </h3>
-            <select style={{
-              padding: '4px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '14px',
-              outline: 'none'
-            }}>
-              <option>Years</option>
-              <option>2025</option>
-              <option>2026</option>
+            <select 
+              value={selectedYearProfit}
+              onChange={(e) => setSelectedYearProfit(e.target.value)}
+              style={{
+                padding: '6px 12px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
             </select>
           </div>
-          <div style={{ height: '320px' }}>
+          <div style={{ height: '300px', backgroundColor: 'white', borderRadius: '12px', padding: '12px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={totalProfitData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <LineChart data={profitDataByYear[selectedYearProfit]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E6F2FB" />
                 <XAxis 
                   dataKey="month" 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#666' }}
+                  tick={{ fontSize: 12, fill: '#333' }}
                 />
                 <YAxis 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#666' }}
+                  tick={{ fontSize: 12, fill: '#333' }}
                 />
                 <Tooltip content={renderCustomTooltip} />
                 <Line 
                   type="monotone" 
                   dataKey="value" 
-                  stroke="#00AEEF" 
+                  stroke="#0066CC" 
                   strokeWidth={3}
-                  dot={{ fill: '#00AEEF', strokeWidth: 2, r: 4 }}
+                  dot={{ fill: '#0066CC', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, fill: '#2D396B' }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div style={{
-            marginTop: '16px',
-            backgroundColor: '#eff6ff',
-            borderRadius: '8px',
-            padding: '12px'
-          }}>
-            <div style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#00AEEF'
-            }}>
-              25200
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280'
-            }}>
-              Current Period Value
-            </div>
-          </div>
         </div>
 
-        {/* Tren Margin Rata-Rata Chart */}
         <div style={{
-          backgroundColor: 'white',
+          backgroundColor: '#E6F2FB',
           borderRadius: '12px',
           padding: '24px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
@@ -318,76 +228,53 @@ const LaporanLaba = () => {
             <h3 style={{
               fontSize: '18px',
               fontWeight: '600',
-              color: '#1f2937'
+              color: '#1f2937',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}>
-              Tren Margin Rata-Rata
+              <Users size={20} />
+              Performa Sales
             </h3>
-            <select style={{
-              padding: '4px 12px',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '14px',
-              outline: 'none'
-            }}>
-              <option>Years</option>
-              <option>2025</option>
-              <option>2026</option>
+            <select 
+              value={selectedYearSales}
+              onChange={(e) => setSelectedYearSales(e.target.value)}
+              style={{
+                padding: '6px 12px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
             </select>
           </div>
-          <div style={{ height: '320px' }}>
+          <div style={{ height: '300px', backgroundColor: 'white', borderRadius: '12px', padding: '12px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={marginTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <BarChart data={salesPerformanceByYear[selectedYearSales]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#cce0f5" />
                 <XAxis 
-                  dataKey="month" 
+                  dataKey="name" 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#666' }}
+                  tick={{ fontSize: 12, fill: '#333' }}
                 />
                 <YAxis 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#666' }}
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value}%`}
+                  tick={{ fontSize: 12, fill: '#333' }}
                 />
                 <Tooltip content={renderCustomTooltip} />
-                <Line 
-                  type="monotone" 
-                  dataKey="margin1" 
-                  stroke="#00AEEF" 
-                  strokeWidth={3}
-                  dot={{ fill: '#00AEEF', strokeWidth: 2, r: 4 }}
+                <Bar 
+                  dataKey="value" 
+                  fill="#0066CC" 
+                  radius={[4, 4, 0, 0]}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="margin2" 
-                  stroke="#2D396B" 
-                  strokeWidth={3}
-                  dot={{ fill: '#2D396B', strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
-          </div>
-          <div style={{
-            marginTop: '16px',
-            backgroundColor: '#eff6ff',
-            borderRadius: '8px',
-            padding: '12px'
-          }}>
-            <div style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#00AEEF'
-            }}>
-              57%
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280'
-            }}>
-              Current Margin Rate
-            </div>
           </div>
         </div>
       </div>
