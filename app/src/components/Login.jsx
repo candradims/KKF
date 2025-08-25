@@ -416,6 +416,7 @@ const App = () => {
                   <option value="">Pilih Role</option>
                   <option value="admin">Admin</option>
                   <option value="sales">Sales</option>
+                  <option value="superAdmin">Super Admin</option>
                 </select>
                 <span style={{
                   position: 'absolute',
@@ -624,6 +625,8 @@ const App = () => {
                   navigate('/sales/dashboard');
                 } else if (formData.role === 'admin') {
                   navigate('/admin/dashboard');
+                } else if (formData.role === 'superAdmin') {
+                  navigate('/superAdmin/dashboard');
                 }
               }}
               style={{
