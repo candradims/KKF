@@ -12,6 +12,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       "/dashboard": "Dashboard",
       "/admin/dashboard": "Dashboard",
       "/sales/dashboard": "Dashboard",
+      "/superAdmin/dashboard": "Dashboard",
+      "/superAdmin/data-penawaran": "Data Penawaran",
       "/data-user": "DataUser",
       "/admin/data-user": "DataUser",
       "/data-layanan": "DataLayanan",
