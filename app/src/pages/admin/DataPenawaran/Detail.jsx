@@ -136,7 +136,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
             marginBottom: '16px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Sales*</span>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Sales</span>
               <input
                 type="text"
                 value="Admin"
