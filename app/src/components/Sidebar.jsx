@@ -17,12 +17,14 @@ const Sidebar = () => {
   
   // Determine role based on current path (like in reference)
   const path = location.pathname.toLowerCase();  
-  let userRole = "admin"; // default
+  let userRole = "superAdmin"; // default
   
   if (path.startsWith("/sales")) {
     userRole = "sales";
   } else if (path.startsWith("/admin")) {
     userRole = "admin";
+  } else if (path.startsWith("/superadmin")) {
+    userRole = "superAdmin";
   }
   
   const isActive = (path) => location.pathname === path;
@@ -40,6 +42,20 @@ const Sidebar = () => {
   const cancelLogout = () => {
     setShowLogoutModal(false);
   };
+
+  // Menu items untuk Super admin
+  const superAdminMenuItems = [
+    {
+      title: "Dashboard",
+      path: "/superAdmin/dashboard",
+      icon: <DashboardIcon />,
+    },
+    {
+      title: "Data Penawaran",
+      path: "/superAdmin/data-penawaran",
+      icon: <BuildIcon />,
+    }
+  ];
 
   // Menu items untuk admin
   const adminMenuItems = [
@@ -95,7 +111,12 @@ const Sidebar = () => {
   ];
 
   // Pilih menu items berdasarkan role
-  const menuItems = userRole === 'sales' ? salesMenuItems : adminMenuItems;
+  let menuItems = adminMenuItems;
+    if (userRole === "sales") {
+      menuItems = salesMenuItems;
+    } else if (userRole === "superAdmin") {
+      menuItems = superAdminMenuItems;
+    }
 
   return (
     <>
@@ -221,7 +242,7 @@ const Sidebar = () => {
                 fontSize: '14px',
                 fontWeight: 'bold'
               }}>
-                {userRole === 'sales' ? 'S' : 'A'}
+                {userRole === 'sales' ? 'S' : userRole === 'superAdmin' ? 'SA' : 'A'}
               </span>
             </div>
             <div>
@@ -230,13 +251,13 @@ const Sidebar = () => {
                 fontWeight: '500',
                 color: '#374151'
               }}>
-                {userRole === 'sales' ? 'Sales' : 'Admin'}
+                {userRole === 'sales' ? 'Sales' : userRole === 'superAdmin' ? 'Super Admin' : 'Admin'}
               </div>
               <div style={{
                 fontSize: '12px',
                 color: '#6B7280'
               }}>
-                {userRole === 'sales' ? 'sales@pln.co.id' : 'admin@pln.co.id'}
+                {userRole === 'sales' ? 'sales@pln.co.id' : userRole === 'superAdmin' ? 'superadmin@pln.co.id' : 'admin@pln.co.id'}
               </div>
             </div>
           </div>
@@ -264,7 +285,7 @@ const Sidebar = () => {
             onMouseOver={(e) => e.target.style.backgroundColor = '#0088CC'}
             onMouseOut={(e) => e.target.style.backgroundColor = '#00AEEF'}
           >
-            <span style={{ 
+            <span style={{  
               marginRight: '8px',
               display: 'flex',
               alignItems: 'center'
