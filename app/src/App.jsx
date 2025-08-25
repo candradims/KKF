@@ -21,7 +21,11 @@ import DataUser from "./pages/admin/DataUser/Index";
 import DataLayanan from "./pages/admin/DataLayanan/Index";
 import AdminDashboard from "./pages/admin/Dashboard";
 import LabaLaporan from "./pages/admin/LaporanLaba/Index";
-import DataPenawaran from "./pages/admin/DataPenawaran/Index";
+import DataPenawaranAdmin from "./pages/admin/DataPenawaran/Index";
+
+// Import pages Super admin
+import SuperAdminDashboard from "./pages/superAdmin/Dashboard";
+import DataPenawaranSuperAdmin from "./pages/superAdmin/DataPenawaran/Index";
 
 function App() {
   return (
@@ -39,8 +43,13 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/data-user" element={<DataUser />} />
           <Route path="/admin/data-layanan" element={<DataLayanan />} />
-           <Route path="/admin/data-penawaran" element={<DataPenawaran />} />
+          <Route path="/admin/data-penawaran" element={<DataPenawaranAdmin />} />
           <Route path="/admin/laporan-laba" element={<LabaLaporan />} />
+
+          {/* Super Admin Routes */}
+          <Route path="/superAdmin/dashboard" element={<SuperAdminDashboard />} />
+          <Route path="/superAdmin/data-penawaran" element={<DataPenawaranSuperAdmin />} />
+
           {/* General Routes */}
           <Route path="/dashboard" element={<SalesDashboard />} />
         </Route>
