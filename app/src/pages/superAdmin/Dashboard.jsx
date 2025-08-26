@@ -141,7 +141,7 @@ const Dashboard = () => {
         }} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Card 1 - Jumlah Total Penawaran */}
           <div style={{
-            background: 'linear-gradient(to right, #00AEEF, #2D396B)',
+            background: 'linear-gradient(to right, #035b71, #035b71)',
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
@@ -185,7 +185,7 @@ const Dashboard = () => {
           {/* Card 2 - Status Penawaran */}
           <div 
             style={{
-              background: 'linear-gradient(to right, #00AEEF, #2D396B)',
+              background: 'linear-gradient(to right, #035b71, #035b71)',
               borderRadius: '12px',
               padding: '24px',
               color: 'white',
@@ -242,7 +242,7 @@ const Dashboard = () => {
 
           {/* Card 3 - Total Revenue */}
           <div style={{
-            background: 'linear-gradient(to right, #00AEEF, #2D396B)',
+            background: 'linear-gradient(to right, #035b71, #035b71)',
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
