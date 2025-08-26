@@ -9,9 +9,11 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  BarChart,
+  Bar,
+  Legend
 } from 'recharts';
-import { BarChart, Bar, Legend, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 
 const Dashboard = () => {
