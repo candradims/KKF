@@ -3,7 +3,7 @@ import { X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
-  const [formData, setFormData] = useState(initialData || {
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     role: '',
@@ -15,10 +15,23 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
 
   useEffect(() => {
     if (initialData) {
+      // Convert database role to display format for form
+      const convertRoleToDisplay = (dbRole) => {
+        switch(dbRole) {
+          case 'superAdmin': return 'superAdmin';
+          case 'admin': return 'admin';
+          case 'sales': return 'sales';
+          case 'Super Admin': return 'superAdmin';
+          case 'Admin': return 'admin';
+          case 'Sales': return 'sales';
+          default: return dbRole;
+        }
+      };
+
       setFormData({
-        email: initialData.email,
-        password: initialData.password, 
-        role: initialData.role,
+        email: initialData.email || '',
+        password: '', // Start with empty password field for security
+        role: convertRoleToDisplay(initialData.role) || '',
       });
     }
   }, [initialData]);
@@ -27,7 +40,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
     if (initialData && formData) {
       const formHasChanged = 
         initialData.email !== formData.email ||
-        initialData.password !== formData.password ||
+        formData.password !== '' || // Password changed if not empty
         initialData.role !== formData.role;
       setIsDirty(formHasChanged);
     }
@@ -44,9 +57,34 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validasi form
+    if (!formData.email || !formData.role) {
+      alert('Email dan Role harus diisi');
+      return;
+    }
+
+    // Validasi password hanya jika diisi
+    if (formData.password && formData.password.length < 6) {
+      alert('Password minimal 6 karakter');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await onUpdate(formData);
+      // Hanya kirim password jika diubah
+      const dataToUpdate = {
+        email: formData.email,
+        role: formData.role,
+      };
+      
+      // Tambahkan password hanya jika diubah
+      if (formData.password && formData.password.trim() !== '') {
+        dataToUpdate.password = formData.password;
+      }
+      
+      console.log("📝 Submitting update data:", dataToUpdate);
+      await onUpdate(dataToUpdate);
       setShowSuccessModal(true);
     } finally {
       setIsSubmitting(false);
@@ -183,17 +221,14 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     fontSize: '16px',
                     fontWeight: '600',
                     color: '#2D3A76'
-                  }}>Kata Sandi</label>
+                  }}>Kata Sandi<br/><span style={{fontSize: '12px', fontWeight: '400', color: '#666'}}>(Opsional)</span></label>
                   <input
-                    type="text"
+                    type="password"
                     name="password"
-                    placeholder="Min. 8 characters (alphanumeric)"
+                    placeholder="Kosongkan jika tidak ingin mengubah password"
                     value={formData.password}
                     onChange={handleChange}
-                    required
-                    minLength={8}
-                    pattern="^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$" 
-                    title="Password harus mengandung kombinasi huruf dan angka."
+                    minLength={6}
                     style={{
                       padding: '12px 16px',
                       borderRadius: '10px',
@@ -238,8 +273,9 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                   }}
                   >
                     <option value="">Pilih role</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Sales">Sales</option>
+                    <option value="superAdmin">Super Admin</option>
+                    <option value="admin">Admin</option>
+                    <option value="sales">Sales</option>
                   </select>
                 </div>
               </form>

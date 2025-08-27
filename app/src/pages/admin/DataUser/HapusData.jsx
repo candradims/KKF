@@ -3,7 +3,7 @@ import { X, AlertTriangle, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
-  const [formData, setFormData] = useState(initialData || {
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     role: '',
@@ -14,21 +14,27 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
   useEffect(() => {
     if (initialData) {
       setFormData({
-        email: initialData.email,
-        password: initialData.password,
-        role: initialData.role,
+        email: initialData.email || '',
+        password: '••••••••', // Hide password for security
+        role: initialData.role || '',
       });
     }
   }, [initialData]);
 
   const handleDeleteConfirm = async () => {
-    await onDelete(initialData.id);
-    onClose();
-    setShowSuccessModal(true);
+    if (initialData && initialData.id) {
+      console.log("🗑️ Confirming delete for user:", initialData);
+      await onDelete(initialData.id);
+      setShowSuccessModal(true);
+    } else {
+      console.error("❌ No user ID found for deletion");
+      alert("Error: Tidak dapat menghapus user - ID tidak ditemukan");
+    }
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+    onClose(); // Tutup modal hapus juga setelah sukses
   };
 
   return (

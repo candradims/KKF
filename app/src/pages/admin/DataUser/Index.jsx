@@ -34,11 +34,22 @@ const Index = () => {
       
       const data = Array.isArray(result) ? result : result.data || [];
       
+      // Function to format role for display
+      const formatRoleForDisplay = (role) => {
+        switch(role) {
+          case 'superAdmin': return 'Super Admin';
+          case 'admin': return 'Admin';
+          case 'sales': return 'Sales';
+          default: return role;
+        }
+      };
+      
       const sanitizedUsers = data.map(user => ({
         id: user.id_user || user.id,
         date: formatDateToDDMMYYYY(user.tanggal) || user.date,
         email: user.email_user || user.email,
-        role: user.role_user || user.role,
+        role: formatRoleForDisplay(user.role_user || user.role), // Format for display
+        originalRole: user.role_user || user.role, // Keep original for API calls
         actions: ['view', 'edit', 'delete'],
         originalDate: user.tanggal 
       }));
@@ -88,7 +99,13 @@ const Index = () => {
   };
 
   const handleOpenEditModal = (user) => {
-    setEditingUser(user);
+    // Convert database role to display format for editing
+    const roleForEdit = user.originalRole || user.role;
+    const userForEdit = {
+      ...user,
+      role: roleForEdit
+    };
+    setEditingUser(userForEdit);
     setShowEditModal(true);
   };
 
@@ -164,26 +181,115 @@ const Index = () => {
     }
   };
 
-  const handleUpdateData = (updatedData) => {
-    setUsersData(prevUsers =>
-      prevUsers.map(user =>
-        user.id === editingUser.id
-          ? {
-              ...user,
-              email: updatedData.email,
-              password: updatedData.password,
-              role: updatedData.role,
-            }
-          : user
-      )
-    );
-    setShowEditModal(false);
-    setEditingUser(null);
+  const handleUpdateData = async (updatedData) => {
+    try {
+      console.log("📝 Frontend - Updating user:", editingUser);
+      console.log("📝 Frontend - Update data received:", updatedData);
+      
+      if (!editingUser || !editingUser.id) {
+        throw new Error("User ID tidak ditemukan");
+      }
+
+      // Function to convert role from form to database format
+      const convertRoleToDatabase = (displayRole) => {
+        switch(displayRole) {
+          case 'Super Admin': return 'superAdmin';
+          case 'Admin': return 'admin';
+          case 'Sales': return 'sales';
+          default: return displayRole;
+        }
+      };
+
+      // Prepare data for API
+      const updatePayload = {
+        email_user: updatedData.email,
+        role_user: convertRoleToDatabase(updatedData.role),
+      };
+
+      // Hanya tambahkan password jika ada dan tidak kosong
+      if (updatedData.password && updatedData.password.trim() !== '') {
+        updatePayload.kata_sandi = updatedData.password;
+        console.log("📝 Frontend - Password akan diupdate");
+      } else {
+        console.log("📝 Frontend - Password tidak diupdate (kosong)");
+      }
+
+      console.log("📝 Frontend - Final payload:", updatePayload);
+
+      const response = await fetch(`http://localhost:3000/api/admin/users/${editingUser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatePayload),
+      });
+
+      console.log("📝 Frontend - Response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("❌ Frontend - API Error:", errorData);
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Frontend - Update response:", result);
+
+      // Update UI dengan data yang baru
+      setUsersData(prevUsers =>
+        prevUsers.map(user =>
+          user.id === editingUser.id
+            ? {
+                ...user,
+                email: updatedData.email,
+                role: updatedData.role,
+                // Tidak menampilkan password di UI
+              }
+            : user
+        )
+      );
+
+      // Tutup modal
+      setShowEditModal(false);
+      setEditingUser(null);
+      
+      console.log("✅ User berhasil diupdate");
+    } catch (error) {
+      console.error("❌ Gagal mengupdate user:", error);
+      alert(`Gagal mengupdate user: ${error.message}`);
+    }
   };
 
-  const handleDeleteData = (userId) => {
-    setUsersData(prevUsers => prevUsers.filter(user => user.id !== userId));
-    handleCloseDeleteModal();
+  const handleDeleteData = async (userId) => {
+    try {
+      console.log("🗑️ Deleting user with ID:", userId);
+      
+      const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Delete response:", result);
+
+      // Update UI dengan menghapus user dari state
+      setUsersData(prevUsers => prevUsers.filter(user => user.id !== userId));
+      
+      // Tutup modal
+      handleCloseDeleteModal();
+      
+      console.log("✅ User berhasil dihapus dari database dan UI");
+    } catch (error) {
+      console.error("❌ Gagal menghapus user:", error);
+      alert(`Gagal menghapus user: ${error.message}`);
+    }
   };
 
   const handleOpenImportModal = () => {

@@ -93,14 +93,45 @@ export class UserModel {
   }
 
   // Perbarui pengguna
+  // Update pengguna
   static async updateUser(id, userData) {
     try {
-      const { data, error } = await db.update("data_user", userData, {
-        id_user: id,
-      });
-      if (error) throw error;
+      console.log("📝 UserModel - Updating user with id:", id);
+      console.log("📝 UserModel - Update data:", userData);
+
+      // Validasi ID
+      if (!id) {
+        throw new Error("User ID tidak boleh kosong");
+      }
+
+      // Validasi userData tidak kosong
+      if (!userData || Object.keys(userData).length === 0) {
+        throw new Error("Data update tidak boleh kosong");
+      }
+
+      const { data, error } = await supabase
+        .from("data_user")
+        .update(userData)
+        .eq("id_user", id)
+        .select();
+
+      if (error) {
+        console.error("❌ Supabase error in updateUser:", error);
+        console.error("❌ Error code:", error.code);
+        console.error("❌ Error message:", error.message);
+        console.error("❌ Error details:", error.details);
+        throw new Error(`Supabase error: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        console.log("❌ No user found with ID:", id);
+        throw new Error("User tidak ditemukan atau tidak ada perubahan");
+      }
+
+      console.log("✅ User updated successfully:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in updateUser:", error);
       throw new Error(`Gagal memperbarui data pengguna: ${error.message}`);
     }
   }
@@ -108,10 +139,23 @@ export class UserModel {
   // Hapus pengguna
   static async deleteUser(id) {
     try {
-      const { data, error } = await db.delete("data_user", { id_user: id });
-      if (error) throw error;
+      console.log("🗑️ Deleting user with id:", id);
+
+      const { data, error } = await supabase
+        .from("data_user")
+        .delete()
+        .eq("id_user", id)
+        .select();
+
+      if (error) {
+        console.error("❌ Supabase error in deleteUser:", error);
+        throw error;
+      }
+
+      console.log("✅ User deleted successfully:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in deleteUser:", error);
       throw new Error(`Gagal menghapus data pengguna: ${error.message}`);
     }
   }

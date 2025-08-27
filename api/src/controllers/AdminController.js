@@ -40,7 +40,7 @@ export class AdminController {
       if (!validRoles.includes(role_user)) {
         return res.status(400).json({
           success: false,
-          message: "Role harus SuperAdmin, Admin, atau Sales",
+          message: "Role harus superAdmin, admin, atau sales",
         });
       }
 
@@ -75,33 +75,62 @@ export class AdminController {
         message: "Pengguna berhasil dibuat",
         data: userResponse,
       });
-
     } catch (error) {
       console.error("❌ Error in createUser:", error);
       res.status(500).json({
         success: false,
         message: "Gagal membuat pengguna",
-        error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        error:
+          process.env.NODE_ENV === "development"
+            ? error.message
+            : "Internal server error",
       });
     }
   }
 
   // Perbarui pengguna (Khusus Admin)
+  // Update user
   static async updateUser(req, res) {
     try {
       const { id } = req.params;
-      const updateData = req.body;
+      const { email_user, kata_sandi, role_user } = req.body;
 
-      // Validasi role jika disediakan
-      if (
-        updateData.role_user &&
-        !["admin", "sales"].includes(updateData.role_user)
-      ) {
+      console.log("📝 AdminController - Updating user ID:", id);
+      console.log("📝 AdminController - Request body:", req.body);
+
+      // Validasi input yang diperlukan
+      if (!email_user && !kata_sandi && !role_user) {
+        console.log("❌ No fields provided for update");
         return res.status(400).json({
           success: false,
-          message: "Role harus admin atau sales",
+          message: "Minimal satu field harus diisi untuk update",
         });
       }
+
+      // Prepare update data
+      const updateData = {};
+
+      if (email_user) {
+        updateData.email_user = email_user;
+      }
+
+      if (kata_sandi && kata_sandi.trim() !== "") {
+        updateData.kata_sandi = kata_sandi;
+      }
+
+      if (role_user) {
+        // Validasi role
+        if (!["superAdmin", "admin", "sales"].includes(role_user)) {
+          console.log("❌ Invalid role:", role_user);
+          return res.status(400).json({
+            success: false,
+            message: "Role harus superAdmin, admin, atau sales",
+          });
+        }
+        updateData.role_user = role_user;
+      }
+
+      console.log("📝 AdminController - Final update data:", updateData);
 
       const updatedUser = await UserModel.updateUser(id, updateData);
 
@@ -121,6 +150,7 @@ export class AdminController {
         data: userWithoutPassword,
       });
     } catch (error) {
+      console.error("❌ Update user error:", error);
       res.status(500).json({
         success: false,
         message: "Gagal memperbarui data pengguna",
@@ -191,10 +221,10 @@ export class AdminController {
     try {
       const { role } = req.params;
 
-      if (!["admin", "sales"].includes(role)) {
+      if (!["superAdmin", "admin", "sales"].includes(role)) {
         return res.status(400).json({
           success: false,
-          message: "Role harus admin atau sales",
+          message: "Role harus superAdmin, admin, atau sales",
         });
       }
 
