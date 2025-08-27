@@ -14,29 +14,58 @@ export class AuthController {
       }
 
       const user = await UserModel.getUserByEmail(email_user);
+
+      // Periksa apakah user ditemukan
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Email tidak ditemukan",
+        });
+      }
+
+      // Periksa apakah user aktif
+      if (!user.is_active) {
+        return res.status(401).json({
+          success: false,
+          message: "Akun tidak aktif",
+        });
+      }
+
+      // Debug logging untuk password comparison
+      console.log("🔐 Password comparison:");
+      console.log("Input password:", kata_sandi);
+      console.log("Stored password:", user.kata_sandi);
+      console.log("Password match:", user.kata_sandi === kata_sandi);
+
+      // Periksa password
       if (user.kata_sandi !== kata_sandi) {
         return res.status(401).json({
           success: false,
           message: "Password salah",
         });
       }
+
+      // Periksa role
       if (user.role_user !== role_user) {
         return res.status(403).json({
           success: false,
-          message: `Role tidak sesuai`,
+          message: `Role tidak sesuai. Expected: ${role_user}, Actual: ${user.role_user}`,
         });
       }
 
+      // Hapus password dari response
       const { kata_sandi: _, ...userWithoutPassword } = user;
 
       res.status(200).json({
         success: true,
+        message: "Login berhasil",
         data: userWithoutPassword,
       });
     } catch (error) {
+      console.error("❌ Login error:", error);
       res.status(500).json({
         success: false,
-        message: "Data Tidak Ditemukan",
+        message: "Kesalahan server internal",
         error: error.message,
       });
     }

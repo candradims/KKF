@@ -5,8 +5,10 @@ export class UserModel {
   static async getAllUsers() {
     const { data, error } = await supabase
       .from("data_user")
-      .select("id_user, tanggal, email_user, role_user, is_active, created_at, updated_at");
-    
+      .select(
+        "id_user, tanggal, email_user, role_user, is_active, created_at, updated_at"
+      );
+
     if (error) throw new Error(error.message);
     return data;
   }
@@ -26,10 +28,12 @@ export class UserModel {
   static async getUserByEmail(email) {
     try {
       console.log("🔍 Searching user by email:", email);
-      
+
       const { data, error } = await supabase
         .from("data_user")
-        .select("id_user, tanggal, email_user, role_user, is_active, created_at, updated_at")
+        .select(
+          "id_user, tanggal, email_user, kata_sandi, role_user, is_active, created_at, updated_at"
+        )
         .eq("email_user", email)
         .maybeSingle();
 
@@ -37,12 +41,14 @@ export class UserModel {
         console.error("❌ Supabase error in getUserByEmail:", error);
         throw error;
       }
-      
+
       console.log("📋 User search result:", data);
       return data;
     } catch (error) {
       console.error("❌ Error in getUserByEmail:", error);
-      throw new Error(`Gagal mengambil data pengguna berdasarkan email: ${error.message}`);
+      throw new Error(
+        `Gagal mengambil data pengguna berdasarkan email: ${error.message}`
+      );
     }
   }
 
@@ -50,15 +56,15 @@ export class UserModel {
   static async createUser(userData) {
     try {
       console.log("Creating user with data:", userData);
-      
+
       const userDataToInsert = {
-        tanggal: new Date().toISOString().split('T')[0],
+        tanggal: new Date().toISOString().split("T")[0],
         email_user: userData.email_user,
         kata_sandi: userData.kata_sandi,
         role_user: userData.role_user,
         is_active: true,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       console.log("Data to insert:", userDataToInsert);
@@ -66,7 +72,9 @@ export class UserModel {
       const { data, error } = await supabase
         .from("data_user")
         .insert([userDataToInsert])
-        .select('id_user, tanggal, email_user, role_user, is_active, created_at, updated_at');
+        .select(
+          "id_user, tanggal, email_user, role_user, is_active, created_at, updated_at"
+        );
 
       if (error) {
         console.error("❌ Supabase insert error:", error);
@@ -75,7 +83,7 @@ export class UserModel {
         console.error("Error code:", error.code);
         throw new Error(error.message);
       }
-      
+
       console.log("✅ User created successfully:", data);
       return data;
     } catch (error) {
