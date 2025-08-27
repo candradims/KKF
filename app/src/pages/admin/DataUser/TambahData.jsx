@@ -27,11 +27,16 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
     setIsSubmitting(true);
     try {
       const dataToSave = {
-        ...formData,
-        createdAt: new Date().toISOString()
+        email_user: formData.email, 
+        kata_sandi: formData.password,
+        role_user: formData.role
       };
-      await onSave(formData);
+      
+      await onSave(dataToSave);
       setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert(`Terjadi kesalahan: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -221,8 +226,9 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                   }}
                   >
                     <option value="">Pilih role</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Sales">Sales</option>
+                    <option value="superAdmin">Super Admin</option>
+                    <option value="admin">Admin</option>
+                    <option value="sales">Sales</option>
                   </select>
                 </div>
               </form>
