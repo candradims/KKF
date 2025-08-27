@@ -9,12 +9,35 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  BarChart,
+  Bar,
+  Legend
 } from 'recharts';
 import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 
 const Dashboard = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
+
+  // Data from table image: Sales names and Target NR 2025
+  const salesBarChartData = [
+    { name: 'Achmad', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
+    { name: 'Firmanda', TargetNR: 14257895010, Achievement: Math.round(14257895010 * 0.1) },
+    { name: 'Pungky', TargetNR: 7604210672, Achievement: Math.round(7604210672 * 0.1) },
+    { name: 'Divia', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
+    { name: 'Mohamad', TargetNR: 12356842342, Achievement: Math.round(12356842342 * 0.1) },
+    { name: 'Yanur', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
+    { name: 'Senna', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
+    { name: 'Rahma', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
+    { name: 'Yesy', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
+    { name: 'Gumilang', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
+    { name: 'Deidra', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
+    { name: 'Febrina', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
+    { name: 'Yeni', TargetNR: 9505263340, Achievement: Math.round(9505263340 * 0.1) },
+    { name: 'Yustika', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
+    { name: 'Ganjar', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
+    { name: 'Zahrotul', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) }
+  ];
 
   // Data untuk status penawaran
   const statusData = [
@@ -118,7 +141,7 @@ const Dashboard = () => {
         }} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Card 1 - Jumlah Total Penawaran */}
           <div style={{
-            background: 'linear-gradient(to right, #00AEEF, #2D396B)',
+            background: 'linear-gradient(to right, #035b71, #035b71)',
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
@@ -162,7 +185,7 @@ const Dashboard = () => {
           {/* Card 2 - Status Penawaran */}
           <div 
             style={{
-              background: 'linear-gradient(to right, #00AEEF, #2D396B)',
+              background: 'linear-gradient(to right, #035b71, #035b71)',
               borderRadius: '12px',
               padding: '24px',
               color: 'white',
@@ -219,7 +242,7 @@ const Dashboard = () => {
 
           {/* Card 3 - Total Revenue */}
           <div style={{
-            background: 'linear-gradient(to right, #00AEEF, #2D396B)',
+            background: 'linear-gradient(to right, #035b71, #035b71)',
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
@@ -258,6 +281,42 @@ const Dashboard = () => {
                 <DollarSign style={{ width: '24px', height: '24px' }} className="w-6 h-6" />
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Sales Target & Achievement Bar Chart */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          padding: '24px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          marginBottom: '32px'
+        }} className="bg-white rounded-xl p-6 shadow-lg mb-8">
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#1f2937',
+            marginBottom: '16px'
+          }} className="text-lg font-semibold text-gray-800 mb-4">
+            Target NR & Pencapaian Sales
+          </h3>
+          <div style={{ height: '340px', paddingLeft: '32px' }} className="h-80 pl-8">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={salesBarChartData} margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#666' }} />
+                <YAxis 
+                  tick={{ fontSize: 12, fill: '#666', dx: 0 }} 
+                  tickFormatter={v => `Rp ${v.toLocaleString()}`}
+                  width={100}
+                  tickMargin={16}
+                />
+                <Tooltip formatter={(value) => `Rp ${value.toLocaleString()}`} />
+                <Legend />
+                <Bar dataKey="TargetNR" fill="#00AEEF" name="Target NR" barSize={32} />
+                <Bar dataKey="Achievement" fill="#2D396B" name="Pencapaian" barSize={32} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

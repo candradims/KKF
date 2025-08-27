@@ -12,7 +12,6 @@ import LupaPassword from './components/LupaPassword';
 
 // Import pages sales
 import SalesDashboard from "./pages/sales/Dashboard";
-import Pengeluaran from "./pages/sales/Pengeluaran";
 import LaporanLaba from "./pages/sales/LaporanLaba";
 import Penawaran from "./pages/sales/Penawaran";
 
@@ -36,7 +35,6 @@ function App() {
           {/* Sales Routes */}
           <Route path="/sales/dashboard" element={<SalesDashboard />} />
           <Route path="/sales/data-penawaran" element={<Penawaran />} />
-          <Route path="/sales/pengeluaran-lain-lain" element={<Pengeluaran />} />
           <Route path="/sales/laporan-laba" element={<LaporanLaba />} />
           
           {/* Admin Routes */}

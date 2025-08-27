@@ -7,7 +7,6 @@ import PeopleIcon from '@mui/icons-material/People';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import BuildIcon from '@mui/icons-material/Build';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 const Sidebar = () => {
@@ -97,11 +96,6 @@ const Sidebar = () => {
       title: "Data Penawaran",
       path: "/sales/data-penawaran",
       icon: <BuildIcon />,
-    },
-    {
-      title: "Pengeluaran Lain-lain",
-      path: "/sales/pengeluaran-lain-lain",
-      icon: <ReceiptIcon />,
     },
     {
       title: "Laporan Laba",

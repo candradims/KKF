@@ -129,7 +129,7 @@ const LaporanLaba = () => {
               fontWeight: '600',
               color: '#1f2937'
             }}>
-              Tren Total Profit
+              Total Revenue
             </h3>
             <select style={{
               padding: '4px 12px',
