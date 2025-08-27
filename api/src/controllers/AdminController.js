@@ -6,16 +6,10 @@ export class AdminController {
     try {
       const users = await UserModel.getAllUsers();
 
-      // Hapus password dari response
-      const usersWithoutPasswords = users.map((user) => {
-        const { kata_sandi, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-      });
-
       res.status(200).json({
         success: true,
         message: "Data pengguna berhasil diambil",
-        data: usersWithoutPasswords,
+        data: users,
       });
     } catch (error) {
       res.status(500).json({
@@ -29,8 +23,11 @@ export class AdminController {
   // Buat pengguna baru (Khusus Admin)
   static async createUser(req, res) {
     try {
+      console.log("📨 Received create user request:", req.body);
+
       const { email_user, kata_sandi, role_user } = req.body;
 
+      // Validasi input
       if (!email_user || !kata_sandi || !role_user) {
         return res.status(400).json({
           success: false,
@@ -39,45 +36,52 @@ export class AdminController {
       }
 
       // Validasi role
-      if (!["admin", "sales"].includes(role_user)) {
+      const validRoles = ["superAdmin", "admin", "sales"];
+      if (!validRoles.includes(role_user)) {
         return res.status(400).json({
           success: false,
-          message: "Role harus admin atau sales",
+          message: "Role harus SuperAdmin, Admin, atau Sales",
         });
       }
 
-      // Cek apakah pengguna sudah ada
-      try {
-        const existingUser = await UserModel.getUserByEmail(email_user);
-        if (existingUser) {
-          return res.status(409).json({
-            success: false,
-            message: "Pengguna dengan email ini sudah ada",
-          });
-        }
-      } catch (error) {
-        // Pengguna tidak ada, lanjutkan proses
+      // Cek email sudah ada
+      const existingUser = await UserModel.getUserByEmail(email_user);
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          message: "Pengguna dengan email ini sudah ada",
+        });
       }
 
+      // Buat user baru
       const newUser = await UserModel.createUser({
         email_user,
         kata_sandi,
         role_user,
       });
 
+      if (!newUser || newUser.length === 0) {
+        throw new Error("Tidak ada data yang dikembalikan dari database");
+      }
+
       // Hapus password dari response
-      const { kata_sandi: _, ...userWithoutPassword } = newUser[0];
+      const userResponse = { ...newUser[0] };
+      delete userResponse.kata_sandi;
+
+      console.log("✅ User created successfully:", userResponse);
 
       res.status(201).json({
         success: true,
         message: "Pengguna berhasil dibuat",
-        data: userWithoutPassword,
+        data: userResponse,
       });
+
     } catch (error) {
+      console.error("❌ Error in createUser:", error);
       res.status(500).json({
         success: false,
         message: "Gagal membuat pengguna",
-        error: error.message,
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
       });
     }
   }
