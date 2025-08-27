@@ -4,9 +4,6 @@ import { authenticate, adminOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Semua rute admin memerlukan autentikasi dan role admin
-router.use(authenticate);
-router.use(adminOnly);
 
 // Rute manajemen pengguna
 router.get("/users", AdminController.getAllUsers);
