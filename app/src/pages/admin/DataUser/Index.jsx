@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Edit2, Trash2, Plus, FileSpreadsheet, RotateCcw } from 'lucide-react';
 import TambahData from './TambahData';
 import EditData from './EditData';
@@ -19,80 +19,65 @@ const Index = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
-  const [usersData, setUsersData] = useState([
-    {
-      id: 1,
-      date: '15/05/2023',
-      email: 'maulana@gmail.com',
-      password: 'password123',
-      role: 'Admin',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 2,
-      date: '16/05/2023',
-      email: 'ahmadazaki@gmail.com',
-      password: 'userpass456',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 3,
-      date: '16/05/2023',
-      email: 'sonimasako@gmail.com',
-      password: 'sonipass789',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 4,
-      date: '16/05/2023',
-      email: 'marywarwati01@gmail.com',
-      password: 'marypass01',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 5,
-      date: '16/05/2023',
-      email: 'ovnza8@gmail.com',
-      password: 'ovnzapass08',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 6,
-      date: '16/05/2023',
-      email: 'dimasuindrudi@gmail.com',
-      password: 'dimaspass12',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 7,
-      date: '17/05/2023',
-      email: 'penhimathan@gmail.com',
-      password: 'penhipass34',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 8,
-      date: '17/05/2023',
-      email: 'astilkellina@gmail.com',
-      password: 'astilpass56',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 9,
-      date: '17/05/2023',
-      email: 'markusukuai@gmail.com',
-      password: 'markuspass78',
-      role: 'Sales',
-      actions: ['view', 'edit', 'delete']
+  const [usersData, setUsersData] = useState([]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/admin/users');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      
+      const data = Array.isArray(result) ? result : result.data || [];
+      
+      const sanitizedUsers = data.map(user => ({
+        id: user.id_user || user.id,
+        date: formatDateToDDMMYYYY(user.tanggal) || user.date,
+        email: user.email_user || user.email,
+        role: user.role_user || user.role,
+        actions: ['view', 'edit', 'delete'],
+        originalDate: user.tanggal 
+      }));
+
+      setUsersData(sanitizedUsers);
+    } catch (error) {
+      console.error("Gagal mengambil data pengguna:", error);
     }
-  ]);
+  };
+  
+  const formatDateToDDMMYYYY = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}-${month}-${year}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
+  const formatDateToYYYYMMDD = (dateString) => {
+    if (!dateString) return '';
+    
+    try {
+      const [day, month, year] = dateString.split('-');
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.error("Error converting to YYYY-MM-DD:", error);
+      return dateString;
+    }
+  };
 
   const handleOpenModal = () => {
     setShowTambahModal(true);
@@ -132,23 +117,51 @@ const Index = () => {
     setDeletingUser(null);
   };
 
-  const handleSaveData = (newUserData) => {
-    const newId = usersData.length > 0 ? Math.max(...usersData.map(user => user.id)) + 1 : 1;
-    const today = new Date();
-    const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+  const handleSaveData = async (newUserData) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email_user: newUserData.email_user,
+          kata_sandi: newUserData.kata_sandi,
+          role_user: newUserData.role_user
+        })
+      });
 
-    const newUser = {
-      id: newId,
-      date: formattedDate,
-      email: newUserData.email,
-      password: newUserData.password,
-      role: newUserData.role,
-      actions: ['view', 'edit', 'delete'],
-      createdAt: newUserData.createdAt
-    };
+      const result = await response.json();
 
-    setUsersData(prevUsers => [...prevUsers, newUser]);
-    setShowTambahModal(false);
+      if (!response.ok) {
+        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+      }
+
+      if (result.success) {
+        const addedUser = result.data;
+
+        const formattedUser = {
+          id: addedUser.id_user,
+          date: formatDateToDDMMYYYY(addedUser.tanggal),
+          email: addedUser.email_user,
+          role: addedUser.role_user,
+          actions: ['view', 'edit', 'delete']
+        };
+
+        setUsersData(prevUsers => [...prevUsers, formattedUser]);
+        setShowTambahModal(false);
+        
+        // Refresh data
+        fetchUsers();
+        
+        return result;
+      } else {
+        throw new Error(result.message || 'Gagal menambah pengguna');
+      }
+    } catch (error) {
+      console.error('Gagal menambah pengguna:', error);
+      throw error;
+    }
   };
 
   const handleUpdateData = (updatedData) => {
@@ -213,11 +226,23 @@ const Index = () => {
   const itemsPerPage = 10;
 
   const filteredUsers = usersData.filter(user => {
-    if (filterRole && user.role !== filterRole) return false;
+    if (filterRole && user.role.toLowerCase() !== filterRole.toLowerCase()) return false;
+
     if (filterDate) {
-      const [day, month, year] = user.date.split('/');
-      const userDateFormatted = `${year}-${month}-${day}`;
-      if (userDateFormatted !== filterDate) return false;
+      const filterDateObj = new Date(filterDate);
+      
+      let userDateObj;
+      if (user.originalDate) {
+        userDateObj = new Date(user.originalDate);
+      } else {
+        const [day, month, year] = user.date.split('-');
+        userDateObj = new Date(`${year}-${month}-${day}`);
+      }
+      
+      filterDateObj.setHours(0, 0, 0, 0);
+      userDateObj.setHours(0, 0, 0, 0);
+      
+      if (userDateObj.getTime() !== filterDateObj.getTime()) return false;
     }
     return true;
   });
@@ -347,6 +372,7 @@ const Index = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">-- Pilih --</option>
+                <option value="SuperAdmin">SuperAdmin</option>
                 <option value="Admin">Admin</option>
                 <option value="Sales">Sales</option>
               </select>
