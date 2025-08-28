@@ -3,18 +3,19 @@ import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DetailData = ({ isOpen, onClose, initialData }) => {
-  const [formData, setFormData] = useState(initialData || {
+  const [formData, setFormData] = useState({
     email: '',
-    password: '',
+    kata_sandi: '',
     role: '',
   });
 
   useEffect(() => {
     if (initialData) {
+      console.log("📋 DetailData - Initial data received:", initialData);
       setFormData({
-        email: initialData.email,
-        password: initialData.password,
-        role: initialData.role,
+        email: initialData.email || '',
+        kata_sandi: initialData.kata_sandi || '',
+        role: initialData.role || '',
       });
     }
   }, [initialData]);
@@ -127,12 +128,13 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                       border: '1px solid rgba(45, 58, 118, 0.5)',
                       fontSize: '14px',
                       backgroundColor: '#e0e0e0',
-                      color: '#2D396B'
+                      color: '#2D396B',
+                      cursor: 'not-allowed'
                     }}
                   />
                 </div>
 
-                {/* Input Kata Sandi */}
+                {/* Input Kata Sandi - Tampilkan password asli dari database */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: '120px 1fr',
@@ -146,8 +148,8 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                   }}>Kata Sandi</label>
                   <input
                     type="text"
-                    name="password"
-                    value={formData.password}
+                    name="kata_sandi"
+                    value={formData.kata_sandi || ''}
                     readOnly
                     style={{
                       padding: '12px 16px',
@@ -155,7 +157,8 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                       border: '1px solid rgba(45, 58, 118, 0.5)',
                       fontSize: '14px',
                       backgroundColor: '#e0e0e0',
-                      color: '#2D396B'
+                      color: '#2D396B',
+                      cursor: 'not-allowed'
                     }}
                   />
                 </div>
