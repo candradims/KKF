@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import logoImage from '../assets/Logo_PLN_Icon_Plus.png';
 import { useNavigate } from 'react-router-dom';
 
-const App = () => {
+const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -13,21 +13,49 @@ const App = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+  };
 
   useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
     
     const style = document.createElement('style');
     style.innerHTML = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+      
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+      
       html, body {
         margin: 0;
         padding: 0;
         font-family: 'Poppins', sans-serif;
-        font-weight: 500;
         overflow-x: hidden;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
       }
       
       * {
@@ -35,19 +63,10 @@ const App = () => {
       }
 
       @media (max-width: 768px) {
-        .form-row {
-          flex-direction: column !important;
-          align-items: stretch !important;
-          gap: 0.5rem !important;
-        }
-
-        .form-row label {
-          width: 100% !important;
-        }
-
         .form-container {
           padding: 1.5rem !important;
           margin: 1rem !important;
+          width: 90% !important;
         }
 
         .login-button {
@@ -55,28 +74,21 @@ const App = () => {
         }
 
         .welcome-title {
-          font-size: 1.5rem !important;
+          font-size: 1.8rem !important;
         }
 
         .logo-img {
-          height: 4rem !important;
+          height: 90px !important;
         }
       }
 
       @media (max-width: 480px) {
         .welcome-title {
-          font-size: 1.25rem !important;
+          font-size: 1.5rem !important;
         }
 
         .form-container {
-          padding: 1rem !important;
-          margin: 0.5rem !important;
-        }
-
-        .checkbox-forgot-container {
-          flex-direction: column !important;
-          align-items: flex-start !important;
-          gap: 1rem !important;
+          padding: 1.25rem !important;
         }
       }
     `;
@@ -97,41 +109,27 @@ const App = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!formData.email || !formData.password || !formData.role) {
       setMessage({ type: 'error', text: 'Semua field harus diisi!' });
+      setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email_user: formData.email,
-          kata_sandi: formData.password,
-          role_user: formData.role
-        })
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        setMessage({ type: "error", text: result.message });
-        return;
-      }
-
-      localStorage.setItem("user", JSON.stringify(result.data));
-
-      setMessage({ type: "success", text: result.message });
-      setShowModal(true);
+      // Simulasi login
+      setTimeout(() => {
+        setMessage({ type: "success", text: "Login berhasil!" });
+        setShowModal(true);
+        setIsLoading(false);
+      }, 1500);
+      
     } catch (error) {
       setMessage({ type: "error", text: "Terjadi kesalahan server" });
+      setIsLoading(false);
     }
   };
-
 
   const handleForgotPassword = () => {
     navigate('/lupa-password');
@@ -140,84 +138,95 @@ const App = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#E2EAFF',
+      background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.secondary}10 50%, ${colors.success}15 100%)`,
       fontFamily: 'Poppins, sans-serif',
       display: 'flex',
-      flexDirection: 'column',
-      position: 'relative'
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      padding: '2rem 1rem'
     }}>
-      {/* Fixed Top Bar */}
+      
+      {/* Background Elements */}
       <div style={{
-        width: '100%',
-        height: '4rem',
-        background: 'linear-gradient(90deg, #00AEEF 0%, #0088CC 50%, #0066AA 100%)',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 1000,
-        transition: 'all 0.3s ease',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        ':hover': {
-          background: 'linear-gradient(90deg, #00C6FB 0%, #00AEEF 50%, #0088CC 100%)'
-        }
+        position: 'absolute',
+        top: '-10%',
+        right: '-5%',
+        width: '300px',
+        height: '300px',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, ${colors.secondary}20 0%, transparent 70%)`,
+        animation: 'float 8s ease-in-out infinite'
+      }} />
+      
+      <div style={{
+        position: 'absolute',
+        bottom: '-5%',
+        left: '-5%',
+        width: '250px',
+        height: '250px',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, ${colors.primary}20 0%, transparent 70%)`,
+        animation: 'float 6s ease-in-out infinite 1s'
       }} />
 
       {/* Main Content Container */}
       <div style={{
-        paddingTop: '10rem',
-        paddingBottom: '2rem',
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
-        minHeight: 'calc(100vh - 4rem)',
+        width: '100%',
+        maxWidth: '450px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
         position: 'relative',
-        zIndex: 1,
-        flex: 1
+        zIndex: 2,
+        animation: 'fadeIn 1s ease-out'
       }}>
         
         {/* Logo & Welcome */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '3rem',
-          width: '100%',
-          maxWidth: '800px',
-          padding: '2rem 0'
+          marginBottom: '2.5rem',
+          width: '100%'
         }}>
-          <img
-            src={logoImage}
-            alt="PLN Icon Plus Logo"
-            className="logo-img"
-            style={{
-              height: '7rem',
-              width: 'auto',
-              objectFit: 'contain',
-              filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))'
-            }}
-          />
-          <h2 className="welcome-title" style={{
-            fontSize: '2rem',
-            color: '#2D396B',
-            fontWeight: '600',
-            marginTop: '2rem',
-            background: 'linear-gradient(90deg, #00AEEF, #2D396B)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '1px',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.05)',
-            lineHeight: '1.2'
+          <div style={{
+            marginBottom: '1.5rem',
+            animation: 'pulse 2s ease-in-out infinite'
           }}>
-            Selamat Datang di Sistem PLN Icon Plus
+            <img
+              src={logoImage}
+              alt="PLN Icon Plus Logo"
+              className="logo-img"
+              style={{
+                height: '120px',
+                width: 'auto',
+                objectFit: 'contain',
+                backgroundColor: 'white',
+                padding: '15px',
+                borderRadius: '20px',
+                boxShadow: `0 15px 35px rgba(3, 91, 113, 0.2)`,
+                border: `2px solid ${colors.primary}20`
+              }}
+            />
+          </div>
+          <h2 className="welcome-title" style={{
+            fontSize: '2.2rem',
+            color: colors.primary,
+            fontWeight: '700',
+            marginBottom: '0.5rem',
+            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Sistem Manajemen PLN
           </h2>
           <p style={{
-            color: '#2D396B',
+            color: colors.primary,
             fontSize: '1rem',
-            marginTop: '0.5rem',
-            fontWeight: '500'
+            fontWeight: '400',
+            opacity: 0.8
           }}>
-            Silakan masuk untuk melanjutkan akses sistem
+            Masuk untuk mengakses dashboard
           </p>
         </div>
 
@@ -225,48 +234,46 @@ const App = () => {
         {message.text && (
           <div
             style={{
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              borderRadius: '12px',
+              fontSize: '0.9rem',
               fontWeight: '500',
               border: '1px solid',
-              backgroundColor: message.type === 'error' ? '#FEE2E2' : message.type === 'success' ? '#D1FAE5' : '#DBEAFE',
-              color: message.type === 'error' ? '#DC2626' : message.type === 'success' ? '#059669' : '#2563EB',
-              borderColor: message.type === 'error' ? '#FCA5A5' : message.type === 'success' ? '#6EE7B7' : '#93C5FD',
-              maxWidth: '780px',
-              width: '100%'
+              backgroundColor: message.type === 'error' ? '#FEE2E2' : '#D1FAE5',
+              color: message.type === 'error' ? '#DC2626' : '#059669',
+              borderColor: message.type === 'error' ? '#FCA5A5' : '#6EE7B7',
+              width: '100%',
+              animation: 'fadeIn 0.5s ease-out',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}
           >
-            {message.text}
+            {message.type === 'error' ? '⚠️' : '✅'} {message.text}
           </div>
         )}
 
         {/* Form Container */}
         <div className="form-container" style={{
-          backgroundColor: '#E9EDF7',
-          borderRadius: '1.5rem',
-          boxShadow: '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          boxShadow: `0 20px 40px rgba(3, 91, 113, 0.15)`,
           padding: '2.5rem',
-          border: '2px solid #2D396B',
-          width: '100%',
-          maxWidth: '780px',
-          transition: 'all 0.3s ease-in-out',
+          border: `1px solid ${colors.primary}20`,
+          width: '100%'
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
             {/* Email */}
-            <div className="form-row" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem'
-            }}>
+            <div>
               <label htmlFor="email" style={{
-                width: '30%',
-                minWidth: '120px',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                color: '#2D396B'
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: colors.primary,
+                marginBottom: '0.5rem'
               }}>
                 Email
               </label>
@@ -274,68 +281,75 @@ const App = () => {
                 type="email"
                 id="email"
                 name="email"
-                placeholder="Masukkan Email"
+                placeholder="email@pln.co.id"
                 value={formData.email}
                 onChange={handleInputChange}
                 style={{
-                  flex: 1,
-                  minWidth: '200px',
-                  padding: '0.85rem 1rem',
-                  border: '1px solid #D1D5DB',
-                  borderRadius: '0.5rem',
+                  width: '100%',
+                  padding: '1rem',
+                  border: `1px solid ${colors.primary}30`,
+                  borderRadius: '12px',
                   fontSize: '0.95rem',
                   backgroundColor: '#F9FAFB',
-                  color: '#2D396B',
+                  color: colors.primary,
                   fontFamily: 'Poppins, sans-serif',
                   fontWeight: '500',
                   outline: 'none',
-                  transition: 'border-color 0.2s'
+                  transition: 'all 0.3s ease'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#00AEEF'}
-                onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
+                onFocus={(e) => {
+                  e.target.style.borderColor = colors.secondary;
+                  e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = `${colors.primary}30`;
+                  e.target.style.boxShadow = 'none';
+                }}
                 required
               />
             </div>
 
             {/* Password */}
-            <div className="form-row" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem'
-            }}>
+            <div>
               <label htmlFor="password" style={{
-                width: '30%',
-                minWidth: '120px',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                color: '#2D396B'
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: colors.primary,
+                marginBottom: '0.5rem'
               }}>
                 Password
               </label>
-              <div style={{ flex: 1, position: 'relative', minWidth: '200px' }}>
+              <div style={{ position: 'relative' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
-                  placeholder="Masukkan Password"
+                  placeholder="Masukkan password"
                   value={formData.password}
                   onChange={handleInputChange}
                   style={{
                     width: '100%',
-                    padding: '0.85rem 1rem',
-                    paddingRight: '2.5rem',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '0.5rem',
+                    padding: '1rem',
+                    paddingRight: '3rem',
+                    border: `1px solid ${colors.primary}30`,
+                    borderRadius: '12px',
                     fontSize: '0.95rem',
                     backgroundColor: '#F9FAFB',
-                    color: '#2D396B',
+                    color: colors.primary,
                     fontFamily: 'Poppins, sans-serif',
                     fontWeight: '500',
                     outline: 'none',
-                    transition: 'border-color 0.2s'
+                    transition: 'all 0.3s ease'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#00AEEF'}
-                  onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.secondary;
+                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = `${colors.primary}30`;
+                    e.target.style.boxShadow = 'none';
+                  }}
                   required
                 />
                 <button
@@ -343,50 +357,38 @@ const App = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
-                    right: '0.75rem',
+                    right: '1rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: '#2D396B',
+                    color: colors.primary,
                     cursor: 'pointer',
-                    fontSize: '1.1rem',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontWeight: '500',
-                    padding: '0.25rem'
+                    fontSize: '1.2rem',
+                    padding: '0.25rem',
+                    opacity: 0.6,
+                    transition: 'opacity 0.3s ease'
                   }}
+                  onMouseOver={(e) => e.target.style.opacity = '1'}
+                  onMouseOut={(e) => e.target.style.opacity = '0.6'}
                 >
-                {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
-                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                    </svg>
-                  )}
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
               </div>
             </div>
 
             {/* Role Dropdown */}
-            <div className="form-row" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem'
-            }}>
+            <div>
               <label htmlFor="role" style={{
-                width: '30%',
-                minWidth: '120px',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                color: '#2D396B'
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: colors.primary,
+                marginBottom: '0.5rem'
               }}>
                 Role
               </label>
-              <div style={{ flex: 1, position: 'relative', minWidth: '200px' }}>
+              <div style={{ position: 'relative' }}>
                 <select
                   id="role"
                   name="role"
@@ -394,23 +396,28 @@ const App = () => {
                   onChange={handleInputChange}
                   style={{
                     width: '100%',
-                    padding: '0.85rem 1rem',
-                    paddingRight: '2.5rem',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '0.5rem',
+                    padding: '1rem',
+                    paddingRight: '3rem',
+                    border: `1px solid ${colors.primary}30`,
+                    borderRadius: '12px',
                     fontSize: '0.95rem',
                     backgroundColor: '#F9FAFB',
-                    color: '#2D396B',
+                    color: colors.primary,
                     appearance: 'none',
-                    WebkitAppearance: 'none',
                     cursor: 'pointer',
                     outline: 'none',
                     fontFamily: 'Poppins, sans-serif',
                     fontWeight: '500',
-                    transition: 'border-color 0.2s'
+                    transition: 'all 0.3s ease'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#00AEEF'}
-                  onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.secondary;
+                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = `${colors.primary}30`;
+                    e.target.style.boxShadow = 'none';
+                  }}
                   required
                 >
                   <option value="">Pilih Role</option>
@@ -423,21 +430,16 @@ const App = () => {
                   right: '1rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  pointerEvents: 'none'
+                  pointerEvents: 'none',
+                  color: colors.primary
                 }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  ▼
                 </span>
               </div>
             </div>
 
             {/* Checkbox & Forgot Password */}
-            <div className="checkbox-forgot-container" style={{
+            <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -452,34 +454,27 @@ const App = () => {
                   type="checkbox"
                   id="rememberMe"
                   style={{
-                    width: '1.1rem',
-                    height: '1.1rem',
+                    width: '1.2rem',
+                    height: '1.2rem',
                     backgroundColor: '#ffffff',
-                    border: '1px solid #00AEEF',
-                    borderRadius: '0.25rem',
+                    border: `2px solid ${colors.primary}50`,
+                    borderRadius: '4px',
                     cursor: 'pointer',
-                    fontFamily: 'Poppins, sans-serif',
-                    fontWeight: '500'
+                    transition: 'all 0.3s ease'
                   }}
                   onChange={(e) => {
                     const checked = e.target.checked;
-                    e.target.style.backgroundColor = checked ? '#00AEEF' : '#ffffff';
-                    e.target.style.backgroundImage = checked
-                      ? "url('data:image/svg+xml;utf8,<svg fill=\"white\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M16.707 5.293a1 1 0 010 1.414l-8.004 8.004a1 1 0 01-1.414 0L3.293 10.707a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\" clip-rule=\"evenodd\"/></svg>')"
-                      : 'none';
-                    e.target.style.backgroundRepeat = 'no-repeat';
-                    e.target.style.backgroundPosition = 'center';
-                    e.target.style.backgroundSize = '0.8rem';
+                    e.target.style.backgroundColor = checked ? colors.secondary : '#ffffff';
+                    e.target.style.borderColor = checked ? colors.secondary : `${colors.primary}50`;
                   }}
                 />
                 <label htmlFor="rememberMe" style={{
                   fontSize: '0.9rem',
-                  color: '#2D396B',
+                  color: colors.primary,
                   cursor: 'pointer',
-                  fontFamily: 'Poppins, sans-serif',
                   fontWeight: '500'
                 }}>
-                  Tetap Masuk
+                  Ingat saya
                 </label>
               </div>
 
@@ -488,18 +483,23 @@ const App = () => {
                 onClick={handleForgotPassword}
                 style={{
                   fontSize: '0.9rem',
-                  fontWeight: '500',
-                  color: '#00AEEF',
+                  fontWeight: '600',
+                  color: colors.secondary,
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
                   padding: '0.25rem 0.5rem',
-                  borderRadius: '0.25rem',
-                  fontFamily: 'Poppins, sans-serif',
-                  transition: 'text-decoration 0.2s'
+                  borderRadius: '4px',
+                  transition: 'all 0.3s ease'
                 }}
-                onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
-                onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                onMouseOver={(e) => {
+                  e.target.style.color = colors.primary;
+                  e.target.style.textDecoration = 'underline';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.color = colors.secondary;
+                  e.target.style.textDecoration = 'none';
+                }}
               >
                 Lupa Password?
               </button>
@@ -509,115 +509,144 @@ const App = () => {
             <button
               type="submit"
               className="login-button"
+              disabled={isLoading}
               style={{
-                width: '40%',
-                maxWidth: '200px',
-                minWidth: '150px',
+                width: '100%',
                 padding: '1rem',
-                borderRadius: '0.95rem',
-                alignSelf: 'center',
-                color: '#FCFEFF',
+                borderRadius: '12px',
+                color: 'white',
                 fontSize: '1rem',
                 fontWeight: '600',
-                backgroundColor: '#00AEEF',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
                 border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                marginTop: '1rem',
-                boxShadow: '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)',
-                fontFamily: 'Poppins, sans-serif'
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                marginTop: '1.5rem',
+                boxShadow: `0 4px 15px ${colors.secondary}40`,
+                opacity: isLoading ? 0.7 : 1,
+                position: 'relative',
+                overflow: 'hidden'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#0088CC';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(45, 57, 107, 0.3)';
+                if (!isLoading) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = `0 6px 20px ${colors.secondary}60`;
+                }
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#00AEEF';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)';
+                if (!isLoading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = `0 4px 15px ${colors.secondary}40`;
+                }
               }}
             >
-              LOGIN
+              {isLoading ? (
+                <>
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                    animation: 'loading 1.5s infinite'
+                  }} />
+                  <span>Memproses...</span>
+                </>
+              ) : (
+                'MASUK'
+              )}
             </button>
           </form>
         </div>
+
         {/* Footer */}
         <footer style={{
-          position: 'relative',
-          width: '100%',
+          marginTop: '3rem',
           textAlign: 'center',
           fontSize: '0.85rem',
-          color: '#6B7280',
-          fontFamily: 'Poppins, sans-serif',
-          fontWeight: '500',
-          marginTop: 'auto',
-          paddingTop: '2rem',
-          paddingBottom: '1rem'
+          color: `${colors.primary}80`,
+          fontWeight: '500'
         }}>
-          &copy; {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
+          © {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
         </footer>
       </div>
 
       {/* Success Modal */}
       {showModal && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(3, 91, 113, 0.3)',
+        backdropFilter: 'blur(3px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }}>
         <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          padding: '1rem'
+          backgroundColor: 'white',
+          borderRadius: '16px',
+          padding: '2.5rem',
+          maxWidth: '420px',
+          width: '90%',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          position: 'relative',
+          overflow: 'hidden',
+          animation: 'fadeIn 0.3s ease'
         }}>
+          {/* Garis gradient di atas */}
           <div style={{
-            backgroundColor: '#F9FAFF',
-            borderRadius: '1rem',
-            padding: '2rem',
-            textAlign: 'center',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-            maxWidth: '350px',
-            width: '100%',
-            position: 'relative'
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.success} 100%)`
+          }} />
+
+          {/* Icon Success */}
+          <div style={{
+            backgroundColor: colors.success,
+            borderRadius: '50%',
+            width: '80px',
+            height: '80px',
+            margin: '1rem auto 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: `0 10px 25px ${colors.success}40`
           }}>
-            <div style={{
-              backgroundColor: '#00AEEF',
-              borderRadius: '50%',
-              width: '60px',
-              height: '60px',
-              margin: '0 auto',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1rem'
-            }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#fff" viewBox="0 0 20 20" >
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.004 8.004a1 1 0 01-1.414 0L3.293 10.707a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-              </svg>
-            </div>
-            <h3 style={{ 
-              color: '#2D396B', 
-              fontSize: '1.25rem', 
-              marginBottom: '0.5rem',
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: '600'
-            }}>
-              Selamat!
-            </h3>
-            <p style={{ 
-              color: '#2D396B', 
-              marginBottom: '1.5rem',
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: '500'
-            }}>
-              Login Anda Berhasil ...
-            </p>
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.004 8.004a1 1 0 01-1.414 0L3.293 10.707a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+            </svg>
+          </div>
+
+          {/* Teks */}
+          <h3 style={{
+            fontSize: '1.375rem',
+            fontWeight: '700',
+            color: colors.primary,
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>
+            Login Berhasil!
+          </h3>
+          <p style={{
+            color: '#6B7280',
+            marginBottom: '2rem',
+            textAlign: 'center',
+            lineHeight: '1.6'
+          }}>
+            Selamat datang di sistem manajemen PLN
+          </p>
+
+          {/* Tombol Lanjutkan */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <button
               onClick={() => {
                 setShowModal(false);
@@ -630,58 +659,40 @@ const App = () => {
                 }
               }}
               style={{
-                backgroundColor: '#00AEEF',
-                border: 'none',
-                borderRadius: '9999px',
-                padding: '0.75rem 3rem',
-                color: 'white',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontFamily: 'Poppins, sans-serif',
+                padding: '12px 32px',
                 fontSize: '0.95rem',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#0088CC'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#00AEEF'}
-            >
-              Oke
-            </button>
-            <button
-              onClick={() => {
-                setShowModal(false);
-                if (formData.role === 'sales') {
-                  navigate('/sales/dashboard');
-                } else if (formData.role === 'admin') {
-                  navigate('/admin/dashboard');
-                }
-              }}
-              style={{
-                position: 'absolute',
-                top: '0.75rem',
-                right: '0.75rem',
-                background: 'none',
+                fontWeight: '600',
+                color: 'white',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                 border: 'none',
-                fontSize: '1.5rem',
-                color: '#666',
+                borderRadius: '10px',
                 cursor: 'pointer',
-                width: '30px',
-                height: '30px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '50%',
-                transition: 'background-color 0.2s'
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 12px rgba(0, 191, 202, 0.3)'
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(0, 191, 202, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 191, 202, 0.3)';
+              }}
             >
-              ×
+              OKE
             </button>
           </div>
         </div>
-      )}
+      </div>
+    )}
+      <style jsx>{`
+        @keyframes loading {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default App;
+export default Login;
