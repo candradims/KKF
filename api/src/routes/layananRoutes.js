@@ -6,6 +6,9 @@ const router = express.Router();
 
 // Route publik untuk testing (tanpa autentikasi)
 router.get("/public", LayananController.getAllLayanan);
+router.post("/public", LayananController.createLayanan);
+router.put("/public/:id", LayananController.updateLayanan);
+router.delete("/public/:id", LayananController.deleteLayanan);
 
 // Semua rute memerlukan autentikasi
 router.use(authenticate);

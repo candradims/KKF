@@ -64,7 +64,7 @@ const Index = () => {
     try {
       console.log("💾 Saving new layanan:", newData);
       
-      const response = await fetch('http://localhost:3000/api/layanan', {
+      const response = await fetch('http://localhost:3000/api/layanan/public', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,10 +90,13 @@ const Index = () => {
 
       // Refresh data
       await fetchLayanan();
-      handleCloseModal();
+      
+      // Don't close modal here - let TambahLayanan handle success modal first
+      // handleCloseModal(); // Commented out to allow success modal to show
     } catch (error) {
       console.error("❌ Gagal menyimpan layanan:", error);
-      alert(`Gagal menyimpan layanan: ${error.message}`);
+      // Re-throw error so TambahLayanan can handle it  
+      throw error;
     }
   };
 
@@ -115,7 +118,7 @@ const Index = () => {
         throw new Error("Layanan ID tidak ditemukan");
       }
 
-      const response = await fetch(`http://localhost:3000/api/layanan/${selectedLayanan.id}`, {
+      const response = await fetch(`http://localhost:3000/api/layanan/public/${selectedLayanan.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +175,7 @@ const Index = () => {
     try {
       console.log("🗑️ Deleting layanan with ID:", layananId);
       
-      const response = await fetch(`http://localhost:3000/api/layanan/${layananId}`, {
+      const response = await fetch(`http://localhost:3000/api/layanan/public/${layananId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -189,10 +192,13 @@ const Index = () => {
 
       // Refresh data
       await fetchLayanan();
-      handleCloseDeleteModal();
+      
+      // Don't close modal here - let HapusLayanan handle success modal first
+      // handleCloseDeleteModal(); // Commented out to allow success modal to show
     } catch (error) {
       console.error("❌ Gagal menghapus layanan:", error);
-      alert(`Gagal menghapus layanan: ${error.message}`);
+      // Re-throw error so HapusLayanan can handle it
+      throw error;
     }
   };
 

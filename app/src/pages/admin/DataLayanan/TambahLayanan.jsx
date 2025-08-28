@@ -1,182 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const layananOptions = [
-  "IP VPN (1 sd 10 Mbps)",
-  "IP VPN (11 sd 50 Mbps)",
-  "IP VPN (51 sd 100 Mbps)",
-  "IP VPN (101 sd 500 Mbps)",
-  "IP VPN (501 sd 1000 Mbps)",
-  "IP VPN Premium (2 Mbps)",
-  "IP VPN Premium (3 Mbps)",
-  "IP VPN Premium (4 Mbps)",
-  "IP VPN Premium (5 Mbps)",
-  "IP VPN Premium (6 Mbps)",
-  "IP VPN Premium (7 Mbps)",
-  "IP VPN Premium (8 Mbps)",
-  "IP VPN Premium (9 Mbps)",
-  "IP VPN Premium (10 Mbps)",
-  "IP VPN Premium (15 Mbps)",
-  "IP VPN Premium (20 Mbps)",
-  "IP VPN Premium (40 Mbps)",
-  "Metronet (1 sd 10 Mbps)",
-  "Metronet (11 sd 50 Mbps)",
-  "Metronet (51 sd 100 Mbps)",
-  "Metronet (101 sd 500 Mbps)",
-  "Metronet (501 sd 1000 Mbps)",
-  "Inet Corp IX&IIX (1 sd 10 Mbps)",
-  "Inet Corp IX&IIX (11 sd 50 Mbps)",
-  "Inet Corp IX&IIX (51 sd 100 Mbps)",
-  "Inet Corp IX&IIX (101 sd 500 Mbps)",
-  "Inet Corp IX&IIX (501 sd 1 Gbps)",
-  "Inet Corp IX&IIX (1.01 sd 5 Gbps)",
-  "Inet Corp IX&IIX (5.01 sd 10 Gbps)",
-  "Inet Corp IIX (1 sd 10 Mbps)",
-  "Inet Corp IIX (11 sd 50 Mbps)",
-  "Inet Corp IIX (51 sd 100 Mbps)",
-  "Inet Corp IIX (101 sd 500 Mbps)",
-  "Inet Corp IIX (501 sd 1 Gbps)",
-  "Inet Corp IIX (1.01 sd 5 Gbps)",
-  "Inet Corp IIX (5.01 sd 10 Gbps)",
-  "Inet Corp IX (1 sd 10 Mbps)",
-  "Inet Corp IX (11 sd 50 Mbps)",
-  "Inet Corp IX (51 sd 100 Mbps)",
-  "Inet Corp IX (101 sd 500 Mbps)",
-  "Inet Corp IX (501 sd 1.000 Mbps)",
-  "Inet Corp IX (1.01 sd 5 Gbps)",
-  "Inet Corp IX (5.01 sd 10 Gbps)",
-  "IP Transit (1 sd 10 Mbps)",
-  "IP Transit (11 sd 50 Mbps)",
-  "IP Transit (51 sd 100 Mbps)",
-  "IP Transit (101 sd 500 Mbps)",
-  "IP Transit (501 sd 1 Gbps)",
-  "IP Transit (1.01 sd 5 Gbps)",
-  "IP Transit (5.01 sd 10 Gbps)",
-  "IP Transit IIX (1 sd 10 Mbps)",
-  "IP Transit IIX (11 sd 50 Mbps)",
-  "IP Transit IIX (51 sd 100 Mbps)",
-  "IP Transit IIX (101 sd 500 Mbps)",
-  "IP Transit IIX (501 sd 1Gbps)",
-  "IP Transit IIX (1.01 sd 5 Gbps)",
-  "IP Transit IIX (5.01 sd 10 Gbps)",
-  "IP Transit IX (1 sd 10 Mbps)",
-  "IP Transit IX Only (11 sd 50 Mbps)",
-  "IP Transit IX (51 sd 100 Mbps)",
-  "IP Transit IX (101 sd 500 Mbps)",
-  "IP Transit IX (501 sd 1 Gbps)",
-  "IP Transit IX (1.01 sd 5 Gbps)",
-  "IP Transit IX (5.01 sd 10 Gbps)",
-  "i-WIN Indoor",
-  "i-WIN Outdoor",
-  "MSR Bronze",
-  "MSR Silver (12 Bulan)",
-  "MSR Gold (12 Bulan)",
-  "MSR Platinum (12 Bulan)",
-  "APK I-See (Basic)",
-  "APK I-See (Flex)",
-  "APK I-See (Ultimate)",
-  "Non Analytic CCTV (Basic)",
-  "Analytic CCTV (Basic)",
-  "Outdoor PTZ (Basic)",
-  "Thermal Outdoor (Basic)",
-  "Non Analytic CCTV (Flex)",
-  "Analytic CCTV (Flex)",
-  "Outdoor PTZ (Flex)",
-  "Thermal Outdoor (Flex)",
-  "Non Analytic CCTV (Ultimate)",
-  "Analytic CCTV (Ultimate)",
-  "Outdoor PTZ (Ultimate)",
-  "Thermal Outdoor (Ultimate)",
-  "Biaya Installasi CCTV",
-  "Penambahan IPv4 Publik",
-  "Lain-lain",
-  "IBBC CIR4-BW10 On-Net FTTH",
-  "IBBC CIR4-BW15 On-Net FTTH",
-  "IBBC CIR4-BW20 On-Net FTTH",
-  "IBBC CIR4-BW25 On-Net FTTH",
-  "IBBC CIR4-BW30 On-Net FTTH",
-  "IBBC CIR4-BW35 On-Net FTTH",
-  "IBBC CIR4-BW50 On-Net FTTH",
-  "IBBC CIR4-BW75 On-Net FTTH",
-  "IBBC CIR4-BW100 On-Net FTTH",
-  "IBBC CIR4-BW150 On-Net FTTH",
-  "IBBC CIR4-BW200 On-Net FTTH",
-  "IBBC CIR4-BW500 On-Net FTTH",
-  "IBBC CIR4-BW1000 On-Net FTTH",
-  "IBBC CIR8-BW10 On-Net FTTH",
-  "IBBC CIR8-BW15 On-Net FTTH",
-  "IBBC CIR8-BW20 On-Net FTTH",
-  "IBBC CIR8-BW25 On-Net FTTH",
-  "IBBC CIR8-BW30 On-Net FTTH",
-  "IBBC CIR8-BW35 On-Net FTTH",
-  "IBBC CIR10-BW50 On-Net FTTH",
-  "IBBC CIR10-BW75 On-Net FTTH",
-  "IBBC CIR16-BW100 On-Net FTTH",
-  "IBBC CIR16-BW150 On-Net FTTH",
-  "IBBC CIR16-BW200 On-Net FTTH",
-  "IBBC CIR20-BW500 On-Net FTTH",
-  "IBBC CIR20-BW1000 On-Net FTTH",
-  "IBBC CIR4-BW10 Off-Net non-FTTH",
-  "IBBC CIR4-BW15 Off-Net non-FTTH",
-  "IBBC CIR4-BW20 Off-Net non-FTTH",
-  "IBBC CIR4-BW25 Off-Net non-FTTH",
-  "IBBC CIR4-BW30 Off-Net non-FTTH",
-  "IBBC CIR4-BW35 Off-Net non-FTTH",
-  "IBBC CIR4-BW50 Off-Net non-FTTH",
-  "IBBC CIR4-BW75 Off-Net non-FTTH",
-  "IBBC CIR4-BW100 Off-Net non-FTTH",
-  "IBBC CIR4-BW150 Off-Net non-FTTH",
-  "IBBC CIR4-BW200 Off-Net non-FTTH",
-  "IBBC CIR4-BW500 Off-Net non-FTTH",
-  "IBBC CIR4-BW1000 Off-Net non-FTTH",
-  "IBBC CIR8-BW10 Off-Net non-FTTH",
-  "IBBC CIR8-BW15 Off-Net non-FTTH",
-  "IBBC CIR8-BW20 Off-Net non-FTTH",
-  "IBBC CIR8-BW25 Off-Net non-FTTH",
-  "IBBC CIR8-BW30 Off-Net non-FTTH",
-  "IBBC CIR8-BW35 Off-Net non-FTTH",
-  "IBBC CIR10-BW50 Off-Net non-FTTH",
-  "IBBC CIR10-BW75 Off-Net non-FTTH",
-  "IBBC CIR16-BW100 Off-Net non-FTTH",
-  "IBBC CIR16-BW150 Off-Net non-FTTH",
-  "IBBC CIR16-BW200 Off-Net non-FTTH",
-  "IBBC CIR20-BW500 Off-Net non-FTTH",
-  "IBBC CIR20-BW1000 Off-Net non-FTTH",
-  "IBBC CIR4-BW10 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW15 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW20 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW25 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW30 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW35 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW50 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW75 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW100 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW150 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW200 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW500 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW1000 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW10 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW15 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW20 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW25 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW30 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW35 On-Net FTTH IP Publik",
-  "IBBC CIR10-BW50 On-Net FTTH IP Publik",
-  "IBBC CIR10-BW75 On-Net FTTH IP Publik",
-  "IBBC CIR16-BW100 On-Net FTTH IP Publik",
-  "IBBC CIR16-BW150 On-Net FTTH IP Publik",
-  "IBBC CIR16-BW200 On-Net FTTH IP Publik",
-  "IBBC CIR20-BW500 On-Net FTTH IP Publik",
-  "IBBC CIR20-BW1000 On-Net FTTH IP Publik",
-  "Cloud 1corevCPU 2GB Mem Cap 50GB",
-  "Cloud 4corevCPU 16GB Mem Cap 200GB",
-  "Cloud 12corevCPU 96Gb Mem Cap 1TB",
-];
-
 const hjtOptions = ["Sumatra", "Jawa Bali", "Jabodetabek", "Intim"];
-
-const satuanOptions = ["Mbps", "Units"];
 
 const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
@@ -191,9 +17,91 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // State untuk data dari database
+  const [layananOptions, setLayananOptions] = useState([]);
+  const [satuanOptions, setSatuanOptions] = useState([]);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
+  
+  // State untuk custom input
+  const [showCustomLayanan, setShowCustomLayanan] = useState(false);
+  const [showCustomSatuan, setShowCustomSatuan] = useState(false);
+
+  // Fetch data dari database ketika komponen dimount
+  useEffect(() => {
+    if (isOpen) {
+      fetchOptionsFromDatabase();
+    }
+  }, [isOpen]);
+
+  const fetchOptionsFromDatabase = async () => {
+    setIsLoadingOptions(true);
+    try {
+      console.log("🔍 Fetching options from database");
+      
+      const response = await fetch('http://localhost:3000/api/layanan/public');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      const data = Array.isArray(result) ? result : result.data || [];
+      
+      // Ambil unique nama_layanan dan satuan dari database
+      const uniqueLayanan = [...new Set(data.map(item => item.nama_layanan).filter(Boolean))];
+      const uniqueSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
+      
+      setLayananOptions(uniqueLayanan.sort());
+      setSatuanOptions(uniqueSatuan.sort());
+      
+      console.log("✅ Options loaded:", { layanan: uniqueLayanan.length, satuan: uniqueSatuan.length });
+    } catch (error) {
+      console.error("❌ Gagal mengambil data options:", error);
+      // Fallback ke data default jika gagal
+      setLayananOptions([
+        "IP VPN (1 sd 10 Mbps)",
+        "IP VPN (11 sd 50 Mbps)",
+        "IP VPN Premium (2 Mbps)",
+        "Metronet (1 sd 10 Mbps)",
+        "Inet Corp IX&IIX (1 sd 10 Mbps)",
+        "IP Transit (1 sd 10 Mbps)",
+        "i-WIN Indoor",
+        "MSR Bronze",
+        "APK I-See (Basic)",
+        "Non Analytic CCTV (Basic)",
+        "IBBC CIR4-BW10 On-Net FTTH",
+        "Cloud 1corevCPU 2GB Mem Cap 50GB"
+      ]);
+      setSatuanOptions(["Mbps", "Units"]);
+    } finally {
+      setIsLoadingOptions(false);
+    }
+  };
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    
+    // Handle custom layanan
+    if (name === 'namaLayanan') {
+      if (value === 'custom') {
+        setShowCustomLayanan(true);
+        setFormData((prev) => ({ ...prev, [name]: '' }));
+      } else {
+        setShowCustomLayanan(false);
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+    }
+    // Handle custom satuan
+    else if (name === 'satuan') {
+      if (value === 'custom') {
+        setShowCustomSatuan(true);
+        setFormData((prev) => ({ ...prev, [name]: '' }));
+      } else {
+        setShowCustomSatuan(false);
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+    }
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCancel = () => {
@@ -206,6 +114,8 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       tarifAkses: "",
       tarif: "",
     });
+    setShowCustomLayanan(false);
+    setShowCustomSatuan(false);
     onClose();
   };
 
@@ -220,6 +130,8 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       tarifAkses: "",
       tarif: "",
     });
+    setShowCustomLayanan(false);
+    setShowCustomSatuan(false);
     onClose();
   };
 
@@ -227,11 +139,20 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const dataToSave = {
-        ...formData,
-        createdAt: new Date().toISOString(),
-      };
+      // Validate required fields
+      if (!formData.namaLayanan || !formData.hjt || !formData.satuan) {
+        alert("Nama layanan, HJT, dan satuan wajib diisi!");
+        return;
+      }
+
+      // Call the onSave function passed from parent to save to database
+      await onSave(formData);
+      
+      // Show success modal
       setShowSuccessModal(true);
+    } catch (error) {
+      console.error("Error saving layanan:", error);
+      alert("Gagal menyimpan layanan: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -371,14 +292,58 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                       color: "#2D396B",
                     }}
                   >
-                    <option value="">Pilih layanan</option>
+                    <option value="">
+                      {isLoadingOptions ? "Memuat layanan..." : "Pilih layanan"}
+                    </option>
                     {layananOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
                     ))}
+                    <option value="custom">Lainnya (Input Manual)</option>
                   </select>
                 </div>
+
+                {/* Custom Nama Layanan Input */}
+                {showCustomLayanan && (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "120px 1fr",
+                      alignItems: "center",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <label
+                      htmlFor="customNamaLayanan"
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        color: "#2D3A76",
+                      }}
+                    >
+                      Input Layanan*
+                    </label>
+                    <input
+                      type="text"
+                      id="customNamaLayanan"
+                      name="namaLayanan"
+                      value={formData.namaLayanan}
+                      onChange={handleChange}
+                      placeholder="Masukkan nama layanan baru"
+                      required
+                      style={{
+                        padding: "12px 16px",
+                        borderRadius: "10px",
+                        border: "1px solid rgba(45, 58, 118, 0.5)",
+                        fontSize: "14px",
+                        backgroundColor: "#ffffff",
+                        width: "100%",
+                        color: "#2D396B",
+                      }}
+                    />
+                  </div>
+                )}
 
                 {/* Select Hjt */}
                 <div
@@ -471,14 +436,58 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                       color: "#2D396B",
                     }}
                   >
-                    <option value="">Pilih satuan</option>
+                    <option value="">
+                      {isLoadingOptions ? "Memuat satuan..." : "Pilih satuan"}
+                    </option>
                     {satuanOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>
                     ))}
+                    <option value="custom">Lainnya (Input Manual)</option>
                   </select>
                 </div>
+
+                {/* Custom Satuan Input */}
+                {showCustomSatuan && (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "120px 1fr",
+                      alignItems: "center",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <label
+                      htmlFor="customSatuan"
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        color: "#2D3A76",
+                      }}
+                    >
+                      Input Satuan*
+                    </label>
+                    <input
+                      type="text"
+                      id="customSatuan"
+                      name="satuan"
+                      value={formData.satuan}
+                      onChange={handleChange}
+                      placeholder="Masukkan satuan baru"
+                      required
+                      style={{
+                        padding: "12px 16px",
+                        borderRadius: "10px",
+                        border: "1px solid rgba(45, 58, 118, 0.5)",
+                        fontSize: "14px",
+                        backgroundColor: "#ffffff",
+                        width: "100%",
+                        color: "#2D396B",
+                      }}
+                    />
+                  </div>
+                )}
 
                 {/* Input Backbone */}
                 <div
