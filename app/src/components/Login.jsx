@@ -574,117 +574,118 @@ const Login = () => {
 
       {/* Success Modal */}
       {showModal && (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(3, 91, 113, 0.3)',
-        backdropFilter: 'blur(3px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000
-      }}>
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '16px',
-          padding: '2.5rem',
-          maxWidth: '420px',
-          width: '90%',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          position: 'relative',
-          overflow: 'hidden',
-          animation: 'fadeIn 0.3s ease'
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(3, 91, 113, 0.3)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
         }}>
-          {/* Garis gradient di atas */}
           <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.success} 100%)`
-          }} />
-
-          {/* Icon Success */}
-          <div style={{
-            backgroundColor: colors.success,
-            borderRadius: '50%',
-            width: '80px',
-            height: '80px',
-            margin: '1rem auto 1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: `0 10px 25px ${colors.success}40`
-          }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="white" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.004 8.004a1 1 0 01-1.414 0L3.293 10.707a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-            </svg>
-          </div>
-
-          {/* Teks */}
-          <h3 style={{
-            fontSize: '1.375rem',
-            fontWeight: '700',
-            color: colors.primary,
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
-            Login Berhasil!
-          </h3>
-          <p style={{
-            color: '#6B7280',
-            marginBottom: '2rem',
+            backgroundColor: 'white',
+            borderRadius: '20px',
+            padding: '2.5rem 2rem',
+            maxWidth: '480px',
+            width: '90%',
+            boxShadow: '0 20px 45px rgba(0,0,0,0.25)',
+            border: '1px solid rgba(0,0,0,0.05)',
             textAlign: 'center',
-            lineHeight: '1.6'
+            position: 'relative',
+            overflow: 'hidden',
+            animation: 'fadeIn 0.3s ease'
           }}>
-            Selamat datang di sistem manajemen PLN
-          </p>
+            {/* garis gradiasi */}
+             <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.success} 100%)`
+            }} />
+            {/* Animated Success Icon */}
+            <div style={{
+              margin: '0 auto 1.5rem',
+              width: '90px',
+              height: '90px',
+              borderRadius: '50%',
+              background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: `0 10px 20px ${colors.success}40`
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 52 52" 
+                width="50" height="50">
+                <circle cx="26" cy="26" r="25" fill="none" stroke="white" strokeWidth="2"/>
+                <path fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+                  d="M16 26l8 8 16-16">
+                  <animate attributeName="stroke-dasharray" from="0,50" to="50,0" dur="0.5s" fill="freeze"/>
+                </path>
+              </svg>
+            </div>
 
-          {/* Tombol Lanjutkan */}
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            {/* Title */}
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              color: colors.primary,
+              marginBottom: '0.5rem'
+            }}>
+              Login Berhasil!
+            </h3>
+
+            {/* Subtext */}
+            <p style={{
+              color: `${colors.primary}CC`,
+              fontSize: '0.95rem',
+              marginBottom: '2rem'
+            }}>
+              Selamat datang kembali <br/>
+              Anda akan diarahkan ke dashboard sesuai role Anda.
+            </p>
+
+            {/* Button */}
             <button
               onClick={() => {
                 setShowModal(false);
-                if (formData.role === 'sales') {
-                  navigate('/sales/dashboard');
-                } else if (formData.role === 'admin') {
-                  navigate('/admin/dashboard');
-                } else if (formData.role === 'superAdmin') {
-                  navigate('/superAdmin/dashboard');
-                }
+                if (formData.role === 'sales') navigate('/sales/dashboard');
+                else if (formData.role === 'admin') navigate('/admin/dashboard');
+                else if (formData.role === 'superAdmin') navigate('/superAdmin/dashboard');
               }}
               style={{
-                padding: '12px 32px',
-                fontSize: '0.95rem',
+                padding: '14px 36px',
+                fontSize: '1rem',
                 fontWeight: '600',
                 color: 'white',
                 background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                 border: 'none',
-                borderRadius: '10px',
+                borderRadius: '12px',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 4px 12px rgba(0, 191, 202, 0.3)'
+                transition: 'all 0.3s ease',
+                boxShadow: `0 6px 16px ${colors.secondary}50`
               }}
               onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 6px 16px rgba(0, 191, 202, 0.4)';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = `0 8px 20px ${colors.secondary}60`;
               }}
               onMouseOut={(e) => {
                 e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 12px rgba(0, 191, 202, 0.3)';
+                e.target.style.boxShadow = `0 6px 16px ${colors.secondary}50`;
               }}
             >
               OKE
             </button>
           </div>
         </div>
-      </div>
-    )}
+      )}
       <style jsx>{`
         @keyframes loading {
           0% { transform: translateX(-100%); }
