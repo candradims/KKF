@@ -14,6 +14,7 @@ const Login = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const colors = {
     primary: '#035b71',
@@ -22,21 +23,28 @@ const Login = () => {
     accent1: '#008bb0',
     accent2: '#0090a8',
     success: '#3fba8c',
+    lightBg: '#f8fafc'
   };
 
   useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-    
+
     const style = document.createElement('style');
     style.innerHTML = `
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      
+
+      input::placeholder {
+        font-style: italic;
+        color: #9CA3AF;
+      }
+        
       @keyframes float {
         0% { transform: translateY(0px); }
         50% { transform: translateY(-10px); }
@@ -49,19 +57,24 @@ const Login = () => {
         100% { transform: scale(1); }
       }
       
+      @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+      }
+      
       html, body {
         margin: 0;
         padding: 0;
         font-family: 'Poppins', sans-serif;
         overflow-x: hidden;
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        background: linear-gradient(135deg, ${colors.lightBg} 0%, #e2e8f0 100%);
         min-height: 100vh;
       }
-      
+
       * {
         box-sizing: border-box;
       }
-
+      
       @media (max-width: 768px) {
         .form-container {
           padding: 1.5rem !important;
@@ -93,6 +106,7 @@ const Login = () => {
       }
     `;
     document.head.appendChild(style);
+
     return () => {
       document.head.removeChild(style);
       document.head.removeChild(link);
@@ -221,6 +235,29 @@ const Login = () => {
         animation: 'float 6s ease-in-out infinite 1s'
       }} />
 
+      {/* Geometric shapes for modern look */}
+      <div style={{
+        position: 'absolute',
+        top: '15%',
+        left: '10%',
+        width: '60px',
+        height: '60px',
+        border: `2px solid ${colors.secondary}30`,
+        transform: 'rotate(45deg)',
+        animation: 'pulse 4s ease-in-out infinite'
+      }} />
+      
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        right: '15%',
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        border: `2px solid ${colors.primary}30`,
+        animation: 'pulse 5s ease-in-out infinite 0.5s'
+      }} />
+
       {/* Main Content Container */}
       <div style={{
         width: '100%',
@@ -241,23 +278,44 @@ const Login = () => {
         }}>
           <div style={{
             marginBottom: '1.5rem',
-            animation: 'pulse 2s ease-in-out infinite'
+            animation: 'pulse 2s ease-in-out infinite',
+            display: 'flex',
+            justifyContent: 'center'
           }}>
-            <img
-              src={logoImage}
-              alt="PLN Icon Plus Logo"
-              className="logo-img"
-              style={{
-                height: '120px',
-                width: 'auto',
-                objectFit: 'contain',
-                backgroundColor: 'white',
-                padding: '15px',
-                borderRadius: '20px',
-                boxShadow: `0 15px 35px rgba(3, 91, 113, 0.2)`,
-                border: `2px solid ${colors.primary}20`
-              }}
-            />
+            <div style={{
+              position: 'relative',
+              display: 'inline-block'
+            }}>
+              <img
+                src={logoImage}
+                alt="PLN Icon Plus Logo"
+                className="logo-img"
+                style={{
+                  height: '120px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  backgroundColor: 'white',
+                  padding: '15px',
+                  borderRadius: '20px',
+                  boxShadow: `0 15px 35px rgba(3, 91, 113, 0.2)`,
+                  border: `2px solid ${colors.primary}20`,
+                  position: 'relative',
+                  zIndex: 2
+                }}
+              />
+              <div style={{
+                position: 'absolute',
+                top: '-5px',
+                left: '-5px',
+                right: '-5px',
+                bottom: '-5px',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                borderRadius: '25px',
+                zIndex: 1,
+                filter: 'blur(8px)',
+                opacity: 0.5
+              }} />
+            </div>
           </div>
           <h2 className="welcome-title" style={{
             fontSize: '2.2rem',
@@ -297,7 +355,8 @@ const Login = () => {
               animation: 'fadeIn 0.5s ease-out',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
             }}
           >
             {message.type === 'error' ? '⚠️' : '✅'} {message.text}
@@ -312,9 +371,32 @@ const Login = () => {
           boxShadow: `0 20px 40px rgba(3, 91, 113, 0.15)`,
           padding: '2.5rem',
           border: `1px solid ${colors.primary}20`,
-          width: '100%'
+          width: '100%',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Decorative corner elements */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '80px',
+            height: '80px',
+            background: `linear-gradient(135deg, ${colors.secondary}15 0%, transparent 50%)`,
+            borderBottomLeftRadius: '100%'
+          }} />
+          
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: '80px',
+            height: '80px',
+            background: `linear-gradient(135deg, transparent 0%, ${colors.primary}15 50%)`,
+            borderTopRightRadius: '100%'
+          }} />
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 2 }}>
 
             {/* Email */}
             <div>
@@ -323,65 +405,22 @@ const Login = () => {
                 fontSize: '0.9rem',
                 fontWeight: '600',
                 color: colors.primary,
-                marginBottom: '0.5rem'
+                marginBottom: '0.5rem',
+                paddingLeft: '0.5rem'
               }}>
                 Email
               </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="email@pln.co.id"
-                value={formData.email}
-                onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '1rem',
-                  border: `1px solid ${colors.primary}30`,
-                  borderRadius: '12px',
-                  fontSize: '0.95rem',
-                  backgroundColor: '#F9FAFB',
-                  color: colors.primary,
-                  fontFamily: 'Poppins, sans-serif',
-                  fontWeight: '500',
-                  outline: 'none',
-                  transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = colors.secondary;
-                  e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = `${colors.primary}30`;
-                  e.target.style.boxShadow = 'none';
-                }}
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" style={{
-                display: 'block',
-                fontSize: '0.9rem',
-                fontWeight: '600',
-                color: colors.primary,
-                marginBottom: '0.5rem'
-              }}>
-                Password
-              </label>
               <div style={{ position: 'relative' }}>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  placeholder="Masukkan password"
-                  value={formData.password}
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Masukkan email"
+                  value={formData.email}
                   onChange={handleInputChange}
                   style={{
                     width: '100%',
-                    padding: '1rem',
-                    paddingRight: '3rem',
+                    padding: '1rem 1rem 1rem 3rem',
                     border: `1px solid ${colors.primary}30`,
                     borderRadius: '12px',
                     fontSize: '0.95rem',
@@ -402,6 +441,72 @@ const Login = () => {
                   }}
                   required
                 />
+                <div style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: colors.primary,
+                  fontSize: '1.1rem'
+                }}>
+                  ✉️
+                </div>
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label htmlFor="password" style={{
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: colors.primary,
+                marginBottom: '0.5rem',
+                paddingLeft: '0.5rem'
+              }}>
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  placeholder="Masukkan kata sandi"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  style={{
+                    width: '100%',
+                    padding: '1rem 1rem 1rem 3rem',
+                    border: `1px solid ${colors.primary}30`,
+                    borderRadius: '12px',
+                    fontSize: '0.95rem',
+                    backgroundColor: '#F9FAFB',
+                    color: colors.primary,
+                    fontFamily: 'Poppins, sans-serif',
+                    fontWeight: '500',
+                    outline: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.secondary;
+                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = `${colors.primary}30`;
+                    e.target.style.boxShadow = 'none';
+                  }}
+                  required
+                />
+                <div style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: colors.secondary,
+                  fontSize: '1.1rem'
+                }}>
+                  🔒
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -417,10 +522,22 @@ const Login = () => {
                     fontSize: '1.2rem',
                     padding: '0.25rem',
                     opacity: 0.6,
-                    transition: 'opacity 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
-                  onMouseOver={(e) => e.target.style.opacity = '1'}
-                  onMouseOut={(e) => e.target.style.opacity = '0.6'}
+                  onMouseOver={(e) => {
+                    e.target.style.opacity = '1';
+                    e.target.style.backgroundColor = `${colors.primary}10`;
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.opacity = '0.6';
+                    e.target.style.backgroundColor = 'transparent';
+                  }}
                 >
                   {showPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -434,7 +551,8 @@ const Login = () => {
                 fontSize: '0.9rem',
                 fontWeight: '600',
                 color: colors.primary,
-                marginBottom: '0.5rem'
+                marginBottom: '0.5rem',
+                paddingLeft: '0.5rem'
               }}>
                 Role
               </label>
@@ -444,10 +562,10 @@ const Login = () => {
                   name="role"
                   value={formData.role}
                   onChange={handleInputChange}
+                  className="with-placeholder"
                   style={{
                     width: '100%',
-                    padding: '1rem',
-                    paddingRight: '3rem',
+                    padding: '1rem 1rem 1rem 3rem',
                     border: `1px solid ${colors.primary}30`,
                     borderRadius: '12px',
                     fontSize: '0.95rem',
@@ -470,11 +588,21 @@ const Login = () => {
                   }}
                   required
                 >
-                  <option value="">Pilih Role</option>
+                  <option value="" disabled hidden>-- Pilih Role --</option>
                   <option value="admin">Admin</option>
                   <option value="sales">Sales</option>
                   <option value="superAdmin">Super Admin</option>
                 </select>
+                <div style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                   color: colors.secondary,
+                  fontSize: '1.1rem'
+                }}>
+                  👤
+                </div>
                 <span style={{
                   position: 'absolute',
                   right: '1rem',
@@ -500,24 +628,43 @@ const Login = () => {
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  style={{
-                    width: '1.2rem',
-                    height: '1.2rem',
-                    backgroundColor: '#ffffff',
-                    border: `2px solid ${colors.primary}50`,
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    e.target.style.backgroundColor = checked ? colors.secondary : '#ffffff';
-                    e.target.style.borderColor = checked ? colors.secondary : `${colors.primary}50`;
-                  }}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="checkbox"
+                    id="rememberMe"
+                    style={{
+                      width: '1.2rem',
+                      height: '1.2rem',
+                      backgroundColor: '#ffffff',
+                      border: `2px solid ${colors.primary}50`,
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      appearance: 'none',
+                      position: 'relative',
+                      zIndex: 2
+                    }}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      e.target.style.backgroundColor = checked ? colors.secondary : '#ffffff';
+                      e.target.style.borderColor = checked ? colors.secondary : `${colors.primary}50`;
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    color: 'white',
+                    fontSize: '0.8rem',
+                    pointerEvents: 'none',
+                    opacity: 0,
+                    transition: 'opacity 0.2s ease',
+                    zIndex: 3
+                  }}>
+                    ✓
+                  </div>
+                </div>
                 <label htmlFor="rememberMe" style={{
                   fontSize: '0.9rem',
                   color: colors.primary,
@@ -577,18 +724,8 @@ const Login = () => {
                 position: 'relative',
                 overflow: 'hidden'
               }}
-              onMouseOver={(e) => {
-                if (!isLoading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = `0 6px 20px ${colors.secondary}60`;
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!isLoading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = `0 4px 15px ${colors.secondary}40`;
-                }
-              }}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
             >
               {isLoading ? (
                 <>
@@ -599,12 +736,25 @@ const Login = () => {
                     right: 0,
                     bottom: 0,
                     background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
-                    animation: 'loading 1.5s infinite'
+                    animation: 'shimmer 1.5s infinite'
                   }} />
                   <span>Memproses...</span>
                 </>
               ) : (
-                'MASUK'
+                <>
+                  <span>MASUK</span>
+                  {isHovered && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
+                      animation: 'shimmer 1.5s infinite'
+                    }} />
+                  )}
+                </>
               )}
             </button>
           </form>
