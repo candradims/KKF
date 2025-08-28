@@ -6,7 +6,7 @@ export class UserModel {
     const { data, error } = await supabase
       .from("data_user")
       .select(
-        "id_user, tanggal, email_user, role_user, is_active, created_at, updated_at"
+        "id_user, tanggal, email_user, kata_sandi, role_user, is_active, created_at, updated_at"
       );
 
     if (error) throw new Error(error.message);
