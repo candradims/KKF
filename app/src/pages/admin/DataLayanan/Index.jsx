@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw } from 'lucide-react';
 import TambahLayanan from './TambahLayanan';
 import EditLayanan from './EditLayanan';
@@ -13,129 +13,44 @@ const Index = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showHapusModal, setShowHapusModal] = useState(false);
 
-  const [layananData, setLayananData] = useState([
-    {
-        id: 1,
-        hjt: 'Sumatra',
-        namaLayanan: 'IP VPN (1 sd 10 Mbps)',
-        satuan: 'Mbps',
-        backbone: '76600',
-        port: '0',
-        tarifAkses: '1585000',
-        tarif: '0'
-    },
-    {
-        id: 2,
-        hjt: 'Jawa Bali',
-        namaLayanan: 'IP VPN (1 sd 10 Mbps)',
-        satuan: 'Mbps',
-        backbone: '33800',
-        port: '0',
-        tarifAkses: '1151000',
-        tarif: '0'
-    },
-    {
-        id: 3,
-        hjt: 'Jabodetabek',
-        namaLayanan: 'IP VPN (1 sd 10 Mbps)',
-        satuan: 'Mbps',
-        backbone: '18700',
-        port: '0',
-        tarifAkses: '872000',
-        tarif: '0'
-    },
-    {
-        id: 4,
-        hjt: 'Intim',
-        namaLayanan: 'IP VPN (1 sd 10 Mbps)',
-        satuan: 'Mbps',
-        backbone: '112700',
-        port: '0',
-        tarifAkses: '1742000',
-        tarif: '0'
-    },
-    {
-        id: 5,
-        hjt: 'Sumatra',
-        namaLayanan: 'IP VPN (11 sd 50 Mbps)',
-        satuan: 'Mbps',
-        backbone: '73300',
-        port: '0',
-        tarifAkses: '1585000',
-        tarif: '0'
-    },
-    {
-        id: 6,
-        hjt: 'Jawa Bali',
-        namaLayanan: 'IP VPN (11 sd 50 Mbps)',
-        satuan: 'Mbps',
-        backbone: '32400',
-        port: '0',
-        tarifAkses: '1151000',
-        tarif: '0'
-    },
-    {
-        id: 7,
-        hjt: 'Jabodetabek',
-        namaLayanan: 'IP VPN (11 sd 50 Mbps)',
-        satuan: 'Mbps',
-        backbone: '17900',
-        port: '0',
-        tarifAkses: '872000',
-        tarif: '0'
-    },
-    {
-        id: 8,
-        hjt: 'Intim',
-        namaLayanan: 'IP VPN (11 sd 50 Mbps)',
-        satuan: 'Mbps',
-        backbone: '107900',
-        port: '0',
-        tarifAkses: '1742000',
-        tarif: '0'
-    },
-    {
-        id: 9,
-        hjt: 'Sumatra',
-        namaLayanan: 'IP VPN Premium (2 Mbps)',
-        satuan: 'Units',
-        backbone: '0',
-        port: '0',
-        tarifAkses: '0',
-        tarif: '11610000'
-    },
-    {
-        id: 10,
-        hjt: 'Jawa Bali',
-        namaLayanan: 'IP VPN Premium (2 Mbps)',
-        satuan: 'Units',
-        backbone: '0',
-        port: '0',
-        tarifAkses: '0',
-        tarif: '11610000'
-    },
-    {
-        id: 11,
-        hjt: 'Jabodetabek',
-        namaLayanan: 'IP VPN Premium (2 Mbps)',
-        satuan: 'Units',
-        backbone: '0',
-        port: '0',
-        tarifAkses: '0',
-        tarif: '11610000'
-    },
-    {
-        id: 12,
-        hjt: 'Intim',
-        namaLayanan: 'IP VPN Premium (2 Mbps)',
-        satuan: 'Units',
-        backbone: '0',
-        port: '0',
-        tarifAkses: '0',
-        tarif: '11610000'
-    }
-    ]);
+  const [layananData, setLayananData] = useState([]);
 
+  useEffect(() => {
+    fetchLayanan();
+  }, []);
+
+  const fetchLayanan = async () => {
+    try {
+      console.log("🔍 Fetching layanan data from API");
+      
+      const response = await fetch('http://localhost:3000/api/layanan/public');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      console.log("📦 API response:", result);
+      
+      const data = Array.isArray(result) ? result : result.data || [];
+      
+      // Map data dari database ke format yang diharapkan UI
+      const sanitizedLayanan = data.map(item => ({
+        id: item.id_layanan || item.id,
+        hjt: item.wilayah_hjt || item.hjt,
+        namaLayanan: item.nama_layanan || item.namaLayanan,
+        satuan: item.satuan,
+        backbone: item.backbone?.toString() || '0',
+        port: item.port?.toString() || '0',
+        tarifAkses: item.tarif_akses?.toString() || '0',
+        tarif: item.tarif?.toString() || '0'
+      }));
+
+      console.log("✅ Sanitized layanan data:", sanitizedLayanan);
+      setLayananData(sanitizedLayanan);
+    } catch (error) {
+      console.error("❌ Gagal mengambil data layanan:", error);
+      // Fallback ke data static jika API gagal
+      setLayananData([]);
+    }
+  };
 
   const handleOpenModal = () => {
     setShowTambahModal(true);
@@ -143,6 +58,43 @@ const Index = () => {
 
   const handleCloseModal = () => {
     setShowTambahModal(false);
+  };
+
+  const handleSaveData = async (newData) => {
+    try {
+      console.log("💾 Saving new layanan:", newData);
+      
+      const response = await fetch('http://localhost:3000/api/layanan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nama_layanan: newData.namaLayanan,
+          wilayah_hjt: newData.hjt,
+          satuan: newData.satuan,
+          backbone: parseFloat(newData.backbone) || 0,
+          port: parseFloat(newData.port) || 0,
+          tarif_akses: parseFloat(newData.tarifAkses) || 0,
+          tarif: parseFloat(newData.tarif) || 0,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Layanan created:", result);
+
+      // Refresh data
+      await fetchLayanan();
+      handleCloseModal();
+    } catch (error) {
+      console.error("❌ Gagal menyimpan layanan:", error);
+      alert(`Gagal menyimpan layanan: ${error.message}`);
+    }
   };
 
   const handleOpenEditModal = (layanan) => {
@@ -153,6 +105,47 @@ const Index = () => {
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setSelectedLayanan(null);
+  };
+
+  const handleSaveEdit = async (updatedData) => {
+    try {
+      console.log("📝 Updating layanan:", selectedLayanan?.id, "with data:", updatedData);
+      
+      if (!selectedLayanan?.id) {
+        throw new Error("Layanan ID tidak ditemukan");
+      }
+
+      const response = await fetch(`http://localhost:3000/api/layanan/${selectedLayanan.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nama_layanan: updatedData.namaLayanan,
+          wilayah_hjt: updatedData.hjt,
+          satuan: updatedData.satuan,
+          backbone: parseFloat(updatedData.backbone) || 0,
+          port: parseFloat(updatedData.port) || 0,
+          tarif_akses: parseFloat(updatedData.tarifAkses) || 0,
+          tarif: parseFloat(updatedData.tarif) || 0,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Layanan updated:", result);
+
+      // Refresh data
+      await fetchLayanan();
+      handleCloseEditModal();
+    } catch (error) {
+      console.error("❌ Gagal mengupdate layanan:", error);
+      alert(`Gagal mengupdate layanan: ${error.message}`);
+    }
   };
 
   const handleOpenDetailModal = (layanan) => {
@@ -169,56 +162,59 @@ const Index = () => {
     setSelectedLayanan(layanan);
     setShowHapusModal(true);
   };
-  
+
   const handleCloseDeleteModal = () => {
     setShowHapusModal(false);
     setSelectedLayanan(null);
   };
-  
-  const handleDeleteConfirm = (id) => {
-    setLayananData(prev => prev.filter(layanan => layanan.id !== id));
+
+  const handleDeleteConfirm = async (layananId) => {
+    try {
+      console.log("🗑️ Deleting layanan with ID:", layananId);
+      
+      const response = await fetch(`http://localhost:3000/api/layanan/${layananId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Layanan deleted:", result);
+
+      // Refresh data
+      await fetchLayanan();
+      handleCloseDeleteModal();
+    } catch (error) {
+      console.error("❌ Gagal menghapus layanan:", error);
+      alert(`Gagal menghapus layanan: ${error.message}`);
+    }
   };
 
-  const handleSaveEdit = (updatedLayanan) => {
-    setLayananData(prev => 
-      prev.map(layanan => 
-        layanan.id === updatedLayanan.id ? updatedLayanan : layanan
-      )
-    );
-    setShowEditModal(false);
-    setSelectedLayanan(null);
+  const handleReset = () => {
+    setFilterHJT('');
   };
 
-  const handleSaveData = (newDataLayanan) => {
-    const newId = layananData.length > 0 ? Math.max(...layananData.map(item => item.id)) + 1 : 1;
-    
-    const newLayanan = {id: newId,...newDataLayanan,};
-    setLayananData(prev => [...prev, newLayanan]);
-    setShowTambahModal(false);
-  };
-
+  // Filter dan pagination logic
+  const filteredData = layananData.filter(item => {
+    const hjtMatch = filterHJT === '' || item.hjt === filterHJT;
+    return hjtMatch;
+  });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  const filteredLayanan = layananData.filter(layanan => {
-    if (filterHJT && layanan.hjt !== filterHJT) return false;
-    return true;
-  });
-
-  const totalPages = Math.ceil(filteredLayanan.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentLayanan = filteredLayanan.slice(startIndex, endIndex);
+  const currentData = filteredData.slice(startIndex, endIndex);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-  };
-
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
   };
 
   const handleNext = () => {
@@ -227,409 +223,446 @@ const Index = () => {
     }
   };
 
-  const handleRefresh = () => {
-    setFilterHJT('');
-    setCurrentPage(1);
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
-   const formatCurrency = (value) => {
-    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
-    if (!isNaN(numericValue) && numericValue !== null) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(numericValue);
-    }
-    return value;
-  };
+  // Get unique HJT values for filter
+  const uniqueHJT = [...new Set(layananData.map(item => item.hjt))];
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f9fafb',
-      padding: '24px',
-      fontFamily: 'Inter, sans-serif'
-    }} className="min-h-screen bg-gray-50 p-6 font-inter">
+    <div style={{ fontFamily: 'Inter, sans-serif' }}>
       <div style={{
-        maxWidth: '80rem',
-        margin: '0 auto'
-      }} className="max-w-7xl mx-auto">
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+      }}>
         <div style={{
-          marginBottom: '24px'
-        }} className="mb-6">
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '24px' }}>
-            <button
-            onClick={handleOpenModal} 
-              style={{
-                backgroundColor: '#00AEEF',
-                color: 'white',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                border: 'none',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'background-color 0.2s',
-                whiteSpace: 'nowrap'
-              }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-colors">
-              <Plus style={{ width: '16px', height: '16px' }} className="w-4 h-4" />
-              Tambah Layanan
-            </button>
-          </div>
-        </div>
-
-        {/* Filter Section */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-          marginBottom: '24px'
-        }} className="bg-white rounded-xl p-6 shadow-sm mb-6">
+          borderBottom: '1px solid #e5e7eb'
+        }}>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '24px',
-            alignItems: 'end'
-          }} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '16px'
+            }}>
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center',
+                flexWrap: 'wrap'
+              }}>
+                <select
+                  value={filterHJT}
+                  onChange={(e) => setFilterHJT(e.target.value)}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    backgroundColor: 'white',
+                    minWidth: '150px'
+                  }}
+                >
+                  <option value="">Semua HJT</option>
+                  {uniqueHJT.map(hjt => (
+                    <option key={hjt} value={hjt}>{hjt}</option>
+                  ))}
+                </select>
 
-            {/* Filter By HJT */}
-            <div>
-            <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-            }} className="block text-sm font-medium text-gray-700 mb-1.5">
-                Filter By HJT
-            </label>
-            <select
-                value={filterHJT}
-                onChange={(e) => setFilterHJT(e.target.value)}
-                style={{
-                width: '50%',
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none'
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-                <option value="">-- Pilih HJT --</option>
-                <option value="Jawa Bali">Jawa Bali</option>
-                <option value="Jabodetabek">Jabodetabek</option>
-                <option value="Sumatra">Sumatra</option>
-                <option value="Intim">Intim</option>
-            </select>
-            </div>
+                <button
+                  onClick={handleReset}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    backgroundColor: '#6b7280',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#4b5563'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#6b7280'}
+                >
+                  <RotateCcw size={16} />
+                  Reset
+                </button>
+              </div>
 
-            {/* Refresh Button */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
-                onClick={handleRefresh}
+                onClick={handleOpenModal}
                 style={{
-                  backgroundColor: '#00AEEF',
-                  color: 'white',
-                  padding: '10px 20px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  transition: 'background-color 0.2s',
-                  whiteSpace: 'nowrap'
-                }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-colors">
-                <RotateCcw style={{ width: '16px', height: '16px' }} className="w-4 h-4" />
-                Refresh
+                  padding: '10px 20px',
+                  backgroundColor: '#00AEEF',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#0088CC'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#00AEEF'}
+              >
+                <Plus size={16} />
+                Tambah Layanan
               </button>
             </div>
           </div>
         </div>
 
-        {/* Table Section */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-        }} className="bg-white rounded-xl overflow-hidden shadow-sm">
-          <div style={{ overflowX: 'auto' }} className="overflow-x-auto">
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              border: '1px solid #e5e7eb'
-            }} className="w-full">
-              <thead style={{ backgroundColor: '#e0f2fe' }} className="bg-blue-50">
-                <tr>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'center',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb',
-                    width: '10px'
-                  }}>
-                    No.
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Wilayah HJT
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Nama Layanan
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Satuan
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Backbone
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Port
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Tarif Akses
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Tarif
-                  </th>
-                  <th style={{
-                    padding: '16px',
-                    textAlign: 'center',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {currentLayanan.map((layanan, index) => (
-                  <tr key={layanan.id} style={{
-                    borderBottom: '1px solid #f3f4f6'
-                  }} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td style={{
-                      padding: '16px',
-                      textAlign: 'center',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {startIndex + index + 1}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {layanan.hjt}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {layanan.namaLayanan}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {layanan.satuan}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {layanan.backbone}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {layanan.port}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {formatCurrency(layanan.tarifAkses)}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      {formatCurrency(layanan.tarif)}
-                    </td>
-                    <td style={{
-                      padding: '16px',
-                      textAlign: 'center',
-                      border: '1px solid #e5e7eb'
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px'
-                      }} className="flex items-center justify-center gap-2">
-                        {/* Tombol Detail/View */}
-                        <button
-                          onClick={() => handleOpenDetailModal(layanan)}
-                          style={{
-                            backgroundColor: '#e0f2fe',
-                            color: '#0284c7',
-                            padding: '6px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'background-color 0.2s'
-                          }}>
-                          <Eye style={{ width: '14px', height: '14px' }} />
-                        </button>
-                        {/* Tombol Edit */}
-                        <button
-                          onClick={() => handleOpenEditModal(layanan)}
-                          style={{
-                            backgroundColor: '#fef3c7',
-                            color: '#d97706',
-                            padding: '6px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'background-color 0.2s'
-                          }}>
-                          <Edit2 style={{ width: '14px', height: '14px' }} />
-                        </button>
-                        {/* Tombol Hapus */}
-                        <button
-                          onClick={() => handleOpenDeleteModal(layanan)}
-                          style={{
-                            backgroundColor: '#fee2e2',
-                            color: '#dc2626',
-                            padding: '6px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'background-color 0.2s'
-                          }}>
-                          <Trash2 style={{ width: '14px', height: '14px' }} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div style={{
-            padding: '16px 24px',
-            borderTop: '1px solid #e5e7eb',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse'
           }}>
-            <button
-              onClick={handlePrevious}
-              disabled={currentPage === 1}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                backgroundColor: currentPage === 1 ? '#f9fafb' : 'white',
-                color: currentPage === 1 ? '#9ca3af' : '#374151',
-                fontSize: '14px',
-                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              &lt; Previous
-            </button>
+            <thead>
+              <tr style={{
+                backgroundColor: '#f9fafb',
+                borderBottom: '1px solid #e5e7eb'
+              }}>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  No
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  HJT
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Nama Layanan
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Satuan
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Backbone
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Port
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Tarif Akses
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Tarif
+                </th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'center',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Aksi
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentData.map((item, index) => (
+                <tr key={item.id} style={{
+                  borderBottom: '1px solid #f3f4f6',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.parentElement.style.backgroundColor = '#f9fafb'}
+                onMouseLeave={(e) => e.target.parentElement.style.backgroundColor = 'transparent'}
+                >
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {startIndex + index + 1}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.hjt}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.namaLayanan}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.satuan}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.backbone}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.port}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.tarifAkses}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.tarif}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px',
+                      justifyContent: 'center'
+                    }}>
+                      <button
+                        onClick={() => handleOpenDetailModal(item)}
+                        style={{
+                          padding: '6px',
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#059669'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = '#10b981'}
+                        title="Lihat Detail"
+                      >
+                        <Eye size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleOpenEditModal(item)}
+                        style={{
+                          padding: '6px',
+                          backgroundColor: '#f59e0b',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#d97706'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = '#f59e0b'}
+                        title="Edit"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleOpenDeleteModal(item)}
+                        style={{
+                          padding: '6px',
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#dc2626'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = '#ef4444'}
+                        title="Hapus"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-            {[...Array(totalPages)].map((_, index) => {
-              const page = index + 1;
+        <div style={{
+          padding: '16px 24px',
+          borderTop: '1px solid #e5e7eb',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px'
+        }}>
+          <button
+            onClick={handlePrevious}
+            disabled={currentPage === 1}
+            style={{
+              padding: '8px 12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: currentPage === 1 ? '#f9fafb' : 'white',
+              color: currentPage === 1 ? '#9ca3af' : '#374151',
+              fontSize: '14px',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            &lt; Previous
+          </button>
+
+          {(() => {
+            const maxVisiblePages = 17;
+            const halfVisible = Math.floor(maxVisiblePages / 2);
+            let startPage = Math.max(1, currentPage - halfVisible);
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // Adjust start page if we're near the end
+            if (endPage - startPage < maxVisiblePages - 1) {
+              startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            const pages = [];
+            
+            // Add first page and ellipsis if needed
+            if (startPage > 1) {
+              pages.push(
+                <button
+                  key={1}
+                  onClick={() => handlePageChange(1)}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    backgroundColor: 1 === currentPage ? '#00AEEF' : 'white',
+                    color: 1 === currentPage ? 'white' : '#374151',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    minWidth: '40px'
+                  }}
+                >
+                  1
+                </button>
+              );
+              
+              if (startPage > 2) {
+                pages.push(
+                  <span
+                    key="ellipsis-start"
+                    style={{
+                      padding: '8px 4px',
+                      color: '#6b7280',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ...
+                  </span>
+                );
+              }
+            }
+
+            // Add visible page range
+            for (let page = startPage; page <= endPage; page++) {
+              if (page === 1 && startPage === 1) continue; // Skip if already added
+              
               const isCurrentPage = page === currentPage;
-
-              return (
+              pages.push(
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
@@ -648,27 +681,68 @@ const Index = () => {
                   {page}
                 </button>
               );
-            })}
+            }
 
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                backgroundColor: currentPage === totalPages ? '#f9fafb' : 'white',
-                color: currentPage === totalPages ? '#9ca3af' : '#374151',
-                fontSize: '14px',
-                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              Next &gt;
-            </button>
-          </div>
+            // Add ellipsis and last page if needed
+            if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                pages.push(
+                  <span
+                    key="ellipsis-end"
+                    style={{
+                      padding: '8px 4px',
+                      color: '#6b7280',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ...
+                  </span>
+                );
+              }
+              
+              pages.push(
+                <button
+                  key={totalPages}
+                  onClick={() => handlePageChange(totalPages)}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    backgroundColor: totalPages === currentPage ? '#00AEEF' : 'white',
+                    color: totalPages === currentPage ? 'white' : '#374151',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    minWidth: '40px'
+                  }}
+                >
+                  {totalPages}
+                </button>
+              );
+            }
+
+            return pages;
+          })()}
+
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            style={{
+              padding: '8px 12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: currentPage === totalPages ? '#f9fafb' : 'white',
+              color: currentPage === totalPages ? '#9ca3af' : '#374151',
+              fontSize: '14px',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Next &gt;
+          </button>
         </div>
       </div>
+
       {showTambahModal && (
         <TambahLayanan
           isOpen={showTambahModal}

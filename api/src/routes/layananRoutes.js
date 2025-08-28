@@ -4,6 +4,9 @@ import { authenticate, adminOnly, adminOrSales } from "../middleware/auth.js";
 
 const router = express.Router();
 
+// Route publik untuk testing (tanpa autentikasi)
+router.get("/public", LayananController.getAllLayanan);
+
 // Semua rute memerlukan autentikasi
 router.use(authenticate);
 
