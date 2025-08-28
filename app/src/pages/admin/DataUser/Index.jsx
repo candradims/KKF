@@ -48,12 +48,15 @@ const Index = () => {
         id: user.id_user || user.id,
         date: formatDateToDDMMYYYY(user.tanggal) || user.date,
         email: user.email_user || user.email,
+        kata_sandi: user.kata_sandi || user.password,
         role: formatRoleForDisplay(user.role_user || user.role), // Format for display
         originalRole: user.role_user || user.role, // Keep original for API calls
         actions: ['view', 'edit', 'delete'],
         originalDate: user.tanggal 
       }));
 
+      sanitizedUsers.sort((a, b) => new Date(a.originalDate) - new Date(b.originalDate));
+      
       setUsersData(sanitizedUsers);
     } catch (error) {
       console.error("Gagal mengambil data pengguna:", error);
@@ -478,7 +481,7 @@ const Index = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">-- Pilih --</option>
-                <option value="SuperAdmin">SuperAdmin</option>
+                <option value="SuperAdmin">Super Admin</option>
                 <option value="Admin">Admin</option>
                 <option value="Sales">Sales</option>
               </select>

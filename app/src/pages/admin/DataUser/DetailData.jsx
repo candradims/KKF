@@ -134,7 +134,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                   />
                 </div>
 
-                {/* Input Kata Sandi - Tampilkan password asli dari database */}
+                {/* Input Kata Sandi */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: '120px 1fr',

@@ -221,7 +221,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     fontSize: '16px',
                     fontWeight: '600',
                     color: '#2D3A76'
-                  }}>Kata Sandi<br/><span style={{fontSize: '12px', fontWeight: '400', color: '#666'}}>(Opsional)</span></label>
+                  }}>Kata Sandi<br/><span style={{fontSize: '12px', fontWeight: '400', color: '#666'}}></span></label>
                   <input
                     type="password"
                     name="password"
