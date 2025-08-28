@@ -126,38 +126,21 @@ const Sidebar = () => {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          padding: '1rem',
           borderBottom: '1px solid #E5E7EB',
-          backgroundColor: '#E8F4FD'
+          backgroundColor: '#E8F4FD',
+          paddingLeft: '10px'
         }}>
           <img 
             src={logoImage}
             alt="PLN Logo"
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '4px',
+              width: '130px',
+              height: '88px',
+              borderRadius: '8px',
               objectFit: 'contain',
-              marginRight: '8px'
+              marginLeft: '10px'
             }}
           />
-          <div>
-            <div style={{
-              fontSize: '18px',
-              fontWeight: 'bold',
-              color: '#00AEEF',
-              lineHeight: '1.2'
-            }}>
-              PLN
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: '#6B7280',
-              lineHeight: '1.2'
-            }}>
-              Icon Plus
-            </div>
-          </div>
         </div>
 
         {/* Navigation Menu */}
