@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import logoImage from '../assets/Logo_PLN_Icon_Plus.png';
-// Import MUI Icons
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -13,10 +12,10 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState(null);
   
-  // Determine role based on current path (like in reference)
   const path = location.pathname.toLowerCase();  
-  let userRole = "superAdmin"; // default
+  let userRole = "superAdmin"; 
   
   if (path.startsWith("/sales")) {
     userRole = "sales";
@@ -42,17 +41,28 @@ const Sidebar = () => {
     setShowLogoutModal(false);
   };
 
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+  };
+
   // Menu items untuk Super admin
   const superAdminMenuItems = [
     {
       title: "Dashboard",
       path: "/superAdmin/dashboard",
       icon: <DashboardIcon />,
+      color: colors.secondary
     },
     {
       title: "Data Penawaran",
       path: "/superAdmin/data-penawaran",
       icon: <BuildIcon />,
+      color: colors.tertiary
     }
   ];
 
@@ -62,26 +72,31 @@ const Sidebar = () => {
       title: "Dashboard",
       path: "/admin/dashboard",
       icon: <DashboardIcon />,
+      color: colors.secondary
     },
     {
       title: "Management Data User",
       path: "/admin/data-user",
       icon: <PeopleIcon />,
+      color: colors.tertiary
     },
     {
       title: "Data Layanan",
       path: "/admin/data-layanan",
       icon: <AssignmentIcon />,
+      color: colors.accent1
     },
     {
       title: "Data Penawaran",
       path: "/admin/data-penawaran",
       icon: <BuildIcon />,
+      color: colors.accent2
     },
     {
       title: "Laporan Laba",
       path: "/admin/laporan-laba",
       icon: <AssessmentIcon />,
+      color: colors.success
     }
   ];
 
@@ -91,16 +106,19 @@ const Sidebar = () => {
       title: "Dashboard",
       path: "/sales/dashboard",
       icon: <DashboardIcon />,
+      color: colors.secondary
     },
     {
       title: "Data Penawaran",
       path: "/sales/data-penawaran",
       icon: <BuildIcon />,
+      color: colors.tertiary
     },
     {
       title: "Laporan Laba",
       path: "/sales/laporan-laba",
       icon: <AssessmentIcon />,
+      color: colors.success
     }
   ];
 
@@ -112,34 +130,166 @@ const Sidebar = () => {
       menuItems = superAdminMenuItems;
     }
 
+  const sidebarStyle = {
+    height: '100vh',
+    width: '270px',
+    background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+    display: 'flex',
+    flexDirection: 'column',
+    borderRight: 'none',
+    boxShadow: '4px 0 20px rgba(3, 91, 113, 0.15)',
+    position: 'relative',
+    overflow: 'hidden'
+  };
+
+  const logoSectionStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottom: `1px solid rgba(255, 255, 255, 0.1)`,
+    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+    padding: '20px',
+    position: 'relative'
+  };
+
+  const menuItemStyle = (item, index) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: '15px 20px',
+    margin: '6px 12px',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    backgroundColor: isActive(item.path) 
+      ? 'rgba(255, 255, 255, 0.15)' 
+      : hoveredItem === index 
+        ? 'rgba(255, 255, 255, 0.08)' 
+        : 'transparent',
+    color: 'white',
+    fontSize: '14px',
+    fontWeight: isActive(item.path) ? '600' : '500',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transform: hoveredItem === index ? 'translateX(4px)' : 'translateX(0)',
+    border: isActive(item.path) ? `1px solid rgba(255, 255, 255, 0.2)` : '1px solid transparent',
+    backdropFilter: isActive(item.path) ? 'blur(10px)' : 'none',
+    position: 'relative',
+    overflow: 'hidden'
+  });
+
+  const iconStyle = (item, index) => ({
+    marginRight: '15px',
+    fontSize: '22px',
+    display: 'flex',
+    alignItems: 'center',
+    color: isActive(item.path) ? 'white' : hoveredItem === index ? item.color : 'rgba(255, 255, 255, 0.8)',
+    transition: 'all 0.3s ease',
+    filter: isActive(item.path) ? 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.3))' : 'none'
+  });
+
+  const userProfileStyle = {
+    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+    padding: '20px',
+    background: `linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)`,
+    backdropFilter: 'blur(10px)'
+  };
+
+  const avatarStyle = {
+    width: '42px',
+    height: '42px',
+    borderRadius: '12px',
+    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: '12px',
+    boxShadow: '0 4px 12px rgba(0, 191, 202, 0.3)',
+    border: '2px solid rgba(255, 255, 255, 0.2)'
+  };
+
+  const logoutButtonStyle = {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '14px 20px',
+    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+    boxSizing: 'border-box',
+    margin: '0',
+    outline: 'none',
+    boxShadow: '0 4px 15px rgba(0, 191, 202, 0.3)',
+    position: 'relative',
+    overflow: 'hidden'
+  };
+
   return (
     <>
-      <div style={{
-        height: '100vh',
-        width: '250px',
-        backgroundColor: '#E8F4FD',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRight: '1px solid #E5E7EB'
-      }}>
-        {/* Logo Section */}
+      <div style={sidebarStyle}>
+        {/* Background Pattern */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          borderBottom: '1px solid #E5E7EB',
-          backgroundColor: '#E8F4FD',
-          paddingLeft: '10px'
-        }}>
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `
+            radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(0, 191, 202, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 60%, rgba(63, 186, 140, 0.05) 0%, transparent 50%)
+          `,
+          pointerEvents: 'none'
+        }} />
+
+        {/* Logo Section */}
+        <div style={logoSectionStyle}>
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%)',
+            pointerEvents: 'none'
+          }} />
           <img 
             src={logoImage}
             alt="PLN Logo"
             style={{
-              width: '130px',
-              height: '88px',
-              borderRadius: '8px',
+              width: '160px',
+              height: 'auto',
               objectFit: 'contain',
-              marginLeft: '10px',
-              marginTop: '10px'
+              padding: '12px 16px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(203, 235, 234, 0.95)',
+              boxShadow: `
+                0 6px 20px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 2px 10px rgba(255, 255, 255, 0.3)
+              `,
+              transition: 'all 0.3s ease',
+              zIndex: 1,
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'scale(1.05) translateY(-2px)';
+              e.target.style.boxShadow = `
+                0 10px 25px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.15),
+                inset 0 2px 12px rgba(255, 255, 255, 0.4)
+              `;
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'scale(1) translateY(0)';
+              e.target.style.boxShadow = `
+                0 6px 20px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 2px 10px rgba(255, 255, 255, 0.3)
+              `;
             }}
           />
         </div>
@@ -147,93 +297,91 @@ const Sidebar = () => {
         {/* Navigation Menu */}
         <div style={{
           flex: 1,
-          padding: '1rem 0'
+          padding: '20px 0',
+          position: 'relative'
         }}>
           {menuItems.map((item, index) => (
             <div
               key={index}
               onClick={() => navigate(item.path)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '12px 16px',
-                margin: '4px 8px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                backgroundColor: isActive(item.path) ? '#00AEEF' : 'transparent',
-                color: isActive(item.path) ? 'white' : '#374151',
-                fontSize: '14px',
-                fontWeight: '500',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseOver={(e) => {
-                if (!isActive(item.path)) {
-                  e.currentTarget.style.backgroundColor = '#F3F4F6';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!isActive(item.path)) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }
-              }}
+              style={menuItemStyle(item, index)}
+              onMouseEnter={() => setHoveredItem(index)}
+              onMouseLeave={() => setHoveredItem(null)}
             >
-              <span style={{ 
-                marginRight: '12px',
-                fontSize: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                color: isActive(item.path) ? 'white' : '#374151'
-              }}>
+              {/* Active indicator */}
+              {isActive(item.path) && (
+                <div style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '4px',
+                  height: '24px',
+                  background: `linear-gradient(180deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                  borderRadius: '0 2px 2px 0',
+                  boxShadow: '0 0 10px rgba(0, 191, 202, 0.5)'
+                }} />
+              )}
+              
+              <span style={iconStyle(item, index)}>
                 {item.icon}
               </span>
               <span style={{ 
-                color: isActive(item.path) ? 'white' : '#374151' 
+                color: 'white',
+                letterSpacing: '0.3px',
+                textShadow: isActive(item.path) ? '0 0 10px rgba(255, 255, 255, 0.3)' : 'none'
               }}>
                 {item.title}
               </span>
+
+              {/* Hover effect background */}
+              {hoveredItem === index && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `linear-gradient(135deg, ${item.color}20 0%, transparent 100%)`,
+                  borderRadius: '12px',
+                  pointerEvents: 'none'
+                }} />
+              )}
             </div>
           ))}
         </div>
 
         {/* User Profile Section */}
-        <div style={{
-          borderTop: '1px solid #E5E7EB',
-          padding: '1rem'
-        }}>
+        <div style={userProfileStyle}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            marginBottom: '1rem'
+            marginBottom: '20px'
           }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              backgroundColor: '#00AEEF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '8px'
-            }}>
+            <div style={avatarStyle}>
               <span style={{
                 color: 'white',
-                fontSize: '14px',
-                fontWeight: 'bold'
+                fontSize: '16px',
+                fontWeight: 'bold',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
               }}>
                 {userRole === 'sales' ? 'S' : userRole === 'superAdmin' ? 'SA' : 'A'}
               </span>
             </div>
             <div>
               <div style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151'
+                fontSize: '15px',
+                fontWeight: '600',
+                color: 'white',
+                marginBottom: '4px',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
               }}>
                 {userRole === 'sales' ? 'Sales' : userRole === 'superAdmin' ? 'Super Admin' : 'Admin'}
               </div>
               <div style={{
                 fontSize: '12px',
-                color: '#6B7280'
+                color: 'rgba(255, 255, 255, 0.7)',
+                letterSpacing: '0.2px'
               }}>
                 {userRole === 'sales' ? 'sales@pln.co.id' : userRole === 'superAdmin' ? 'superadmin@pln.co.id' : 'admin@pln.co.id'}
               </div>
@@ -243,39 +391,40 @@ const Sidebar = () => {
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            style={{
-              width: '100%',
+            style={logoutButtonStyle}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 20px rgba(0, 191, 202, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 15px rgba(0, 191, 202, 0.3)';
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%)',
+              borderRadius: '12px',
+              pointerEvents: 'none'
+            }} />
+            <span style={{  
+              marginRight: '10px',
               display: 'flex',
               alignItems: 'center',
-              padding: '12px 16px',
-              backgroundColor: '#00AEEF',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'background-color 0.2s',
-              boxSizing: 'border-box',
-              margin: '0',
-              outline: 'none'
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#0088CC'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#00AEEF'}
-          >
-            <span style={{  
-              marginRight: '8px',
-              display: 'flex',
-              alignItems: 'center'
+              zIndex: 1
             }}>
               <LogoutIcon fontSize="small" />
             </span>
-            Logout
+            <span style={{ zIndex: 1 }}>Logout</span>
           </button>
         </div>
       </div>
 
-      {/* Logout Confirmation Modal */}
+      {/* Enhanced Logout Confirmation Modal */}
       {showLogoutModal && (
         <div style={{
           position: 'fixed',
@@ -283,72 +432,103 @@ const Sidebar = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: 'rgba(3, 91, 113, 0.8)',
+          backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          animation: 'fadeIn 0.3s ease'
         }}>
           <div style={{
             backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '2rem',
-            maxWidth: '400px',
+            borderRadius: '16px',
+            padding: '2.5rem',
+            maxWidth: '420px',
             width: '90%',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
+            {/* Modal background gradient */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.success} 100%)`
+            }} />
+            
             <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: '#374151',
-              marginBottom: '1rem'
+              fontSize: '1.375rem',
+              fontWeight: '700',
+              color: colors.primary,
+              marginBottom: '1rem',
+              textAlign: 'center'
             }}>
               Konfirmasi Logout
             </h3>
             <p style={{
               color: '#6B7280',
-              marginBottom: '2rem'
+              marginBottom: '2rem',
+              textAlign: 'center',
+              lineHeight: '1.6'
             }}>
               Apakah Anda yakin ingin keluar dari aplikasi?
             </p>
             <div style={{
               display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '0.75rem'
+              justifyContent: 'center',
+              gap: '1rem'
             }}>
               <button
                 onClick={cancelLogout}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '12px 24px',
                   fontSize: '0.875rem',
-                  fontWeight: '500',
+                  fontWeight: '600',
                   color: '#374151',
-                  backgroundColor: '#F3F4F6',
-                  border: 'none',
-                  borderRadius: '6px',
+                  backgroundColor: '#F9FAFB',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '10px',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s'
+                  transition: 'all 0.2s ease'
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#E5E7EB'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#F3F4F6'}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#F3F4F6';
+                  e.target.style.transform = 'translateY(-1px)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#F9FAFB';
+                  e.target.style.transform = 'translateY(0)';
+                }}
               >
                 Batal
               </button>
               <button
                 onClick={confirmLogout}
                 style={{
-                  padding: '0.5rem 1rem',
+                  padding: '12px 24px',
                   fontSize: '0.875rem',
-                  fontWeight: '500',
+                  fontWeight: '600',
                   color: 'white',
-                  backgroundColor: '#00AEEF',
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '10px',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s'
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 12px rgba(0, 191, 202, 0.3)'
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#0088CC'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#00AEEF'}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(0, 191, 202, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0, 191, 202, 0.3)';
+                }}
               >
                 Logout
               </button>
@@ -356,6 +536,19 @@ const Sidebar = () => {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </>
   );
 };
