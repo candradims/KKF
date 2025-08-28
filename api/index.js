@@ -1,11 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { AuthController } from './src/controllers/AuthController.js';
-import { AdminController } from './src/controllers/AdminController.js';
-import adminRoutes from './src/routes/adminRoutes.js';
-
-
+import { AuthController } from "./src/controllers/AuthController.js";
+import { AdminController } from "./src/controllers/AdminController.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
+import layananRoutes from "./src/routes/layananRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +37,7 @@ app.get("/api/health", (req, res) => {
 
 app.post("/api/auth/login", AuthController.login);
 app.use("/api/admin", adminRoutes);
+app.use("/api/layanan", layananRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
