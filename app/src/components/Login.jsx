@@ -118,15 +118,65 @@ const Login = () => {
     }
 
     try {
-      // Simulasi login
-      setTimeout(() => {
+      console.log("🔐 Attempting login with:", { 
+        email: formData.email, 
+        role: formData.role,
+        passwordLength: formData.password.length 
+      });
+      
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email_user: formData.email,
+          kata_sandi: formData.password,
+          role_user: formData.role
+        })
+      });
+
+      const result = await response.json();
+      console.log("🔐 Login response status:", response.status);
+      console.log("🔐 Login response body:", result);
+
+      if (response.ok && result.success) {
+        // Simpan data user ke localStorage
+        localStorage.setItem('userData', JSON.stringify(result.data));
+        localStorage.setItem('userRole', result.data.role_user);
+        
         setMessage({ type: "success", text: "Login berhasil!" });
         setShowModal(true);
         setIsLoading(false);
-      }, 1500);
+      } else {
+        // Handle specific error messages from server
+        let errorMessage = "Login gagal";
+        
+        if (result.message === "Email tidak ditemukan") {
+          errorMessage = "Email tidak terdaftar dalam sistem";
+        } else if (result.message === "Password salah") {
+          errorMessage = "Password yang Anda masukkan salah";
+        } else if (result.message === "Akun tidak aktif") {
+          errorMessage = "Akun Anda tidak aktif. Hubungi administrator";
+        } else if (result.message && result.message.includes("Role tidak sesuai")) {
+          errorMessage = "Role yang dipilih tidak sesuai dengan akun Anda";
+        } else {
+          errorMessage = result.message || "Login gagal";
+        }
+        
+        setMessage({ 
+          type: "error", 
+          text: errorMessage
+        });
+        setIsLoading(false);
+      }
       
     } catch (error) {
-      setMessage({ type: "error", text: "Terjadi kesalahan server" });
+      console.error("❌ Login error:", error);
+      setMessage({ 
+        type: "error", 
+        text: "Terjadi kesalahan koneksi server" 
+      });
       setIsLoading(false);
     }
   };
