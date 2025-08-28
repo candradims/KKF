@@ -22,15 +22,23 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
     }
   }, [initialData]);
 
-  const handleDeleteConfirm = async () => {
-    try {
-      setShowSuccessModal(true);
-    } catch (error) {
-      console.error("Error deleting data:", error);
-    }
-  };
-
-  const handleCloseSuccessModal = () => {
+  const handleDeleteConfirm = async () => {
+    try {
+      console.log("🗑️ Deleting layanan:", formData);
+      
+      // Call the onDelete function passed from parent with the ID
+      if (onDelete && formData.id) {
+        await onDelete(formData.id);
+        // Only show success modal if no error occurred
+        setShowSuccessModal(true);
+      } else {
+        throw new Error("ID layanan tidak ditemukan");
+      }
+    } catch (error) {
+      console.error("❌ Error deleting layanan:", error);
+      alert("Gagal menghapus layanan: " + error.message);
+    }
+  };  const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
     onClose(); 
   };
