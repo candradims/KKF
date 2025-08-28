@@ -44,7 +44,7 @@ const Login = () => {
         font-style: italic;
         color: #9CA3AF;
       }
-        
+
       @keyframes float {
         0% { transform: translateY(0px); }
         50% { transform: translateY(-10px); }
@@ -234,8 +234,7 @@ const Login = () => {
         background: `radial-gradient(circle, ${colors.primary}20 0%, transparent 70%)`,
         animation: 'float 6s ease-in-out infinite 1s'
       }} />
-
-      {/* Geometric shapes for modern look */}
+      
       <div style={{
         position: 'absolute',
         top: '15%',
