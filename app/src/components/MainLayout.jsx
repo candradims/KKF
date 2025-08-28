@@ -14,15 +14,22 @@ const MainLayout = () => {
     <div style={{
       display: 'flex',
       height: '100vh',
-      backgroundColor: '#F9FAFB'
+      margin: 0,
+      padding: 0,
+      backgroundColor: '#F9FAFB',
+      overflow: 'hidden'
     }}>
       {/* Sidebar */}
       <div style={{
         display: sidebarOpen ? 'block' : 'none',
         position: 'fixed',
+        top: 0,
+        left: 0,
         width: '250px',
-        height: '100%',
-        zIndex: 40
+        height: '100vh',
+        zIndex: 40,
+        margin: 0,
+        padding: 0
       }}>
         <Sidebar />
       </div>
@@ -36,9 +43,7 @@ const MainLayout = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 30,
-            display: 'none'
+            zIndex: 30
           }}
           onClick={toggleSidebar}
         />
@@ -51,7 +56,8 @@ const MainLayout = () => {
         flex: 1,
         width: '100%',
         marginLeft: sidebarOpen ? '250px' : '0',
-        transition: 'margin-left 0.3s ease'
+        transition: 'margin-left 0.3s ease',
+        minHeight: '100vh'
       }}>
         {/* Navbar */}
         <Navbar isSidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
