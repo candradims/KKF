@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const hjtOptions = ["Sumatra", "Jawa Bali", "Jabodetabek", "Intim"];
-
 const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     namaLayanan: "",
@@ -21,6 +19,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   // State untuk data dari database
   const [layananOptions, setLayananOptions] = useState([]);
   const [satuanOptions, setSatuanOptions] = useState([]);
+  const [hjtOptions, setHjtOptions] = useState([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   
   // State untuk custom input
@@ -45,14 +44,20 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       const result = await response.json();
       const data = Array.isArray(result) ? result : result.data || [];
       
-      // Ambil unique nama_layanan dan satuan dari database
+      // Ambil unique nama_layanan, satuan, dan wilayah_hjt dari database
       const uniqueLayanan = [...new Set(data.map(item => item.nama_layanan).filter(Boolean))];
       const uniqueSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
+      const uniqueHjt = [...new Set(data.map(item => item.wilayah_hjt).filter(Boolean))];
       
       setLayananOptions(uniqueLayanan.sort());
       setSatuanOptions(uniqueSatuan.sort());
+      setHjtOptions(uniqueHjt.sort());
       
-      console.log("✅ Options loaded:", { layanan: uniqueLayanan.length, satuan: uniqueSatuan.length });
+      console.log("✅ Options loaded:", { 
+        layanan: uniqueLayanan.length, 
+        satuan: uniqueSatuan.length,
+        hjt: uniqueHjt.length 
+      });
     } catch (error) {
       console.error("❌ Gagal mengambil data options:", error);
       // Fallback ke data default jika gagal
@@ -71,6 +76,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
         "Cloud 1corevCPU 2GB Mem Cap 50GB"
       ]);
       setSatuanOptions(["Mbps", "Units"]);
+      setHjtOptions(["Sumatra", "Jawa Bali", "Jabodetabek", "Intim"]);
     } finally {
       setIsLoadingOptions(false);
     }

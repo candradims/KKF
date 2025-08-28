@@ -2,139 +2,265 @@ import React, { useState, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const layananOptions = [
-  "IP VPN (1 sd 10 Mbps)", "IP VPN (11 sd 50 Mbps)", "IP VPN (51 sd 100 Mbps)", "IP VPN (101 sd 500 Mbps)",
-  "IP VPN (501 sd 1000 Mbps)", "IP VPN Premium (2 Mbps)", "IP VPN Premium (3 Mbps)", "IP VPN Premium (4 Mbps)",
-  "IP VPN Premium (5 Mbps)", "IP VPN Premium (6 Mbps)", "IP VPN Premium (7 Mbps)", "IP VPN Premium (8 Mbps)",
-  "IP VPN Premium (9 Mbps)", "IP VPN Premium (10 Mbps)", "IP VPN Premium (15 Mbps)", "IP VPN Premium (20 Mbps)",
-  "IP VPN Premium (40 Mbps)", "Metronet (1 sd 10 Mbps)", "Metronet (11 sd 50 Mbps)", "Metronet (51 sd 100 Mbps)",
-  "Metronet (101 sd 500 Mbps)", "Metronet (501 sd 1000 Mbps)", "Inet Corp IX&IIX (1 sd 10 Mbps)",
-  "Inet Corp IX&IIX (11 sd 50 Mbps)", "Inet Corp IX&IIX (51 sd 100 Mbps)", "Inet Corp IX&IIX (101 sd 500 Mbps)",
-  "Inet Corp IX&IIX (501 sd 1 Gbps)", "Inet Corp IX&IIX (1.01 sd 5 Gbps)", "Inet Corp IX&IIX (5.01 sd 10 Gbps)",
-  "Inet Corp IIX (1 sd 10 Mbps)", "Inet Corp IIX (11 sd 50 Mbps)", "Inet Corp IIX (51 sd 100 Mbps)",
-  "Inet Corp IIX (101 sd 500 Mbps)", "Inet Corp IIX (501 sd 1 Gbps)", "Inet Corp IIX (1.01 sd 5 Gbps)",
-  "Inet Corp IIX (5.01 sd 10 Gbps)", "Inet Corp IX (1 sd 10 Mbps)", "Inet Corp IX (11 sd 50 Mbps)",
-  "Inet Corp IX (51 sd 100 Mbps)", "Inet Corp IX (101 sd 500 Mbps)", "Inet Corp IX (501 sd 1.000 Mbps)",
-  "Inet Corp IX (1.01 sd 5 Gbps)", "Inet Corp IX (5.01 sd 10 Gbps)", "IP Transit (1 sd 10 Mbps)",
-  "IP Transit (11 sd 50 Mbps)", "IP Transit (51 sd 100 Mbps)", "IP Transit (101 sd 500 Mbps)",
-  "IP Transit (501 sd 1 Gbps)", "IP Transit (1.01 sd 5 Gbps)", "IP Transit (5.01 sd 10 Gbps)",
-  "IP Transit IIX (1 sd 10 Mbps)", "IP Transit IIX (11 sd 50 Mbps)", "IP Transit IIX (51 sd 100 Mbps)",
-  "IP Transit IIX (101 sd 500 Mbps)", "IP Transit IIX (501 sd 1Gbps)", "IP Transit IIX (1.01 sd 5 Gbps)",
-  "IP Transit IIX (5.01 sd 10 Gbps)", "IP Transit IX (1 sd 10 Mbps)", "IP Transit IX Only (11 sd 50 Mbps)",
-  "IP Transit IX (51 sd 100 Mbps)", "IP Transit IX (101 sd 500 Mbps)", "IP Transit IX (501 sd 1 Gbps)",
-  "IP Transit IX (1.01 sd 5 Gbps)", "IP Transit IX (5.01 sd 10 Gbps)", "i-WIN Indoor", "i-WIN Outdoor",
-  "MSR Bronze", "MSR Silver (12 Bulan)", "MSR Gold (12 Bulan)", "MSR Platinum (12 Bulan)", "APK I-See (Basic)",
-  "APK I-See (Flex)", "APK I-See (Ultimate)", "Non Analytic CCTV (Basic)", "Analytic CCTV (Basic)",
-  "Outdoor PTZ (Basic)", "Thermal Outdoor (Basic)", "Non Analytic CCTV (Flex)", "Analytic CCTV (Flex)",
-  "Outdoor PTZ (Flex)", "Thermal Outdoor (Flex)", "Non Analytic CCTV (Ultimate)", "Analytic CCTV (Ultimate)",
-  "Outdoor PTZ (Ultimate)", "Thermal Outdoor (Ultimate)", "Biaya Installasi CCTV", "Penambahan IPv4 Publik",
-  "Lain-lain", "IBBC CIR4-BW10 On-Net FTTH", "IBBC CIR4-BW15 On-Net FTTH", "IBBC CIR4-BW20 On-Net FTTH",
-  "IBBC CIR4-BW25 On-Net FTTH", "IBBC CIR4-BW30 On-Net FTTH", "IBBC CIR4-BW35 On-Net FTTH",
-  "IBBC CIR4-BW50 On-Net FTTH", "IBBC CIR4-BW75 On-Net FTTH", "IBBC CIR4-BW100 On-Net FTTH",
-  "IBBC CIR4-BW150 On-Net FTTH", "IBBC CIR4-BW200 On-Net FTTH", "IBBC CIR4-BW500 On-Net FTTH",
-  "IBBC CIR4-BW1000 On-Net FTTH", "IBBC CIR8-BW10 On-Net FTTH", "IBBC CIR8-BW15 On-Net FTTH",
-  "IBBC CIR8-BW20 On-Net FTTH", "IBBC CIR8-BW25 On-Net FTTH", "IBBC CIR8-BW30 On-Net FTTH",
-  "IBBC CIR8-BW35 On-Net FTTH", "IBBC CIR10-BW50 On-Net FTTH", "IBBC CIR10-BW75 On-Net FTTH",
-  "IBBC CIR16-BW100 On-Net FTTH", "IBBC CIR16-BW150 On-Net FTTH", "IBBC CIR16-BW200 On-Net FTTH",
-  "IBBC CIR20-BW500 On-Net FTTH", "IBBC CIR20-BW1000 On-Net FTTH", "IBBC CIR4-BW10 Off-Net non-FTTH",
-  "IBBC CIR4-BW15 Off-Net non-FTTH", "IBBC CIR4-BW20 Off-Net non-FTTH", "IBBC CIR4-BW25 Off-Net non-FTTH",
-  "IBBC CIR4-BW30 Off-Net non-FTTH", "IBBC CIR4-BW35 Off-Net non-FTTH", "IBBC CIR4-BW50 Off-Net non-FTTH",
-  "IBBC CIR4-BW75 Off-Net non-FTTH", "IBBC CIR4-BW100 Off-Net non-FTTH", "IBBC CIR4-BW150 Off-Net non-FTTH",
-  "IBBC CIR4-BW200 Off-Net non-FTTH", "IBBC CIR4-BW500 Off-Net non-FTTH", "IBBC CIR4-BW1000 Off-Net non-FTTH",
-  "IBBC CIR8-BW10 Off-Net non-FTTH", "IBBC CIR8-BW15 Off-Net non-FTTH", "IBBC CIR8-BW20 Off-Net non-FTTH",
-  "IBBC CIR8-BW25 Off-Net non-FTTH", "IBBC CIR8-BW30 Off-Net non-FTTH", "IBBC CIR8-BW35 Off-Net non-FTTH",
-  "IBBC CIR10-BW50 Off-Net non-FTTH", "IBBC CIR10-BW75 Off-Net non-FTTH", "IBBC CIR16-BW100 Off-Net non-FTTH",
-  "IBBC CIR16-BW150 Off-Net non-FTTH", "IBBC CIR16-BW200 Off-Net non-FTTH", "IBBC CIR20-BW500 Off-Net non-FTTH",
-  "IBBC CIR20-BW1000 Off-Net non-FTTH", "IBBC CIR4-BW10 On-Net FTTH IP Publik", "IBBC CIR4-BW15 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW20 On-Net FTTH IP Publik", "IBBC CIR4-BW25 On-Net FTTH IP Publik", "IBBC CIR4-BW30 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW35 On-Net FTTH IP Publik", "IBBC CIR4-BW50 On-Net FTTH IP Publik", "IBBC CIR4-BW75 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW100 On-Net FTTH IP Publik", "IBBC CIR4-BW150 On-Net FTTH IP Publik", "IBBC CIR4-BW200 On-Net FTTH IP Publik",
-  "IBBC CIR4-BW500 On-Net FTTH IP Publik", "IBBC CIR4-BW1000 On-Net FTTH IP Publik", "IBBC CIR8-BW10 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW15 On-Net FTTH IP Publik", "IBBC CIR8-BW20 On-Net FTTH IP Publik", "IBBC CIR8-BW25 On-Net FTTH IP Publik",
-  "IBBC CIR8-BW30 On-Net FTTH IP Publik", "IBBC CIR8-BW35 On-Net FTTH IP Publik", "IBBC CIR10-BW50 On-Net FTTH IP Publik",
-  "IBBC CIR10-BW75 On-Net FTTH IP Publik", "IBBC CIR16-BW100 On-Net FTTH IP Publik", "IBBC CIR16-BW150 On-Net FTTH IP Publik",
-  "IBBC CIR16-BW200 On-Net FTTH IP Publik", "IBBC CIR20-BW500 On-Net FTTH IP Publik", "IBBC CIR20-BW1000 On-Net FTTH IP Publik",
-  "Cloud 1corevCPU 2GB Mem Cap 50GB", "Cloud 4corevCPU 16GB Mem Cap 200GB", "Cloud 12corevCPU 96Gb Mem Cap 1TB",
-];
-
-const hjtOptions = ["Sumatra", "Jawa Bali", "Jabodetabek", "Intim"];
-const satuanOptions = ["Mbps", "Units"];
-
 const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
-  const [formData, setFormData] = useState(initialData || {
-    id: null,
-    namaLayanan: "",
-    hjt: "",
-    satuan: "",
-    backbone: "",
-    port: "",
-    tarifAkses: "",
-    tarif: "",
+  console.log('🔄 EditLayanan render:', { isOpen, initialData }); // Debug log
+  
+  // Add custom scrollbar styling
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 12px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+        border: 2px solid #f1f5f9;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:active {
+        background: #475569;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
+  
+  const [layananOptions, setLayananOptions] = useState([]);
+  const [satuanOptions, setSatuanOptions] = useState([]);
+  const [hjtOptions, setHjtOptions] = useState([]);
+
+  // Form state - sesuaikan dengan struktur data dari Index.jsx
+  const [formData, setFormData] = useState({
+    namaLayanan: '',
+    hjt: '',
+    satuan: '',
+    backbone: '',
+    port: '',
+    tarifAkses: '',
+    tarif: ''
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-
+  const [showSuccess, setShowSuccess] = useState(false);
+  
+  // Debug log for showSuccess state changes
   useEffect(() => {
-    if (initialData) {
+    console.log("🔔 EditLayanan: showSuccess state changed to:", showSuccess);
+  }, [showSuccess]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState({
+    layanan: false,
+    hjt: false,
+    satuan: false
+  });
+
+  // Fetch dynamic options from database
+  useEffect(() => {
+    const fetchOptionsFromDatabase = async () => {
+      if (!isOpen) return;
+      
+      try {
+        console.log("🔍 Fetching options from database");
+        
+        const response = await fetch('http://localhost:3000/api/layanan/public');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const result = await response.json();
+        const data = Array.isArray(result) ? result : result.data || [];
+        
+        // Ambil unique nama_layanan, satuan, dan wilayah_hjt dari database
+        const uniqueLayanan = [...new Set(data.map(item => item.nama_layanan).filter(Boolean))];
+        const uniqueSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
+        const uniqueHjt = [...new Set(data.map(item => item.wilayah_hjt).filter(Boolean))];
+        
+        setLayananOptions(uniqueLayanan.sort());
+        setSatuanOptions(uniqueSatuan.sort());
+        setHjtOptions(uniqueHjt.sort());
+        
+        console.log("✅ Options loaded:", { 
+          layanan: uniqueLayanan.length, 
+          satuan: uniqueSatuan.length,
+          hjt: uniqueHjt.length 
+        });
+        console.log("🔍 Satuan options:", uniqueSatuan); // Debug log untuk satuan
+      } catch (error) {
+        console.error("❌ Gagal mengambil data options:", error);
+        // Fallback ke data default jika gagal
+        setLayananOptions([
+          "IP VPN (1 sd 10 Mbps)",
+          "IP VPN (11 sd 50 Mbps)",
+          "IP VPN (51 sd 100 Mbps)",
+          "IP VPN (101 sd 500 Mbps)",
+          "IP VPN (501 sd 1000 Mbps)",
+          "IP VPN (>1 Gbps)",
+          "MPLS",
+          "Internet Dedicated",
+          "DIA (Dedicated Internet Access)",
+          "CoLo (Colocation)",
+          "Cloud Service",
+          "Dark Fiber"
+        ]);
+        setSatuanOptions([
+          "Mbps",
+          "Gbps", 
+          "Port",
+          "Unit",
+          "Rack",
+          "Slot",
+          "Bandwidth",
+          "Connection",
+          "License",
+          "Instance",
+          "TB",
+          "GB",
+          "User",
+          "Device",
+          "Site"
+        ]);
+        setHjtOptions([
+          "Jakarta",
+          "Sumatra",
+          "Kalimantan",
+          "Sulawesi",
+          "Papua"
+        ]);
+      }
+    };
+
+    fetchOptionsFromDatabase();
+  }, [isOpen]);
+
+  // Initialize form with initial data
+  useEffect(() => {
+    if (initialData && isOpen) {
+      console.log('EditLayanan initialData:', initialData); // Debug log
       setFormData({
-        ...initialData,
-        port: initialData.port.toString(),
-        tarifAkses: initialData.tarifAkses.toString(),
-        tarif: initialData.tarif.toString(), 
+        namaLayanan: initialData.namaLayanan || '',
+        hjt: initialData.hjt || '',
+        satuan: initialData.satuan || '',
+        backbone: initialData.backbone || '',
+        port: initialData.port || '',
+        tarifAkses: initialData.tarifAkses || '',
+        tarif: initialData.tarif || ''
       });
     }
-  }, [initialData]);
+  }, [initialData, isOpen]);
 
-  useEffect(() => {
-    if (initialData) {
-      const hasChanged =
-        formData.namaLayanan !== initialData.namaLayanan ||
-        formData.hjt !== initialData.hjt ||
-        formData.satuan !== initialData.satuan ||
-        formData.backbone.toString() !== initialData.backbone.toString() ||
-        formData.port.toString() !== initialData.port.toString() ||
-        formData.tarifAkses.toString() !== initialData.tarifAkses.toString() ||
-        formData.tarif.toString() !== initialData.tarif.toString();
-      setIsDirty(hasChanged);
+  // Remove auto-calculate since we're using the existing structure
+  // Auto-calculate is not needed for this form structure
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDropdownSelect = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    setIsDropdownOpen(prev => ({
+      ...prev,
+      [field]: false
+    }));
+  };
+
+  const toggleDropdown = (field) => {
+    console.log(`🔄 Toggle dropdown ${field}, current options:`, {
+      layanan: layananOptions.length,
+      satuan: satuanOptions.length,
+      hjt: hjtOptions.length
+    });
+    if (field === 'satuan') {
+      console.log('🔍 Satuan options detail:', satuanOptions);
     }
-  }, [formData, initialData]);
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleCancel = () => {
-    onClose();
-  };
-
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    onClose();
+    setIsDropdownOpen(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+
+    // Validate required fields
+    if (!formData.namaLayanan) {
+      alert('Nama layanan harus diisi!');
+      return;
+    }
+    if (!formData.hjt) {
+      alert('HJT harus dipilih!');
+      return;
+    }
+    if (!formData.satuan) {
+      alert('Satuan harus diisi!');
+      return;
+    }
+
     try {
+      console.log("📝 EditLayanan: Starting save process with data:", formData);
+      
       const dataToSave = {
-        ...formData,
-        id: initialData.id,
-        port: parseInt(formData.port, 10),
-        tarifAkses: parseInt(formData.tarifAkses, 10),
-        tarif: parseInt(formData.tarif, 10),
+        ...initialData,
+        namaLayanan: formData.namaLayanan,
+        hjt: formData.hjt,
+        satuan: formData.satuan,
+        backbone: formData.backbone,
+        port: formData.port,
+        tarifAkses: formData.tarifAkses,
+        tarif: formData.tarif
       };
-      setShowSuccessModal(true);
-    } finally {
-      setIsSubmitting(false);
+
+      console.log("📤 EditLayanan: Calling onSave with:", dataToSave);
+      await onSave(dataToSave);
+      console.log("✅ EditLayanan: onSave completed successfully");
+      setShowSuccess(true);
+      console.log("✅ EditLayanan: Success modal should now be visible");
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error('❌ EditLayanan: Error updating data:', error);
+      alert('Terjadi kesalahan saat mengupdate data: ' + error.message);
     }
   };
+
+  if (!isOpen) return null;
+
+  // Early return dengan pesan loading jika belum ada data
+  if (isOpen && !initialData) {
+    console.log('⚠️ No initialData provided');
+    return (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, color: 'white', fontSize: '18px'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <>
       <AnimatePresence>
-        {isOpen && !showSuccessModal && (
+        {isOpen && !showSuccess && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -178,242 +304,420 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
               </div>
 
               {/* Form */}
-              <form id="form-edit-layanan" onSubmit={handleSubmit} style={{
+              <form onSubmit={handleSubmit} style={{
                 backgroundColor: '#E9EDF7', borderRadius: '20px', padding: '32px',
                 margin: '0 auto', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
                 maxWidth: '600px', marginBottom: '32px'
               }}>
-                {/* Select Layanan */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <label htmlFor="layanan" style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                    Layanan*
+                {/* Nama Layanan Field */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B', display: 'block', marginBottom: '8px' }}>
+                    Nama Layanan*
                   </label>
-                  <select
-                    id="layanan" name="namaLayanan" value={formData.namaLayanan} onChange={handleChange} required
-                    style={{
-                      padding: '12px 32px 12px 16px', borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)', fontSize: '14px',
-                      backgroundColor: '#ffffff', width: '100%', appearance: 'none',
-                      backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")',
-                      backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
-                      backgroundSize: '16px', color: '#2D396B'
-                    }}
-                  >
-                    <option value="">Pilih layanan</option>
-                    {layananOptions.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                  <div style={{ position: 'relative' }}>
+                    <div
+                      onClick={() => toggleDropdown('layanan')}
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(45, 58, 118, 0.5)',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        color: '#2D396B'
+                      }}
+                    >
+                      <span>{formData.namaLayanan || 'Pilih Nama Layanan'}</span>
+                      <span style={{ transform: isDropdownOpen.layanan ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
+                    </div>
+                    {isDropdownOpen.layanan && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(45, 58, 118, 0.5)',
+                        borderRadius: '10px',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        zIndex: 1000,
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#cbd5e0 #f7fafc'
+                      }}
+                      className="custom-scrollbar"
+                      >
+                        {layananOptions.map((option) => (
+                          <div
+                            key={option}
+                            onClick={() => handleDropdownSelect('namaLayanan', option)}
+                            style={{
+                              padding: '12px 16px',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #f0f0f0',
+                              color: '#2D396B'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Select Hjt */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <label htmlFor="hjt" style={{ fontSize: '16px', fontWeight: '600', color: '#2D3A76' }}>
-                    Hjt*
+                {/* HJT Field */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B', display: 'block', marginBottom: '8px' }}>
+                    HJT*
                   </label>
-                  <select
-                    id="hjt" name="hjt" value={formData.hjt} onChange={handleChange} required
-                    style={{
-                      padding: '12px 32px 12px 16px', borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)', fontSize: '14px',
-                      backgroundColor: '#ffffff', width: '100%', appearance: 'none',
-                      backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")',
-                      backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
-                      backgroundSize: '16px', color: '#2D396B'
-                    }}
-                  >
-                    <option value="">Pilih Hjt</option>
-                    {hjtOptions.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
+                  <div style={{ position: 'relative' }}>
+                    <div
+                      onClick={() => toggleDropdown('hjt')}
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(45, 58, 118, 0.5)',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        color: '#2D396B'
+                      }}
+                    >
+                      <span>{formData.hjt || 'Pilih HJT'}</span>
+                      <span style={{ transform: isDropdownOpen.hjt ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
+                    </div>
+                    {isDropdownOpen.hjt && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(45, 58, 118, 0.5)',
+                        borderRadius: '10px',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        zIndex: 1000,
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#cbd5e0 #f7fafc'
+                      }}
+                      className="custom-scrollbar"
+                      >
+                        {hjtOptions.map((option) => (
+                          <div
+                            key={option}
+                            onClick={() => handleDropdownSelect('hjt', option)}
+                            style={{
+                              padding: '12px 16px',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid #f0f0f0',
+                              color: '#2D396B'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Select Satuan */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <label htmlFor="satuan" style={{ fontSize: '16px', fontWeight: '600', color: '#2D3A76' }}>
+                {/* Satuan Field */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B', display: 'block', marginBottom: '8px' }}>
                     Satuan*
                   </label>
-                  <select
-                    id="satuan" name="satuan" value={formData.satuan} onChange={handleChange} required
+                  <div style={{ position: 'relative' }}>
+                    <div
+                      onClick={() => toggleDropdown('satuan')}
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(45, 58, 118, 0.5)',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        color: '#2D396B'
+                      }}
+                    >
+                      <span>{formData.satuan || 'Pilih Satuan'}</span>
+                      <span style={{ transform: isDropdownOpen.satuan ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
+                    </div>
+                    {isDropdownOpen.satuan && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(45, 58, 118, 0.5)',
+                        borderRadius: '10px',
+                        maxHeight: '120px',
+                        overflowY: 'auto',
+                        zIndex: 1000,
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#94a3b8 #f1f5f9'
+                      }}
+                      className="custom-scrollbar"
+                      >
+                        {satuanOptions.length === 0 ? (
+                          <div style={{
+                            padding: '12px 16px',
+                            color: '#6b7280',
+                            textAlign: 'center'
+                          }}>
+                            Memuat data satuan...
+                          </div>
+                        ) : (
+                          <>
+                            {/* Force scroll indicator */}
+                            <div style={{
+                              padding: '8px 16px',
+                              backgroundColor: '#f8fafc',
+                              borderBottom: '1px solid #e2e8f0',
+                              fontSize: '12px',
+                              color: '#64748b',
+                              textAlign: 'center'
+                            }}>
+                              {satuanOptions.length} opsi tersedia - scroll untuk melihat semua
+                            </div>
+                            {satuanOptions.map((option) => (
+                              <div
+                                key={option}
+                                onClick={() => handleDropdownSelect('satuan', option)}
+                                style={{
+                                  padding: '12px 16px',
+                                  cursor: 'pointer',
+                                  borderBottom: '1px solid #f0f0f0',
+                                  color: '#2D396B'
+                                }}
+                                onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                              >
+                                {option}
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Backbone Field */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B', display: 'block', marginBottom: '8px' }}>
+                    Backbone
+                  </label>
+                  <input
+                    type="text"
+                    name="backbone"
+                    value={formData.backbone}
+                    onChange={handleInputChange}
+                    placeholder="Masukkan backbone"
                     style={{
-                      padding: '12px 32px 12px 16px', borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)', fontSize: '14px',
-                      backgroundColor: '#ffffff', width: '100%', appearance: 'none',
-                      backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")',
-                      backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
-                      backgroundSize: '16px', color: '#2D396B'
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#ffffff',
+                      color: '#2D396B'
+                    }}
+                  />
+                </div>
+
+                {/* Port Field */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B', display: 'block', marginBottom: '8px' }}>
+                    Port
+                  </label>
+                  <input
+                    type="number"
+                    name="port"
+                    value={formData.port}
+                    onChange={handleInputChange}
+                    placeholder="Masukkan port"
+                    min="0"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#ffffff',
+                      color: '#2D396B'
+                    }}
+                  />
+                </div>
+
+                {/* Tarif Akses Field */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B', display: 'block', marginBottom: '8px' }}>
+                    Tarif Akses
+                  </label>
+                  <input
+                    type="number"
+                    name="tarifAkses"
+                    value={formData.tarifAkses}
+                    onChange={handleInputChange}
+                    placeholder="Masukkan tarif akses"
+                    min="0"
+                    step="0.01"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#ffffff',
+                      color: '#2D396B'
+                    }}
+                  />
+                </div>
+
+                {/* Tarif Field */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B', display: 'block', marginBottom: '8px' }}>
+                    Tarif
+                  </label>
+                  <input
+                    type="number"
+                    name="tarif"
+                    value={formData.tarif}
+                    onChange={handleInputChange}
+                    placeholder="Masukkan tarif"
+                    min="0"
+                    step="0.01"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#ffffff',
+                      color: '#2D396B'
+                    }}
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '20px', marginTop: '32px' }}>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    style={{
+                      backgroundColor: '#6c757d',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '12px 32px',
+                      borderRadius: '50px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '14px'
                     }}
                   >
-                    <option value="">Pilih satuan</option>
-                    {satuanOptions.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Input Backbone */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <label htmlFor="backbone" style={{ fontSize: '16px', fontWeight: '600', color: '#2D3A76' }}>
-                    Backbone*
-                  </label>
-                  <input
-                    id="backbone" name="backbone" type="text" placeholder="Backbone"
-                    value={formData.backbone} onChange={handleChange} required
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
                     style={{
-                      padding: '12px 16px', borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)', fontSize: '14px',
-                      backgroundColor: '#ffffff', color: '#2D396B'
+                      backgroundColor: '#035b71',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '12px 32px',
+                      borderRadius: '50px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '14px'
                     }}
-                  />
-                </div>
-
-                {/* Input Port */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <label htmlFor="port" style={{ fontSize: '16px', fontWeight: '600', color: '#2D3A76' }}>
-                    Port*
-                  </label>
-                  <input
-                    id="port" name="port" type="number" placeholder="Port"
-                    value={formData.port} onChange={handleChange} required
-                    min={0}
-                    style={{
-                      padding: '12px 16px', borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)', fontSize: '14px',
-                      backgroundColor: '#ffffff', color: '#2D396B'
-                    }}
-                  />
-                </div>
-
-                {/* Input Tarif Akses */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <label htmlFor="tarifAkses" style={{ fontSize: '16px', fontWeight: '600', color: '#2D3A76' }}>
-                    Tarif Akses*
-                  </label>
-                  <input
-                    id="tarifAkses" name="tarifAkses" type="number" placeholder="Tarif Akses"
-                    value={formData.tarifAkses} onChange={handleChange} required
-                    min={0} step="0.01"
-                    style={{
-                      padding: '12px 16px', borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)', fontSize: '14px',
-                      backgroundColor: '#ffffff', color: '#2D396B'
-                    }}
-                  />
-                </div>
-
-                {/* Input Tarif */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '0' }}>
-                  <label htmlFor="tarif" style={{ fontSize: '16px', fontWeight: '600', color: '#2D3A76' }}>
-                    Tarif*
-                  </label>
-                  <input
-                    id="tarif" name="tarif" type="number" placeholder="Tarif"
-                    value={formData.tarif} onChange={handleChange} required
-                    min={0} step="0.01"
-                    style={{
-                      padding: '12px 16px', borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)', fontSize: '14px',
-                      backgroundColor: '#ffffff', color: '#2D396B'
-                    }}
-                  />
+                  >
+                    Simpan
+                  </button>
                 </div>
               </form>
-
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '20px', paddingRight: '65px' }}>
-                <button
-                  type="button" onClick={handleCancel}
-                  style={{
-                    backgroundColor: '#2D3A76', color: '#ffffff', border: 'none',
-                    padding: '12px 32px', borderRadius: '50px', fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit" form="form-edit-layanan" disabled={!isDirty || isSubmitting}
-                  style={{
-                    backgroundColor: (!isDirty || isSubmitting) ? '#A0B0D5' : '#00AEEF',
-                    color: '#ffffff', border: 'none', padding: '12px 32px',
-                    borderRadius: '50px', fontWeight: '600',
-                    cursor: (!isDirty || isSubmitting) ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {isSubmitting ? 'Menyimpan...' : 'Simpan'}
-                </button>
-              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Success Popup */}
+      {/* Success Modal */}
       <AnimatePresence>
-        {showSuccessModal && (
+        {showSuccess && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              zIndex: 1000, padding: '20px', fontFamily: 'Inter, sans-serif'
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2000
             }}
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.5 }}
               style={{
-                backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px',
-                textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                position: 'relative', width: '100%', maxWidth: '300px'
+                backgroundColor: '#ffffff',
+                borderRadius: '20px',
+                padding: '40px',
+                textAlign: 'center',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                maxWidth: '400px',
+                width: '90%'
               }}
             >
               <div style={{
-                backgroundColor: '#00AEEF', borderRadius: '50%', width: '60px',
-                height: '60px', margin: '0 auto 16px auto', display: 'flex',
-                alignItems: 'center', justifyContent: 'center'
+                width: '60px',
+                height: '60px',
+                backgroundColor: '#00a2b9',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px'
               }}>
-                <Check style={{ width: '30px', height: '30px', color: 'white' }} />
+                <Check size={30} color="#ffffff" />
               </div>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '600', color: '#333' }}>
-                Selamat!
+              <h3 style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#035b71',
+                margin: '0 0 10px',
+                fontFamily: 'Inter, sans-serif'
+              }}>
+                Berhasil!
               </h3>
-              <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#666', lineHeight: '1.4' }}>
-                Data Layanan Berhasil Diperbarui
+              <p style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                margin: 0,
+                fontFamily: 'Inter, sans-serif'
+              }}>
+                Data layanan berhasil diperbarui
               </p>
-              <button
-                onClick={handleCloseSuccessModal}
-                style={{
-                  backgroundColor: '#00AEEF', color: 'white', border: 'none',
-                  borderRadius: '6px', padding: '8px 24px', fontSize: '14px',
-                  fontWeight: '500', cursor: 'pointer', minWidth: '80px',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                onMouseOver={(e) => { e.target.style.backgroundColor = '#0088CC'; }}
-                onMouseOut={(e) => { e.target.style.backgroundColor = '#00AEEF'; }}
-              >
-                Oke
-              </button>
-              <button
-                onClick={handleCloseSuccessModal}
-                style={{
-                  position: 'absolute', top: '0.75rem', right: '0.75rem',
-                  background: 'none', border: 'none', fontSize: '1.5rem',
-                  color: '#666', cursor: 'pointer', width: '30px', height: '30px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: '50%', transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-              >
-                ×
-              </button>
             </motion.div>
           </motion.div>
         )}

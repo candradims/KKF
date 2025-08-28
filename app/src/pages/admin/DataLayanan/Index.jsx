@@ -144,10 +144,13 @@ const Index = () => {
 
       // Refresh data
       await fetchLayanan();
-      handleCloseEditModal();
+      
+      // Don't close modal here - let EditLayanan handle it after showing success modal
+      // handleCloseEditModal();
     } catch (error) {
       console.error("❌ Gagal mengupdate layanan:", error);
       alert(`Gagal mengupdate layanan: ${error.message}`);
+      throw error; // Re-throw error so EditLayanan can handle it
     }
   };
 
