@@ -432,13 +432,12 @@ const Sidebar = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(3, 91, 113, 0.8)',
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(3, 91, 113, 0.3)',
+          backdropFilter: 'blur(2px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000,
-          animation: 'fadeIn 0.3s ease'
+          zIndex: 1000
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -449,7 +448,8 @@ const Sidebar = () => {
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            animation: 'fadeIn 0.3s ease'
           }}>
             {/* Modal background gradient */}
             <div style={{
