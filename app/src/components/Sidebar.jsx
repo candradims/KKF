@@ -138,7 +138,8 @@ const Sidebar = () => {
               height: '88px',
               borderRadius: '8px',
               objectFit: 'contain',
-              marginLeft: '10px'
+              marginLeft: '10px',
+              marginTop: '10px'
             }}
           />
         </div>
