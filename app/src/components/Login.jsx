@@ -176,6 +176,21 @@ const Login = () => {
           padding: 1.5rem !important;
         }
       }
+        @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.3); opacity: 1; }
+      }
+
+      @keyframes flow {
+        0% { opacity: 0.5; transform: translateX(0); }
+        50% { opacity: 1; transform: translateX(15px); }
+        100% { opacity: 0.5; transform: translateX(0); }
+      }
+
+      @keyframes flicker {
+        0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+        20%, 24%, 55% { opacity: 0.4; }
+      }
     `;
     document.head.appendChild(style);
     
@@ -293,33 +308,101 @@ const Login = () => {
         right: '15%',
         width: '120px',
         height: '120px',
-        background: `linear-gradient(45deg, ${colors.secondary}15, ${colors.accent1}15)`,
+        background: `linear-gradient(45deg, ${colors.secondary}55, ${colors.accent1}55)`,
         animation: 'morphing 8s ease-in-out infinite',
-        filter: 'blur(1px)'
+        filter: 'blur(2px)',
+        borderRadius: "20%"
       }} />
-      
+
       <div style={{
         position: 'absolute',
         bottom: '15%',
         left: '10%',
-        width: '80px',
-        height: '80px',
-        background: `linear-gradient(45deg, ${colors.primary}20, ${colors.tertiary}15)`,
+        width: '90px',
+        height: '90px',
+        background: `linear-gradient(45deg, ${colors.primary}60, ${colors.tertiary}50)`,
         clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
         animation: 'floating 6s ease-in-out infinite 1s',
-        filter: 'blur(1px)'
+        boxShadow: `0 0 25px ${colors.primary}40`,
       }} />
 
       <div style={{
         position: 'absolute',
         top: '30%',
         left: '5%',
-        width: '60px',
-        height: '60px',
-        background: `linear-gradient(45deg, ${colors.accent1}25, ${colors.secondary}20)`,
+        width: '70px',
+        height: '70px',
+        background: `linear-gradient(45deg, ${colors.accent1}70, ${colors.secondary}60)`,
         clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
-        animation: 'floating 7s ease-in-out infinite 2s'
+        animation: 'floating 7s ease-in-out infinite 2s',
+        boxShadow: `0 0 20px ${colors.accent1}55`
       }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        backgroundImage: `linear-gradient(90deg, ${colors.primary}15 1px, transparent 1px),
+                          linear-gradient(180deg, ${colors.primary}15 1px, transparent 1px)`,
+        backgroundSize: '80px 80px',
+        zIndex: 0
+      }} />
+
+      {[
+        { top: '20%', left: '30%', color: colors.accent1 },
+        { top: '50%', left: '60%', color: colors.secondary },
+        { top: '70%', left: '25%', color: colors.accent2 },
+        { top: '40%', left: '80%', color: colors.primary },
+      ].map((node, idx) => (
+        <div key={idx} style={{
+          position: 'absolute',
+          top: node.top,
+          left: node.left,
+          width: '16px',
+          height: '16px',
+          borderRadius: '50%',
+          background: node.color,
+          boxShadow: `0 0 20px ${node.color}, 0 0 40px ${node.color}55`,
+          animation: `pulse ${3 + idx}s ease-in-out infinite`
+        }} />
+      ))}
+
+      <div style={{
+        position: 'absolute',
+        top: '21%',
+        left: '31%',
+        width: '150px',
+        height: '2px',
+        background: `linear-gradient(90deg, ${colors.accent1}, ${colors.secondary})`,
+        boxShadow: `0 0 10px ${colors.secondary}`,
+        animation: 'flow 6s linear infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '52%',
+        left: '26%',
+        width: '200px',
+        height: '2px',
+        background: `linear-gradient(90deg, ${colors.accent2}, ${colors.primary})`,
+        boxShadow: `0 0 10px ${colors.accent2}`,
+        animation: 'flow 8s linear infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '30%',
+        right: '15%',
+        width: '50px',
+        height: '50px',
+        background: `linear-gradient(135deg, ${colors.accent2}, ${colors.primary})`,
+        clipPath: 'polygon(50% 0%, 60% 35%, 40% 35%, 55% 70%, 35% 70%, 50% 100%, 20% 60%, 40% 60%, 30% 30%, 50% 30%)',
+        filter: 'drop-shadow(0 0 15px rgba(255,255,0,0.8))',
+        animation: 'flicker 2s infinite'
+      }} />
+
 
       {/* Interactive cursor glow */}
       <div style={{
@@ -496,7 +579,7 @@ const Login = () => {
             top: 0,
             left: 0,
             right: 0,
-            height: '2px',
+            height: 'px',
             background: `linear-gradient(90deg, ${colors.secondary}, ${colors.accent1}, ${colors.tertiary}, ${colors.secondary})`,
             backgroundSize: '300% 100%',
             animation: 'shimmerGold 3s ease-in-out infinite'
