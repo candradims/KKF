@@ -191,6 +191,25 @@ const Login = () => {
         0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
         20%, 24%, 55% { opacity: 0.4; }
       }
+      
+      @keyframes rotateOrb {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.1); }
+        100% { transform: rotate(360deg) scale(1); }
+      }
+
+      @keyframes glowMove {
+        0% { transform: translateX(-50%); opacity: 0; }
+        50% { transform: translateX(0); opacity: 1; }
+        100% { transform: translateX(50%); opacity: 0; }
+      }
+
+      @keyframes zigzag {
+        0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+        25% { transform: translateX(-10px) translateY(10px) rotate(-5deg); }
+        50% { transform: translateX(10px) translateY(-10px) rotate(5deg); }
+        75% { transform: translateX(-5px) translateY(5px) rotate(-3deg); }
+      }
     `;
     document.head.appendChild(style);
     
@@ -402,7 +421,52 @@ const Login = () => {
         filter: 'drop-shadow(0 0 15px rgba(255,255,0,0.8))',
         animation: 'flicker 2s infinite'
       }} />
+      
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        left: '15%',
+        width: '40px',
+        height: '40px',
+        background: `linear-gradient(135deg, ${colors.accent1}, ${colors.secondary})`,
+        clipPath: 'polygon(50% 0%, 60% 35%, 40% 35%, 55% 70%, 35% 70%, 50% 100%, 20% 60%, 40% 60%, 30% 30%, 50% 30%)',
+        filter: 'drop-shadow(0 0 12px rgba(255,255,0,0.9))',
+        animation: 'flicker 1.8s infinite'
+      }} />
 
+      <div style={{
+        position: 'absolute',
+        top: '65%',
+        right: '20%',
+        width: '60px',
+        height: '60px',
+        background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent2})`,
+        clipPath: 'polygon(50% 0%, 60% 35%, 40% 35%, 55% 70%, 35% 70%, 50% 100%, 20% 60%, 40% 60%, 30% 30%, 50% 30%)',
+        filter: 'drop-shadow(0 0 20px rgba(255,255,0,1))',
+        animation: 'zigzag 3s infinite ease-in-out'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '15%',
+        left: '50%',
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, ${colors.accent2} 20%, transparent 70%)`,
+        boxShadow: `0 0 25px ${colors.accent2}aa`,
+        animation: 'rotateOrb 10s linear infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '75%',
+        left: '10%',
+        width: '250px',
+        height: '3px',
+        background: `linear-gradient(90deg, transparent, ${colors.primary}, transparent)`,
+        animation: 'glowMove 5s linear infinite'
+      }} />
 
       {/* Interactive cursor glow */}
       <div style={{
