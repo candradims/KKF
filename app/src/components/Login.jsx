@@ -573,20 +573,27 @@ const Login = () => {
             </div>
           </div>
           
-          <h1 className="welcome-title text-gradient" style={{
-            fontSize: '2.5rem',
-            fontWeight: '800',
+         <h1 className="welcome-title" style={{
+            fontSize: '3rem',
+            fontWeight: '900',
             marginBottom: '0.5rem',
-            letterSpacing: '-0.02em',
-            animation: 'slideInFromRight 1s ease-out 0.5s both'
+            
+            letterSpacing: '-0.03em',
+            background: 'linear-gradient(90deg, #00E0FF, #00FFA3, #008bb0)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 4px 25px rgba(0, 224, 255, 0.3), 0 2px 15px rgba(0, 255, 163, 0.25)',
+            animation: 'glowText 3s infinite alternate ease-in-out, slideInFromRight 1s ease-out 0.5s both'
           }}>
             PLN FinNeta
           </h1>
           <p style={{
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '1.1rem',
-            fontWeight: '400',
+            color: 'rgba(255, 255, 255, 0.8)',
+            fontSize: '1.2rem',
+            fontWeight: '500',
             margin: 0,
+            letterSpacing: '0.5px',
+            textShadow: '0 2px 8px rgba(0,0,0,0.3)',
             animation: 'fadeInUp 1s ease-out 0.7s both'
           }}>
             Financial Network Feasibility System
