@@ -362,6 +362,16 @@ const Login = () => {
               position: 'relative',
               display: 'inline-block'
             }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%)',
+                pointerEvents: 'none',
+                borderRadius: '16px'
+              }} />
               <img
                 src={logoImage}
                 alt="PLN Icon Plus Logo"
@@ -369,13 +379,34 @@ const Login = () => {
                   height: '130px',
                   width: 'auto',
                   objectFit: 'contain',
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  backgroundColor: 'rgba(203, 235, 234, 0.95)',
                   padding: '20px',
-                  borderRadius: '25px',
-                  border: `2px solid rgba(255, 255, 255, 0.2)`,
+                  borderRadius: '16px',
+                  boxShadow: `
+                    0 6px 20px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    inset 0 2px 10px rgba(255, 255, 255, 0.3)
+                  `,
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   position: 'relative',
                   zIndex: 2,
-                  animation: 'glowing 3s ease-in-out infinite'
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'scale(1.05) translateY(-2px)';
+                  e.target.style.boxShadow = `
+                    0 10px 25px rgba(0, 0, 0, 0.2),
+                    0 0 0 1px rgba(255, 255, 255, 0.15),
+                    inset 0 2px 12px rgba(255, 255, 255, 0.4)
+                  `;
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'scale(1) translateY(0)';
+                  e.target.style.boxShadow = `
+                    0 6px 20px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    inset 0 2px 10px rgba(255, 255, 255, 0.3)
+                  `;
                 }}
               />
               {/* Animated background rings */}
@@ -386,7 +417,7 @@ const Login = () => {
                 right: '-15px',
                 bottom: '-15px',
                 background: `conic-gradient(from 0deg, ${colors.secondary}, ${colors.accent1}, ${colors.primary}, ${colors.secondary})`,
-                borderRadius: '35px',
+                borderRadius: '28px',
                 zIndex: 1,
                 filter: 'blur(8px)',
                 opacity: 0.6,
@@ -830,7 +861,7 @@ const Login = () => {
                 fontWeight: '700',
                 background: isLoading 
                   ? 'rgba(255, 255, 255, 0.1)' 
-                  : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.accent1} 50%, ${colors.primary} 100%)`,
+                  : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                 backgroundSize: '200% 200%',
                 border: 'none',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
