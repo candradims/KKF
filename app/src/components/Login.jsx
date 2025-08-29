@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import logoImage from '../assets/Logo_PLN_Icon_Plus.png';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ const Login = () => {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [focusedField, setFocusedField] = useState('');
 
   const colors = {
     primary: '#035b71',
@@ -23,93 +26,168 @@ const Login = () => {
     accent1: '#008bb0',
     accent2: '#0090a8',
     success: '#3fba8c',
-    lightBg: '#f8fafc'
+    lightBg: '#f8fafc',
+    dark: '#004d59',
+    darker: '#00363d'
   };
 
   useEffect(() => {
     const link = document.createElement('link');
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
 
     const style = document.createElement('style');
     style.innerHTML = `
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+      @keyframes fadeInUp {
+        from { 
+          opacity: 0; 
+          transform: translateY(40px) scale(0.95); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateY(0) scale(1); 
+        }
       }
 
+      @keyframes slideInFromLeft {
+        from { 
+          opacity: 0; 
+          transform: translateX(-50px); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateX(0); 
+        }
+      }
+
+      @keyframes slideInFromRight {
+        from { 
+          opacity: 0; 
+          transform: translateX(50px); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateX(0); 
+        }
+      }
+
+      @keyframes morphing {
+        0% { transform: scale(1) rotate(0deg); border-radius: 50%; }
+        25% { transform: scale(1.1) rotate(90deg); border-radius: 20%; }
+        50% { transform: scale(0.9) rotate(180deg); border-radius: 50%; }
+        75% { transform: scale(1.05) rotate(270deg); border-radius: 30%; }
+        100% { transform: scale(1) rotate(360deg); border-radius: 50%; }
+      }
+
+      @keyframes floating {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-15px) rotate(1deg); }
+        66% { transform: translateY(-5px) rotate(-1deg); }
+      }
+      
+      @keyframes glowing {
+        0% { box-shadow: 0 0 20px ${colors.secondary}30; }
+        50% { box-shadow: 0 0 30px ${colors.secondary}60, 0 0 40px ${colors.primary}30; }
+        100% { box-shadow: 0 0 20px ${colors.secondary}30; }
+      }
+      
+      @keyframes shimmerGold {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+      }
+
+      @keyframes ripple {
+        0% { transform: scale(0); opacity: 1; }
+        100% { transform: scale(4); opacity: 0; }
+      }
+
+      @keyframes textShine {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+      }
+      
       input::placeholder {
         font-style: italic;
-        color: #9CA3AF;
-      }
-
-      @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-      
-      @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-      }
-      
-      @keyframes shimmer {
-        0% { background-position: -1000px 0; }
-        100% { background-position: 1000px 0; }
+        color: #94a3b8;
+        font-weight: 400;
       }
       
       html, body {
         margin: 0;
         padding: 0;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         overflow-x: hidden;
-        background: linear-gradient(135deg, ${colors.lightBg} 0%, #e2e8f0 100%);
+        background: linear-gradient(135deg, ${colors.darker} 0%, ${colors.dark} 50%, ${colors.primary} 100%);
         min-height: 100vh;
+        position: relative;
       }
 
       * {
         box-sizing: border-box;
       }
+
+      .glass-effect {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .input-glow:focus {
+        box-shadow: 0 0 0 3px ${colors.secondary}30, 0 8px 25px ${colors.secondary}20 !important;
+        border-color: ${colors.secondary} !important;
+      }
+
+      .button-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px ${colors.secondary}40;
+      }
+
+      .text-gradient {
+        background: linear-gradient(135deg, ${colors.secondary} 0%, ${colors.accent1} 50%, ${colors.primary} 100%);
+        background-size: 200% 200%;
+        animation: textShine 3s ease-in-out infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
       
       @media (max-width: 768px) {
         .form-container {
-          padding: 1.5rem !important;
+          padding: 2rem 1.5rem !important;
           margin: 1rem !important;
-          width: 90% !important;
-        }
-
-        .login-button {
-          width: 100% !important;
+          width: 95% !important;
         }
 
         .welcome-title {
-          font-size: 1.8rem !important;
+          font-size: 2rem !important;
         }
 
-        .logo-img {
-          height: 90px !important;
+        .logo-container {
+          margin-bottom: 2rem !important;
         }
       }
 
       @media (max-width: 480px) {
         .welcome-title {
-          font-size: 1.5rem !important;
+          font-size: 1.8rem !important;
         }
 
         .form-container {
-          padding: 1.25rem !important;
+          padding: 1.5rem !important;
         }
       }
     `;
     document.head.appendChild(style);
+    
+    const handleMouseMove = (e) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
       document.head.removeChild(style);
       document.head.removeChild(link);
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
 
@@ -132,12 +210,6 @@ const Login = () => {
     }
 
     try {
-      console.log("🔐 Attempting login with:", { 
-        email: formData.email, 
-        role: formData.role,
-        passwordLength: formData.password.length 
-      });
-      
       const response = await fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
         headers: {
@@ -151,11 +223,8 @@ const Login = () => {
       });
 
       const result = await response.json();
-      console.log("🔐 Login response status:", response.status);
-      console.log("🔐 Login response body:", result);
 
       if (response.ok && result.success) {
-        // Simpan data user ke localStorage
         localStorage.setItem('userData', JSON.stringify(result.data));
         localStorage.setItem('userRole', result.data.role_user);
         
@@ -163,7 +232,6 @@ const Login = () => {
         setShowModal(true);
         setIsLoading(false);
       } else {
-        // Handle specific error messages from server
         let errorMessage = "Login gagal";
         
         if (result.message === "Email tidak ditemukan") {
@@ -178,19 +246,12 @@ const Login = () => {
           errorMessage = result.message || "Login gagal";
         }
         
-        setMessage({ 
-          type: "error", 
-          text: errorMessage
-        });
+        setMessage({ type: "error", text: errorMessage });
         setIsLoading(false);
       }
       
     } catch (error) {
-      console.error("❌ Login error:", error);
-      setMessage({ 
-        type: "error", 
-        text: "Terjadi kesalahan koneksi server" 
-      });
+      setMessage({ type: "error", text: "Terjadi kesalahan koneksi server" });
       setIsLoading(false);
     }
   };
@@ -202,84 +263,100 @@ const Login = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.secondary}10 50%, ${colors.success}15 100%)`,
-      fontFamily: 'Poppins, sans-serif',
+      position: 'relative',
+      overflow: 'hidden',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      padding: '2rem 1rem'
+      padding: '2rem 1rem',
+      background: `linear-gradient(135deg, ${colors.darker} 0%, ${colors.dark} 50%, ${colors.primary} 100%)`
     }}>
       
-      {/* Background Elements */}
+      {/* Animated Background Elements */}
       <div style={{
         position: 'absolute',
-        top: '-10%',
-        right: '-5%',
-        width: '300px',
-        height: '300px',
-        borderRadius: '50%',
-        background: `radial-gradient(circle, ${colors.secondary}20 0%, transparent 70%)`,
-        animation: 'float 8s ease-in-out infinite'
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: `
+          radial-gradient(circle at 20% 80%, ${colors.secondary}40 0%, transparent 0%),
+          radial-gradient(circle at 80% 20%, ${colors.accent1}30 0%, transparent 0%),
+          linear-gradient(180deg, ${colors.accent2} 0%, ${colors.primary} 0%, ${colors.tertiary} 100%)
+        `
+      }} />
+
+      {/* Floating geometric shapes */}
+      <div style={{
+        position: 'absolute',
+        top: '10%',
+        right: '15%',
+        width: '120px',
+        height: '120px',
+        background: `linear-gradient(45deg, ${colors.secondary}15, ${colors.accent1}15)`,
+        animation: 'morphing 8s ease-in-out infinite',
+        filter: 'blur(1px)'
       }} />
       
       <div style={{
         position: 'absolute',
-        bottom: '-5%',
-        left: '-5%',
-        width: '250px',
-        height: '250px',
-        borderRadius: '50%',
-        background: `radial-gradient(circle, ${colors.primary}20 0%, transparent 70%)`,
-        animation: 'float 6s ease-in-out infinite 1s'
-      }} />
-      
-      <div style={{
-        position: 'absolute',
-        top: '15%',
+        bottom: '15%',
         left: '10%',
+        width: '80px',
+        height: '80px',
+        background: `linear-gradient(45deg, ${colors.primary}20, ${colors.tertiary}15)`,
+        clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+        animation: 'floating 6s ease-in-out infinite 1s',
+        filter: 'blur(1px)'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '30%',
+        left: '5%',
         width: '60px',
         height: '60px',
-        border: `2px solid ${colors.secondary}30`,
-        transform: 'rotate(45deg)',
-        animation: 'pulse 4s ease-in-out infinite'
+        background: `linear-gradient(45deg, ${colors.accent1}25, ${colors.secondary}20)`,
+        clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+        animation: 'floating 7s ease-in-out infinite 2s'
       }} />
-      
+
+      {/* Interactive cursor glow */}
       <div style={{
         position: 'absolute',
-        bottom: '20%',
-        right: '15%',
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        border: `2px solid ${colors.primary}30`,
-        animation: 'pulse 5s ease-in-out infinite 0.5s'
+        left: mousePosition.x - 150,
+        top: mousePosition.y - 150,
+        width: '300px',
+        height: '300px',
+        background: `radial-gradient(circle, ${colors.secondary}05 0%, transparent 70%)`,
+        pointerEvents: 'none',
+        transition: 'all 0.3s ease',
+        borderRadius: '50%'
       }} />
 
       {/* Main Content Container */}
       <div style={{
         width: '100%',
-        maxWidth: '450px',
+        maxWidth: '480px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         position: 'relative',
         zIndex: 2,
-        animation: 'fadeIn 1s ease-out'
+        animation: 'fadeInUp 1s ease-out'
       }}>
         
-        {/* Logo & Welcome */}
-        <div style={{
+        {/* Logo & Welcome Section */}
+        <div className="logo-container" style={{
           textAlign: 'center',
-          marginBottom: '2.5rem',
+          marginBottom: '3rem',
           width: '100%'
         }}>
           <div style={{
-            marginBottom: '1.5rem',
-            animation: 'pulse 2s ease-in-out infinite',
+            marginBottom: '2rem',
             display: 'flex',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            animation: 'slideInFromLeft 1s ease-out 0.3s both'
           }}>
             <div style={{
               position: 'relative',
@@ -288,124 +365,130 @@ const Login = () => {
               <img
                 src={logoImage}
                 alt="PLN Icon Plus Logo"
-                className="logo-img"
                 style={{
-                  height: '120px',
+                  height: '130px',
                   width: 'auto',
                   objectFit: 'contain',
-                  backgroundColor: 'white',
-                  padding: '15px',
-                  borderRadius: '20px',
-                  boxShadow: `0 15px 35px rgba(3, 91, 113, 0.2)`,
-                  border: `2px solid ${colors.primary}20`,
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  padding: '20px',
+                  borderRadius: '25px',
+                  border: `2px solid rgba(255, 255, 255, 0.2)`,
                   position: 'relative',
-                  zIndex: 2
+                  zIndex: 2,
+                  animation: 'glowing 3s ease-in-out infinite'
                 }}
               />
+              {/* Animated background rings */}
               <div style={{
                 position: 'absolute',
-                top: '-5px',
-                left: '-5px',
-                right: '-5px',
-                bottom: '-5px',
-                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                borderRadius: '25px',
+                top: '-15px',
+                left: '-15px',
+                right: '-15px',
+                bottom: '-15px',
+                background: `conic-gradient(from 0deg, ${colors.secondary}, ${colors.accent1}, ${colors.primary}, ${colors.secondary})`,
+                borderRadius: '35px',
                 zIndex: 1,
                 filter: 'blur(8px)',
-                opacity: 0.5
+                opacity: 0.6,
+                animation: 'floating 4s ease-in-out infinite'
               }} />
             </div>
           </div>
-          <h2 className="welcome-title" style={{
-            fontSize: '2.2rem',
-            color: colors.primary,
-            fontWeight: '700',
+          
+          <h1 className="welcome-title text-gradient" style={{
+            fontSize: '2.5rem',
+            fontWeight: '800',
             marginBottom: '0.5rem',
-            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            letterSpacing: '-0.02em',
+            animation: 'slideInFromRight 1s ease-out 0.5s both'
           }}>
-            Sistem Manajemen PLN
-          </h2>
+            PLN FinNetra
+          </h1>
           <p style={{
-            color: colors.primary,
-            fontSize: '1rem',
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '1.1rem',
             fontWeight: '400',
-            opacity: 0.8
+            margin: 0,
+            animation: 'fadeInUp 1s ease-out 0.7s both'
           }}>
-            Masuk untuk mengakses dashboard
+            Sistem Kajian Kelayakan Finansial Jaringan
           </p>
         </div>
 
-        {/* Message Box */}
+        {/* Enhanced Message Box */}
         {message.text && (
           <div
             style={{
-              padding: '1rem',
-              marginBottom: '1.5rem',
-              borderRadius: '12px',
-              fontSize: '0.9rem',
+              padding: '1.25rem 1.5rem',
+              marginBottom: '2rem',
+              borderRadius: '16px',
+              fontSize: '0.95rem',
               fontWeight: '500',
               border: '1px solid',
-              backgroundColor: message.type === 'error' ? '#FEE2E2' : '#D1FAE5',
-              color: message.type === 'error' ? '#DC2626' : '#059669',
-              borderColor: message.type === 'error' ? '#FCA5A5' : '#6EE7B7',
+              backgroundColor: message.type === 'error' 
+                ? 'rgba(239, 68, 68, 0.1)' 
+                : 'rgba(34, 197, 94, 0.1)',
+              color: message.type === 'error' ? '#f87171' : '#4ade80',
+              borderColor: message.type === 'error' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)',
               width: '100%',
-              animation: 'fadeIn 0.5s ease-out',
+              animation: 'fadeInUp 0.5s ease-out',
+              backdropFilter: 'blur(10px)',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+              gap: '0.75rem',
+              boxShadow: message.type === 'error' 
+                ? '0 8px 25px rgba(239, 68, 68, 0.15)'
+                : '0 8px 25px rgba(34, 197, 94, 0.15)'
             }}
           >
-            {message.type === 'error' ? '⚠️' : '✅'} {message.text}
+            <span style={{ fontSize: '1.2rem' }}>
+              {message.type === 'error' ? '⚠️' : '✅'}
+            </span>
+            <span>{message.text}</span>
           </div>
         )}
 
-        {/* Form Container */}
-        <div className="form-container" style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '20px',
-          boxShadow: `0 20px 40px rgba(3, 91, 113, 0.15)`,
-          padding: '2.5rem',
-          border: `1px solid ${colors.primary}20`,
+        {/* Enhanced Form Container */}
+        <div className="form-container glass-effect" style={{
+          borderRadius: '24px',
+          padding: '3rem 2.5rem',
           width: '100%',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4)',
+          animation: 'fadeInUp 1s ease-out 0.9s both'
         }}>
-          {/* Decorative corner elements */}
+          
+          {/* Animated gradient overlay */}
           <div style={{
             position: 'absolute',
             top: 0,
-            right: 0,
-            width: '80px',
-            height: '80px',
-            background: `linear-gradient(135deg, ${colors.secondary}15 0%, transparent 50%)`,
-            borderBottomLeftRadius: '100%'
-          }} />
-          
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
             left: 0,
-            width: '80px',
-            height: '80px',
-            background: `linear-gradient(135deg, transparent 0%, ${colors.primary}15 50%)`,
-            borderTopRightRadius: '100%'
+            right: 0,
+            height: '2px',
+            background: `linear-gradient(90deg, ${colors.secondary}, ${colors.accent1}, ${colors.tertiary}, ${colors.secondary})`,
+            backgroundSize: '300% 100%',
+            animation: 'shimmerGold 3s ease-in-out infinite'
           }} />
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 2 }}>
+          <form onSubmit={handleSubmit} style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '2rem', 
+            position: 'relative', 
+            zIndex: 2 
+          }}>
 
-            {/* Email */}
-            <div>
+            {/* Enhanced Email Field */}
+            <div style={{ position: 'relative' }}>
               <label htmlFor="email" style={{
                 display: 'block',
                 fontSize: '0.9rem',
                 fontWeight: '600',
-                color: colors.primary,
-                marginBottom: '0.5rem',
-                paddingLeft: '0.5rem'
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '0.75rem',
+                paddingLeft: '0.5rem',
+                letterSpacing: '0.5px'
               }}>
                 Email
               </label>
@@ -414,144 +497,163 @@ const Login = () => {
                   type="email"
                   id="email"
                   name="email"
-                  placeholder="Masukkan email"
+                  placeholder="Masukkan Email"
                   value={formData.email}
                   onChange={handleInputChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField('')}
+                  className="input-glow"
                   style={{
                     width: '100%',
-                    padding: '1rem 1rem 1rem 3rem',
-                    border: `1px solid ${colors.primary}30`,
-                    borderRadius: '12px',
-                    fontSize: '0.95rem',
-                    backgroundColor: '#F9FAFB',
-                    color: colors.primary,
-                    fontFamily: 'Poppins, sans-serif',
+                    padding: '1.25rem 1.25rem 1.25rem 3.5rem',
+                    border: `2px solid ${focusedField === 'email' ? colors.secondary : 'rgba(255, 255, 255, 0.15)'}`,
+                    borderRadius: '16px',
+                    fontSize: '1rem',
+                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                    color: 'white',
+                    fontFamily: 'Inter, sans-serif',
                     fontWeight: '500',
                     outline: 'none',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.secondary;
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = `${colors.primary}30`;
-                    e.target.style.boxShadow = 'none';
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(10px)'
                   }}
                   required
                 />
                 <div style={{
                   position: 'absolute',
-                  left: '1rem',
+                  left: '1.25rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: colors.primary,
-                  fontSize: '1.1rem'
+                  fontSize: '1.25rem',
+                  color: focusedField === 'email' ? colors.secondary : 'rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease'
                 }}>
-                  ✉️
+                  📧
                 </div>
+                {/* Focus indicator */}
+                {focusedField === 'email' && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '50%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${colors.secondary}, transparent)`,
+                    animation: 'shimmerGold 1s ease-in-out infinite'
+                  }} />
+                )}
               </div>
             </div>
 
-            {/* Password */}
-            <div>
+           {/* Enhanced Password Field */}
+            <div style={{ position: 'relative' }}>
               <label htmlFor="password" style={{
                 display: 'block',
                 fontSize: '0.9rem',
                 fontWeight: '600',
-                color: colors.primary,
-                marginBottom: '0.5rem',
-                paddingLeft: '0.5rem'
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '0.75rem',
+                paddingLeft: '0.5rem',
+                letterSpacing: '0.5px'
               }}>
-                Password
+                Kata Sandi
               </label>
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
-                  placeholder="Masukkan kata sandi"
+                  placeholder="Masukkan Kata Sandi"
                   value={formData.password}
                   onChange={handleInputChange}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField('')}
+                  className="input-glow"
                   style={{
                     width: '100%',
-                    padding: '1rem 1rem 1rem 3rem',
-                    border: `1px solid ${colors.primary}30`,
-                    borderRadius: '12px',
-                    fontSize: '0.95rem',
-                    backgroundColor: '#F9FAFB',
-                    color: colors.primary,
-                    fontFamily: 'Poppins, sans-serif',
+                    padding: '1.25rem 4rem 1.25rem 3.5rem',
+                    border: `2px solid ${focusedField === 'password' ? colors.secondary : 'rgba(255, 255, 255, 0.15)'}`,
+                    borderRadius: '16px',
+                    fontSize: '1rem',
+                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                    color: 'white',
+                    fontFamily: 'Inter, sans-serif',
                     fontWeight: '500',
                     outline: 'none',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.secondary;
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = `${colors.primary}30`;
-                    e.target.style.boxShadow = 'none';
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(10px)'
                   }}
                   required
                 />
                 <div style={{
                   position: 'absolute',
-                  left: '1rem',
+                  left: '1.25rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: colors.secondary,
-                  fontSize: '1.1rem'
+                  fontSize: '1.25rem',
+                  color: focusedField === 'password' ? colors.secondary : 'rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease'
                 }}>
-                  🔒
+                  🔐
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
-                    right: '1rem',
+                    right: '1.25rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    background: 'none',
                     border: 'none',
-                    color: colors.primary,
+                    background: 'transparent', 
                     cursor: 'pointer',
-                    fontSize: '1.2rem',
-                    padding: '0.25rem',
-                    opacity: 0.6,
-                    transition: 'all 0.3s ease',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
+                    fontSize: '1.1rem',
+                    padding: '0.5rem',
+                    borderRadius: '10px',
+                    width: '40px',
+                    height: '40px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease'
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.opacity = '1';
-                    e.target.style.backgroundColor = `${colors.primary}10`;
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
                   }}
                   onMouseOut={(e) => {
-                    e.target.style.opacity = '0.6';
-                    e.target.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
                   }}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  {showPassword ? <Eye color="white" size={22} /> :  <EyeOff color="white" size={22} />}
                 </button>
+                {focusedField === 'password' && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '50%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${colors.secondary}, transparent)`,
+                    animation: 'shimmerGold 1s ease-in-out infinite'
+                  }} />
+                )}
               </div>
             </div>
 
-            {/* Role Dropdown */}
-            <div>
+            {/* Enhanced Role Dropdown */}
+            <div style={{ position: 'relative' }}>
               <label htmlFor="role" style={{
                 display: 'block',
                 fontSize: '0.9rem',
                 fontWeight: '600',
-                color: colors.primary,
-                marginBottom: '0.5rem',
-                paddingLeft: '0.5rem'
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '0.75rem',
+                paddingLeft: '0.5rem',
+                letterSpacing: '0.5px'
               }}>
                 Role
               </label>
@@ -561,92 +663,111 @@ const Login = () => {
                   name="role"
                   value={formData.role}
                   onChange={handleInputChange}
-                  className="with-placeholder"
+                  onFocus={() => setFocusedField('role')}
+                  onBlur={() => setFocusedField('')}
+                  className="input-glow"
                   style={{
                     width: '100%',
-                    padding: '1rem 1rem 1rem 3rem',
-                    border: `1px solid ${colors.primary}30`,
-                    borderRadius: '12px',
-                    fontSize: '0.95rem',
-                    backgroundColor: '#F9FAFB',
-                    color: colors.primary,
+                    padding: '1.25rem 4rem 1.25rem 3.5rem',
+                    border: `2px solid ${focusedField === 'role' ? colors.secondary : 'rgba(255, 255, 255, 0.15)'}`,
+                    borderRadius: '16px',
+                    fontSize: '1rem',
+                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                    color: formData.role ? 'white' : 'rgba(255, 255, 255, 0.5)',
                     appearance: 'none',
                     cursor: 'pointer',
                     outline: 'none',
-                    fontFamily: 'Poppins, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     fontWeight: '500',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.secondary;
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = `${colors.primary}30`;
-                    e.target.style.boxShadow = 'none';
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(10px)'
                   }}
                   required
                 >
-                  <option value="" disabled hidden>-- Pilih Role --</option>
-                  <option value="admin">Admin</option>
-                  <option value="sales">Sales</option>
-                  <option value="superAdmin">Super Admin</option>
+                  <option value="" disabled hidden style={{ backgroundColor: colors.dark, color: 'white' }}>
+                    Pilih Role 
+                  </option>
+                  <option value="superAdmin" style={{ backgroundColor: colors.dark, color: 'white' }}>
+                    👑 Super Admin
+                  </option>
+                  <option value="admin" style={{ backgroundColor: colors.dark, color: 'white' }}>
+                    👨‍💼 Admin
+                  </option>
+                  <option value="sales" style={{ backgroundColor: colors.dark, color: 'white' }}>
+                    💼 Sales
+                  </option>
                 </select>
                 <div style={{
                   position: 'absolute',
-                  left: '1rem',
+                  left: '1.25rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                   color: colors.secondary,
-                  fontSize: '1.1rem'
+                  fontSize: '1.25rem',
+                  color: focusedField === 'role' ? colors.secondary : 'rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease'
                 }}>
                   👤
                 </div>
-                <span style={{
+                <div style={{
                   position: 'absolute',
-                  right: '1rem',
+                  right: '1.95rem',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   pointerEvents: 'none',
-                  color: colors.primary
+                  color: 'white',
+                  fontSize: '1rem'
                 }}>
                   ▼
-                </span>
+                </div>
+                {focusedField === 'role' && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '50%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${colors.secondary}, transparent)`,
+                    animation: 'shimmerGold 1s ease-in-out infinite'
+                  }} />
+                )}
               </div>
             </div>
 
-            {/* Checkbox & Forgot Password */}
+            {/* Enhanced Options Row */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               marginTop: '0.5rem'
             }}>
-              <div style={{ 
+              <label style={{ 
                 display: 'flex', 
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.75rem',
+                cursor: 'pointer',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.95rem',
+                fontWeight: '500'
               }}>
                 <div style={{ position: 'relative' }}>
                   <input
                     type="checkbox"
-                    id="rememberMe"
                     style={{
-                      width: '1.2rem',
-                      height: '1.2rem',
-                      backgroundColor: '#ffffff',
-                      border: `2px solid ${colors.primary}50`,
-                      borderRadius: '4px',
+                      width: '1.25rem',
+                      height: '1.25rem',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      border: `2px solid rgba(255, 255, 255, 0.2)`,
+                      borderRadius: '6px',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
                       appearance: 'none',
-                      position: 'relative',
-                      zIndex: 2
+                      position: 'relative'
                     }}
                     onChange={(e) => {
                       const checked = e.target.checked;
-                      e.target.style.backgroundColor = checked ? colors.secondary : '#ffffff';
-                      e.target.style.borderColor = checked ? colors.secondary : `${colors.primary}50`;
+                      e.target.style.backgroundColor = checked ? colors.secondary : 'rgba(255, 255, 255, 0.1)';
+                      e.target.style.borderColor = checked ? colors.secondary : 'rgba(255, 255, 255, 0.2)';
                     }}
                   />
                   <div style={{
@@ -658,90 +779,93 @@ const Login = () => {
                     fontSize: '0.8rem',
                     pointerEvents: 'none',
                     opacity: 0,
-                    transition: 'opacity 0.2s ease',
-                    zIndex: 3
+                    transition: 'opacity 0.2s ease'
                   }}>
                     ✓
                   </div>
                 </div>
-                <label htmlFor="rememberMe" style={{
-                  fontSize: '0.9rem',
-                  color: colors.primary,
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}>
-                  Ingat saya
-                </label>
-              </div>
+                Ingat Saya
+              </label>
 
               <button
                 type="button"
                 onClick={handleForgotPassword}
                 style={{
-                  fontSize: '0.9rem',
+                  fontSize: '0.95rem',
                   fontWeight: '600',
-                  color: colors.secondary,
+                  color: colors.accent1,
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  transition: 'all 0.3s ease'
+                  padding: '0.5rem',
+                  borderRadius: '8px',
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.color = colors.primary;
-                  e.target.style.textDecoration = 'underline';
+                  e.target.style.color = 'white';
+                  e.target.style.backgroundColor = 'rgba(0, 139, 176, 0.15)';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.color = colors.secondary;
-                  e.target.style.textDecoration = 'none';
+                  e.target.style.color = colors.accent1;
+                  e.target.style.backgroundColor = 'transparent';
                 }}
               >
-                Lupa Password?
+                Lupa Kata Sandi ?
               </button>
             </div>
 
-            {/* Submit Button */}
+            {/* Premium Submit Button */}
             <button
               type="submit"
-              className="login-button"
               disabled={isLoading}
+              className="button-hover"
               style={{
                 width: '100%',
-                padding: '1rem',
-                borderRadius: '12px',
+                padding: '1.25rem',
+                borderRadius: '16px',
                 color: 'white',
-                fontSize: '1rem',
-                fontWeight: '600',
-                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                fontSize: '1.1rem',
+                fontWeight: '700',
+                background: isLoading 
+                  ? 'rgba(255, 255, 255, 0.1)' 
+                  : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.accent1} 50%, ${colors.primary} 100%)`,
+                backgroundSize: '200% 200%',
                 border: 'none',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                marginTop: '1.5rem',
-                boxShadow: `0 4px 15px ${colors.secondary}40`,
-                opacity: isLoading ? 0.7 : 1,
+                transition: 'all 0.4s ease',
+                marginTop: '2rem',
+                boxShadow: isLoading 
+                  ? 'none'
+                  : `0 8px 25px ${colors.secondary}30`,
+                opacity: isLoading ? 0.6 : 1,
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                letterSpacing: '1px',
+                textTransform: 'uppercase'
               }}
-              onMouseEnter={() => setIsHovered(true)}
+              onMouseEnter={() => {
+                if (!isLoading) {
+                  setIsHovered(true);
+                }
+              }}
               onMouseLeave={() => setIsHovered(false)}
             >
               {isLoading ? (
-                <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
                   <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
-                    animation: 'shimmer 1.5s infinite'
+                    width: '20px',
+                    height: '20px',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    borderTop: '2px solid white',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
                   }} />
-                  <span>Memproses...</span>
-                </>
+                </div>
               ) : (
                 <>
-                  <span>MASUK</span>
+                  <span>Masuk</span>
                   {isHovered && (
                     <div style={{
                       position: 'absolute',
@@ -750,7 +874,7 @@ const Login = () => {
                       right: 0,
                       bottom: 0,
                       background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
-                      animation: 'shimmer 1.5s infinite'
+                      animation: 'shimmerGold 1.5s infinite'
                     }} />
                   )}
                 </>
@@ -759,19 +883,20 @@ const Login = () => {
           </form>
         </div>
 
-        {/* Footer */}
+        {/* Enhanced Footer */}
         <footer style={{
           marginTop: '3rem',
           textAlign: 'center',
-          fontSize: '0.85rem',
-          color: `${colors.primary}80`,
-          fontWeight: '500'
+          fontSize: '0.9rem',
+          color: 'rgba(255, 255, 255, 0.6)',
+          fontWeight: '500',
+          letterSpacing: '0.5px'
         }}>
-          © {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
+         © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System
         </footer>
       </div>
 
-      {/* Success Modal */}
+      {/* Premium Success Modal */}
       {showModal && (
         <div style={{
           position: 'fixed',
@@ -779,79 +904,82 @@ const Login = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(3, 91, 113, 0.3)',
-          backdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          animation: 'fadeInUp 0.3s ease'
         }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '20px',
-            padding: '2.5rem 2rem',
-            maxWidth: '480px',
+          <div className="glass-effect" style={{
+            borderRadius: '28px',
+            padding: '3rem 2.5rem',
+            maxWidth: '500px',
             width: '90%',
-            boxShadow: '0 20px 45px rgba(0,0,0,0.25)',
-            border: '1px solid rgba(0,0,0,0.05)',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
-            animation: 'fadeIn 0.3s ease'
+            animation: 'fadeInUp 0.4s ease 0.1s both'
           }}>
-            {/* garis gradiasi */}
-             <div style={{
+            
+            {/* Animated top border */}
+            <div style={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
-              height: '4px',
-              background: `linear-gradient(90deg, ${colors.primary} 0%, ${colors.secondary} 50%, ${colors.success} 100%)`
+              height: '3px',
+              background: `linear-gradient(90deg, ${colors.secondary}, ${colors.accent1}, ${colors.success}, ${colors.secondary})`,
+              backgroundSize: '300% 100%',
+              animation: 'shimmerGold 2s ease-in-out infinite'
             }} />
-            {/* Animated Success Icon */}
+
+            {/* Success Animation */}
             <div style={{
-              margin: '0 auto 1.5rem',
-              width: '90px',
-              height: '90px',
+              margin: '0 auto 2rem',
+              width: '100px',
+              height: '100px',
               borderRadius: '50%',
-              background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+              background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.secondary} 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: `0 10px 20px ${colors.success}40`
+              boxShadow: `0 15px 30px ${colors.success}40`,
+              animation: 'glowing 2s ease-in-out infinite'
             }}>
               <svg xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 52 52" 
-                width="50" height="50">
-                <circle cx="26" cy="26" r="25" fill="none" stroke="white" strokeWidth="2"/>
-                <path fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+                width="55" height="55">
+                <circle cx="26" cy="26" r="25" fill="none" stroke="white" strokeWidth="3"/>
+                <path fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"
                   d="M16 26l8 8 16-16">
-                  <animate attributeName="stroke-dasharray" from="0,50" to="50,0" dur="0.5s" fill="freeze"/>
+                  <animate attributeName="stroke-dasharray" from="0,60" to="60,0" dur="0.6s" fill="freeze"/>
                 </path>
               </svg>
             </div>
 
-            {/* Title */}
             <h3 style={{
-              fontSize: '1.5rem',
-              fontWeight: '700',
-              color: colors.primary,
-              marginBottom: '0.5rem'
+              fontSize: '1.8rem',
+              fontWeight: '800',
+              color: 'white',
+              marginBottom: '1rem',
+              letterSpacing: '-0.02em'
             }}>
-              Login Berhasil!
+              Welcome Back!
             </h3>
 
-            {/* Subtext */}
             <p style={{
-              color: `${colors.primary}CC`,
-              fontSize: '0.95rem',
-              marginBottom: '2rem'
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '1.1rem',
+              marginBottom: '2.5rem',
+              lineHeight: '1.6'
             }}>
-              Selamat datang kembali <br/>
-              Anda akan diarahkan ke dashboard sesuai role Anda.
+              Authentication successful. <br/>
+              Redirecting to your personalized dashboard...
             </p>
 
-            {/* Button */}
             <button
               onClick={() => {
                 setShowModal(false);
@@ -860,35 +988,51 @@ const Login = () => {
                 else if (formData.role === 'superAdmin') navigate('/superAdmin/dashboard');
               }}
               style={{
-                padding: '14px 36px',
-                fontSize: '1rem',
-                fontWeight: '600',
+                padding: '1rem 2.5rem',
+                fontSize: '1.1rem',
+                fontWeight: '700',
                 color: 'white',
                 background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                 border: 'none',
-                borderRadius: '12px',
+                borderRadius: '16px',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
-                boxShadow: `0 6px 16px ${colors.secondary}50`
+                boxShadow: `0 8px 20px ${colors.secondary}40`,
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+                position: 'relative',
+                overflow: 'hidden'
               }}
               onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = `0 8px 20px ${colors.secondary}60`;
+                e.target.style.transform = 'translateY(-2px) scale(1.02)';
+                e.target.style.boxShadow = `0 12px 25px ${colors.secondary}50`;
               }}
               onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = `0 6px 16px ${colors.secondary}50`;
+                e.target.style.transform = 'translateY(0) scale(1)';
+                e.target.style.boxShadow = `0 8px 20px ${colors.secondary}40`;
               }}
             >
-              OKE
+              Continue
             </button>
           </div>
         </div>
       )}
+
+      {/* Additional Animations */}
       <style jsx>{`
-        @keyframes loading {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        input:checked + div {
+          opacity: 1 !important;
+        }
+
+        select option {
+          background-color: #1e293b !important;
+          color: white !important;
+          padding: 0.5rem !important;
         }
       `}</style>
     </div>
