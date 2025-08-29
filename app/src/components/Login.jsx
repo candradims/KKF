@@ -402,7 +402,7 @@ const Login = () => {
             letterSpacing: '-0.02em',
             animation: 'slideInFromRight 1s ease-out 0.5s both'
           }}>
-            PLN FinNetra
+            PLN FinNeta
           </h1>
           <p style={{
             color: 'rgba(255, 255, 255, 0.7)',
@@ -411,7 +411,7 @@ const Login = () => {
             margin: 0,
             animation: 'fadeInUp 1s ease-out 0.7s both'
           }}>
-            Sistem Kajian Kelayakan Finansial Jaringan
+            Financial Network Feasibility System
           </p>
         </div>
 
