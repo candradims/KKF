@@ -55,7 +55,7 @@ const MainLayout = () => {
         flexDirection: 'column',
         flex: 1,
         width: '100%',
-        marginLeft: sidebarOpen ? '250px' : '0',
+        marginLeft: sidebarOpen ? '270px' : '0',
         transition: 'margin-left 0.3s ease',
         minHeight: '100vh'
       }}>
@@ -67,7 +67,8 @@ const MainLayout = () => {
           flex: 1,
           overflowY: 'auto',
           padding: '1.5rem',
-          backgroundColor: '#F9FAFB'
+          backgroundColor: '#F9FAFB',
+          marginTop: '72px'
         }}>
           <Outlet />
         </div>
