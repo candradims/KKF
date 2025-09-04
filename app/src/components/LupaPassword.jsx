@@ -1,129 +1,213 @@
 import React, { useState, useEffect } from 'react';
 import logoImage from '../assets/Logo_PLN_Icon_Plus.png';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, ArrowLeft, Key, CheckCircle } from "lucide-react";
 
-const App = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '',
+    confirmPassword: ''
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState('');
+
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+    lightBg: '#f8fafc',
+    dark: '#004d59',
+    darker: '#00363d'
+  };
 
   useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-    
+
     const style = document.createElement('style');
     style.innerHTML = `
+      @keyframes fadeInUp {
+        from { 
+          opacity: 0; 
+          transform: translateY(40px) scale(0.95); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateY(0) scale(1); 
+        }
+      }
+
+      @keyframes slideInFromLeft {
+        from { 
+          opacity: 0; 
+          transform: translateX(-50px); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateX(0); 
+        }
+      }
+
+      @keyframes slideInFromRight {
+        from { 
+          opacity: 0; 
+          transform: translateX(50px); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateX(0); 
+        }
+      }
+
+      @keyframes morphing {
+        0% { transform: scale(1) rotate(0deg); border-radius: 50%; }
+        25% { transform: scale(1.1) rotate(90deg); border-radius: 20%; }
+        50% { transform: scale(0.9) rotate(180deg); border-radius: 50%; }
+        75% { transform: scale(1.05) rotate(270deg); border-radius: 30%; }
+        100% { transform: scale(1) rotate(360deg); border-radius: 50%; }
+      }
+
+      @keyframes floating {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-15px) rotate(1deg); }
+        66% { transform: translateY(-5px) rotate(-1deg); }
+      }
+      
+      @keyframes glowing {
+        0% { box-shadow: 0 0 20px ${colors.secondary}30; }
+        50% { box-shadow: 0 0 30px ${colors.secondary}60, 0 0 40px ${colors.primary}30; }
+        100% { box-shadow: 0 0 20px ${colors.secondary}30; }
+      }
+      
+      @keyframes shimmerGold {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+      }
+
+      @keyframes textShine {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+      }
+      
+      input::placeholder {
+        font-style: italic;
+        color: #94a3b8;
+        font-weight: 400;
+      }
+      
       html, body {
         margin: 0;
         padding: 0;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
+        font-family: 'Inter', sans-serif;
         overflow-x: hidden;
+        background: linear-gradient(135deg, ${colors.darker} 0%, ${colors.dark} 50%, ${colors.primary} 100%);
+        min-height: 100vh;
+        position: relative;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .glass-effect {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .input-glow:focus {
+        box-shadow: 0 0 0 3px ${colors.secondary}30, 0 8px 25px ${colors.secondary}20 !important;
+        border-color: ${colors.secondary} !important;
+      }
+
+      .button-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px ${colors.secondary}40;
+      }
+
+      .text-gradient {
+        background: linear-gradient(135deg, ${colors.secondary} 0%, ${colors.accent1} 50%, ${colors.primary} 100%);
+        background-size: 200% 200%;
+        animation: textShine 3s ease-in-out infinite;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
       
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-
-      @keyframes scaleIn {
-        from { transform: scale(0.95); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-      }
-
-      @keyframes checkmarkPulse {
-        0% { transform: scale(0.8); opacity: 0; }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); opacity: 1; }
-      }
-
-      @media (min-width: 1024px) {
-        .main-title {
-          font-size: 2.25rem !important;
-        }
-        .form-input {
-          font-size: 1rem !important;
-        }
-      }
-
       @media (max-width: 768px) {
-        .main-title {
-          font-size: 1.5rem !important;
-          margin-top: 2rem !important;
-        }
-        
-        .logo-img {
-          height: 4.5rem !important;
-        }
-        
-        .welcome-section {
-          margin-bottom: 2rem !important;
-        }
-        
         .form-container {
-          padding: 1.5rem 1.5rem !important;
-          margin: 0 0.5rem !important;
-        }
-        
-        .form-row {
-          flex-direction: column !important;
-          align-items: stretch !important;
-          gap: 0.5rem !important;
+          padding: 2rem 1.5rem !important;
+          margin: 1rem !important;
+          width: 95% !important;
         }
 
-        .form-row label {
-          width: 100% !important;
-          margin-bottom: 0.25rem;
-          font-size: 0.9rem !important;
+        .welcome-title {
+          font-size: 2rem !important;
         }
-        
-        .form-input {
-          font-size: 0.9rem !important;
-          padding: 0.75rem 0.875rem !important;
-        }
-        
-        .submit-btn {
-          width: 60% !important;
-          font-size: 0.9rem !important;
-          padding: 0.875rem !important;
-        }
-        
-        .footer-text {
-          font-size: 0.75rem !important;
-          bottom: 0.5rem !important;
-          left: 0.5rem !important;
+
+        .logo-container {
+          margin-bottom: 2rem !important;
         }
       }
 
       @media (max-width: 480px) {
-        .main-title {
-          font-size: 1.25rem !important;
+        .welcome-title {
+          font-size: 1.8rem !important;
         }
-        
-        .logo-img {
-          height: 4rem !important;
-        }
-        
+
         .form-container {
-          padding: 1.25rem 1rem !important;
-          border-radius: 1.25rem !important;
+          padding: 1.5rem !important;
         }
-        
-        .submit-btn {
-          width: 80% !important;
-        }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.3); opacity: 1; }
+      }
+
+      @keyframes flow {
+        0% { opacity: 0.5; transform: translateX(0); }
+        50% { opacity: 1; transform: translateX(15px); }
+        100% { opacity: 0.5; transform: translateX(0); }
+      }
+
+      @keyframes flicker {
+        0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+        20%, 24%, 55% { opacity: 0.4; }
+      }
+      
+      @keyframes rotateOrb {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.1); }
+        100% { transform: rotate(360deg) scale(1); }
+      }
+
+      @keyframes glowMove {
+        0% { transform: translateX(-50%); opacity: 0; }
+        50% { transform: translateX(0); opacity: 1; }
+        100% { transform: translateX(50%); opacity: 0; }
+      }
+
+      @keyframes zigzag {
+        0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+        25% { transform: translateX(-10px) translateY(10px) rotate(-5deg); }
+        50% { transform: translateX(10px) translateY(-10px) rotate(5deg); }
+        75% { transform: translateX(-5px) translateY(5px) rotate(-3deg); }
       }
     `;
     document.head.appendChild(style);
+    
     return () => {
       document.head.removeChild(style);
       document.head.removeChild(link);
@@ -138,512 +222,930 @@ const App = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!formData.email || !formData.password || !formData.confirmPassword) {
       setMessage({ type: 'error', text: 'Semua field harus diisi!' });
+      setIsLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setMessage({ type: 'error', text: 'Password dan konfirmasi password tidak cocok!' });
+      setIsLoading(false);
       return;
     }
 
-    console.log('Simpan Password:', formData);
-    setShowModal(true);
+    // Validasi minimal panjang password (sesuai dengan database varchar)
+    if (formData.password.length < 6) {
+      setMessage({ type: 'error', text: 'Password minimal 6 karakter!' });
+      setIsLoading(false);
+      return;
+    }
+
+    // Validasi maksimal panjang password (sesuai dengan database varchar)
+    if (formData.password.length > 255) {
+      setMessage({ type: 'error', text: 'Password maksimal 255 karakter!' });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Di sini akan ada panggilan API untuk reset password
+      // Contoh: 
+      // const response = await fetch('/api/reset-password', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     email: formData.email,
+      //     newPassword: formData.password
+      //   })
+      // });
+      
+      // if (response.ok) {
+      //   setShowModal(true);
+      // } else {
+      //   setMessage({ type: "error", text: "Terjadi kesalahan. Silakan coba lagi." });
+      // }
+      
+      // Simulasi sukses
+      setTimeout(() => {
+        setShowModal(true);
+        setIsLoading(false);
+      }, 1500);
+    } catch (error) {
+      setMessage({ type: "error", text: "Terjadi kesalahan. Silakan coba lagi." });
+      setIsLoading(false);
+    }
+  };
+
+  const handleBackToLogin = () => {
+    navigate('/login');
   };
 
   return (
     <div style={{
       minHeight: '100vh',
-      width: '100%',
+      position: 'relative',
+      overflow: 'hidden',
       display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: '#E2EAFF',
-      fontFamily: 'Poppins, sans-serif',
-      position: 'relative'
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '2rem 1rem',
+      background: `linear-gradient(135deg, ${colors.darker} 0%, ${colors.dark} 50%, ${colors.primary} 100%)`
     }}>
-      {/* Top Blue Bar */}
+      
+      {/* Animated Background Elements */}
       <div style={{
-        width: '100%',
-        height: '4rem',
-        background: 'linear-gradient(90deg, #00AEEF 0%, #0088CC 50%, #0066AA 100%)',
-        position: 'fixed',
+        position: 'absolute',
         top: 0,
         left: 0,
-        zIndex: 1000
+        right: 0,
+        bottom: 0,
+        background: `
+          radial-gradient(circle at 20% 80%, ${colors.secondary}40 0%, transparent 0%),
+          radial-gradient(circle at 80% 20%, ${colors.accent1}30 0%, transparent 0%),
+          linear-gradient(180deg, ${colors.accent2} 0%, ${colors.primary} 0%, ${colors.tertiary} 100%)
+        `
       }} />
 
-      {/* Scrollable Content */}
-      <div style={{ 
+      {/* Floating geometric shapes */}
+      <div style={{
+            position: 'absolute',
+            top: '10%',
+            right: '15%',
+            width: '120px',
+            height: '120px',
+            background: `linear-gradient(45deg, ${colors.secondary}55, ${colors.accent1}55)`,
+            animation: 'morphing 8s ease-in-out infinite',
+            filter: 'blur(2px)',
+            borderRadius: "20%"
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        bottom: '15%',
+        left: '10%',
+        width: '90px',
+        height: '90px',
+        background: `linear-gradient(45deg, ${colors.primary}60, ${colors.tertiary}50)`,
+        clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+        animation: 'floating 6s ease-in-out infinite 1s',
+        boxShadow: `0 0 25px ${colors.primary}40`,
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '30%',
+        left: '5%',
+        width: '70px',
+        height: '70px',
+        background: `linear-gradient(45deg, ${colors.accent1}70, ${colors.secondary}60)`,
+        clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+        animation: 'floating 7s ease-in-out infinite 2s',
+        boxShadow: `0 0 20px ${colors.accent1}55`
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '0',
+        left: '0',
         width: '100%',
-        minHeight: '100vh',
-        paddingTop: '13rem', 
-        paddingBottom: '2rem',
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
-        boxSizing: 'border-box',
-        overflowY: 'auto',
+        height: '100%',
+        backgroundImage: `linear-gradient(90deg, ${colors.primary}15 1px, transparent 1px),
+                          linear-gradient(180deg, ${colors.primary}15 1px, transparent 1px)`,
+        backgroundSize: '80px 80px',
+        zIndex: 0
+      }} />
+
+      {[
+        { top: '20%', left: '30%', color: colors.accent1 },
+        { top: '50%', left: '60%', color: colors.secondary },
+        { top: '70%', left: '25%', color: colors.accent2 },
+        { top: '40%', left: '80%', color: colors.primary },
+      ].map((node, idx) => (
+        <div key={idx} style={{
+          position: 'absolute',
+          top: node.top,
+          left: node.left,
+          width: '16px',
+          height: '16px',
+          borderRadius: '50%',
+          background: node.color,
+          boxShadow: `0 0 20px ${node.color}, 0 0 40px ${node.color}55`,
+          animation: `pulse ${3 + idx}s ease-in-out infinite`
+        }} />
+      ))}
+
+      <div style={{
+        position: 'absolute',
+        top: '21%',
+        left: '31%',
+        width: '150px',
+        height: '2px',
+        background: `linear-gradient(90deg, ${colors.accent1}, ${colors.secondary})`,
+        boxShadow: `0 0 10px ${colors.secondary}`,
+        animation: 'flow 6s linear infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '52%',
+        left: '26%',
+        width: '200px',
+        height: '2px',
+        background: `linear-gradient(90deg, ${colors.accent2}, ${colors.primary})`,
+        boxShadow: `0 0 10px ${colors.accent2}`,
+        animation: 'flow 8s linear infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '30%',
+        right: '15%',
+        width: '50px',
+        height: '50px',
+        background: `linear-gradient(135deg, ${colors.accent2}, ${colors.primary})`,
+        clipPath: 'polygon(50% 0%, 60% 35%, 40% 35%, 55% 70%, 35% 70%, 50% 100%, 20% 60%, 40% 60%, 30% 30%, 50% 30%)',
+        filter: 'drop-shadow(0 0 15px rgba(255,255,0,0.8))',
+        animation: 'flicker 2s infinite'
+      }} />
+      
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        left: '15%',
+        width: '40px',
+        height: '40px',
+        background: `linear-gradient(135deg, ${colors.accent1}, ${colors.secondary})`,
+        clipPath: 'polygon(50% 0%, 60% 35%, 40% 35%, 55% 70%, 35% 70%, 50% 100%, 20% 60%, 40% 60%, 30% 30%, 50% 30%)',
+        filter: 'drop-shadow(0 0 12px rgba(255,255,0,0.9))',
+        animation: 'flicker 1.8s infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '65%',
+        right: '20%',
+        width: '60px',
+        height: '60px',
+        background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent2})`,
+        clipPath: 'polygon(50% 0%, 60% 35%, 40% 35%, 55% 70%, 35% 70%, 50% 100%, 20% 60%, 40% 60%, 30% 30%, 50% 30%)',
+        filter: 'drop-shadow(0 0 20px rgba(255,255,0,1))',
+        animation: 'zigzag 3s infinite ease-in-out'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '15%',
+        left: '50%',
+        width: '60px',
+        height: '60px',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, ${colors.accent2} 20%, transparent 70%)`,
+        boxShadow: `0 0 25px ${colors.accent2}aa`,
+        animation: 'rotateOrb 10s linear infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '75%',
+        left: '10%',
+        width: '250px',
+        height: '3px',
+        background: `linear-gradient(90deg, transparent, ${colors.primary}, transparent)`,
+        animation: 'glowMove 5s linear infinite'
+      }} />
+
+      {/* Main Content Container */}
+      <div style={{
+        width: '100%',
+        maxWidth: '520px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-start'
+        position: 'relative',
+        zIndex: 2,
+        animation: 'fadeInUp 1s ease-out'
       }}>
-        {/* Logo & Welcome */}
-        <div className="welcome-section" style={{
+        
+        {/* Logo & Welcome Section */}
+        <div className="logo-container" style={{
           textAlign: 'center',
-          marginBottom: '3rem',
-          width: '100%',
-          maxWidth: '1200px',
-          padding: '1rem 0'
+          marginBottom: '2rem',
+          width: '100%'
         }}>
-          <img
-            src={logoImage}
-            alt="PLN Icon Plus Logo"
-            className="logo-img"
-            style={{
-              height: '6.5rem',
-              width: 'auto',
-              objectFit: 'contain',
-              filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.1))',
-              animation: 'fadeIn 0.8s ease-out'
-            }}
-          />
-          <h2 className="main-title" style={{
-            fontSize: '2rem',
-            color: '#2D396B',
-            fontWeight: '500',
-            marginTop: '2.5rem',
+          <div style={{
+            marginBottom: '2rem',
+            display: 'flex',
+            justifyContent: 'center',
+            animation: 'slideInFromLeft 1s ease-out 0.3s both'
+          }}>
+            <div style={{
+              position: 'relative',
+              display: 'inline-block'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%)',
+                pointerEvents: 'none',
+                borderRadius: '16px'
+              }} />
+              <img
+                src={logoImage}
+                alt="PLN Icon Plus Logo"
+                style={{
+                  height: '100px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  backgroundColor: 'rgba(203, 235, 234, 0.95)',
+                  padding: '15px',
+                  borderRadius: '16px',
+                  boxShadow: `
+                    0 6px 20px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    inset 0 2px 10px rgba(255, 255, 255, 0.3)
+                  `,
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  position: 'relative',
+                  zIndex: 2,
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'scale(1.05) translateY(-2px)';
+                  e.target.style.boxShadow = `
+                    0 10px 25px rgba(0, 0, 0, 0.2),
+                    0 0 0 1px rgba(255, 255, 255, 0.15),
+                    inset 0 2px 12px rgba(255, 255, 255, 0.4)
+                  `;
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'scale(1) translateY(0)';
+                  e.target.style.boxShadow = `
+                    0 6px 20px rgba(0, 0, 0, 0.15),
+                    0 0 0 1px rgba(255, 255, 255, 0.1),
+                    inset 0 2px 10px rgba(255, 255, 255, 0.3)
+                  `;
+                }}
+              />
+              {/* Animated background rings */}
+              <div style={{
+                position: 'absolute',
+                top: '-15px',
+                left: '-15px',
+                right: '-15px',
+                bottom: '-15px',
+                background: `conic-gradient(from 0deg, ${colors.secondary}, ${colors.accent1}, ${colors.primary}, ${colors.secondary})`,
+                borderRadius: '28px',
+                zIndex: 1,
+                filter: 'blur(8px)',
+                opacity: 0.6,
+                animation: 'floating 4s ease-in-out infinite'
+              }} />
+            </div>
+          </div>
+          
+          <h1 className="welcome-title" style={{
+            fontSize: '2.5rem',
+            fontWeight: '800',
             marginBottom: '0.5rem',
-            background: 'linear-gradient(90deg, #00AEEF, #2D396B)',
+            letterSpacing: '-0.03em',
+            background: 'linear-gradient(90deg, #00E0FF, #00FFA3, #008bb0)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            letterSpacing: '1px',
-            textShadow: '1px 1px 2px rgba(0,0,0,0.05)',
-            animation: 'scaleIn 0.8s ease-out 0.2s both'
+            textShadow: '0 4px 25px rgba(0, 224, 255, 0.3), 0 2px 15px rgba(0, 255, 163, 0.25)',
+            animation: 'slideInFromRight 1s ease-out 0.5s both'
           }}>
-            Selamat Datang di Sistem PLN Icon Plus
-          </h2>
+            Reset Password
+          </h1>
           <p style={{
-            color: '#2D396B',
-            fontSize: '1.05rem',
-            marginTop: '0.5rem',
+            color: 'rgba(255, 255, 255, 0.8)',
+            fontSize: '1rem',
             fontWeight: '500',
-            animation: 'fadeIn 0.8s ease-out 0.4s both',
-            opacity: 0
+            margin: 0,
+            letterSpacing: '0.5px',
+            textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            animation: 'fadeInUp 1s ease-out 0.7s both'
           }}>
-            Silakan Ubah Password untuk melanjutkan akses sistem
+            Buat kata sandi baru untuk akun Anda
           </p>
         </div>
 
-        {/* Message Box */}
+        {/* Enhanced Message Box */}
         {message.text && (
           <div
             style={{
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
+              padding: '1rem 1.5rem',
+              marginBottom: '1.5rem',
+              borderRadius: '16px',
+              fontSize: '0.95rem',
               fontWeight: '500',
               border: '1px solid',
-              backgroundColor: message.type === 'error' ? '#FEE2E2' : message.type === 'success' ? '#D1FAE5' : '#DBEAFE',
-              color: message.type === 'error' ? '#DC2626' : message.type === 'success' ? '#059669' : '#2563EB',
-              borderColor: message.type === 'error' ? '#FCA5A5' : message.type === 'success' ? '#6EE7B7' : '#93C5FD',
-              maxWidth: '780px',
+              backgroundColor: message.type === 'error' 
+                ? 'rgba(239, 68, 68, 0.1)' 
+                : 'rgba(34, 197, 94, 0.1)',
+              color: message.type === 'error' ? '#f87171' : '#4ade80',
+              borderColor: message.type === 'error' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)',
               width: '100%',
-              margin: '0 auto',
-              animation: 'scaleIn 0.3s ease-out'
+              animation: 'fadeInUp 0.5s ease-out',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              boxShadow: message.type === 'error' 
+                ? '0 8px 25px rgba(239, 68, 68, 0.15)'
+                : '0 8px 25px rgba(34, 197, 94, 0.15)'
             }}
           >
-            {message.text}
+            <span style={{ fontSize: '1.2rem' }}>
+              {message.type === 'error' ? '⚠️' : '✅'}
+            </span>
+            <span>{message.text}</span>
           </div>
         )}
 
-        {/* Form Container */}
-        <div className="form-container" style={{
-          backgroundColor: '#E9EDF7',
-          borderRadius: '1.85rem',
-          boxShadow: '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)',
-          padding: '2.5rem 3rem',
-          border: '2px solid #2D396B',
+        {/* Enhanced Form Container */}
+        <div className="form-container glass-effect" style={{
+          borderRadius: '24px',
+          padding: '2.5rem 2rem',
           width: '100%',
-          maxWidth: '780px',
-          margin: '0 auto 2rem auto',
-          transition: 'all 0.3s ease-in-out',
-          boxSizing: 'border-box',
-          animation: 'scaleIn 0.8s ease-out 0.6s both',
-          opacity: 0
+          position: 'relative',
+          overflow: 'hidden',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4)',
+          animation: 'fadeInUp 1s ease-out 0.9s both'
         }}>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          
+          {/* Animated gradient overlay */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: `linear-gradient(90deg, ${colors.secondary}, ${colors.accent1}, ${colors.tertiary}, ${colors.secondary})`,
+            backgroundSize: '300% 100%',
+            animation: 'shimmerGold 3s ease-in-out infinite'
+          }} />
 
-            {/* Email */}
-            <div className="form-row" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap'
-            }}>
+          <form onSubmit={handleSubmit} style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '1.5rem', 
+            position: 'relative', 
+            zIndex: 2 
+          }}>
+
+            {/* Enhanced Email Field */}
+            <div style={{ position: 'relative' }}>
               <label htmlFor="email" style={{
-                width: '30%',
-                minWidth: '120px',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                color: '#2D396B',
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '0.75rem',
+                paddingLeft: '0.5rem',
+                letterSpacing: '0.5px'
               }}>
                 Email
               </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Masukkan Email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="form-input"
-                style={{
-                  flex: 1,
-                  minWidth: '250px',
-                  padding: '0.85rem 1rem',
-                  border: '1px solid #D1D5DB',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.95rem',
-                  backgroundColor: '#F9FAFB',
-                  color: '#2D396B',
-                  boxSizing: 'border-box',
-                  fontFamily: 'Poppins, sans-serif',
-                  fontWeight: '500',
-                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#00AEEF';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(0, 174, 239, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#D1D5DB';
-                  e.target.style.boxShadow = 'none';
-                }}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Masukkan Email Anda"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField('')}
+                  className="input-glow"
+                  style={{
+                    width: '100%',
+                    padding: '1.25rem 1.25rem 1.25rem 3.5rem',
+                    border: `2px solid ${focusedField === 'email' ? colors.secondary : 'rgba(255, 255, 255, 0.15)'}`,
+                    borderRadius: '16px',
+                    fontSize: '1rem',
+                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                    color: 'white',
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: '500',
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                  required
+                />
+                <div style={{
+                  position: 'absolute',
+                  left: '1.25rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: '1.25rem',
+                  color: focusedField === 'email' ? colors.secondary : 'rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease'
+                }}>
+                  ✉️
+                </div>
+                {/* Focus indicator */}
+                {focusedField === 'email' && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '50%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${colors.secondary}, transparent)`,
+                    animation: 'shimmerGold 1s ease-in-out infinite'
+                  }} />
+                )}
+              </div>
             </div>
 
-            {/* Password */}
-            <div className="form-row" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap'
-            }}>
+            {/* Enhanced Password Field */}
+            <div style={{ position: 'relative' }}>
               <label htmlFor="password" style={{
-                width: '30%',
-                minWidth: '120px',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                color: '#2D396B',
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '0.75rem',
+                paddingLeft: '0.5rem',
+                letterSpacing: '0.5px'
               }}>
-                Password Baru
+                Kata Sandi Baru
               </label>
-              <div style={{ flex: 1, position: 'relative', minWidth: '250px' }}>
+              <div style={{ position: 'relative' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
-                  placeholder="Masukkan Password Baru"
+                  placeholder="Masukkan Kata Sandi Baru (min. 6 karakter)"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="form-input"
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField('')}
+                  className="input-glow"
                   style={{
                     width: '100%',
-                    padding: '0.85rem 1rem',
-                    paddingRight: '2.5rem',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.95rem',
-                    backgroundColor: '#F9FAFB',
-                    color: '#2D396B',
-                    boxSizing: 'border-box',
-                    fontFamily: 'Poppins, sans-serif',
+                    padding: '1.25rem 4rem 1.25rem 3.5rem',
+                    border: `2px solid ${focusedField === 'password' ? colors.secondary : 'rgba(255, 255, 255, 0.15)'}`,
+                    borderRadius: '16px',
+                    fontSize: '1rem',
+                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                    color: 'white',
+                    fontFamily: 'Inter, sans-serif',
                     fontWeight: '500',
-                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#00AEEF';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(0, 174, 239, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#D1D5DB';
-                    e.target.style.boxShadow = 'none';
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(10px)'
                   }}
                   required
                 />
+                <div style={{
+                  position: 'absolute',
+                  left: '1.25rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: '1.25rem',
+                  color: focusedField === 'password' ? colors.secondary : 'rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease'
+                }}>
+                  <Key size={20} />
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
-                    right: '0.75rem',
+                    right: '1.25rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    background: 'none',
                     border: 'none',
+                    background: 'transparent', 
                     cursor: 'pointer',
-                    padding: '0.25rem',
-                    borderRadius: '0.25rem',
-                    transition: 'background-color 0.2s ease'
+                    fontSize: '1.1rem',
+                    padding: '0.5rem',
+                    borderRadius: '10px',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease'
                   }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(0, 174, 239, 0.1)'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+                  }}
                 >
-                  {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
-                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                    </svg>
-                  )}
+                  {showPassword ? <Eye color="white" size={22} /> : <EyeOff color="white" size={22} />}
                 </button>
+                {focusedField === 'password' && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '50%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${colors.secondary}, transparent)`,
+                    animation: 'shimmerGold 1s ease-in-out infinite'
+                  }} />
+                )}
               </div>
             </div>
 
-            {/* Confirm Password */}
-            <div className="form-row" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              flexWrap: 'wrap'
-            }}>
+            {/* Enhanced Confirm Password Field */}
+            <div style={{ position: 'relative' }}>
               <label htmlFor="confirmPassword" style={{
-                width: '30%',
-                minWidth: '120px',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                color: '#2D396B',
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: 'rgba(255, 255, 255, 0.9)',
+                marginBottom: '0.75rem',
+                paddingLeft: '0.5rem',
+                letterSpacing: '0.5px'
               }}>
-                Ulangi Password
+                Konfirmasi Kata Sandi
               </label>
-              <div style={{ flex: 1, position: 'relative', minWidth: '250px' }}>
+              <div style={{ position: 'relative' }}>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
                   name="confirmPassword"
-                  placeholder="Ulangi Password Baru"
+                  placeholder="Konfirmasi Kata Sandi Baru"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className="form-input"
+                  onFocus={() => setFocusedField('confirmPassword')}
+                  onBlur={() => setFocusedField('')}
+                  className="input-glow"
                   style={{
                     width: '100%',
-                    padding: '0.85rem 1rem',
-                    paddingRight: '2.5rem',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.95rem',
-                    backgroundColor: '#F9FAFB',
-                    color: '#2D396B',
-                    boxSizing: 'border-box',
-                    fontFamily: 'Poppins, sans-serif',
+                    padding: '1.25rem 4rem 1.25rem 3.5rem',
+                    border: `2px solid ${focusedField === 'confirmPassword' ? colors.secondary : 'rgba(255, 255, 255, 0.15)'}`,
+                    borderRadius: '16px',
+                    fontSize: '1rem',
+                    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                    color: 'white',
+                    fontFamily: 'Inter, sans-serif',
                     fontWeight: '500',
-                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#00AEEF';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(0, 174, 239, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#D1D5DB';
-                    e.target.style.boxShadow = 'none';
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                    backdropFilter: 'blur(10px)'
                   }}
                   required
                 />
+                <div style={{
+                  position: 'absolute',
+                  left: '1.25rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: '1.25rem',
+                  color: focusedField === 'confirmPassword' ? colors.secondary : 'rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease'
+                }}>
+                  <Key size={20} />
+                </div>
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={{
                     position: 'absolute',
-                    right: '0.75rem',
+                    right: '1.25rem',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    background: 'none',
                     border: 'none',
+                    background: 'transparent', 
                     cursor: 'pointer',
-                    padding: '0.25rem',
-                    borderRadius: '0.25rem',
-                    transition: 'background-color 0.2s ease'
+                    fontSize: '1.1rem',
+                    padding: '0.5rem',
+                    borderRadius: '10px',
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease'
                   }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(0, 174, 239, 0.1)'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                    e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+                  }}
                 >
-                  {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#2D396B" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
-                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                    </svg>
-                  )}
+                  {showConfirmPassword ? <Eye color="white" size={22} /> : <EyeOff color="white" size={22} />}
                 </button>
+                {focusedField === 'confirmPassword' && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-2px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '50%',
+                    height: '2px',
+                    background: `linear-gradient(90deg, transparent, ${colors.secondary}, transparent)`,
+                    animation: 'shimmerGold 1s ease-in-out infinite'
+                  }} />
+                )}
               </div>
+              
+              {/* Password Match Indicator */}
+              {formData.password && formData.confirmPassword && (
+                <div style={{
+                  marginTop: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  color: formData.password === formData.confirmPassword ? '#22c55e' : '#ef4444',
+                  fontSize: '0.85rem',
+                  fontWeight: '500'
+                }}>
+                  {formData.password === formData.confirmPassword ? (
+                    <>
+                      <CheckCircle size={16} />
+                      <span>Kata sandi cocok</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>⚠️</span>
+                      <span>Kata sandi tidak cocok</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Submit Button */}
+            {/* Premium Submit Button */}
             <button
               type="submit"
-              className="submit-btn"
+              disabled={isLoading}
+              className="button-hover"
               style={{
-                width: '30%',
-                padding: '1rem',
-                borderRadius: '0.95rem',
-                alignSelf: 'center',
-                color: '#FCFEFF',
-                fontSize: '1rem',
-                fontWeight: '500',
-                backgroundColor: '#00AEEF',
+                width: '100%',
+                padding: '1.25rem',
+                borderRadius: '16px',
+                color: 'white',
+                fontSize: '1.1rem',
+                fontWeight: '700',
+                background: isLoading 
+                  ? 'rgba(255, 255, 255, 0.1)' 
+                  : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                backgroundSize: '200% 200%',
                 border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.4s ease',
                 marginTop: '1rem',
-                boxShadow: '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)',
-                fontFamily: 'Poppins, sans-serif'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#0088CC';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(45, 57, 107, 0.3)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#00AEEF';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(45, 57, 107, 0.1), 0 2px 4px -1px rgba(45, 57, 107, 0.06)';
+                boxShadow: isLoading 
+                  ? 'none'
+                  : `0 8px 25px ${colors.secondary}30`,
+                opacity: isLoading ? 0.6 : 1,
+                position: 'relative',
+                overflow: 'hidden',
+                letterSpacing: '1px',
+                textTransform: 'uppercase'
               }}
             >
-              SIMPAN
+              {isLoading ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    borderTop: '2px solid white',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                  Memproses...
+                </div>
+              ) : (
+                'Reset'
+              )}
+            </button>
+
+            {/* Back to Login Button */}
+            <button
+              type="button"
+              onClick={handleBackToLogin}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                width: '100%',
+                padding: '1rem',
+                borderRadius: '16px',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '1rem',
+                fontWeight: '600',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                marginTop: '0.5rem'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                e.target.style.color = 'white';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                e.target.style.color = 'rgba(255, 255, 255, 0.8)';
+              }}
+            >
+              <ArrowLeft size={18} />
+              Kembali ke Login
             </button>
           </form>
         </div>
 
-        {/* Footer */}
-        <footer className="footer-text" style={{
-          position: 'relative',
-          width: '100%',
+        {/* Enhanced Footer */}
+        <footer style={{
+          marginTop: '2rem',
           textAlign: 'center',
-          fontSize: '0.85rem',
-          color: '#6B7280',
-          fontFamily: 'Poppins, sans-serif',
+          fontSize: '0.9rem',
+          color: 'rgba(255, 255, 255, 0.6)',
           fontWeight: '500',
-          marginTop: 'auto',
-          paddingTop: '2rem',
-          paddingBottom: '1rem'
+          letterSpacing: '0.5px'
         }}>
-          &copy; {new Date().getFullYear()} PLN Icon Plus. All rights reserved.
+          © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System
         </footer>
       </div>
+
+      {/* Success Modal */}
       {showModal && (
         <div style={{
           position: 'fixed',
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 9999
+          zIndex: 1000,
+          animation: 'fadeInUp 0.3s ease'
         }}>
-          <div style={{
-            backgroundColor: '#F9FAFF',
-            borderRadius: '1rem',
-            padding: '2rem 4rem',
-            textAlign: 'center',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-            maxWidth: '350px',
+          <div className="glass-effect" style={{
+            borderRadius: '28px',
+            padding: '3rem 2.5rem',
+            maxWidth: '500px',
             width: '90%',
-            position: 'relative'
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            animation: 'fadeInUp 0.4s ease 0.1s both'
           }}>
+            
+            {/* Animated top border */}
             <div style={{
-              backgroundColor: '#00AEEF',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '3px',
+              background: `linear-gradient(90deg, ${colors.secondary}, ${colors.accent1}, ${colors.success}, ${colors.secondary})`,
+              backgroundSize: '300% 100%',
+              animation: 'shimmerGold 2s ease-in-out infinite'
+            }} />
+
+            {/* Success Animation */}
+            <div style={{
+              margin: '0 auto 2rem',
+              width: '100px',
+              height: '100px',
               borderRadius: '50%',
-              width: '60px',
-              height: '60px',
-              margin: '0 auto',
+              background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.secondary} 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: '1rem'
+              boxShadow: `0 15px 30px ${colors.success}40`,
+              animation: 'glowing 2s ease-in-out infinite'
             }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="#fff" viewBox="0 0 20 20" >
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8.004 8.004a1 1 0 01-1.414 0L3.293 10.707a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-              </svg>
+              <CheckCircle size={50} color="white" />
             </div>
-            <h3 style={{ color: '#2D396B', fontSize: '1.25rem', marginBottom: '0.5rem' }}>Selamat!</h3>
-            <p style={{ color: '#2D396B', marginBottom: '1.5rem' }}>Password Anda Berhasil Di Perbarui...</p>
+
+            <h3 style={{
+              fontSize: '1.8rem',
+              fontWeight: '800',
+              color: 'white',
+              marginBottom: '1rem',
+              letterSpacing: '-0.02em'
+            }}>
+              Password Diperbarui!
+            </h3>
+
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '1.1rem',
+              marginBottom: '2.5rem',
+              lineHeight: '1.6'
+            }}>
+              Kata sandi Anda berhasil diperbarui. <br/>
+              Silakan login dengan kata sandi baru Anda.
+            </p>
+
             <button
               onClick={() => {
                 setShowModal(false);
-                  navigate('/login');
+                navigate('/login');
               }}
               style={{
-                backgroundColor: '#00AEEF',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '0.6rem 4rem',
+                padding: '1rem 2.5rem',
+                fontSize: '1.1rem',
+                fontWeight: '700',
                 color: 'white',
-                fontWeight: '500',
-                cursor: 'pointer',
-                fontFamily: 'Poppins, sans-serif',
-                fontSize: '1rem',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 4px 6px rgba(0, 174, 239, 0.2)',
-                minWidth: '120px'
-              }}
-            >
-              Oke
-            </button>
-            <button
-              onClick={() => setShowModal(false)}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'none',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                 border: 'none',
-                fontSize: '1.5rem',
-                color: '#94A3B8',
+                borderRadius: '16px',
                 cursor: 'pointer',
-                padding: '0.5rem',
-                borderRadius: '50%',
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.3s ease',
+                boxShadow: `0 8px 20px ${colors.secondary}40`,
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 174, 239, 0.1)';
-                e.currentTarget.style.color = '#00AEEF';
+                e.target.style.transform = 'translateY(-2px) scale(1.02)';
+                e.target.style.boxShadow = `0 12px 25px ${colors.secondary}50`;
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#94A3B8';
+                e.target.style.transform = 'translateY(0) scale(1)';
+                e.target.style.boxShadow = `0 8px 20px ${colors.secondary}40`;
               }}
             >
-              &times;
+              Login Sekarang
             </button>
           </div>
         </div>
       )}
+
+      {/* Additional Animations */}
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default App;
+export default ForgotPassword;
