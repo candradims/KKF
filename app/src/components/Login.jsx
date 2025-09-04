@@ -262,7 +262,6 @@ const Login = () => {
         localStorage.setItem('userData', JSON.stringify(result.data));
         localStorage.setItem('userRole', result.data.role_user);
         
-        setMessage({ type: "success", text: "Login berhasil!" });
         setShowModal(true);
         setIsLoading(false);
       } else {
