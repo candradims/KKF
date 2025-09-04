@@ -58,7 +58,6 @@ export class AuthController {
 
       res.status(200).json({
         success: true,
-        message: "Login berhasil",
         data: userWithoutPassword,
       });
     } catch (error) {
