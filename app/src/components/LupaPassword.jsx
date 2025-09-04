@@ -227,58 +227,42 @@ const ForgotPassword = () => {
     setIsLoading(true);
 
     if (!formData.email || !formData.password || !formData.confirmPassword) {
-      setMessage({ type: 'error', text: 'Semua field harus diisi!' });
+      setMessage({ type: "error", text: "Semua field harus diisi!" });
       setIsLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setMessage({ type: 'error', text: 'Password dan konfirmasi password tidak cocok!' });
-      setIsLoading(false);
-      return;
-    }
-
-    // Validasi minimal panjang password (sesuai dengan database varchar)
-    if (formData.password.length < 6) {
-      setMessage({ type: 'error', text: 'Password minimal 6 karakter!' });
-      setIsLoading(false);
-      return;
-    }
-
-    // Validasi maksimal panjang password (sesuai dengan database varchar)
-    if (formData.password.length > 255) {
-      setMessage({ type: 'error', text: 'Password maksimal 255 karakter!' });
+      setMessage({ type: "error", text: "Password dan konfirmasi tidak cocok!" });
       setIsLoading(false);
       return;
     }
 
     try {
-      // Di sini akan ada panggilan API untuk reset password
-      // Contoh: 
-      // const response = await fetch('/api/reset-password', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     email: formData.email,
-      //     newPassword: formData.password
-      //   })
-      // });
-      
-      // if (response.ok) {
-      //   setShowModal(true);
-      // } else {
-      //   setMessage({ type: "error", text: "Terjadi kesalahan. Silakan coba lagi." });
-      // }
-      
-      // Simulasi sukses
-      setTimeout(() => {
+      const response = await fetch("http://localhost:3000/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email_user: formData.email,
+          new_password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: "success", text: data.message });
         setShowModal(true);
-        setIsLoading(false);
-      }, 1500);
-    } catch (error) {
-      setMessage({ type: "error", text: "Terjadi kesalahan. Silakan coba lagi." });
+
+        setTimeout(() => navigate("/login"), 2000);
+      } else {
+        setMessage({ type: "error", text: data.message || "Gagal reset password" });
+      }
+    } catch (err) {
+      setMessage({ type: "error", text: "Server error. Coba lagi nanti." });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -971,7 +955,6 @@ const ForgotPassword = () => {
                     borderRadius: '50%',
                     animation: 'spin 1s linear infinite'
                   }} />
-                  Memproses...
                 </div>
               ) : (
                 'Reset'
@@ -1035,8 +1018,8 @@ const ForgotPassword = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(3, 91, 113, 0.3)',
+          backdropFilter: 'blur(2px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -1052,7 +1035,8 @@ const ForgotPassword = () => {
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
-            animation: 'fadeInUp 0.4s ease 0.1s both'
+            animation: 'fadeInUp 0.4s ease 0.1s both',
+            background: '#0d1b2a',
           }}>
             
             {/* Animated top border */}
@@ -1090,7 +1074,7 @@ const ForgotPassword = () => {
               marginBottom: '1rem',
               letterSpacing: '-0.02em'
             }}>
-              Password Diperbarui!
+              SELAMAT!
             </h3>
 
             <p style={{
