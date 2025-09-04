@@ -36,6 +36,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.post("/api/auth/login", AuthController.login);
+app.post("/api/auth/reset-password", AuthController.resetPassword);
 app.use("/api/admin", adminRoutes);
 app.use("/api/layanan", layananRoutes);
 
