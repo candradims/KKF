@@ -713,7 +713,7 @@ const Login = () => {
                   color: focusedField === 'email' ? colors.secondary : 'rgba(255, 255, 255, 0.5)',
                   transition: 'all 0.3s ease'
                 }}>
-                  📧
+                  ✉️
                 </div>
                 {/* Focus indicator */}
                 {focusedField === 'email' && (
