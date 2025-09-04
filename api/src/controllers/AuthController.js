@@ -89,4 +89,43 @@ export class AuthController {
       });
     }
   }
+  
+  static async resetPassword(req, res) {
+    try {
+      const { email_user, new_password } = req.body;
+
+      if (!email_user || !new_password) {
+        return res.status(400).json({
+          success: false,
+          message: "Email dan password baru wajib diisi",
+        });
+      }
+
+      const user = await UserModel.getUserByEmail(email_user);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengguna dengan email ini tidak ditemukan",
+        });
+      }
+
+      const updatedUser = await UserModel.updateUser(user.id_user, {
+        kata_sandi: new_password,
+        updated_at: new Date().toISOString(),
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Password berhasil diperbarui",
+        data: { id_user: updatedUser[0].id_user, email_user: updatedUser[0].email_user },
+      });
+    } catch (error) {
+      console.error("❌ Reset password error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal reset password",
+        error: error.message,
+      });
+    }
+  }
 }
