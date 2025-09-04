@@ -1016,7 +1016,7 @@ const ForgotPassword = () => {
 
         {/* Enhanced Footer */}
         <footer style={{
-          marginTop: '2rem',
+          marginTop: '3rem',
           textAlign: 'center',
           fontSize: '0.9rem',
           color: 'rgba(255, 255, 255, 0.6)',
