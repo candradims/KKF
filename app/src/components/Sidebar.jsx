@@ -75,7 +75,7 @@ const Sidebar = () => {
       color: colors.secondary
     },
     {
-      title: "Management Data User",
+      title: "Data User",
       path: "/admin/data-user",
       icon: <PeopleIcon />,
       color: colors.tertiary
