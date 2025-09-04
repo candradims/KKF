@@ -1089,8 +1089,8 @@ const Login = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(3, 91, 113, 0.3)',
+          backdropFilter: 'blur(2px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -1106,7 +1106,8 @@ const Login = () => {
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden',
-            animation: 'fadeInUp 0.4s ease 0.1s both'
+            animation: 'fadeInUp 0.4s ease 0.1s both',
+            background: '#0d1b2a',
           }}>
             
             {/* Animated top border */}
@@ -1152,7 +1153,7 @@ const Login = () => {
               marginBottom: '1rem',
               letterSpacing: '-0.02em'
             }}>
-              Welcome Back!
+              SELAMAT!
             </h3>
 
             <p style={{
@@ -1161,8 +1162,8 @@ const Login = () => {
               marginBottom: '2.5rem',
               lineHeight: '1.6'
             }}>
-              Authentication successful. <br/>
-              Redirecting to your personalized dashboard...
+              Anda berhasil masuk ke sistem. <br/>
+              Mengarahkan ke dashboard sesuai peran Anda...
             </p>
 
             <button
@@ -1197,7 +1198,7 @@ const Login = () => {
                 e.target.style.boxShadow = `0 8px 20px ${colors.secondary}40`;
               }}
             >
-              Continue
+              OKE
             </button>
           </div>
         </div>
