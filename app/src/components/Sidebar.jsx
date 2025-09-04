@@ -148,7 +148,7 @@ const Sidebar = () => {
     justifyContent: 'center',
     borderBottom: `1px solid rgba(255, 255, 255, 0.1)`,
     background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-    padding: '20px',
+    padding: '9px',
     position: 'relative'
   };
 
@@ -260,7 +260,7 @@ const Sidebar = () => {
             src={logoImage}
             alt="PLN Logo"
             style={{
-              width: '160px',
+              width: '145px',
               height: 'auto',
               objectFit: 'contain',
               padding: '12px 16px',
