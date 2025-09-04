@@ -90,7 +90,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          minHeight: '72px',
+          minHeight: '85px',
           boxShadow: '0 4px 20px rgba(3, 91, 113, 0.15)',
           position: 'fixed',                         
           top: 0,
@@ -236,7 +236,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             }}>
               <Search 
                 style={{
-                  color: isSearchFocused ? colors.secondary : 'rgba(255, 255, 255, 0.6)',
+                  color: isSearchFocused ? colors.secondary : 'rgba(255, 255, 255, 0.95)',
                   fontSize: '20px',
                   filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
                 }}
@@ -254,10 +254,10 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                 borderRadius: '16px',
                 border: isSearchFocused 
                   ? `2px solid ${colors.secondary}` 
-                  : '2px solid rgba(255, 255, 255, 0.2)',
+                  : '2px solid rgba(255, 255, 255, 1)',
                 backgroundColor: isSearchFocused 
                   ? 'rgba(255, 255, 255, 0.95)' 
-                  : 'rgba(255, 255, 255, 0.15)',
+                  : 'rgba(255, 255, 255, 0.05)',
                 backdropFilter: 'blur(10px)',
                 fontSize: '14px',
                 width: '260px',
@@ -309,6 +309,11 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
         @keyframes shimmer {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
+        }
+
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.95);
+          opacity: 1; /* pastikan warnanya tidak transparan */
         }
       `}</style>
     </>
