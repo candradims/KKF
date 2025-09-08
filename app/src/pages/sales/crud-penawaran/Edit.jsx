@@ -187,6 +187,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     kontrakTahunKe: "",
     referensiHJT: "",
     durasiKontrak: "",
+    discount: "",
     item: "",
     keterangan: "",
     harga: "",
@@ -204,6 +205,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         kontrakTahunKe: editData.kontrakKe || editData.kontrakTahunKe || "",
         referensiHJT: editData.referensi || editData.referensiHJT || "",
         durasiKontrak: editData.durasi || editData.durasiKontrak || "",
+        discount: editData.discount || "",
         item: editData.item || "",
         keterangan: editData.keterangan || "",
         harga: editData.harga || "",
@@ -264,6 +266,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       kontrakTahunKe: "",
       referensiHJT: "",
       durasiKontrak: "",
+      discount: "",
       item: "",
       keterangan: "",
       harga: "",
@@ -282,6 +285,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       kontrakTahunKe: "",
       referensiHJT: "",
       durasiKontrak: "",
+      discount: "",
       item: "",
       keterangan: "",
       harga: "",
@@ -310,6 +314,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       keterangan: "",
       harga: "",
       jumlah: "",
+      discount: "",
     }));
   };
 
@@ -623,6 +628,61 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       <option value="kalimantan">Kalimantan</option>
                       <option value="jawa-bali">Jawa-Bali</option>
                       <option value="intim">Intim</option>
+                    </select>
+                    <div
+                      style={{
+                        position: "absolute",
+                        right: "12px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        pointerEvents: "none",
+                        fontSize: "12px",
+                        color: "#666",
+                      }}
+                    >
+                      ▼
+                    </div>
+                  </div>
+                </div>
+
+                {/* Discount */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      color: "#374151",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Discount*
+                  </label>
+                  <div style={{ position: "relative" }}>
+                    <select
+                      name="discount"
+                      value={formData.discount}
+                      onChange={handleInputChange}
+                      disabled={isSaving}
+                      required
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        border: "2px solid #B0BEC5",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        outline: "none",
+                        backgroundColor: isSaving ? "#f5f5f5" : "white",
+                        boxSizing: "border-box",
+                        appearance: "none",
+                        cursor: isSaving ? "not-allowed" : "pointer",
+                        transition: "all 0.2s ease-in-out",
+                      }}
+                    >
+                      <option value="">Pilih Discount</option>
+                      <option value="0%">0%</option>
+                      <option value="MB Niaga">MB Niaga</option>
+                      <option value="GM SBU">GM SBU</option>
                     </select>
                     <div
                       style={{
