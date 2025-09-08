@@ -7,22 +7,31 @@ export class PenawaranController {
   // Ambil semua penawaran
   static async getAllPenawaran(req, res) {
     try {
+      console.log("📋 Getting penawaran for user:", req.user);
       let penawaran;
 
       // Jika user adalah sales, hanya tampilkan penawaran mereka sendiri
       if (req.user.role_user === "sales") {
+        console.log(
+          "👤 Sales user - getting own penawaran for ID:",
+          req.user.id_user
+        );
         penawaran = await PenawaranModel.getPenawaranByUser(req.user.id_user);
       } else {
         // Admin dapat melihat semua penawaran
+        console.log("👑 Admin user - getting all penawaran");
         penawaran = await PenawaranModel.getAllPenawaran();
       }
+
+      console.log("✅ Retrieved penawaran:", penawaran?.length || 0, "records");
 
       res.status(200).json({
         success: true,
         message: "Data penawaran berhasil diambil",
-        data: penawaran,
+        data: penawaran || [],
       });
     } catch (error) {
+      console.error("❌ Error in getAllPenawaran:", error);
       res.status(500).json({
         success: false,
         message: "Gagal mengambil data penawaran",
@@ -73,24 +82,62 @@ export class PenawaranController {
   // Buat penawaran baru (Khusus Sales)
   static async createPenawaran(req, res) {
     try {
+      console.log("📝 Received penawaran data:", req.body);
+      console.log("👤 User info:", req.user);
+
+      // Validasi input dasar
+      const requiredFields = ["pelanggan", "nomorKontrak", "durasiKontrak"];
+      const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Field yang wajib diisi: ${missingFields.join(", ")}`,
+        });
+      }
+
       const penawaranData = {
         ...req.body,
         id_user: req.user.id_user, // Set ID user dari user yang terautentikasi
-        tanggal_dibuat: new Date().toISOString().split("T")[0], // Set tanggal saat ini
+        tanggal_dibuat:
+          req.body.tanggal || new Date().toISOString().split("T")[0], // Set tanggal saat ini jika tidak ada
       };
+
+      console.log("📋 Processed penawaran data:", penawaranData);
 
       const newPenawaran = await PenawaranModel.createPenawaran(penawaranData);
 
       res.status(201).json({
         success: true,
         message: "Penawaran berhasil dibuat",
-        data: newPenawaran[0],
+        data: newPenawaran[0] || newPenawaran,
       });
     } catch (error) {
-      res.status(500).json({
+      console.error("❌ Error in createPenawaran:", error);
+      console.error("❌ Error stack:", error.stack);
+
+      // Check if it's a validation error or database error
+      let statusCode = 500;
+      let message = "Gagal membuat penawaran";
+
+      if (
+        error.message.includes("violates not-null constraint") ||
+        error.message.includes("required") ||
+        error.message.includes("wajib")
+      ) {
+        statusCode = 400;
+        message = "Data tidak lengkap atau tidak valid";
+      } else if (error.message.includes("duplicate key value")) {
+        statusCode = 409;
+        message = "Data dengan nomor kontrak yang sama sudah ada";
+      }
+
+      res.status(statusCode).json({
         success: false,
-        message: "Gagal membuat penawaran",
+        message: message,
         error: error.message,
+        details:
+          process.env.NODE_ENV === "development" ? error.stack : undefined,
       });
     }
   }
@@ -101,6 +148,10 @@ export class PenawaranController {
       const { id } = req.params;
       const updateData = req.body;
 
+      console.log("🔄 Update penawaran ID:", id);
+      console.log("📝 Update data received:", updateData);
+      console.log("👤 User info:", req.user);
+
       // Cek apakah penawaran ada dan user memiliki izin
       const existingPenawaran = await PenawaranModel.getPenawaranById(id);
       if (!existingPenawaran) {
@@ -109,6 +160,8 @@ export class PenawaranController {
           message: "Penawaran tidak ditemukan",
         });
       }
+
+      console.log("📋 Existing penawaran:", existingPenawaran);
 
       // Sales hanya dapat memperbarui penawaran mereka sendiri
       if (
@@ -127,12 +180,15 @@ export class PenawaranController {
         updateData
       );
 
+      console.log("✅ Penawaran updated successfully:", updatedPenawaran);
+
       res.status(200).json({
         success: true,
         message: "Penawaran berhasil diperbarui",
-        data: updatedPenawaran[0],
+        data: updatedPenawaran[0] || updatedPenawaran,
       });
     } catch (error) {
+      console.error("❌ Error in updatePenawaran:", error);
       res.status(500).json({
         success: false,
         message: "Gagal memperbarui penawaran",
@@ -146,6 +202,9 @@ export class PenawaranController {
     try {
       const { id } = req.params;
 
+      console.log("🗑️ Delete penawaran ID:", id);
+      console.log("👤 User info:", req.user);
+
       // Cek apakah penawaran ada dan user memiliki izin
       const existingPenawaran = await PenawaranModel.getPenawaranById(id);
       if (!existingPenawaran) {
@@ -154,6 +213,8 @@ export class PenawaranController {
           message: "Penawaran tidak ditemukan",
         });
       }
+
+      console.log("📋 Existing penawaran to delete:", existingPenawaran);
 
       // Sales hanya dapat menghapus penawaran mereka sendiri
       if (
@@ -169,11 +230,14 @@ export class PenawaranController {
 
       await PenawaranModel.deletePenawaran(id);
 
+      console.log("✅ Penawaran deleted successfully");
+
       res.status(200).json({
         success: true,
         message: "Penawaran berhasil dihapus",
       });
     } catch (error) {
+      console.error("❌ Error in deletePenawaran:", error);
       res.status(500).json({
         success: false,
         message: "Gagal menghapus penawaran",

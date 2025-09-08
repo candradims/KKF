@@ -203,12 +203,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSaving(true);
-    onSave(formData);
+    
+    // Validasi form
+    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      alert(`Harap isi field yang wajib: ${missingFields.join(', ')}`);
+      return;
+    }
 
-    // Immediately transition to success modal
-    setShowSuccessModal(true);
-    setIsSaving(false);
+    setIsSaving(true);
+    
+    // Call parent save function
+    onSave(formData);
   };
 
   const handleCloseSuccessModal = () => {
