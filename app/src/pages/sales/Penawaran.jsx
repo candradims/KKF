@@ -27,7 +27,7 @@ const Penawaran = () => {
       nomorKontrak: '20301231',
       kontrakKe: 3,
       referensi: 'Sumatera',
-      discount: '5.00%',
+      discount: '0%',
       durasi: 2,
       targetIRR: '76.600',
       status: 'Menunggu',
@@ -40,7 +40,7 @@ const Penawaran = () => {
       nomorKontrak: '19237843',
       kontrakKe: 1,
       referensi: 'Kalimantan',
-      discount: '3.50%',
+      discount: 'GM SBU',
       durasi: 2,
       targetIRR: '73.300',
       status: 'Disetujui',
@@ -53,7 +53,7 @@ const Penawaran = () => {
       nomorKontrak: '19093412',
       kontrakKe: 4,
       referensi: 'Kalimantan',
-      discount: '4.74%',
+      discount: '0%',
       durasi: 2,
       targetIRR: '31.400',
       status: 'Ditolak',
@@ -66,7 +66,7 @@ const Penawaran = () => {
       nomorKontrak: '28903123',
       kontrakKe: 3,
       referensi: 'Intim',
-      discount: '6.02%',
+      discount: 'GM SBU',
       durasi: 2,
       targetIRR: '29.200',
       status: 'Disetujui',
@@ -79,7 +79,7 @@ const Penawaran = () => {
       nomorKontrak: '30412567',
       kontrakKe: 2,
       referensi: 'Jawa-Bali',
-      discount: '7.25%',
+      discount: '0%',
       durasi: 3,
       targetIRR: '82.100',
       status: 'Menunggu',
@@ -556,6 +556,14 @@ const Penawaran = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
+                }}>Discount</th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  borderBottom: '1px solid #E5E7EB'
                 }}>Durasi</th>
                 <th style={{
                   padding: '12px 16px',
@@ -621,6 +629,13 @@ const Penawaran = () => {
                     color: '#374151'
                   }}>
                     {item.referensi}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.discount}
                   </td>
                   <td style={{
                     padding: '12px 16px',

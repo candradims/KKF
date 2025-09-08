@@ -12,6 +12,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     kontrakTahunKe: '',
     referensiHJT: '',
     durasiKontrak: '',
+    discount: '',
     piliLayanan: '',
     keterangan: '',
     kapasitas: '',
@@ -31,6 +32,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
         kontrakTahunKe: deleteData.kontrakKe || deleteData.kontrakTahunKe || '',
         referensiHJT: deleteData.referensi || deleteData.referensiHJT || '',
         durasiKontrak: deleteData.durasi || deleteData.durasiKontrak || '',
+        discount: deleteData.discount || '',
         piliLayanan: deleteData.piliLayanan || '',
         keterangan: deleteData.keterangan || '',
         kapasitas: deleteData.kapasitas || '',
@@ -60,6 +62,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
       kontrakTahunKe: '',
       referensiHJT: '',
       durasiKontrak: '',
+      discount: '',
       piliLayanan: '',
       keterangan: '',
       kapasitas: '',
@@ -364,6 +367,52 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
                   <option value="kalimantan">Kalimantan</option>
                   <option value="jawa-bali">Jawa-Bali</option>
                   <option value="intim">Intim</option>
+                </select>
+                <div style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  fontSize: '12px',
+                  color: '#9CA3AF'
+                }}>▼</div>
+              </div>
+            </div>
+
+            {/* Discount */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '6px'
+              }}>
+                Discount*
+              </label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  name="discount"
+                  value={formData.discount}
+                  disabled
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '2px solid #E5E7EB',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    backgroundColor: '#F9FAFB',
+                    boxSizing: 'border-box',
+                    appearance: 'none',
+                    color: '#6B7280'
+                  }}
+                >
+                  <option value="">Pilih Discount</option>
+                  <option value="0%">0%</option>
+                  <option value="MB Niaga">MB Niaga</option>
+                  <option value="GM SBU">GM SBU</option>
                 </select>
                 <div style={{
                   position: 'absolute',
