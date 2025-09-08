@@ -67,7 +67,7 @@ const MainLayout = () => {
           flex: 1,
           overflowY: 'auto',
           padding: '1.5rem',
-          backgroundColor: '#F9FAFB',
+          backgroundColor: '#d3eff5ff',
           marginTop: '72px'
         }}>
           <Outlet />
