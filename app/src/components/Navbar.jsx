@@ -313,7 +313,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
 
         input::placeholder {
           color: rgba(255, 255, 255, 0.95);
-          opacity: 1; /* pastikan warnanya tidak transparan */
+          opacity: 1;
         }
       `}</style>
     </>
