@@ -398,7 +398,7 @@ const Dashboard = () => {
               }}>Tren Total Revenue</h3>
               <select style={{
                 padding: '4px 12px',
-                border: '1px solid #d1d5db',
+                border: '1px solid #035b71',
                 borderRadius: '6px',
                 fontSize: '14px',
                 outline: 'none'
@@ -565,7 +565,7 @@ const Dashboard = () => {
               }}>Tren Margin Rata-Rata </h3>
               <select style={{
                 padding: '4px 12px',
-                border: '1px solid #d1d5db',
+                border: '1px solid #035b71',
                 borderRadius: '6px',
                 fontSize: '14px',
                 outline: 'none'
