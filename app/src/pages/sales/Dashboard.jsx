@@ -19,10 +19,19 @@ import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircl
 const Dashboard = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
 
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+  };
+
   // Data untuk status penawaran
   const statusData = [
-    { status: 'Menunggu', count: 20, icon: Clock, color: '#F59E0B' },
-    { status: 'Setuju', count: 25, icon: CheckCircle, color: '#10B981' },
+    { status: 'Menunggu', count: 20, icon: Clock, color: '#fce40bff' },
+    { status: 'Setuju', count: 25, icon: CheckCircle, color: '#3fba8c' },
     { status: 'Tidak Setuju', count: 5, icon: XCircle, color: '#EF4444' }
   ];
   
@@ -66,28 +75,21 @@ const Dashboard = () => {
 
   // Data untuk pie chart regional
   const regionalData = [
-    { name: 'HJT JAWA-BALI', value: 37, color: '#00AEEF' },
-    { name: 'HJT SUMATRA', value: 28, color: '#2D396B' },
-    { name: 'HJT JABODETABEK', value: 24, color: '#60A5FA' },
-    { name: 'HJT INTIM', value: 11, color: '#93C5FD' }
-  ];
-
-  const penawananData = [
-    { name: 'HJT JAWA-BALI', value: 37, color: '#00AEEF' },
-    { name: 'HJT SUMATRA', value: 28, color: '#2D396B' },
-    { name: 'HJT JABODETABEK', value: 24, color: '#60A5FA' },
-    { name: 'HJT INTIM', value: 11, color: '#93C5FD' }
+    { name: 'HJT JAWA-BALI', value: 37, color: colors.primary },
+    { name: 'HJT SUMATRA', value: 28, color: colors.secondary },
+    { name: 'HJT JABODETABEK', value: 24, color: colors.accent1 },
+    { name: 'HJT INTIM', value: 11, color: colors.tertiary }
   ];
 
   // Data untuk pie chart status penawaran
   const statusPenawaranData = [
-    { name: 'Menunggu', value: 40, color: '#F59E0B' },
-    { name: 'Disetujui', value: 50, color: '#10B981' },
+    { name: 'Menunggu', value: 40, color: '#fce40bff' },
+    { name: 'Disetujui', value: 50, color: '#3fba8c' },
     { name: 'Ditolak', value: 10, color: '#EF4444' }
   ];
 
-  const COLORS = ['#00AEEF', '#2D396B', '#60A5FA', '#93C5FD'];
-  const STATUS_COLORS = ['#F59E0B', '#10B981', '#EF4444'];
+  const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary];
+  const STATUS_COLORS = ['#fce40bff', '#3fba8c', '#EF4444'];
 
   const renderCustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -105,7 +107,7 @@ const Dashboard = () => {
             const isMarginData = entry.dataKey.includes('margin');
             const displayValue = isMarginData ? `${entry.value}%` : entry.value;
             return (
-              <p key={index} style={{ color: '#00AEEF', fontWeight: '600' }}>
+              <p key={index} style={{ color: colors.primary, fontWeight: '600' }}>
                 {`${entry.dataKey}: ${displayValue}`}
               </p>
             );
@@ -119,91 +121,105 @@ const Dashboard = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#f9fafb',
-      padding: '24px'
-    }} className="min-h-screen bg-gray-50 p-6">
+      backgroundColor: '#e7f3f5ff',
+      padding: '24px',
+      paddingTop: '105px'
+    }}>
       <div style={{
         maxWidth: '80rem',
         margin: '0 auto'
-      }} className="max-w-7xl mx-auto">
+      }}>
         {/* Header Cards */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '24px',
           marginBottom: '32px'
-        }} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        }}>
           {/* Card 1 - Jumlah Total Penawaran */}
           <div style={{
-            background: 'linear-gradient(to right, #035b71, #035b71)',
+            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'box-shadow 0.2s'
-          }} className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            cursor: 'pointer'
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between'
-            }} className="flex items-center justify-between">
+            }}>
               <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   marginBottom: '8px'
-                }} className="flex items-center gap-2 mb-2">
-                  <Users style={{ width: '20px', height: '20px' }} className="w-5 h-5" />
+                }}>
+                  <Users style={{ width: '20px', height: '20px' }} />
                   <span style={{
                     fontSize: '14px',
                     fontWeight: '500',
                     opacity: '0.9'
-                  }} className="text-sm font-medium opacity-90">Jumlah Total Penawaran</span>
+                  }}>Jumlah Total Penawaran</span>
                 </div>
                 <div style={{
                   fontSize: '30px',
                   fontWeight: 'bold'
-                }} className="text-3xl font-bold">50</div>
+                }}>50</div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 padding: '12px',
                 borderRadius: '8px'
-              }} className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <BarChart3 style={{ width: '24px', height: '24px' }} className="w-6 h-6" />
+              }}>
+                <BarChart3 style={{ width: '24px', height: '24px' }} />
               </div>
             </div>
           </div>
 
           {/* Card 2 - Status Penawaran */}
-          <div 
-            style={{
-              background: 'linear-gradient(to right, #035b71, #035b71)',
-              borderRadius: '12px',
-              padding: '24px',
-              color: 'white',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-              transition: 'box-shadow 0.2s'
-            }} className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+          <div style={{
+            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+            borderRadius: '12px',
+            padding: '24px',
+            color: 'white',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            cursor: 'pointer'
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between'
-            }} className="flex items-center justify-between">
+            }}>
               <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   marginBottom: '8px'
-                }} className="flex items-center gap-2 mb-2">
-                  <TrendingUp style={{ width: '20px', height: '20px' }} className="w-5 h-5" />
+                }}>
+                  <TrendingUp style={{ width: '20px', height: '20px' }} />
                   <span style={{
                     fontSize: '14px',
                     fontWeight: '500',
                     opacity: '0.9'
-                  }} className="text-sm font-medium opacity-90">Status Penawaran</span>
+                  }}>Status Penawaran</span>
                   <ChevronDown 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -217,62 +233,69 @@ const Dashboard = () => {
                       cursor: 'pointer',
                       transition: 'opacity 0.2s'
                     }} 
-                    className="w-4 h-4 ml-1 opacity-80 cursor-pointer hover:opacity-100 transition-opacity" />
+                  />
                 </div>
                 <div style={{
                   fontSize: '30px',
                   fontWeight: 'bold'
-                }} className="text-3xl font-bold">50</div>
+                }}>50</div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 padding: '12px',
                 borderRadius: '8px'
-              }} className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <BarChart3 style={{ width: '24px', height: '24px' }} className="w-6 h-6" />
+              }}>
+                <BarChart3 style={{ width: '24px', height: '24px' }} />
               </div>
             </div>
           </div>
 
           {/* Card 3 - Total Revenue */}
           <div style={{
-            background: 'linear-gradient(to right, #035b71, #035b71)',
+            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'box-shadow 0.2s'
-          }} className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            cursor: 'pointer'
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between'
-            }} className="flex items-center justify-between">
+            }}>
               <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   marginBottom: '8px'
-                }} className="flex items-center gap-2 mb-2">
-                  <DollarSign style={{ width: '20px', height: '20px' }} className="w-5 h-5" />
+                }}>
+                  <DollarSign style={{ width: '20px', height: '20px' }} />
                   <span style={{
                     fontSize: '14px',
                     fontWeight: '500',
                     opacity: '0.9'
-                  }} className="text-sm font-medium opacity-90">Total Revenue</span>
+                  }}>Total Revenue</span>
                 </div>
                 <div style={{
                   fontSize: '24px',
                   fontWeight: 'bold'
-                }} className="text-2xl font-bold">Rp 52.000.000,-</div>
+                }}>Rp 52.000.000,-</div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 padding: '12px',
                 borderRadius: '8px'
-              }} className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <DollarSign style={{ width: '24px', height: '24px' }} className="w-6 h-6" />
+              }}>
+                <DollarSign style={{ width: '24px', height: '24px' }} />
               </div>
             </div>
           </div>
@@ -280,22 +303,34 @@ const Dashboard = () => {
 
         {/* Sales Target Chart */}
         <div style={{
-          backgroundColor: 'white',
+          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
           borderRadius: '12px',
           padding: '24px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          marginBottom: '24px'
-        }} className="bg-white rounded-xl p-6 shadow-lg mb-6">
+          marginBottom: '32px',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          border: '1px solid #035b71',
+          position: 'relative',
+          overflow: 'hidden'
+        }} onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-4px)';
+          e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+        }} onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+        }}>
           <h3 style={{
             fontSize: '18px',
             fontWeight: '600',
-            color: '#374151',
+            color: '#1f2937',
             marginBottom: '16px'
-          }} className="text-lg font-semibold text-gray-800 mb-4">Target NR & Pencapaian Sales Saya</h3>
-          <div style={{ height: '340px', paddingLeft: '32px' }} className="h-80 pl-8">
+          }}>
+            Target NR & Pencapaian Sales Saya
+          </h3>
+          <div style={{ height: '340px', paddingLeft: '32px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mySalesData} margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#666' }} />
                 <YAxis 
                   tick={{ fontSize: 12, fill: '#666', dx: 0 }} 
@@ -305,8 +340,8 @@ const Dashboard = () => {
                 />
                 <Tooltip formatter={(value) => `Rp ${value.toLocaleString()}`} />
                 <Legend />
-                <Bar dataKey="TargetNR" fill="#00AEEF" name="Target NR" barSize={32} />
-                <Bar dataKey="Achievement" fill="#2D396B" name="Pencapaian" barSize={32} />
+                <Bar dataKey="TargetNR" fill={colors.primary} name="Target NR" barSize={32} />
+                <Bar dataKey="Achievement" fill={colors.secondary} name="Pencapaian" barSize={32} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -318,38 +353,48 @@ const Dashboard = () => {
           gridTemplateColumns: '2fr 1fr',
           gap: '24px',
           marginBottom: '24px'
-        }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        }}>
           {/* Total Revenue Chart */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
             borderRadius: '12px',
             padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-          }} className="lg:col-span-2 bg-white rounded-xl p-6 shadow-lg">
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            border: '1px solid #035b71',
+            position: 'relative',
+            overflow: 'hidden'
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               marginBottom: '24px'
-            }} className="flex items-center justify-between mb-6">
+            }}>
               <h3 style={{
                 fontSize: '18px',
                 fontWeight: '600',
                 color: '#1f2937'
-              }} className="text-lg font-semibold text-gray-800">Tren Total Revenue</h3>
+              }}>Tren Total Revenue</h3>
               <select style={{
                 padding: '4px 12px',
-                border: '1px solid #d1d5db',
+                border: '1px solid #035b71',
                 borderRadius: '6px',
                 fontSize: '14px',
                 outline: 'none'
-              }} className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              }}>
                 <option>Years</option>
                 <option>2025</option>
                 <option>2026</option>
               </select>
             </div>
-            <div style={{ height: '320px' }} className="h-80">
+            <div style={{ height: '320px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={totalRevenueData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -368,46 +413,56 @@ const Dashboard = () => {
                   <Line 
                     type="monotone" 
                     dataKey="value" 
-                    stroke="#00AEEF" 
+                    stroke={colors.primary} 
                     strokeWidth={3}
-                    dot={{ fill: '#00AEEF', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: '#2D396B' }}
+                    dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: colors.secondary }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <div style={{
               marginTop: '16px',
-              backgroundColor: '#eff6ff',
+              background: 'linear-gradient(135deg, #d7f2f5ff 100%, #f0faff 200%)',
               borderRadius: '8px',
               padding: '12px'
-            }} className="mt-4 bg-blue-50 rounded-lg p-3">
+            }}>
               <div style={{
                 fontSize: '24px',
                 fontWeight: 'bold',
-                color: '#00AEEF'
-              }} className="text-2xl font-bold text-blue-600">25200</div>
+                color: colors.primary
+              }}>25200</div>
               <div style={{
                 fontSize: '14px',
                 color: '#6b7280'
-              }} className="text-sm text-gray-600">Current Period Value</div>
+              }}>Current Period Value</div>
             </div>
           </div>
 
           {/* Total Revenue Pie Chart */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
             borderRadius: '12px',
             padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-          }} className="bg-white rounded-xl p-6 shadow-lg">
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            border: '1px solid #035b71',
+            position: 'relative',
+            overflow: 'hidden'
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}>
             <h3 style={{
               fontSize: '18px',
               fontWeight: '600',
               color: '#1f2937',
               marginBottom: '16px'
-            }} className="text-lg font-semibold text-gray-800 mb-4">Total revenue</h3>
-            <div style={{ height: '192px', marginBottom: '16px' }} className="h-48 mb-4">
+            }}>Total Revenue</h3>
+            <div style={{ height: '192px', marginBottom: '16px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -427,19 +482,19 @@ const Dashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }} className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {regionalData.map((item, index) => (
                 <div key={index} style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   fontSize: '14px'
-                }} className="flex items-center justify-between text-sm">
+                }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px'
-                  }} className="flex items-center gap-2">
+                  }}>
                     <div 
                       style={{
                         width: '12px',
@@ -447,14 +502,13 @@ const Dashboard = () => {
                         borderRadius: '50%',
                         backgroundColor: COLORS[index]
                       }}
-                      className="w-3 h-3 rounded-full"
                     ></div>
-                    <span style={{ color: '#6b7280' }} className="text-gray-600">{item.name}</span>
+                    <span style={{ color: '#6b7280' }}>{item.name}</span>
                   </div>
                   <span style={{
                     fontWeight: '600',
                     color: '#1f2937'
-                  }} className="font-semibold text-gray-800">{item.value}%</span>
+                  }}>{item.value}%</span>
                 </div>
               ))}
             </div>
@@ -466,38 +520,48 @@ const Dashboard = () => {
           display: 'grid',
           gridTemplateColumns: '2fr 1fr',
           gap: '24px'
-        }} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        }}>
           {/* Margin Trend Chart */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
             borderRadius: '12px',
             padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-          }} className="lg:col-span-2 bg-white rounded-xl p-6 shadow-lg">
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            border: '1px solid #035b71',
+            position: 'relative',
+            overflow: 'hidden'
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               marginBottom: '24px'
-            }} className="flex items-center justify-between mb-6">
+            }}>
               <h3 style={{
                 fontSize: '18px',
                 fontWeight: '600',
                 color: '#1f2937'
-              }} className="text-lg font-semibold text-gray-800">Tren Margin Rata-Rata </h3>
+              }}>Tren Margin Rata-Rata </h3>
               <select style={{
                 padding: '4px 12px',
-                border: '1px solid #d1d5db',
+                border: '1px solid #035b71',
                 borderRadius: '6px',
                 fontSize: '14px',
                 outline: 'none'
-              }} className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              }}>
                 <option>Years</option>
                 <option>2025</option>
                 <option>2026</option>
               </select>
             </div>
-            <div style={{ height: '320px' }} className="h-80">
+            <div style={{ height: '320px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={marginTrendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -518,52 +582,62 @@ const Dashboard = () => {
                   <Line 
                     type="monotone" 
                     dataKey="margin1" 
-                    stroke="#00AEEF" 
+                    stroke={colors.primary} 
                     strokeWidth={3}
-                    dot={{ fill: '#00AEEF', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="margin2" 
-                    stroke="#2D396B" 
+                    stroke={colors.secondary} 
                     strokeWidth={3}
-                    dot={{ fill: '#2D396B', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: colors.secondary, strokeWidth: 2, r: 4 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <div style={{
               marginTop: '16px',
-              backgroundColor: '#eff6ff',
+              backgroundColor: '#cfefedff',
               borderRadius: '8px',
               padding: '12px'
-            }} className="mt-4 bg-blue-50 rounded-lg p-3">
+            }}>
               <div style={{
                 fontSize: '24px',
                 fontWeight: 'bold',
-                color: '#00AEEF'
-              }} className="text-2xl font-bold text-blue-600">57%</div>
+                color: colors.primary
+              }}>57%</div>
               <div style={{
                 fontSize: '14px',
                 color: '#6b7280'
-              }} className="text-sm text-gray-600">Current Margin Rate</div>
+              }}>Current Margin Rate</div>
             </div>
           </div>
 
           {/* Status Penawaran Pie Chart */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
             borderRadius: '12px',
             padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-          }} className="bg-white rounded-xl p-6 shadow-lg">
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            border: '1px solid #035b71',
+            position: 'relative',
+            overflow: 'hidden'
+          }} onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+          }} onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }}>
             <h3 style={{
               fontSize: '18px',
               fontWeight: '600',
               color: '#1f2937',
               marginBottom: '16px'
-            }} className="text-lg font-semibold text-gray-800 mb-4">Status Penawaran</h3>
-            <div style={{ height: '192px', marginBottom: '16px' }} className="h-48 mb-4">
+            }}>Status Penawaran</h3>
+            <div style={{ height: '192px', marginBottom: '16px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -583,19 +657,19 @@ const Dashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }} className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {statusPenawaranData.map((item, index) => (
                 <div key={index} style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   fontSize: '14px'
-                }} className="flex items-center justify-between text-sm">
+                }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px'
-                  }} className="flex items-center gap-2">
+                  }}>
                     <div 
                       style={{
                         width: '12px',
@@ -603,14 +677,13 @@ const Dashboard = () => {
                         borderRadius: '50%',
                         backgroundColor: STATUS_COLORS[index]
                       }}
-                      className="w-3 h-3 rounded-full"
                     ></div>
-                    <span style={{ color: '#6b7280' }} className="text-gray-600">{item.name}</span>
+                    <span style={{ color: '#6b7280' }}>{item.name}</span>
                   </div>
                   <span style={{
                     fontWeight: '600',
                     color: '#1f2937'
-                  }} className="font-semibold text-gray-800">{item.value}%</span>
+                  }}>{item.value}%</span>
                 </div>
               ))}
             </div>
@@ -631,8 +704,7 @@ const Dashboard = () => {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
-        }} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        onClick={() => setShowStatusModal(false)}>
+        }} onClick={() => setShowStatusModal(false)}>
           <div style={{
             backgroundColor: 'white',
             borderRadius: '16px',
@@ -642,20 +714,19 @@ const Dashboard = () => {
             maxHeight: '80vh',
             overflow: 'auto',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-          }} className="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[80vh] overflow-auto shadow-2xl"
-          onClick={(e) => e.stopPropagation()}>
+          }} onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               marginBottom: '24px'
-            }} className="flex items-center justify-between mb-6">
+            }}>
               <h2 style={{
                 fontSize: '24px',
                 fontWeight: 'bold',
                 color: '#1f2937'
-              }} className="text-2xl font-bold text-gray-800">Detail Status Penawaran</h2>
+              }}>Detail Status Penawaran</h2>
               <button
                 onClick={() => setShowStatusModal(false)}
                 style={{
@@ -666,9 +737,8 @@ const Dashboard = () => {
                   cursor: 'pointer',
                   transition: 'background-color 0.2s'
                 }}
-                className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
               >
-                <X style={{ width: '20px', height: '20px', color: '#6b7280' }} className="w-5 h-5 text-gray-600" />
+                <X style={{ width: '20px', height: '20px', color: '#6b7280' }} />
               </button>
             </div>
 
@@ -677,7 +747,7 @@ const Dashboard = () => {
               display: 'flex',
               flexDirection: 'column',
               gap: '16px'
-            }} className="space-y-4">
+            }}>
               {statusData.map((item, index) => {
                 const IconComponent = item.icon;
                 return (
@@ -686,27 +756,33 @@ const Dashboard = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '20px',
-                    border: '1px solid #e5e7eb',
                     borderRadius: '12px',
-                    backgroundColor: '#f9fafb',
-                    transition: 'box-shadow 0.2s'
-                  }} className="flex items-center justify-between p-5 border border-gray-200 rounded-xl bg-gray-50 hover:shadow-md transition-shadow">
+                    backgroundColor: `${item.color}20`, 
+                    border: `2px solid ${item.color}`,
+                    transition: 'box-shadow 0.2s, transform 0.2s'
+                  }} onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                  }} onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '16px'
-                    }} className="flex items-center gap-4">
+                    }}>
                       <div style={{
                         padding: '12px',
                         borderRadius: '12px',
                         backgroundColor: 'white',
                         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                      }} className="p-3 rounded-xl bg-white shadow-sm">
+                      }}>
                         <IconComponent style={{ 
                           width: '24px', 
                           height: '24px', 
                           color: item.color 
-                        }} className="w-6 h-6" />
+                        }} />
                       </div>
                       <div>
                         <h3 style={{
@@ -714,55 +790,55 @@ const Dashboard = () => {
                           fontWeight: '600',
                           color: '#1f2937',
                           marginBottom: '4px'
-                        }} className="text-lg font-semibold text-gray-800">{item.status}</h3>
+                        }}>{item.status}</h3>
                         <p style={{
                           fontSize: '14px',
                           color: '#6b7280'
-                        }} className="text-sm text-gray-600">Status penawaran</p>
+                        }}>Status penawaran</p>
                       </div>
                     </div>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px'
-                    }} className="flex items-center gap-2">
+                    }}>
                       <span style={{
                         fontSize: '28px',
                         fontWeight: 'bold',
                         color: item.color
-                      }} className="text-3xl font-bold">{item.count}</span>
+                      }}>{item.count}</span>
                       <span style={{
                         fontSize: '14px',
                         color: '#6b7280'
-                      }} className="text-sm text-gray-600">items</span>
+                      }}>items</span>
                     </div>
                   </div>
                 );
               })}
             </div>
-
+            
             {/* Modal Footer */}
             <div style={{
               marginTop: '24px',
               padding: '16px',
               backgroundColor: '#eff6ff',
               borderRadius: '12px'
-            }} className="mt-6 p-4 bg-blue-50 rounded-xl">
+            }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
-              }} className="flex items-center justify-between">
+              }}>
                 <span style={{
                   fontSize: '16px',
                   fontWeight: '600',
                   color: '#1f2937'
-                }} className="text-lg font-semibold text-gray-800">Total Penawaran:</span>
+                }}>Total Penawaran:</span>
                 <span style={{
                   fontSize: '24px',
                   fontWeight: 'bold',
-                  color: '#00AEEF'
-                }} className="text-2xl font-bold text-blue-600">
+                  color: colors.primary
+                }}>
                   {statusData.reduce((total, item) => total + item.count, 0)}
                 </span>
               </div>
