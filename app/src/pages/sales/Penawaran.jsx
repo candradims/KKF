@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Edit2, Trash2, Plus, RotateCcw, Download } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -6,6 +6,7 @@ import Tambah from './crud-penawaran/Tambah';
 import Edit from './crud-penawaran/Edit';
 import Hapus from './crud-penawaran/Hapus';
 import Detail from './crud-penawaran/Detail';
+import { penawaranAPI, getUserData } from '../../utils/api';
 
 const Penawaran = () => {
   const [filterDate, setFilterDate] = useState('');
@@ -17,75 +18,76 @@ const Penawaran = () => {
   const [selectedDetailData, setSelectedDetailData] = useState(null);
   const [showHapusModal, setShowHapusModal] = useState(false);
   const [selectedDeleteData, setSelectedDeleteData] = useState(null);
+  
+  // State untuk data dari API
+  const [penawaranData, setPenawaranData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample data for penawaran with status
-  const penawaranData = [
-    {
-      id: 1,
-      tanggal: '16/06/04',
-      namaPelanggan: 'Audrey',
-      nomorKontrak: '20301231',
-      kontrakKe: 3,
-      referensi: 'Sumatera',
-      discount: '0%',
-      durasi: 2,
-      targetIRR: '76.600',
-      status: 'Menunggu',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 2,
-      tanggal: '02/06/02',
-      namaPelanggan: 'Riki',
-      nomorKontrak: '19237843',
-      kontrakKe: 1,
-      referensi: 'Kalimantan',
-      discount: 'GM SBU',
-      durasi: 2,
-      targetIRR: '73.300',
-      status: 'Disetujui',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 3,
-      tanggal: '17/12/02',
-      namaPelanggan: 'Hasian',
-      nomorKontrak: '19093412',
-      kontrakKe: 4,
-      referensi: 'Kalimantan',
-      discount: '0%',
-      durasi: 2,
-      targetIRR: '31.400',
-      status: 'Ditolak',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 4,
-      tanggal: '28/06/24',
-      namaPelanggan: 'Hisyam',
-      nomorKontrak: '28903123',
-      kontrakKe: 3,
-      referensi: 'Intim',
-      discount: 'GM SBU',
-      durasi: 2,
-      targetIRR: '29.200',
-      status: 'Disetujui',
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 5,
-      tanggal: '15/08/24',
-      namaPelanggan: 'Sari',
-      nomorKontrak: '30412567',
-      kontrakKe: 2,
-      referensi: 'Jawa-Bali',
-      discount: '0%',
-      durasi: 3,
-      targetIRR: '82.100',
-      status: 'Menunggu',
-      actions: ['view', 'edit', 'delete']
+  // Get auth token from localStorage (assuming it's stored there after login)
+  // This function is now imported from utils/api.js
+
+  // Fetch data penawaran dari API
+  const fetchPenawaranData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Check if user is authenticated
+      const userData = getUserData();
+      if (!userData) {
+        throw new Error('User tidak terautentikasi. Silakan login kembali.');
+      }
+      
+      console.log("📋 Fetching penawaran data for user:", userData.email_user);
+
+      const result = await penawaranAPI.getAll();
+      
+      if (result.success) {
+        // Transform data dari API ke format yang digunakan di frontend
+        const transformedData = result.data.map(item => ({
+          id: item.id_penawaran,
+          tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
+          namaPelanggan: item.nama_pelanggan,
+          nomorKontrak: item.nomor_kontrak,
+          kontrakKe: item.kontrak_tahun,
+          referensi: item.wilayah_hjt,
+          discount: item.diskon || '0%',
+          durasi: item.durasi_kontrak,
+          targetIRR: item.target_irr || '0',
+          status: item.status || 'Menunggu',
+          actions: ['view', 'edit', 'delete'],
+          // Data lengkap untuk detail
+          rawData: item
+        }));
+        
+        setPenawaranData(transformedData);
+        setError(null);
+        console.log("✅ Penawaran data fetched successfully:", transformedData.length, "records");
+      } else {
+        throw new Error(result.message || 'Gagal mengambil data penawaran');
+      }
+    } catch (err) {
+      console.error('❌ Error fetching penawaran data:', err);
+      setError(err.message);
+      setPenawaranData([]);
+      
+      // If authentication error, redirect to login
+      if (err.message.includes('terautentikasi') || err.message.includes('authentication')) {
+        alert('Sesi Anda telah berakhir. Silakan login kembali.');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login';
+      }
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  // useEffect untuk fetch data saat komponen dimount
+  useEffect(() => {
+    fetchPenawaranData();
+  }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -135,9 +137,54 @@ const Penawaran = () => {
     setSelectedEditData(null);
   };
 
-  const handleSaveEditData = (updatedData) => {
-    console.log('Saving edited data:', updatedData);
-    // Add your save logic here
+  const handleSaveEditData = async (updatedData) => {
+    try {
+      // Check if user is authenticated
+      const userData = getUserData();
+      if (!userData) {
+        alert('User tidak terautentikasi. Silakan login kembali.');
+        return;
+      }
+
+      console.log('🔄 Updating penawaran data:', updatedData);
+      console.log('🔍 Selected edit data ID:', selectedEditData.id);
+
+      // Map the updated data to match API format
+      const apiData = {
+        sales: updatedData.sales,
+        tanggal: updatedData.tanggal,
+        pelanggan: updatedData.pelanggan,
+        nomorKontrak: updatedData.nomorKontrak,
+        kontrakTahunKe: updatedData.kontrakTahunKe,
+        referensiHJT: updatedData.referensiHJT,
+        durasiKontrak: updatedData.durasiKontrak,
+        item: updatedData.item,
+        keterangan: updatedData.keterangan,
+        harga: updatedData.harga,
+        jumlah: updatedData.jumlah,
+        discount: updatedData.discount
+      };
+
+      console.log('📤 Sending API data:', apiData);
+
+      const result = await penawaranAPI.update(selectedEditData.id, apiData);
+      
+      console.log('📬 API Response:', result);
+      
+      if (result.success) {
+        alert('Data penawaran berhasil diperbarui');
+        // Refresh data setelah update
+        await fetchPenawaranData();
+        setShowEditModal(false);
+        setSelectedEditData(null);
+      } else {
+        console.error('❌ API Error:', result.error);
+        alert(`Gagal memperbarui data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
+      }
+    } catch (error) {
+      console.error('❌ Error updating penawaran:', error);
+      alert(`Terjadi kesalahan saat memperbarui data:\n${error.message}`);
+    }
   };
 
   const handleDetailData = (item) => {
@@ -160,14 +207,73 @@ const Penawaran = () => {
     setSelectedDeleteData(null);
   };
 
-  const handleConfirmDelete = (deleteData) => {
-    console.log('Deleting data:', deleteData);
-    // Add your delete logic here
+  const handleConfirmDelete = async (deleteData) => {
+    try {
+      // Check if user is authenticated
+      const userData = getUserData();
+      if (!userData) {
+        alert('User tidak terautentikasi. Silakan login kembali.');
+        return;
+      }
+
+      console.log('🗑️ Deleting penawaran:', deleteData);
+      console.log('🔍 Delete data ID:', deleteData.id);
+
+      const result = await penawaranAPI.delete(deleteData.id);
+      
+      console.log('📬 Delete API Response:', result);
+      
+      if (result.success) {
+        alert('Data penawaran berhasil dihapus');
+        // Refresh data setelah delete
+        await fetchPenawaranData();
+        setShowHapusModal(false);
+        setSelectedDeleteData(null);
+      } else {
+        console.error('❌ Delete API Error:', result.error);
+        alert(`Gagal menghapus data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
+      }
+    } catch (error) {
+      console.error('❌ Error deleting penawaran:', error);
+      alert(`Terjadi kesalahan saat menghapus data:\n${error.message}`);
+    }
   };
 
-  const handleSaveData = (newData) => {
-    console.log('Saving new data:', newData);
-    // Add your save logic here
+  const handleSaveData = async (newData) => {
+    try {
+      // Check if user is authenticated
+      const userData = getUserData();
+      if (!userData) {
+        alert('User tidak terautentikasi. Silakan login kembali.');
+        return false;
+      }
+
+      console.log('💾 User data:', userData);
+      console.log('💾 Sending penawaran data:', newData);
+
+      const result = await penawaranAPI.create(newData);
+      
+      console.log('📬 API Response:', result);
+      
+      if (result.success) {
+        alert('Data penawaran berhasil disimpan');
+        // Refresh data setelah save
+        await fetchPenawaranData();
+        setShowTambahModal(false);
+        
+        // Reset form di komponen Tambah akan dilakukan oleh callback
+        return true;
+      } else {
+        console.error('❌ API Error:', result.error);
+        alert(`Gagal menyimpan data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error saving penawaran:', error);
+      console.error('❌ Error details:', error.message);
+      alert(`Terjadi kesalahan saat menyimpan data:\n${error.message}`);
+      return false;
+    }
   };
 
   const handleExportPDF = () => {
@@ -313,6 +419,51 @@ const Penawaran = () => {
       backgroundColor: '#f8f9fa',
       minHeight: '100vh'
     }}>
+      {/* Loading State */}
+      {isLoading && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '200px',
+          fontSize: '16px',
+          color: '#666'
+        }}>
+          Memuat data penawaran...
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div style={{
+          backgroundColor: '#f8d7da',
+          color: '#721c24',
+          padding: '12px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          border: '1px solid #f5c6cb'
+        }}>
+          <strong>Error:</strong> {error}
+          <button
+            onClick={fetchPenawaranData}
+            style={{
+              marginLeft: '10px',
+              padding: '4px 8px',
+              backgroundColor: '#721c24',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Coba Lagi
+          </button>
+        </div>
+      )}
+
+      {/* Content - Only show when not loading */}
+      {!isLoading && (
+        <>
       {/* Header Section with Action Buttons */}
       <div style={{
         display: 'flex',
@@ -824,6 +975,8 @@ const Penawaran = () => {
         onConfirm={handleConfirmDelete}
         deleteData={selectedDeleteData}
       />
+        </>
+      )}
     </div>
   );
 };

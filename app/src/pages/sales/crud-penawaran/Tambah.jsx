@@ -188,7 +188,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     durasiKontrak: "",
     item: "",
     keterangan: "",
-    harga: "",
+    hasrat: "",
     jumlah: "",
     discount: "",
   });
@@ -203,12 +203,20 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSaving(true);
-    onSave(formData);
+    
+    // Validasi form
+    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      alert(`Harap isi field yang wajib: ${missingFields.join(', ')}`);
+      return;
+    }
 
-    // Immediately transition to success modal
-    setShowSuccessModal(true);
-    setIsSaving(false);
+    setIsSaving(true);
+    
+    // Call parent save function
+    onSave(formData);
   };
 
   const handleCloseSuccessModal = () => {
@@ -223,7 +231,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       durasiKontrak: "",
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
       discount: "",
     });
@@ -242,7 +250,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       durasiKontrak: "",
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
       discount: "",
     });
@@ -267,7 +275,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       ...prev,
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
       discount: "",
     }));
@@ -1077,7 +1085,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       />
                     </div>
 
-                    {/* Harga */}
+                    {/* Hasrat */}
                     <div
                       style={{
                         display: "flex",
@@ -1095,15 +1103,15 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                           flexShrink: 0,
                         }}
                       >
-                        Harga*
+                        Hasrat*
                       </label>
                       <input
                         type="text"
-                        name="harga"
-                        value={formData.harga || ""}
+                        name="hasrat"
+                        value={formData.hasrat || ""}
                         onChange={handleInputChange}
                         disabled={isSaving}
-                        placeholder="Masukkan harga satuan"
+                        placeholder="Masukkan hasrat"
                         required
                         style={{
                           flex: 1,

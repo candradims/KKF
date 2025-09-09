@@ -16,10 +16,25 @@ export class UserModel {
   // Ambil pengguna berdasarkan ID
   static async getUserById(id) {
     try {
-      const { data, error } = await db.findOne("data_user", { id_user: id });
-      if (error) throw error;
+      console.log("🔍 Searching user by ID:", id);
+
+      const { data, error } = await supabase
+        .from("data_user")
+        .select(
+          "id_user, tanggal, email_user, kata_sandi, role_user, is_active, created_at, updated_at"
+        )
+        .eq("id_user", id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("❌ Supabase error in getUserById:", error);
+        throw error;
+      }
+
+      console.log("📋 User search result:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in getUserById:", error);
       throw new Error(`Gagal mengambil data pengguna: ${error.message}`);
     }
   }

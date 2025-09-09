@@ -5,6 +5,9 @@ import { AuthController } from "./src/controllers/AuthController.js";
 import { AdminController } from "./src/controllers/AdminController.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import layananRoutes from "./src/routes/layananRoutes.js";
+import penawaranRoutes from "./src/routes/penawaranRoutes.js";
+import authRoutes from "./src/routes/authRoutes.js";
+import pengeluaranRoutes from "./src/routes/pengeluaranRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -39,6 +42,9 @@ app.post("/api/auth/login", AuthController.login);
 app.post("/api/auth/reset-password", AuthController.resetPassword);
 app.use("/api/admin", adminRoutes);
 app.use("/api/layanan", layananRoutes);
+app.use("/api/penawaran", penawaranRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/pengeluaran", pengeluaranRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -61,25 +61,87 @@ export class PenawaranModel {
   // Buat penawaran baru
   static async createPenawaran(penawaranData) {
     try {
-      const { data, error } = await db.insert("data_penawaran", {
-        id_user: penawaranData.id_user,
-        tanggal_dibuat: penawaranData.tanggal_dibuat,
-        nama_pelanggan: penawaranData.nama_pelanggan,
-        pekerjaan: penawaranData.pekerjaan,
-        nomor_kontrak: penawaranData.nomor_kontrak,
-        kontrak_tahun: penawaranData.kontrak_tahun,
-        wilayah_hjt: penawaranData.wilayah_hjt,
-        diskon: penawaranData.diskon,
-        durasi_kontrak: penawaranData.durasi_kontrak,
-        target_irr: penawaranData.target_irr,
-        diskon_thdp_backbone: penawaranData.diskon_thdp_backbone,
-        diskon_thdp_port: penawaranData.diskon_thdp_port,
+      console.log("📝 Creating penawaran with data:", penawaranData);
+
+      // Validate required fields
+      if (!penawaranData.id_user) {
+        throw new Error("User ID diperlukan");
+      }
+
+      if (!penawaranData.pelanggan && !penawaranData.nama_pelanggan) {
+        throw new Error("Nama pelanggan diperlukan");
+      }
+
+      if (!penawaranData.nomorKontrak && !penawaranData.nomor_kontrak) {
+        throw new Error("Nomor kontrak diperlukan");
+      }
+
+      // Basic data mapping - sesuai struktur table database
+      const dataToInsert = {
+        id_user: parseInt(penawaranData.id_user),
+        tanggal_dibuat:
+          penawaranData.tanggal_dibuat ||
+          penawaranData.tanggal ||
+          new Date().toISOString().split("T")[0],
+        nama_pelanggan: penawaranData.nama_pelanggan || penawaranData.pelanggan,
+        nomor_kontrak:
+          penawaranData.nomor_kontrak || penawaranData.nomorKontrak,
+        kontrak_tahun: parseInt(
+          penawaranData.kontrak_tahun || penawaranData.kontrakTahunKe || 1
+        ),
+        wilayah_hjt:
+          penawaranData.wilayah_hjt || penawaranData.referensiHJT || "",
+        diskon:
+          parseFloat(
+            penawaranData.diskon?.toString().replace("%", "") ||
+              penawaranData.discount?.toString().replace("%", "") ||
+              "0"
+          ) || 0,
+        durasi_kontrak: parseInt(
+          penawaranData.durasi_kontrak || penawaranData.durasiKontrak || 12
+        ),
         status: penawaranData.status || "Menunggu",
-        catatan: penawaranData.catatan,
-      });
-      if (error) throw error;
+        nama_sales: penawaranData.nama_sales || penawaranData.sales || "",
+      };
+
+      // Optional fields - hanya tambahkan jika ada
+      if (
+        penawaranData.pekerjaan ||
+        penawaranData.keterangan ||
+        penawaranData.item
+      ) {
+        dataToInsert.pekerjaan =
+          penawaranData.pekerjaan ||
+          penawaranData.keterangan ||
+          `${penawaranData.item || "Layanan"} - ${
+            penawaranData.jumlah || 1
+          } unit - Rp ${penawaranData.harga || 0}`;
+      }
+
+      if (
+        penawaranData.catatan ||
+        (penawaranData.item && penawaranData.harga)
+      ) {
+        dataToInsert.catatan =
+          penawaranData.catatan ||
+          `Item: ${penawaranData.item || ""}, Harga: ${
+            penawaranData.harga || ""
+          }, Jumlah: ${penawaranData.jumlah || ""}`;
+      }
+
+      console.log("📋 Data to insert:", dataToInsert);
+
+      const { data, error } = await db.insert("data_penawaran", dataToInsert);
+
+      if (error) {
+        console.error("❌ Database error:", error);
+        throw error;
+      }
+
+      console.log("✅ Penawaran created successfully:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in createPenawaran:", error);
       throw new Error(`Gagal membuat penawaran baru: ${error.message}`);
     }
   }
@@ -87,12 +149,100 @@ export class PenawaranModel {
   // Perbarui penawaran
   static async updatePenawaran(id, penawaranData) {
     try {
-      const { data, error } = await db.update("data_penawaran", penawaranData, {
+      console.log("🔄 Updating penawaran ID:", id);
+      console.log("📝 Update data received:", penawaranData);
+
+      // Map frontend fields to database fields sama seperti create
+      const updateData = {};
+
+      if (penawaranData.sales || penawaranData.nama_sales) {
+        updateData.nama_sales = penawaranData.nama_sales || penawaranData.sales;
+      }
+
+      if (penawaranData.tanggal || penawaranData.tanggal_dibuat) {
+        updateData.tanggal_dibuat =
+          penawaranData.tanggal_dibuat || penawaranData.tanggal;
+      }
+
+      if (penawaranData.pelanggan || penawaranData.nama_pelanggan) {
+        updateData.nama_pelanggan =
+          penawaranData.nama_pelanggan || penawaranData.pelanggan;
+      }
+
+      if (penawaranData.nomorKontrak || penawaranData.nomor_kontrak) {
+        updateData.nomor_kontrak =
+          penawaranData.nomor_kontrak || penawaranData.nomorKontrak;
+      }
+
+      if (penawaranData.kontrakTahunKe || penawaranData.kontrak_tahun) {
+        updateData.kontrak_tahun = parseInt(
+          penawaranData.kontrak_tahun || penawaranData.kontrakTahunKe
+        );
+      }
+
+      if (penawaranData.referensiHJT || penawaranData.wilayah_hjt) {
+        updateData.wilayah_hjt =
+          penawaranData.wilayah_hjt || penawaranData.referensiHJT;
+      }
+
+      if (penawaranData.discount || penawaranData.diskon) {
+        updateData.diskon =
+          parseFloat(
+            penawaranData.diskon?.toString().replace("%", "") ||
+              penawaranData.discount?.toString().replace("%", "") ||
+              "0"
+          ) || 0;
+      }
+
+      if (penawaranData.durasiKontrak || penawaranData.durasi_kontrak) {
+        updateData.durasi_kontrak = parseInt(
+          penawaranData.durasi_kontrak || penawaranData.durasiKontrak
+        );
+      }
+
+      if (penawaranData.status) {
+        updateData.status = penawaranData.status;
+      }
+
+      if (
+        penawaranData.keterangan ||
+        penawaranData.pekerjaan ||
+        penawaranData.item
+      ) {
+        updateData.pekerjaan =
+          penawaranData.pekerjaan ||
+          penawaranData.keterangan ||
+          `${penawaranData.item || "Layanan"} - ${
+            penawaranData.jumlah || 1
+          } unit - Rp ${penawaranData.harga || 0}`;
+      }
+
+      if (
+        penawaranData.catatan ||
+        (penawaranData.item && penawaranData.harga)
+      ) {
+        updateData.catatan =
+          penawaranData.catatan ||
+          `Item: ${penawaranData.item || ""}, Harga: ${
+            penawaranData.harga || ""
+          }, Jumlah: ${penawaranData.jumlah || ""}`;
+      }
+
+      console.log("📋 Mapped update data:", updateData);
+
+      const { data, error } = await db.update("data_penawaran", updateData, {
         id_penawaran: id,
       });
-      if (error) throw error;
+
+      if (error) {
+        console.error("❌ Database update error:", error);
+        throw error;
+      }
+
+      console.log("✅ Penawaran updated successfully:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in updatePenawaran:", error);
       throw new Error(`Gagal memperbarui penawaran: ${error.message}`);
     }
   }
@@ -100,12 +250,21 @@ export class PenawaranModel {
   // Hapus penawaran
   static async deletePenawaran(id) {
     try {
+      console.log("🗑️ Deleting penawaran ID:", id);
+
       const { data, error } = await db.delete("data_penawaran", {
         id_penawaran: id,
       });
-      if (error) throw error;
+
+      if (error) {
+        console.error("❌ Database delete error:", error);
+        throw error;
+      }
+
+      console.log("✅ Penawaran deleted successfully:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in deletePenawaran:", error);
       throw new Error(`Gagal menghapus penawaran: ${error.message}`);
     }
   }

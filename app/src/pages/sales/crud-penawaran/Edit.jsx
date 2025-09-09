@@ -190,7 +190,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     discount: "",
     item: "",
     keterangan: "",
-    harga: "",
+    hasrat: "",
     jumlah: "",
   });
 
@@ -208,7 +208,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         discount: editData.discount || "",
         item: editData.item || "",
         keterangan: editData.keterangan || "",
-        harga: editData.harga || "",
+        hasrat: editData.harga || "",
         jumlah: editData.jumlah || "",
       };
 
@@ -269,7 +269,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       discount: "",
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
     });
     setShowAdditionalSection(false);
@@ -288,7 +288,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       discount: "",
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
     });
     setShowAdditionalSection(false);
@@ -312,7 +312,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       ...prev,
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
       discount: "",
     }));
@@ -1123,7 +1123,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       />
                     </div>
 
-                    {/* Harga */}
+                    {/* Hasrat */}
                     <div
                       style={{
                         display: "flex",
@@ -1141,15 +1141,15 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           flexShrink: 0,
                         }}
                       >
-                        Harga*
+                        Hasrat*
                       </label>
                       <input
                         type="text"
-                        name="harga"
-                        value={formData.harga || ""}
+                        name="hasrat"
+                        value={formData.hasrat || ""}
                         onChange={handleInputChange}
                         disabled={isSaving}
-                        placeholder="Masukkan harga satuan"
+                        placeholder="Masukkan hasrat"
                         required
                         style={{
                           flex: 1,

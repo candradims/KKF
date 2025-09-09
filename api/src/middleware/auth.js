@@ -3,31 +3,51 @@ import { UserModel } from "../models/UserModel.js";
 // Middleware untuk autentikasi sederhana
 export const authenticate = async (req, res, next) => {
   try {
-    const { email_user, kata_sandi } = req.headers;
+    console.log("🔐 Authentication middleware - Headers:", req.headers);
 
-    if (!email || !password) {
+    const userId = req.headers["x-user-id"];
+    const userRole = req.headers["x-user-role"];
+    const userEmail = req.headers["x-user-email"];
+
+    if (!userId || !userRole || !userEmail) {
       return res.status(401).json({
         success: false,
-        message: "Email dan password diperlukan di headers",
+        message:
+          "Authentication headers diperlukan (X-User-ID, X-User-Role, X-User-Email)",
       });
     }
 
-    const user = await UserModel.getUserByEmail(email_user);
+    // Verify user exists in database
+    const user = await UserModel.getUserById(parseInt(userId));
 
-    if (!user || user.kata_sandi !== kata_sandi) {
+    if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Email atau kata sandi salah",
+        message: "User tidak ditemukan",
       });
     }
 
-    req.user = user;
-    next();
+    // Verify user role and email match
+    if (user.role_user !== userRole || user.email_user !== userEmail) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication data tidak valid",
+      });
+    }
 
-    // Attach user to request
+    // Verify user is active
+    if (!user.is_active) {
+      return res.status(401).json({
+        success: false,
+        message: "Akun tidak aktif",
+      });
+    }
+
+    console.log("✅ Authentication successful for user:", user.email_user);
     req.user = user;
     next();
   } catch (error) {
+    console.error("❌ Authentication error:", error);
     return res.status(500).json({
       success: false,
       message: "Kesalahan autentikasi",
