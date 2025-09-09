@@ -188,7 +188,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     durasiKontrak: "",
     item: "",
     keterangan: "",
-    harga: "",
+    hasrat: "",
     jumlah: "",
     discount: "",
   });
@@ -231,7 +231,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       durasiKontrak: "",
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
       discount: "",
     });
@@ -250,7 +250,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       durasiKontrak: "",
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
       discount: "",
     });
@@ -275,7 +275,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       ...prev,
       item: "",
       keterangan: "",
-      harga: "",
+      hasrat: "",
       jumlah: "",
       discount: "",
     }));
@@ -1085,7 +1085,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       />
                     </div>
 
-                    {/* Harga */}
+                    {/* Hasrat */}
                     <div
                       style={{
                         display: "flex",
@@ -1103,15 +1103,15 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                           flexShrink: 0,
                         }}
                       >
-                        Harga*
+                        Hasrat*
                       </label>
                       <input
                         type="text"
-                        name="harga"
-                        value={formData.harga || ""}
+                        name="hasrat"
+                        value={formData.hasrat || ""}
                         onChange={handleInputChange}
                         disabled={isSaving}
-                        placeholder="Masukkan harga satuan"
+                        placeholder="Masukkan hasrat"
                         required
                         style={{
                           flex: 1,
