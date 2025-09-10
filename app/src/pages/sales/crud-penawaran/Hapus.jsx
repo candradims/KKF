@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Calculator, Check } from 'lucide-react';
+import { getUserData, getAuthHeaders } from '../../../utils/api';
 
 const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [pengeluaranData, setPengeluaranData] = useState([]);
+  const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
   const [formData, setFormData] = useState({
     sales: '',
     tanggal: '',
@@ -40,20 +43,122 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
         aksesExisting: deleteData.aksesExisting || '',
         hargaFinalSebelumPPN: deleteData.hargaFinalSebelumPPN || ''
       });
+
+      // Load pengeluaran data
+      loadPengeluaranData();
     }
   }, [deleteData]);
 
-  const handleConfirm = () => {
+  const loadPengeluaranData = async () => {
+    if (!deleteData?.id_penawaran) return;
+
+    setLoadingPengeluaran(true);
+    try {
+      // Get auth data using utility function
+      const userData = getUserData();
+      if (!userData) {
+        console.log('❌ No user data for loading pengeluaran');
+        setPengeluaranData([]);
+        return;
+      }
+
+      console.log('📋 Loading pengeluaran data for penawaran ID:', deleteData.id_penawaran);
+
+      // Get auth headers using utility function
+      const headers = getAuthHeaders();
+      console.log('📋 Using headers:', headers);
+
+      const response = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${deleteData.id_penawaran}`, {
+        method: 'GET',
+        headers: headers,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          console.log('✅ Pengeluaran data loaded:', result.data);
+          setPengeluaranData(result.data);
+        } else {
+          console.log('📝 No pengeluaran data found');
+          setPengeluaranData([]);
+        }
+      } else {
+        console.error('❌ Failed to load pengeluaran data');
+        setPengeluaranData([]);
+      }
+    } catch (error) {
+      console.error('❌ Error loading pengeluaran data:', error);
+      setPengeluaranData([]);
+    } finally {
+      setLoadingPengeluaran(false);
+    }
+  };
+
+  const handleConfirm = async () => {
     setIsDeleting(true);
-    onConfirm(deleteData);
     
-    // Immediately transition to success modal
-    setShowSuccessModal(true);
-    setIsDeleting(false);
+    try {
+      // First check if there's associated pengeluaran data
+      const userData = getUserData();
+      if (!userData) {
+        console.log('❌ No user data for deletion');
+        setIsDeleting(false);
+        alert('Data autentikasi tidak ditemukan. Silakan login kembali.');
+        return;
+      }
+      
+      if (deleteData?.id_penawaran) {
+        console.log('🗑️ Checking for pengeluaran data for penawaran ID:', deleteData.id_penawaran);
+        
+        try {
+          const headers = getAuthHeaders();
+          
+          const pengeluaranResponse = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${deleteData.id_penawaran}`, {
+            method: 'GET',
+            headers: headers,
+          });
+
+          if (pengeluaranResponse.ok) {
+            const pengeluaranData = await pengeluaranResponse.json();
+            if (pengeluaranData.data && pengeluaranData.data.length > 0) {
+              console.log('🗑️ Found pengeluaran data to delete:', pengeluaranData.data);
+              
+              // Delete each pengeluaran record
+              for (const pengeluaran of pengeluaranData.data) {
+                console.log('🗑️ Deleting pengeluaran ID:', pengeluaran.id_pengeluaran);
+                
+                const deletePengeluaranResponse = await fetch(`http://localhost:3000/api/pengeluaran/${pengeluaran.id_pengeluaran}`, {
+                  method: 'DELETE',
+                  headers: headers,
+                });
+
+                if (!deletePengeluaranResponse.ok) {
+                  console.error('❌ Failed to delete pengeluaran:', pengeluaran.id_pengeluaran);
+                }
+              }
+            }
+          }
+        } catch (pengeluaranError) {
+          console.log('⚠️ Error checking/deleting pengeluaran (continuing with penawaran deletion):', pengeluaranError);
+        }
+      }
+      
+      // Now delete the penawaran (this calls the parent's onConfirm)
+      onConfirm(deleteData);
+      
+      // Immediately transition to success modal
+      setShowSuccessModal(true);
+      setIsDeleting(false);
+    } catch (error) {
+      console.error('❌ Error during deletion:', error);
+      setIsDeleting(false);
+      alert('Terjadi kesalahan saat menghapus data');
+    }
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+    setPengeluaranData([]);
     setFormData({
       sales: '',
       tanggal: '',
@@ -168,7 +273,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
               color: '#7F1D1D',
               fontSize: '12px'
             }}>
-              Data yang sudah dihapus tidak dapat dikembalikan!
+              Data penawaran dan semua pengeluaran terkait akan terhapus permanen!
             </p>
           </div>
         </div>
@@ -720,6 +825,212 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
                 />
               </div>
             </div>
+
+            {/* Pengeluaran Lain-lain History Section */}
+            {pengeluaranData.length > 0 && (
+              <div style={{
+                backgroundColor: '#e3f2fd',
+                borderRadius: '6px',
+                padding: '16px',
+                marginBottom: '20px',
+                border: '1px solid #bbdefb'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '16px'
+                }}>
+                  <h4 style={{
+                    margin: 0,
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#1565C0'
+                  }}>
+                    📋 History Pengeluaran Lain-lain
+                  </h4>
+                  <span style={{
+                    fontSize: '11px',
+                    color: '#DC2626',
+                    fontStyle: 'italic',
+                    fontWeight: '500'
+                  }}>
+                    ⚠️ {pengeluaranData.length} item akan terhapus
+                  </span>
+                </div>
+                
+                {loadingPengeluaran ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '20px',
+                    color: '#1565C0',
+                    fontSize: '14px'
+                  }}>
+                    Memuat data pengeluaran...
+                  </div>
+                ) : (
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {pengeluaranData.map((item, index) => (
+                      <div key={item.id_pengeluaran || index} style={{
+                        backgroundColor: 'white',
+                        border: '1px solid #bbdefb',
+                        borderRadius: '6px',
+                        padding: '12px',
+                        marginBottom: index < pengeluaranData.length - 1 ? '12px' : '0'
+                      }}>
+                        {/* Item */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          minHeight: '32px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Item*
+                          </label>
+                          <div style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            backgroundColor: '#f9f9f9',
+                            color: '#666'
+                          }}>
+                            {item.item || '-'}
+                          </div>
+                        </div>
+
+                        {/* Keterangan */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          minHeight: '32px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Keterangan*
+                          </label>
+                          <div style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            backgroundColor: '#f9f9f9',
+                            color: '#666'
+                          }}>
+                            {item.keterangan || 'Tidak ada keterangan'}
+                          </div>
+                        </div>
+
+                        {/* Hasrat */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          minHeight: '32px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Hasrat*
+                          </label>
+                          <div style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            backgroundColor: '#f9f9f9',
+                            color: '#666'
+                          }}>
+                            Rp {(item.harga_satuan || 0).toLocaleString('id-ID')}
+                          </div>
+                        </div>
+
+                        {/* Jumlah */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          minHeight: '32px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Jumlah*
+                          </label>
+                          <div style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            backgroundColor: '#f9f9f9',
+                            color: '#666'
+                          }}>
+                            {item.jumlah || 0}
+                          </div>
+                        </div>
+                        
+                        {/* Display total */}
+                        <div style={{
+                          padding: '8px 12px',
+                          backgroundColor: '#ffebee',
+                          border: '1px solid #ef9a9a',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          color: '#c62828'
+                        }}>
+                          <strong>Total: Rp {(item.total_harga || 0).toLocaleString('id-ID')}</strong>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Total Keseluruhan */}
+                    <div style={{
+                      marginTop: '16px',
+                      padding: '12px',
+                      backgroundColor: '#ffcdd2',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      fontWeight: '600',
+                      border: '2px solid #ef5350'
+                    }}>
+                      <span style={{ color: '#c62828', fontSize: '14px' }}>
+                        Total Keseluruhan Pengeluaran yang akan Dihapus:
+                      </span>
+                      <span style={{ color: '#b71c1c', fontSize: '16px' }}>
+                        Rp {pengeluaranData.reduce((total, item) => total + (item.total_harga || 0), 0).toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div style={{

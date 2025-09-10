@@ -124,3 +124,32 @@ export const penawaranAPI = {
   getByStatus: (status) =>
     apiRequest(API_CONFIG.ENDPOINTS.PENAWARAN.BY_STATUS(status)),
 };
+
+// Specific API functions for Pengeluaran
+export const pengeluaranAPI = {
+  // Get all pengeluaran
+  getAll: () => apiRequest(API_CONFIG.ENDPOINTS.PENGELUARAN),
+
+  // Get pengeluaran by ID
+  getById: (id) => apiRequest(`${API_CONFIG.ENDPOINTS.PENGELUARAN}/${id}`),
+
+  // Create new pengeluaran
+  create: (data) =>
+    apiRequest(API_CONFIG.ENDPOINTS.PENGELUARAN, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Update pengeluaran
+  update: (id, data) =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.PENGELUARAN}/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Delete pengeluaran
+  delete: (id) =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.PENGELUARAN}/${id}`, {
+      method: "DELETE",
+    }),
+};

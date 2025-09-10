@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
+import { pengeluaranAPI, getUserData, getAuthHeaders } from '../../../utils/api';
 
-const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
+const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
   const [tabelPerhitungan, setTabelPerhitungan] = useState([
     {
       id: 1,
@@ -22,7 +23,130 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
     }
   ]);
 
-  const [pengeluaranLain, setPengeluaranLain] = useState([
+  const [pengeluaranLain, setPengeluaranLain] = useState([]);
+  const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
+  const [errorPengeluaran, setErrorPengeluaran] = useState(null);
+
+  // Function to load pengeluaran data (extracted for reusability)
+  const loadPengeluaranData = async () => {
+    // Check for id_penawaran in detailData or rawData
+    const penawaranId = detailData?.id_penawaran || detailData?.id || detailData?.rawData?.id_penawaran;
+    
+    console.log('🔍 Looking for penawaran ID in:', {
+      'detailData?.id_penawaran': detailData?.id_penawaran,
+      'detailData?.id': detailData?.id,
+      'detailData?.rawData?.id_penawaran': detailData?.rawData?.id_penawaran,
+      'final penawaranId': penawaranId
+    });
+    
+    if (!penawaranId) {
+      console.log('❌ No penawaran ID found in detailData:', detailData);
+      setErrorPengeluaran('ID Penawaran tidak ditemukan');
+      return;
+    }
+    
+    try {
+      setLoadingPengeluaran(true);
+      setErrorPengeluaran(null);
+      console.log('Loading pengeluaran for penawaran ID:', penawaranId);
+      console.log('DetailData structure:', detailData);
+      
+      // Get auth data using utility function
+      const userData = getUserData();
+      if (!userData) {
+        setErrorPengeluaran('Data autentikasi tidak ditemukan. Silakan login kembali.');
+        return;
+      }
+      
+      console.log('User data:', userData);
+      
+      // Get auth headers using utility function
+      let headers;
+      try {
+        headers = getAuthHeaders();
+        console.log('Auth headers:', headers);
+      } catch (authError) {
+        console.error('Error getting auth headers:', authError);
+        setErrorPengeluaran('Gagal mendapatkan data autentikasi. Silakan login kembali.');
+        return;
+      }
+      
+      // Using the existing API endpoint for pengeluaran by penawaran ID
+      const url = `http://localhost:3000/api/pengeluaran/penawaran/${penawaranId}`;
+      console.log('📡 Making request to:', url);
+      console.log('📡 With headers:', headers);
+      
+      const response = await fetch(url, {
+        headers: headers
+      });
+      
+      console.log('API Response status:', response.status);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('API Response result:', result);
+        if (result.success) {
+          const formattedData = result.data.map(item => ({
+            id: item.id_pengeluaran,
+            item: item.item,
+            keterangan: item.keterangan,
+            hasrat: item.harga_satuan?.toString() || '0',
+            jumlah: item.jumlah?.toString() || '0',
+            total: (item.total_harga || 0).toLocaleString('id-ID')
+          }));
+          setPengeluaranLain(formattedData);
+          console.log('Pengeluaran data loaded:', formattedData);
+          setErrorPengeluaran(null);
+        } else {
+          setErrorPengeluaran(result.message || 'Gagal memuat data pengeluaran');
+        }
+      } else {
+        const errorResult = await response.text();
+        console.error('Failed to load pengeluaran data. Status:', response.status, 'Response:', errorResult);
+        
+        // Try to parse error response as JSON
+        let errorMessage = `Gagal memuat data (Status: ${response.status})`;
+        try {
+          const errorJson = JSON.parse(errorResult);
+          if (errorJson.message) {
+            errorMessage = errorJson.message;
+          }
+        } catch (parseError) {
+          // If not JSON, use the text response
+          if (errorResult) {
+            errorMessage = `${errorMessage} - ${errorResult}`;
+          }
+        }
+        
+        setErrorPengeluaran(errorMessage);
+      }
+    } catch (error) {
+      console.error('Error loading pengeluaran data:', error);
+      setErrorPengeluaran('Terjadi kesalahan saat memuat data pengeluaran');
+    } finally {
+      setLoadingPengeluaran(false);
+    }
+  };
+
+  // Load data pengeluaran lain-lain berdasarkan id_penawaran
+  useEffect(() => {
+    if (isOpen && detailData) {
+      loadPengeluaranData();
+    } else if (!isOpen) {
+      // Clear data when modal closes to ensure fresh data on next open
+      setPengeluaranLain([]);
+    }
+  }, [isOpen, detailData]);
+
+  // Refresh data when refreshTrigger changes
+  useEffect(() => {
+    if (isOpen && detailData && refreshTrigger) {
+      console.log('🔄 Refresh triggered from parent component, refreshTrigger:', refreshTrigger);
+      loadPengeluaranData();
+    }
+  }, [refreshTrigger]);
+
+  const [pengeluaranLainBackup] = useState([
     { 
       id: 1, 
       item: 'Biaya Instalasi', 
@@ -118,7 +242,15 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       alignItems: 'center',
       zIndex: 1000
     }}>
-      <div style={{
+      <style>
+        {`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+        <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
         width: '95%',
@@ -640,39 +772,82 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {pengeluaranLain.map((row, index) => (
-                    <tr key={row.id}>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
-                        <input
-                          type="text"
-                          value={row.item}
-                          style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
-                        />
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
-                        <input
-                          type="text"
-                          value={row.keterangan}
-                          style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
-                        />
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.hasrat}
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.jumlah}
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
-                        {row.total}
+                  {loadingPengeluaran ? (
+                    <tr>
+                      <td colSpan="5" style={{ 
+                        padding: '20px', 
+                        textAlign: 'center', 
+                        fontSize: '14px', 
+                        color: '#666' 
+                      }}>
+                        Memuat data pengeluaran...
                       </td>
                     </tr>
-                  ))}
+                  ) : errorPengeluaran ? (
+                    <tr>
+                      <td colSpan="5" style={{ 
+                        padding: '20px', 
+                        textAlign: 'center', 
+                        fontSize: '14px', 
+                        color: '#DC2626' 
+                      }}>
+                        Error: {errorPengeluaran}
+                        <br />
+                        <button 
+                          onClick={loadPengeluaranData}
+                          style={{
+                            marginTop: '8px',
+                            padding: '4px 12px',
+                            backgroundColor: '#3B82F6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Coba Lagi
+                        </button>
+                      </td>
+                    </tr>
+                  ) : pengeluaranLain.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" style={{ 
+                        padding: '20px', 
+                        textAlign: 'center', 
+                        fontSize: '14px', 
+                        color: '#666' 
+                      }}>
+                        Tidak ada data pengeluaran lain-lain
+                      </td>
+                    </tr>
+                  ) : (
+                    pengeluaranLain.map((row, index) => (
+                      <tr key={row.id}>
+                        <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
+                          {row.item}
+                        </td>
+                        <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
+                          {row.keterangan}
+                        </td>
+                        <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
+                          {parseFloat(row.hasrat || 0).toLocaleString('id-ID')}
+                        </td>
+                        <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
+                          {row.jumlah}
+                        </td>
+                        <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
+                          Rp {row.total}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                   <tr style={{ backgroundColor: '#F3F4F6', fontWeight: '600' }}>
                     <td colSpan="4" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
                       <strong>Total Pengeluaran Lain-lain:</strong>
                     </td>
                     <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
-                      <strong>9.700.000</strong>
+                      <strong>Rp {pengeluaranLain.reduce((total, item) => total + parseFloat(item.total.replace(/[^\d]/g, '') || 0), 0).toLocaleString('id-ID')}</strong>
                     </td>
                   </tr>
                 </tbody>
@@ -701,19 +876,6 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               }}
             >
               Tutup
-            </button>
-            <button
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#00AEEF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                cursor: 'pointer'
-              }}
-            >
-              Simpan
             </button>
           </div>
         </div>

@@ -2,16 +2,139 @@ import { PengeluaranModel } from "../models/PengeluaranModel.js";
 import { PenawaranModel } from "../models/PenawaranModel.js";
 
 export class PengeluaranController {
+  // Ambil semua pengeluaran
+  static async getAllPengeluaran(req, res) {
+    try {
+      console.log("Getting all pengeluaran for user:", req.headers);
+
+      const userId = req.headers["x-user-id"];
+      const userRole = req.headers["x-user-role"];
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User ID tidak ditemukan dalam header",
+        });
+      }
+
+      let pengeluaran;
+
+      // Admin dan superAdmin bisa melihat semua data
+      if (userRole === "admin" || userRole === "superAdmin") {
+        pengeluaran = await PengeluaranModel.getAllPengeluaran();
+      } else {
+        // Sales hanya bisa melihat data mereka sendiri
+        pengeluaran = await PengeluaranModel.getPengeluaranByUserId(userId);
+      }
+
+      // Format total ke Rupiah untuk response
+      const formattedPengeluaran = pengeluaran.map((item) => ({
+        ...item,
+        totalFormatted: PengeluaranModel.formatRupiah(item.total),
+      }));
+
+      console.log(
+        "Retrieved pengeluaran:",
+        formattedPengeluaran.length,
+        "items"
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Data pengeluaran berhasil diambil",
+        data: formattedPengeluaran,
+      });
+    } catch (error) {
+      console.error("Error in getAllPengeluaran:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal mengambil data pengeluaran",
+        error: error.message,
+      });
+    }
+  }
+
+  // Buat pengeluaran baru
+  static async createPengeluaran(req, res) {
+    try {
+      console.log("Creating new pengeluaran with data:", req.body);
+      console.log("Headers:", req.headers);
+
+      const userId = req.headers["x-user-id"];
+      const userRole = req.headers["x-user-role"];
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User ID tidak ditemukan dalam header",
+        });
+      }
+
+      // Sales hanya bisa membuat data untuk diri mereka sendiri
+      if (userRole === "sales") {
+        req.body.idUser = userId;
+      }
+
+      // Validasi field yang wajib diisi untuk pengeluaran
+      const requiredFields = ["id_penawaran", "item", "jumlah"];
+      const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+      // Also check if hasrat/harga_satuan is provided
+      if (!req.body.hasrat && !req.body.harga_satuan) {
+        missingFields.push("hasrat/harga_satuan");
+      }
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Field berikut wajib diisi: ${missingFields.join(", ")}`,
+        });
+      }
+
+      const newPengeluaran = await PengeluaranModel.createPengeluaran(req.body);
+
+      // Format response dengan total dalam Rupiah
+      const responseData = {
+        ...newPengeluaran,
+        totalFormatted: PengeluaranModel.formatRupiah(
+          newPengeluaran.total_harga
+        ),
+      };
+
+      res.status(201).json({
+        success: true,
+        message: "Pengeluaran berhasil dibuat",
+        data: responseData,
+      });
+    } catch (error) {
+      console.error("Error in createPengeluaran:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal membuat data pengeluaran",
+        error: error.message,
+      });
+    }
+  }
   // Ambil pengeluaran berdasarkan ID penawaran
   static async getPengeluaranByPenawaranId(req, res) {
     try {
       const { idPenawaran } = req.params;
 
+      console.log("📋 getPengeluaranByPenawaranId called with:", {
+        idPenawaran,
+        user: req.user,
+        headers: req.headers,
+      });
+
       // Cek apakah penawaran ada dan user memiliki izin
       const existingPenawaran = await PenawaranModel.getPenawaranById(
         idPenawaran
       );
+
+      console.log("📋 Found penawaran:", existingPenawaran);
+
       if (!existingPenawaran) {
+        console.log("❌ Penawaran not found for ID:", idPenawaran);
         return res.status(404).json({
           success: false,
           message: "Penawaran tidak ditemukan",
@@ -23,6 +146,11 @@ export class PengeluaranController {
         req.user.role_user === "sales" &&
         existingPenawaran.id_user !== req.user.id_user
       ) {
+        console.log("❌ Access denied for sales user:", {
+          userRole: req.user.role_user,
+          userId: req.user.id_user,
+          penawaranUserId: existingPenawaran.id_user,
+        });
         return res.status(403).json({
           success: false,
           message:
@@ -30,9 +158,12 @@ export class PengeluaranController {
         });
       }
 
+      console.log("✅ Access granted, fetching pengeluaran data...");
       const pengeluaran = await PengeluaranModel.getPengeluaranByPenawaranId(
         idPenawaran
       );
+
+      console.log("📋 Retrieved pengeluaran data:", pengeluaran);
 
       res.status(200).json({
         success: true,
@@ -40,6 +171,7 @@ export class PengeluaranController {
         data: pengeluaran,
       });
     } catch (error) {
+      console.error("❌ Error in getPengeluaranByPenawaranId:", error);
       res.status(500).json({
         success: false,
         message: "Gagal mengambil data pengeluaran",
@@ -85,7 +217,7 @@ export class PengeluaranController {
       ) {
         return res.status(400).json({
           success: false,
-          message: "Item, harga satuan, dan jumlah wajib diisi",
+          message: "Item, hasrat (harga satuan), dan jumlah wajib diisi",
         });
       }
 
@@ -316,6 +448,146 @@ export class PengeluaranController {
       res.status(500).json({
         success: false,
         message: "Gagal menghitung total pengeluaran",
+        error: error.message,
+      });
+    }
+  }
+
+  // Update pengeluaran
+  static async updatePengeluaran(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.headers["x-user-id"];
+      const userRole = req.headers["x-user-role"];
+
+      console.log("Updating pengeluaran:", id, "Data:", req.body);
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User ID tidak ditemukan dalam header",
+        });
+      }
+
+      // Cek apakah pengeluaran ada
+      const existingPengeluaran = await PengeluaranModel.getPengeluaranById(id);
+      if (!existingPengeluaran) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengeluaran tidak ditemukan",
+        });
+      }
+
+      // Sales hanya bisa mengupdate pengeluaran dari penawaran mereka sendiri
+      // Cek penawaran yang terkait dengan pengeluaran ini
+      const relatedPenawaran = await PenawaranModel.getPenawaranById(
+        existingPengeluaran.id_penawaran
+      );
+      if (
+        userRole === "sales" &&
+        relatedPenawaran &&
+        relatedPenawaran.id_user !== parseInt(userId)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Akses ditolak. Anda hanya dapat mengupdate pengeluaran dari penawaran milik Anda sendiri.",
+        });
+      }
+
+      // Validasi field yang wajib diisi
+      const requiredFields = ["item", "hasrat", "jumlah"];
+      const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Field berikut wajib diisi: ${missingFields.join(", ")}`,
+        });
+      }
+
+      const updatedPengeluaran = await PengeluaranModel.updatePengeluaran(
+        id,
+        req.body
+      );
+
+      // Format response dengan total dalam Rupiah
+      const responseData = {
+        ...updatedPengeluaran,
+        totalFormatted: PengeluaranModel.formatRupiah(
+          updatedPengeluaran.total_harga
+        ),
+      };
+
+      res.status(200).json({
+        success: true,
+        message: "Pengeluaran berhasil diperbarui",
+        data: responseData,
+      });
+    } catch (error) {
+      console.error("Error in updatePengeluaran:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal memperbarui data pengeluaran",
+        error: error.message,
+      });
+    }
+  }
+
+  // Delete pengeluaran
+  static async deletePengeluaran(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.headers["x-user-id"];
+      const userRole = req.headers["x-user-role"];
+
+      console.log("Deleting pengeluaran:", id);
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User ID tidak ditemukan dalam header",
+        });
+      }
+
+      // Cek apakah pengeluaran ada
+      const existingPengeluaran = await PengeluaranModel.getPengeluaranById(id);
+      if (!existingPengeluaran) {
+        return res.status(404).json({
+          success: false,
+          message: "Pengeluaran tidak ditemukan",
+        });
+      }
+
+      // Sales hanya bisa menghapus pengeluaran dari penawaran mereka sendiri
+      // Cek penawaran yang terkait dengan pengeluaran ini
+      const relatedPenawaran = await PenawaranModel.getPenawaranById(
+        existingPengeluaran.id_penawaran
+      );
+      if (
+        userRole === "sales" &&
+        relatedPenawaran &&
+        relatedPenawaran.id_user !== parseInt(userId)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Akses ditolak. Anda hanya dapat menghapus pengeluaran dari penawaran milik Anda sendiri.",
+        });
+      }
+
+      await PengeluaranModel.deletePengeluaran(id);
+
+      res.status(200).json({
+        success: true,
+        message: "Pengeluaran berhasil dihapus",
+        data: existingPengeluaran,
+      });
+    } catch (error) {
+      console.error("Error in deletePengeluaran:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal menghapus data pengeluaran",
         error: error.message,
       });
     }

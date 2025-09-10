@@ -18,6 +18,7 @@ const Penawaran = () => {
   const [selectedDetailData, setSelectedDetailData] = useState(null);
   const [showHapusModal, setShowHapusModal] = useState(false);
   const [selectedDeleteData, setSelectedDeleteData] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // State untuk data dari API
   const [penawaranData, setPenawaranData] = useState([]);
@@ -47,6 +48,7 @@ const Penawaran = () => {
         // Transform data dari API ke format yang digunakan di frontend
         const transformedData = result.data.map(item => ({
           id: item.id_penawaran,
+          id_penawaran: item.id_penawaran, // Add this for Detail component
           tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
           namaPelanggan: item.nama_pelanggan,
           nomorKontrak: item.nomor_kontrak,
@@ -172,9 +174,108 @@ const Penawaran = () => {
       console.log('📬 API Response:', result);
       
       if (result.success) {
+        // Handle pengeluaran updates if the form had pengeluaran data
+        if (updatedData.item && updatedData.keterangan && updatedData.hasrat && updatedData.jumlah) {
+          console.log('💰 Handling pengeluaran update for penawaran ID:', selectedEditData.id);
+          
+          try {
+            // Check if there's existing pengeluaran data
+            const hasExistingPengeluaran = updatedData._hasExistingPengeluaran;
+            const existingPengeluaranId = updatedData._existingPengeluaranId;
+            
+            const pengeluaranData = {
+              id_penawaran: selectedEditData.id,
+              item: updatedData.item,
+              keterangan: updatedData.keterangan,
+              hasrat: parseFloat(updatedData.hasrat) || 0,
+              jumlah: parseInt(updatedData.jumlah) || 0
+            };
+            
+            console.log('💰 Pengeluaran data to save:', pengeluaranData);
+            
+            if (hasExistingPengeluaran && existingPengeluaranId) {
+              // Update existing pengeluaran
+              console.log('🔄 Updating existing pengeluaran ID:', existingPengeluaranId);
+              
+              const pengeluaranResult = await fetch(`http://localhost:3000/api/pengeluaran/${existingPengeluaranId}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-User-ID': userData.id_user.toString(),
+                  'X-User-Role': userData.role,
+                  'X-User-Email': userData.email_user
+                },
+                body: JSON.stringify(pengeluaranData)
+              });
+              
+              const pengeluaranResponse = await pengeluaranResult.json();
+              console.log('📋 Pengeluaran update response:', pengeluaranResponse);
+              
+              if (pengeluaranResult.ok && pengeluaranResponse.success) {
+                console.log('✅ Pengeluaran updated successfully');
+              } else {
+                console.error('❌ Failed to update pengeluaran:', pengeluaranResponse);
+                alert(`Gagal memperbarui pengeluaran: ${pengeluaranResponse.message || 'Unknown error'}`);
+              }
+            } else {
+              // Create new pengeluaran
+              console.log('➕ Creating new pengeluaran');
+              
+              const pengeluaranResult = await fetch('http://localhost:3000/api/pengeluaran', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-User-ID': userData.id_user.toString(),
+                  'X-User-Role': userData.role,
+                  'X-User-Email': userData.email_user
+                },
+                body: JSON.stringify(pengeluaranData)
+              });
+              
+              const pengeluaranResponse = await pengeluaranResult.json();
+              console.log('📋 Pengeluaran create response:', pengeluaranResponse);
+              
+              if (pengeluaranResult.ok && pengeluaranResponse.success) {
+                console.log('✅ Pengeluaran created successfully');
+              } else {
+                console.error('❌ Failed to create pengeluaran:', pengeluaranResponse);
+                alert(`Gagal membuat pengeluaran: ${pengeluaranResponse.message || 'Unknown error'}`);
+              }
+            }
+          } catch (pengeluaranError) {
+            console.error('❌ Error handling pengeluaran:', pengeluaranError);
+            // Don't fail the whole operation for pengeluaran errors
+          }
+        } else if (updatedData._hasExistingPengeluaran && updatedData._existingPengeluaranId) {
+          // If pengeluaran fields are cleared, delete existing pengeluaran
+          console.log('🗑️ Deleting existing pengeluaran (fields cleared)');
+          
+          try {
+            const deleteResult = await fetch(`http://localhost:3000/api/pengeluaran/${updatedData._existingPengeluaranId}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-User-ID': userData.id_user.toString(),
+                'X-User-Role': userData.role,
+                'X-User-Email': userData.email_user
+              }
+            });
+            
+            if (deleteResult.ok) {
+              console.log('✅ Pengeluaran deleted successfully');
+            } else {
+              console.error('❌ Failed to delete pengeluaran');
+            }
+          } catch (deleteError) {
+            console.error('❌ Error deleting pengeluaran:', deleteError);
+          }
+        }
+        
         alert('Data penawaran berhasil diperbarui');
         // Refresh data setelah update
         await fetchPenawaranData();
+        // Trigger refresh of detail data if modal is open
+        triggerDetailRefresh();
         setShowEditModal(false);
         setSelectedEditData(null);
       } else {
@@ -195,6 +296,11 @@ const Penawaran = () => {
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedDetailData(null);
+  };
+
+  // Function to trigger refresh of detail data
+  const triggerDetailRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleDeleteData = (item) => {
@@ -259,6 +365,8 @@ const Penawaran = () => {
         alert('Data penawaran berhasil disimpan');
         // Refresh data setelah save
         await fetchPenawaranData();
+        // Trigger refresh of detail data if modal is open
+        triggerDetailRefresh();
         setShowTambahModal(false);
         
         // Reset form di komponen Tambah akan dilakukan oleh callback
@@ -967,6 +1075,7 @@ const Penawaran = () => {
         isOpen={showDetailModal}
         onClose={handleCloseDetailModal}
         detailData={selectedDetailData}
+        refreshTrigger={refreshTrigger}
       />
       
       <Hapus

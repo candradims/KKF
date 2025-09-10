@@ -107,6 +107,69 @@ export class PenawaranController {
 
       const newPenawaran = await PenawaranModel.createPenawaran(penawaranData);
 
+      console.log("📋 New penawaran created:", newPenawaran);
+
+      // Extract ID from the created penawaran
+      let penawaranId = null;
+      if (Array.isArray(newPenawaran) && newPenawaran.length > 0) {
+        penawaranId = newPenawaran[0].id_penawaran;
+      } else if (newPenawaran && newPenawaran.id_penawaran) {
+        penawaranId = newPenawaran.id_penawaran;
+      } else if (newPenawaran && newPenawaran.data && newPenawaran.data[0]) {
+        penawaranId = newPenawaran.data[0].id_penawaran;
+      }
+
+      console.log("📋 Extracted penawaran ID:", penawaranId);
+
+      // Jika ada data pengeluaran lain-lain, simpan juga
+      console.log("🔍 Checking pengeluaran fields:", {
+        item: req.body.item,
+        keterangan: req.body.keterangan,
+        hasrat: req.body.hasrat,
+        jumlah: req.body.jumlah,
+      });
+
+      if (
+        req.body.item &&
+        req.body.keterangan &&
+        req.body.hasrat &&
+        req.body.jumlah &&
+        penawaranId
+      ) {
+        console.log("💰 Saving pengeluaran data for penawaran:", penawaranId);
+
+        const pengeluaranData = {
+          id_penawaran: penawaranId,
+          item: req.body.item,
+          keterangan: req.body.keterangan,
+          harga_satuan: req.body.hasrat, // Mapping hasrat ke harga_satuan
+          jumlah: parseInt(req.body.jumlah),
+          // total_harga will be calculated by database as generated column
+        };
+
+        console.log("💰 Pengeluaran data to save:", pengeluaranData);
+
+        try {
+          const pengeluaranResult = await PengeluaranModel.createPengeluaran(
+            pengeluaranData
+          );
+          console.log(
+            "✅ Pengeluaran data saved successfully:",
+            pengeluaranResult
+          );
+        } catch (pengeluaranError) {
+          console.error("⚠️ Error saving pengeluaran data:", pengeluaranError);
+          // Don't fail the whole request if pengeluaran fails, just log it
+        }
+      } else {
+        console.log(
+          "ℹ️ No pengeluaran data provided, incomplete fields, or no penawaran ID"
+        );
+        if (!penawaranId) {
+          console.log("❌ Missing penawaran ID");
+        }
+      }
+
       res.status(201).json({
         success: true,
         message: "Penawaran berhasil dibuat",

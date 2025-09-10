@@ -204,7 +204,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validasi form
+    // Validasi form - hanya field penawaran yang wajib
     const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak'];
     const missingFields = requiredFields.filter(field => !formData[field]);
     
@@ -212,6 +212,26 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       alert(`Harap isi field yang wajib: ${missingFields.join(', ')}`);
       return;
     }
+
+    // Validasi pengeluaran jika section tambahan ditampilkan
+    if (showAdditionalSection) {
+      const pengeluaranFields = ['item', 'keterangan', 'hasrat', 'jumlah'];
+      const missingPengeluaranFields = pengeluaranFields.filter(field => !formData[field]);
+      
+      if (missingPengeluaranFields.length > 0) {
+        alert(`Harap isi field pengeluaran yang wajib: ${missingPengeluaranFields.join(', ')}`);
+        return;
+      }
+    }
+
+    console.log('🚀 Submitting form data:', formData);
+    console.log('📦 Pengeluaran fields:', {
+      item: formData.item,
+      keterangan: formData.keterangan,
+      hasrat: formData.hasrat,
+      jumlah: formData.jumlah
+    });
+    console.log('📦 Show additional section:', showAdditionalSection);
 
     setIsSaving(true);
     

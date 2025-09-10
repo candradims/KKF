@@ -5,9 +5,14 @@ export const authenticate = async (req, res, next) => {
   try {
     console.log("🔐 Authentication middleware - Headers:", req.headers);
 
-    const userId = req.headers["x-user-id"];
-    const userRole = req.headers["x-user-role"];
-    const userEmail = req.headers["x-user-email"];
+    // Express.js automatically converts headers to lowercase
+    // But let's be safe and check both cases
+    const userId = req.headers["x-user-id"] || req.headers["X-User-ID"];
+    const userRole = req.headers["x-user-role"] || req.headers["X-User-Role"];
+    const userEmail =
+      req.headers["x-user-email"] || req.headers["X-User-Email"];
+
+    console.log("🔍 Auth header values:", { userId, userRole, userEmail });
 
     if (!userId || !userRole || !userEmail) {
       return res.status(401).json({

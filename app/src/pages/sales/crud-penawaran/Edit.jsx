@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Plus, Calculator, Check } from "lucide-react";
+import { getUserData, getAuthHeaders } from '../../../utils/api';
 
 const layananOptions = [
   "IP VPN (1 sd 10 Mbps)",
@@ -179,6 +180,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showAdditionalSection, setShowAdditionalSection] = useState(false);
   const [originalData, setOriginalData] = useState({});
+  const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
+  const [existingPengeluaran, setExistingPengeluaran] = useState(null);
   const [formData, setFormData] = useState({
     sales: "",
     tanggal: "",
@@ -194,7 +197,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     jumlah: "",
   });
 
-  // Pre-fill form with existing data when editing
+  // Pre-fill form with existing data when editing and load pengeluaran data
   useEffect(() => {
     if (editData) {
       const initialData = {
@@ -206,26 +209,93 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         referensiHJT: editData.referensi || editData.referensiHJT || "",
         durasiKontrak: editData.durasi || editData.durasiKontrak || "",
         discount: editData.discount || "",
-        item: editData.item || "",
-        keterangan: editData.keterangan || "",
-        hasrat: editData.harga || "",
-        jumlah: editData.jumlah || "",
+        item: "",
+        keterangan: "",
+        hasrat: "",
+        jumlah: "",
       };
 
       setFormData(initialData);
       setOriginalData(initialData);
 
-      // Show additional section if item data exists
-      if (
-        editData.item ||
-        editData.keterangan ||
-        editData.harga ||
-        editData.jumlah
-      ) {
-        setShowAdditionalSection(true);
-      }
+      // Load pengeluaran data from API
+      loadPengeluaranData();
     }
   }, [editData]);
+
+  // Load pengeluaran data for this penawaran
+  const loadPengeluaranData = async () => {
+    if (!editData?.id_penawaran && !editData?.id) return;
+
+    const penawaranId = editData.id_penawaran || editData.id;
+    
+    try {
+      setLoadingPengeluaran(true);
+      console.log('Loading pengeluaran for penawaran ID:', penawaranId);
+
+      // Get auth data using utility function
+      const userData = getUserData();
+      if (!userData) {
+        console.error('No user data found');
+        return;
+      }
+
+      // Get auth headers using utility function
+      const headers = getAuthHeaders();
+
+      const response = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${penawaranId}`, {
+        headers: headers
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('API Response result:', result);
+        if (result.success && result.data.length > 0) {
+          // For Edit, we want to handle multiple pengeluaran items
+          const pengeluaranItems = result.data.map(item => ({
+            id: item.id_pengeluaran,
+            item: item.item || "",
+            keterangan: item.keterangan || "",
+            hasrat: item.harga_satuan?.toString() || "",
+            jumlah: item.jumlah?.toString() || "",
+            total: item.total_harga || 0
+          }));
+          
+          setExistingPengeluaran(pengeluaranItems);
+          
+          // Update form with first pengeluaran data 
+          if (pengeluaranItems.length > 0) {
+            const pengeluaranData = pengeluaranItems[0];
+            setFormData(prev => ({
+              ...prev,
+              item: pengeluaranData.item,
+              keterangan: pengeluaranData.keterangan,
+              hasrat: pengeluaranData.hasrat,
+              jumlah: pengeluaranData.jumlah,
+            }));
+            
+            // Automatically show the edit section since we have data
+            setShowAdditionalSection(true);
+          }
+
+          console.log('Pengeluaran data loaded:', pengeluaranItems);
+        } else {
+          setExistingPengeluaran(null);
+          console.log('No pengeluaran data found for this penawaran');
+        }
+      } else {
+        console.error('Failed to load pengeluaran data. Status:', response.status);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        setExistingPengeluaran(null);
+      }
+    } catch (error) {
+      console.error('Error loading pengeluaran data:', error);
+      setExistingPengeluaran(null);
+    } finally {
+      setLoadingPengeluaran(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -248,8 +318,41 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       return; // Don't proceed if no changes
     }
 
+    // Validasi form - hanya field penawaran yang wajib
+    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+    
+    if (missingFields.length > 0) {
+      alert(`Harap isi field yang wajib: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Validasi pengeluaran jika ada data yang diisi (optional)
+    const pengeluaranFields = ['item', 'keterangan', 'hasrat', 'jumlah'];
+    const filledPengeluaranFields = pengeluaranFields.filter(field => formData[field]);
+    
+    // Jika ada field pengeluaran yang diisi, pastikan semua field wajib diisi
+    if (filledPengeluaranFields.length > 0 && filledPengeluaranFields.length < pengeluaranFields.length) {
+      const missingPengeluaranFields = pengeluaranFields.filter(field => !formData[field]);
+      alert(`Jika mengisi pengeluaran lain-lain, harap lengkapi semua field: ${missingPengeluaranFields.join(', ')}`);
+      return;
+    }
+
+    console.log('📝 Updating penawaran data:', formData);
+    console.log('📝 Existing pengeluaran:', existingPengeluaran);
+    console.log('📝 Show additional section:', showAdditionalSection);
+
     setIsSaving(true);
-    onSave({ ...editData, ...formData });
+    
+    // Include pengeluaran info for the parent component
+    const updateData = {
+      ...editData,
+      ...formData,
+      _hasExistingPengeluaran: !!existingPengeluaran,
+      _existingPengeluaranId: existingPengeluaran?.id_pengeluaran,
+    };
+    
+    onSave(updateData);
 
     // Immediately transition to success modal
     setShowSuccessModal(true);
@@ -1030,179 +1133,252 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                   </button>
                 </div>
 
-                {/* Section dengan background biru muda untuk informasi tambahan */}
-                {showAdditionalSection && (
-                  <div
-                    style={{
-                      backgroundColor: "#e3f2fd",
-                      borderRadius: "6px",
-                      padding: "16px",
-                      marginBottom: "20px",
-                      border: "1px solid #bbdefb",
-                    }}
-                  >
-                    {/* Item */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginBottom: "12px",
-                        minHeight: "40px",
-                      }}
-                    >
-                      <label
-                        style={{
-                          width: "140px",
-                          fontSize: "12px",
-                          color: "#333",
-                          fontWeight: "500",
-                          flexShrink: 0,
-                        }}
-                      >
-                        Item*
-                      </label>
-                      <input
-                        type="text"
-                        name="item"
-                        value={formData.item || ""}
-                        onChange={handleInputChange}
-                        disabled={isSaving}
-                        placeholder="Masukkan Item"
-                        required
-                        style={{
-                          flex: 1,
-                          padding: "8px 12px",
-                          border: "1px solid #ddd",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          outline: "none",
-                          backgroundColor: isSaving ? "#f5f5f5" : "white",
-                          cursor: isSaving ? "not-allowed" : "text",
-                        }}
-                      />
+                {/* History/Edit Pengeluaran Lain-lain Section */}
+                {(existingPengeluaran || showAdditionalSection) && (
+                  <div style={{
+                    backgroundColor: '#e3f2fd',
+                    borderRadius: '6px',
+                    padding: '16px',
+                    marginBottom: '20px',
+                    border: '1px solid #bbdefb'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '16px'
+                    }}>
+                      <h4 style={{
+                        margin: 0,
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1565C0'
+                      }}>
+                        {existingPengeluaran ? '📋 Edit Pengeluaran Lain-lain' : '➕ Tambah Pengeluaran Lain-lain'}
+                      </h4>
+                      {existingPengeluaran && (
+                        <span style={{
+                          fontSize: '11px',
+                          color: '#666',
+                          fontStyle: 'italic'
+                        }}>
+                          Data dari pengeluaran sebelumnya - Ubah sesuai kebutuhan
+                        </span>
+                      )}
                     </div>
+                    
+                    {loadingPengeluaran ? (
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '20px',
+                        color: '#1565C0',
+                        fontSize: '14px'
+                      }}>
+                        Memuat data pengeluaran...
+                      </div>
+                    ) : (
+                      <div>
+                        {/* Item */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          minHeight: '40px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Item*
+                          </label>
+                          <input
+                            type="text"
+                            name="item"
+                            value={formData.item || ""}
+                            onChange={handleInputChange}
+                            disabled={isSaving}
+                            placeholder="Masukkan Item"
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              outline: 'none',
+                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                              cursor: isSaving ? 'not-allowed' : 'text'
+                            }}
+                          />
+                        </div>
 
-                    {/* Keterangan */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginBottom: "12px",
-                        minHeight: "40px",
-                      }}
-                    >
-                      <label
-                        style={{
-                          width: "140px",
-                          fontSize: "12px",
-                          color: "#333",
-                          fontWeight: "500",
-                          flexShrink: 0,
-                        }}
-                      >
-                        Keterangan*
-                      </label>
-                      <input
-                        type="text"
-                        name="keterangan"
-                        value={formData.keterangan || ""}
-                        onChange={handleInputChange}
-                        disabled={isSaving}
-                        placeholder="Masukkan keterangan"
-                        required
-                        style={{
-                          flex: 1,
-                          padding: "8px 12px",
-                          border: "1px solid #ddd",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          outline: "none",
-                          backgroundColor: isSaving ? "#f5f5f5" : "white",
-                          cursor: isSaving ? "not-allowed" : "text",
-                        }}
-                      />
-                    </div>
+                        {/* Keterangan */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          minHeight: '40px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Keterangan*
+                          </label>
+                          <input
+                            type="text"
+                            name="keterangan"
+                            value={formData.keterangan || ""}
+                            onChange={handleInputChange}
+                            disabled={isSaving}
+                            placeholder="Masukkan keterangan"
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              outline: 'none',
+                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                              cursor: isSaving ? 'not-allowed' : 'text'
+                            }}
+                          />
+                        </div>
 
-                    {/* Hasrat */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginBottom: "12px",
-                        minHeight: "40px",
-                      }}
-                    >
-                      <label
-                        style={{
-                          width: "140px",
-                          fontSize: "12px",
-                          color: "#333",
-                          fontWeight: "500",
-                          flexShrink: 0,
-                        }}
-                      >
-                        Hasrat*
-                      </label>
-                      <input
-                        type="text"
-                        name="hasrat"
-                        value={formData.hasrat || ""}
-                        onChange={handleInputChange}
-                        disabled={isSaving}
-                        placeholder="Masukkan hasrat"
-                        required
-                        style={{
-                          flex: 1,
-                          padding: "8px 12px",
-                          border: "1px solid #ddd",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          outline: "none",
-                          backgroundColor: isSaving ? "#f5f5f5" : "white",
-                          cursor: isSaving ? "not-allowed" : "text",
-                        }}
-                      />
-                    </div>
+                        {/* Hasrat */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          marginBottom: '12px',
+                          minHeight: '40px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Hasrat*
+                          </label>
+                          <input
+                            type="text"
+                            name="hasrat"
+                            value={formData.hasrat || ""}
+                            onChange={handleInputChange}
+                            disabled={isSaving}
+                            placeholder="Masukkan hasrat"
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              outline: 'none',
+                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                              cursor: isSaving ? 'not-allowed' : 'text'
+                            }}
+                          />
+                        </div>
 
-                    {/* Jumlah */}
-                    <div
+                        {/* Jumlah */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          minHeight: '40px'
+                        }}>
+                          <label style={{
+                            width: '140px',
+                            fontSize: '12px',
+                            color: '#333',
+                            fontWeight: '500',
+                            flexShrink: 0
+                          }}>
+                            Jumlah*
+                          </label>
+                          <input
+                            type="text"
+                            name="jumlah"
+                            value={formData.jumlah || ""}
+                            onChange={handleInputChange}
+                            disabled={isSaving}
+                            placeholder="Masukkan Jumlah"
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              outline: 'none',
+                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                              cursor: isSaving ? 'not-allowed' : 'text'
+                            }}
+                          />
+                        </div>
+                        
+                        {/* Display calculated total */}
+                        {formData.hasrat && formData.jumlah && (
+                          <div style={{
+                            marginTop: '12px',
+                            padding: '8px 12px',
+                            backgroundColor: '#f0f8ff',
+                            border: '1px solid #bbdefb',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            color: '#1565C0'
+                          }}>
+                            <strong>Total: Rp {(parseFloat(formData.hasrat || 0) * parseInt(formData.jumlah || 0)).toLocaleString('id-ID')}</strong>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Add Pengeluaran Button - Show when no existing pengeluaran and section not shown */}
+                {!existingPengeluaran && !showAdditionalSection && (
+                  <div style={{
+                    backgroundColor: '#F0F9FF',
+                    border: '1px solid #BAE6FD',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    marginBottom: '20px',
+                    textAlign: 'center'
+                  }}>
+                    <p style={{
+                      margin: '0 0 12px 0',
+                      fontSize: '12px',
+                      color: '#0369A1',
+                      fontStyle: 'italic'
+                    }}>
+                      Tidak ada pengeluaran lain-lain untuk penawaran ini
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdditionalSection(true)}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        minHeight: "40px",
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: 'white',
+                        backgroundColor: '#0EA5E9',
+                        padding: '6px 16px',
+                        borderRadius: '16px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        margin: '0 auto'
                       }}
                     >
-                      <label
-                        style={{
-                          width: "140px",
-                          fontSize: "12px",
-                          color: "#333",
-                          fontWeight: "500",
-                          flexShrink: 0,
-                        }}
-                      >
-                        Jumlah*
-                      </label>
-                      <input
-                        type="text"
-                        name="jumlah"
-                        value={formData.jumlah || ""}
-                        onChange={handleInputChange}
-                        disabled={isSaving}
-                        placeholder="Masukkan Jumlah"
-                        required
-                        style={{
-                          flex: 1,
-                          padding: "8px 12px",
-                          border: "1px solid #ddd",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          outline: "none",
-                          backgroundColor: isSaving ? "#f5f5f5" : "white",
-                          cursor: isSaving ? "not-allowed" : "text",
-                        }}
-                      />
-                    </div>
+                      <Plus style={{ width: '14px', height: '14px' }} />
+                      Tambah Pengeluaran Lain-lain
+                    </button>
                   </div>
                 )}
 
