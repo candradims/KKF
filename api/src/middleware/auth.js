@@ -91,10 +91,10 @@ export const authorize = (allowedRoles) => {
 };
 
 // Middleware khusus untuk admin
-export const adminOnly = authorize(["admin"]);
+export const adminOnly = authorize(["admin", "superAdmin"]);
 
 // Middleware khusus untuk sales
 export const salesOnly = authorize(["sales"]);
 
 // Middleware untuk admin dan sales
-export const adminOrSales = authorize(["admin", "sales"]);
+export const adminOrSales = authorize(["admin", "sales", "superAdmin"]);

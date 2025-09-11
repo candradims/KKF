@@ -51,6 +51,8 @@ const Penawaran = () => {
           id_penawaran: item.id_penawaran, // Add this for Detail component
           tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
           namaPelanggan: item.nama_pelanggan,
+          namaSales: item.nama_sales || '-', // Add sales name for table display
+          sales: item.nama_sales || '-', // Add sales name for form components
           nomorKontrak: item.nomor_kontrak,
           kontrakKe: item.kontrak_tahun,
           referensi: item.wilayah_hjt,
@@ -153,7 +155,7 @@ const Penawaran = () => {
 
       // Map the updated data to match API format
       const apiData = {
-        sales: updatedData.sales,
+        nama_sales: updatedData.sales,
         tanggal: updatedData.tanggal,
         pelanggan: updatedData.pelanggan,
         nomorKontrak: updatedData.nomorKontrak,
@@ -791,6 +793,14 @@ const Penawaran = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
+                }}>Nama Sales</th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  borderBottom: '1px solid #E5E7EB'
                 }}>Nomor Kontrak/BAKB</th>
                 <th style={{
                   padding: '12px 16px',
@@ -867,6 +877,13 @@ const Penawaran = () => {
                     color: '#374151'
                   }}>
                     {item.namaPelanggan}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    {item.namaSales}
                   </td>
                   <td style={{
                     padding: '12px 16px',

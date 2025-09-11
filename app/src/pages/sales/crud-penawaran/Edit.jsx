@@ -201,7 +201,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   useEffect(() => {
     if (editData) {
       const initialData = {
-        sales: editData.sales || "",
+        sales: editData.rawData?.sales || editData.sales || editData.namaSales || "",
         tanggal: editData.tanggal || "",
         pelanggan: editData.namaPelanggan || editData.pelanggan || "",
         nomorKontrak: editData.nomorKontrak || "",

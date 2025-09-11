@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, RotateCcw } from 'lucide-react';
 import Detail from './Detail';
+import { penawaranAPI, getUserData } from '../../../utils/api';
 
 const Index = () => {
   const [filterDate, setFilterDate] = useState('');
@@ -11,74 +12,75 @@ const Index = () => {
   const [selectedStatusItem, setSelectedStatusItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
 
-  // Sample data for penawaran with status
-  const [penawaranData, setPenawaranData] = useState([
-    {
-      id: 1,
-      tanggal: '16/06/04',
-      namaPelanggan: 'Audrey',
-      nomorKontrak: '20301231',
-      kontrakKe: 3,
-      referensi: 'Sumatera',
-      discount: '5.00%',
-      durasi: 2,
-      targetIRR: '76.600',
-      status: 'Menunggu',
-      actions: ['view']
-    },
-    {
-      id: 2,
-      tanggal: '02/06/02',
-      namaPelanggan: 'Riki',
-      nomorKontrak: '19237843',
-      kontrakKe: 1,
-      referensi: 'Kalimantan',
-      discount: '3.50%',
-      durasi: 2,
-      targetIRR: '73.300',
-      status: 'Disetujui',
-      actions: ['view']
-    },
-    {
-      id: 3,
-      tanggal: '17/12/02',
-      namaPelanggan: 'Hasian',
-      nomorKontrak: '19093412',
-      kontrakKe: 4,
-      referensi: 'Kalimantan',
-      discount: '4.74%',
-      durasi: 2,
-      targetIRR: '31.400',
-      status: 'Ditolak',
-      actions: ['view']
-    },
-    {
-      id: 4,
-      tanggal: '28/06/24',
-      namaPelanggan: 'Hisyam',
-      nomorKontrak: '28903123',
-      kontrakKe: 3,
-      referensi: 'Intim',
-      discount: '6.02%',
-      durasi: 2,
-      targetIRR: '29.200',
-      status: 'Disetujui',
-      actions: ['view']
-    },
-    {
-      id: 5,
-      tanggal: '15/08/24',
-      namaPelanggan: 'Sari',
-      nomorKontrak: '30412567',
-      kontrakKe: 2,
-      referensi: 'Jawa-Bali',
-      discount: '7.25%',
-      durasi: 3,
-      targetIRR: '82.100',
-      status: 'Menunggu',
-      actions: ['view']
+  // State untuk data dari API
+  const [penawaranData, setPenawaranData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch data penawaran dari API
+  const fetchPenawaranData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Check if user is authenticated
+      const userData = getUserData();
+      if (!userData) {
+        throw new Error('User tidak terautentikasi. Silakan login kembali.');
+      }
+      
+      console.log("📋 Fetching penawaran data for SuperAdmin:", userData.email_user);
+
+      const result = await penawaranAPI.getAll();
+      
+      if (result.success) {
+        // Transform data dari API ke format yang digunakan di frontend
+        const transformedData = result.data.map(item => ({
+          id: item.id_penawaran,
+          id_penawaran: item.id_penawaran, // Add this for Detail component
+          tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
+          namaPelanggan: item.nama_pelanggan,
+          namaSales: item.nama_sales || '-', // Add sales name for table display
+          sales: item.nama_sales || '-', // Add sales name for form components
+          nomorKontrak: item.nomor_kontrak,
+          kontrakKe: item.kontrak_tahun,
+          referensi: item.wilayah_hjt,
+          discount: item.diskon || '0%',
+          durasi: item.durasi_kontrak,
+          targetIRR: item.target_irr || '0',
+          status: item.status || 'Menunggu',
+          actions: ['view'],
+          // Data lengkap untuk detail
+          rawData: item
+        }));
+        
+        setPenawaranData(transformedData);
+        setError(null);
+        console.log("✅ SuperAdmin penawaran data fetched successfully:", transformedData.length, "records");
+      } else {
+        throw new Error(result.message || 'Gagal mengambil data penawaran');
+      }
+    } catch (err) {
+      console.error('❌ Error fetching penawaran data:', err);
+      setError(err.message);
+      setPenawaranData([]);
+      
+      // If authentication error, redirect to login
+      if (err.message.includes('terautentikasi') || err.message.includes('authentication')) {
+        alert('Sesi Anda telah berakhir. Silakan login kembali.');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('userRole');
+        window.location.href = '/login';
+      }
+    } finally {
+      setIsLoading(false);
     }
-  ]);
+  };
+
+  // useEffect untuk fetch data saat komponen dimount
+  useEffect(() => {
+    fetchPenawaranData();
+  }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -126,15 +128,60 @@ const Index = () => {
     setShowStatusModal(true);
   };
 
-  const handleStatusChange = () => {
-    if (selectedStatusItem && newStatus) {
-      setPenawaranData(prevData =>
-        prevData.map(item =>
-          item.id === selectedStatusItem.id
-            ? { ...item, status: newStatus }
-            : item
-        )
-      );
+  const handleStatusChange = async () => {
+    if (!selectedStatusItem || !newStatus) return;
+    
+    try {
+      console.log("📝 Updating status for penawaran:", selectedStatusItem.id, "to:", newStatus);
+      
+      // Call API to update status
+      const response = await fetch(`http://localhost:3000/api/penawaran/${selectedStatusItem.id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': getUserData().id_user.toString(),
+          'X-User-Role': getUserData().role_user,
+          'X-User-Email': getUserData().email_user
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          catatan: `Status diubah oleh SuperAdmin menjadi ${newStatus}`
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update local state dengan data dari API
+        setPenawaranData(prevData =>
+          prevData.map(item =>
+            item.id === selectedStatusItem.id
+              ? { ...item, status: newStatus }
+              : item
+          )
+        );
+        
+        console.log("✅ Status updated successfully:", result.data);
+        
+        // Show success message (you can replace this with a toast notification)
+        alert(`Status penawaran berhasil diubah menjadi "${newStatus}"`);
+        
+        // Refresh data untuk memastikan sinkronisasi dengan database
+        fetchPenawaranData();
+        
+      } else {
+        throw new Error(result.message || 'Failed to update status');
+      }
+      
+    } catch (error) {
+      console.error("❌ Error updating status:", error);
+      alert(`Gagal mengubah status: ${error.message}`);
+    } finally {
+      // Close modal regardless of success/failure
       setShowStatusModal(false);
       setSelectedStatusItem(null);
       setNewStatus('');
@@ -189,11 +236,22 @@ const Index = () => {
   };
 
   return (
-    <div style={{
-      padding: '20px',
-      backgroundColor: '#f8f9fa',
-      minHeight: '100vh'
-    }}>
+    <>
+      {/* CSS Animation for spinner */}
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+      
+      <div style={{
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        minHeight: '100vh'
+      }}>
       {/* Filter Section */}  
       <div style={{
         display: 'grid',
@@ -311,6 +369,66 @@ const Index = () => {
       </div>
 
       {/* Table Section */}
+      {isLoading ? (
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '40px',
+          color: '#6B7280'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              border: '3px solid #E5E7EB',
+              borderTop: '3px solid #00AEEF',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 12px'
+            }}></div>
+            Memuat data penawaran...
+          </div>
+        </div>
+      ) : error ? (
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '40px',
+          color: '#EF4444',
+          backgroundColor: '#FEF2F2',
+          borderLeft: '4px solid #EF4444'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>
+              Error memuat data
+            </div>
+            <div style={{ fontSize: '14px' }}>
+              {error}
+            </div>
+            <button
+              onClick={fetchPenawaranData}
+              style={{
+                marginTop: '12px',
+                padding: '8px 16px',
+                backgroundColor: '#EF4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+      ) : (
       <div style={{
         backgroundColor: 'white',
         borderRadius: '8px',
@@ -355,6 +473,14 @@ const Index = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
+                }}>Nama Sales</th>
+                <th style={{
+                  padding: '12px 16px',
+                  textAlign: 'left',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  borderBottom: '1px solid #E5E7EB'
                 }}>Nomor Kontrak/BAKB</th>
                 <th style={{
                   padding: '12px 16px',
@@ -388,14 +514,6 @@ const Index = () => {
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
                 }}>Durasi</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Target IRR</th>
                 <th style={{
                   padding: '12px 16px',
                   textAlign: 'left',
@@ -445,6 +563,13 @@ const Index = () => {
                     fontSize: '14px',
                     color: '#374151'
                   }}>
+                    {item.namaSales}
+                  </td>
+                  <td style={{
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
                     {item.nomorKontrak}
                   </td>
                   <td style={{
@@ -474,13 +599,6 @@ const Index = () => {
                     color: '#374151'
                   }}>
                     {item.durasi}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.targetIRR}
                   </td>
                   <td style={{
                     padding: '12px 16px',
@@ -623,6 +741,7 @@ const Index = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Modal Components */}
       <Detail
@@ -777,7 +896,8 @@ const Index = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

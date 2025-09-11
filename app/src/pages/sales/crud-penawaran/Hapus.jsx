@@ -28,7 +28,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
   useEffect(() => {
     if (deleteData) {
       setFormData({
-        sales: deleteData.sales || '',
+        sales: deleteData.rawData?.sales || deleteData.sales || deleteData.namaSales || '',
         tanggal: deleteData.tanggal || '',
         pelanggan: deleteData.namaPelanggan || deleteData.pelanggan || '',
         nomorKontrak: deleteData.nomorKontrak || '',
