@@ -302,14 +302,16 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
               <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Sales*</span>
               <input
                 type="text"
-                value="Sales Team"
+                value={detailData?.rawData?.sales || detailData?.sales || detailData?.namaSales || '-'}
                 style={{
                   width: '200px',
                   padding: '8px 12px',
                   border: '1px solid #D1D5DB',
                   borderRadius: '6px',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  backgroundColor: '#F9FAFB'
                 }}
+                readOnly
               />
             </div>
           </div>
