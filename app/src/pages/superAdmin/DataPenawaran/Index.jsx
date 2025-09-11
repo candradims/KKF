@@ -128,15 +128,60 @@ const Index = () => {
     setShowStatusModal(true);
   };
 
-  const handleStatusChange = () => {
-    if (selectedStatusItem && newStatus) {
-      setPenawaranData(prevData =>
-        prevData.map(item =>
-          item.id === selectedStatusItem.id
-            ? { ...item, status: newStatus }
-            : item
-        )
-      );
+  const handleStatusChange = async () => {
+    if (!selectedStatusItem || !newStatus) return;
+    
+    try {
+      console.log("📝 Updating status for penawaran:", selectedStatusItem.id, "to:", newStatus);
+      
+      // Call API to update status
+      const response = await fetch(`http://localhost:3000/api/penawaran/${selectedStatusItem.id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': getUserData().id_user.toString(),
+          'X-User-Role': getUserData().role_user,
+          'X-User-Email': getUserData().email_user
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          catatan: `Status diubah oleh SuperAdmin menjadi ${newStatus}`
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update local state dengan data dari API
+        setPenawaranData(prevData =>
+          prevData.map(item =>
+            item.id === selectedStatusItem.id
+              ? { ...item, status: newStatus }
+              : item
+          )
+        );
+        
+        console.log("✅ Status updated successfully:", result.data);
+        
+        // Show success message (you can replace this with a toast notification)
+        alert(`Status penawaran berhasil diubah menjadi "${newStatus}"`);
+        
+        // Refresh data untuk memastikan sinkronisasi dengan database
+        fetchPenawaranData();
+        
+      } else {
+        throw new Error(result.message || 'Failed to update status');
+      }
+      
+    } catch (error) {
+      console.error("❌ Error updating status:", error);
+      alert(`Gagal mengubah status: ${error.message}`);
+    } finally {
+      // Close modal regardless of success/failure
       setShowStatusModal(false);
       setSelectedStatusItem(null);
       setNewStatus('');
