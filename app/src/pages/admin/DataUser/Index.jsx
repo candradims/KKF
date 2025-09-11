@@ -47,6 +47,7 @@ const Index = () => {
       const sanitizedUsers = data.map(user => ({
         id: user.id_user || user.id,
         date: formatDateToDDMMYYYY(user.tanggal) || user.date,
+        nama: user.nama_user || user.nama,
         email: user.email_user || user.email,
         kata_sandi: user.kata_sandi || user.password,
         role: formatRoleForDisplay(user.role_user || user.role), // Format for display
@@ -145,6 +146,7 @@ const Index = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          nama_user: newUserData.nama_user,
           email_user: newUserData.email_user,
           kata_sandi: newUserData.kata_sandi,
           role_user: newUserData.role_user
@@ -163,6 +165,7 @@ const Index = () => {
         const formattedUser = {
           id: addedUser.id_user,
           date: formatDateToDDMMYYYY(addedUser.tanggal),
+          nama: addedUser.nama_user,
           email: addedUser.email_user,
           role: addedUser.role_user,
           actions: ['view', 'edit', 'delete']
@@ -205,6 +208,7 @@ const Index = () => {
 
       // Prepare data for API
       const updatePayload = {
+        nama_user: updatedData.nama,
         email_user: updatedData.email,
         role_user: convertRoleToDatabase(updatedData.role),
       };
@@ -244,6 +248,7 @@ const Index = () => {
           user.id === editingUser.id
             ? {
                 ...user,
+                nama: updatedData.nama,
                 email: updatedData.email,
                 role: updatedData.role,
                 // Tidak menampilkan password di UI
@@ -585,6 +590,16 @@ const Index = () => {
                     fontWeight: '600',
                     color: '#374151',
                     border: '1px solid #e5e7eb'
+                  }}>
+                    Nama User
+                  </th>
+                  <th style={{
+                    padding: '16px',
+                    textAlign: 'left',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    border: '1px solid #e5e7eb'
                   }} className="px-4 py-4 text-left text-sm font-semibold text-gray-700 border-b">
                     Email User
                   </th>
@@ -642,6 +657,14 @@ const Index = () => {
                       border: '1px solid #e5e7eb'
                     }} className="px-4 py-4 text-sm text-gray-700">
                       {user.date}
+                    </td>
+                    <td style={{
+                      padding: '16px',
+                      fontSize: '14px',
+                      color: '#374151',
+                      border: '1px solid #e5e7eb'
+                    }}>
+                      {user.nama}
                     </td>
                     <td style={{
                       padding: '16px',
