@@ -25,13 +25,13 @@ export class AdminController {
     try {
       console.log("📨 Received create user request:", req.body);
 
-      const { email_user, kata_sandi, role_user } = req.body;
+      const { nama_user, email_user, kata_sandi, role_user } = req.body;
 
       // Validasi input
-      if (!email_user || !kata_sandi || !role_user) {
+      if (!nama_user || !email_user || !kata_sandi || !role_user) {
         return res.status(400).json({
           success: false,
-          message: "Email, kata sandi, dan role wajib diisi",
+          message: "Nama, email, kata sandi, dan role wajib diisi",
         });
       }
 
@@ -55,6 +55,7 @@ export class AdminController {
 
       // Buat user baru
       const newUser = await UserModel.createUser({
+        nama_user,
         email_user,
         kata_sandi,
         role_user,
@@ -89,17 +90,16 @@ export class AdminController {
   }
 
   // Perbarui pengguna (Khusus Admin)
-  // Update user
   static async updateUser(req, res) {
     try {
       const { id } = req.params;
-      const { email_user, kata_sandi, role_user } = req.body;
+      const { nama_user, email_user, kata_sandi, role_user } = req.body;
 
       console.log("📝 AdminController - Updating user ID:", id);
       console.log("📝 AdminController - Request body:", req.body);
 
       // Validasi input yang diperlukan
-      if (!email_user && !kata_sandi && !role_user) {
+      if (!nama_user && !email_user && !kata_sandi && !role_user) {
         console.log("❌ No fields provided for update");
         return res.status(400).json({
           success: false,
@@ -109,6 +109,10 @@ export class AdminController {
 
       // Prepare update data
       const updateData = {};
+
+      if (nama_user) {
+        updateData.nama_user = nama_user;
+      }
 
       if (email_user) {
         updateData.email_user = email_user;
