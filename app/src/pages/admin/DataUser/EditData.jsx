@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
   const [formData, setFormData] = useState({
+    nama: '',
     email: '',
     password: '',
     role: '',
@@ -29,6 +30,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
       };
 
       setFormData({
+        nama: initialData.nama || '',
         email: initialData.email || '',
         password: '', // Start with empty password field for security
         role: convertRoleToDisplay(initialData.role) || '',
@@ -39,6 +41,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
   useEffect(() => {
     if (initialData && formData) {
       const formHasChanged = 
+        initialData.nama !== formData.nama ||
         initialData.email !== formData.email ||
         formData.password !== '' || // Password changed if not empty
         initialData.role !== formData.role;
@@ -59,7 +62,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
     e.preventDefault();
     
     // Validasi form
-    if (!formData.email || !formData.role) {
+    if (!formData.nama || !formData.email || !formData.role) {
       alert('Email dan Role harus diisi');
       return;
     }
@@ -74,6 +77,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
     try {
       // Hanya kirim password jika diubah
       const dataToUpdate = {
+        nama: formData.nama,
         email: formData.email,
         role: formData.role,
       };
@@ -180,6 +184,36 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                 maxWidth: '600px',
                 marginBottom: '32px'
               }}>
+                {/* Input Nama */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '120px 1fr',
+                  alignItems: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <label style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#2D396B'
+                  }}>Nama</label>
+                  <input
+                    type="text"
+                    name="nama"
+                    placeholder="Masukkan nama lengkap"
+                    value={formData.nama}
+                    onChange={handleChange}
+                    required
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#ffffff',
+                      color: '#2D396B'
+                    }}
+                  />
+                </div>
+
                 {/* Input Email */}
                 <div style={{
                   display: 'grid',
