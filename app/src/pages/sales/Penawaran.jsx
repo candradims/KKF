@@ -51,6 +51,7 @@ const Penawaran = () => {
           id_penawaran: item.id_penawaran, // Add this for Detail component
           tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
           namaPelanggan: item.nama_pelanggan,
+          pekerjaan: item.pekerjaan || "-",
           namaSales: item.data_user?.nama_user || "-",
           sales: item.data_user?.nama_user || "-",
           nomorKontrak: item.nomor_kontrak,
@@ -785,7 +786,7 @@ const Penawaran = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
-                }}>Nama Pelanggan</th>
+                }}>Nama Sales</th>
                 <th style={{
                   padding: '12px 16px',
                   textAlign: 'left',
@@ -793,7 +794,7 @@ const Penawaran = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
-                }}>Nama Sales</th>
+                }}>Nama Pelanggan</th>
                 <th style={{
                   padding: '12px 16px',
                   textAlign: 'left',
@@ -876,14 +877,14 @@ const Penawaran = () => {
                     fontSize: '14px',
                     color: '#374151'
                   }}>
-                    {item.namaPelanggan}
+                    {item.namaSales}
                   </td>
                   <td style={{
                     padding: '12px 16px',
                     fontSize: '14px',
                     color: '#374151'
                   }}>
-                    {item.namaSales}
+                    {item.namaPelanggan}
                   </td>
                   <td style={{
                     padding: '12px 16px',
