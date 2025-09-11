@@ -14,6 +14,11 @@ router.use(authenticate);
 
 // Rute yang dapat diakses oleh admin dan sales
 router.get("/", adminOrSales, PenawaranController.getAllPenawaran);
+router.get(
+  "/dashboard/stats",
+  adminOnly,
+  PenawaranController.getDashboardStats
+);
 router.get("/:id", adminOrSales, PenawaranController.getPenawaranById);
 router.get(
   "/status/:status",

@@ -496,4 +496,116 @@ export class PenawaranController {
       });
     }
   }
+
+  // Ambil statistik dashboard untuk SuperAdmin
+  static async getDashboardStats(req, res) {
+    try {
+      console.log("📊 Getting dashboard stats for user:", req.user);
+
+      // Hanya SuperAdmin dan Admin yang bisa mengakses
+      if (
+        req.user.role_user !== "superAdmin" &&
+        req.user.role_user !== "admin"
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Akses ditolak. Hanya SuperAdmin dan Admin yang dapat mengakses statistik dashboard.",
+        });
+      }
+
+      // Ambil semua penawaran untuk statistik
+      const allPenawaran = await PenawaranModel.getAllPenawaran();
+
+      // Hitung total penawaran
+      const totalPenawaran = allPenawaran.length;
+
+      // Hitung berdasarkan status
+      const statusStats = {
+        menunggu: 0,
+        disetujui: 0,
+        ditolak: 0,
+      };
+
+      // Hitung berdasarkan wilayah
+      const wilayahStats = {
+        "jawa-bali": 0,
+        sumatra: 0,
+        kalimantan: 0,
+        sulawesi: 0,
+        papua: 0,
+        "nusa-tenggara": 0,
+      };
+
+      // Hitung berdasarkan sales
+      const salesStats = {};
+
+      // Hitung total nilai penawaran (estimasi)
+      let totalNilaiPenawaran = 0;
+
+      allPenawaran.forEach((penawaran) => {
+        // Status statistics
+        const status = penawaran.status?.toLowerCase();
+        if (status === "menunggu" || status === "pending") {
+          statusStats.menunggu++;
+        } else if (status === "disetujui" || status === "approved") {
+          statusStats.disetujui++;
+        } else if (status === "ditolak" || status === "rejected") {
+          statusStats.ditolak++;
+        }
+
+        // Wilayah statistics
+        const wilayah = penawaran.wilayah_hjt;
+        if (wilayahStats.hasOwnProperty(wilayah)) {
+          wilayahStats[wilayah]++;
+        }
+
+        // Sales statistics
+        const salesName = penawaran.nama_sales || "Unknown";
+        salesStats[salesName] = (salesStats[salesName] || 0) + 1;
+
+        // Estimasi nilai (jika ada harga_final)
+        if (penawaran.harga_final) {
+          totalNilaiPenawaran += parseFloat(penawaran.harga_final) || 0;
+        }
+      });
+
+      const dashboardData = {
+        totalPenawaran,
+        statusStats,
+        wilayahStats,
+        salesStats,
+        totalNilaiPenawaran,
+        recentPenawaran: allPenawaran
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 5), // 5 penawaran terbaru
+        summary: {
+          totalSales: Object.keys(salesStats).length,
+          totalWilayah: Object.values(wilayahStats).filter((count) => count > 0)
+            .length,
+          avgNilaiPerPenawaran:
+            totalPenawaran > 0 ? totalNilaiPenawaran / totalPenawaran : 0,
+        },
+      };
+
+      console.log("✅ Dashboard stats calculated:", {
+        totalPenawaran,
+        totalSales: dashboardData.summary.totalSales,
+        totalNilai: totalNilaiPenawaran,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Statistik dashboard berhasil diambil",
+        data: dashboardData,
+      });
+    } catch (error) {
+      console.error("❌ Error in getDashboardStats:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal mengambil statistik dashboard",
+        error: error.message,
+      });
+    }
+  }
 }
