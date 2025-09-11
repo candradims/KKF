@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -15,9 +15,101 @@ import {
   Legend
 } from 'recharts';
 import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import { penawaranAPI, getUserData, getAuthHeaders } from '../../utils/api';
 
 const Dashboard = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [totalPenawaran, setTotalPenawaran] = useState(0);
+  const [statusCounts, setStatusCounts] = useState({
+    menunggu: 0,
+    disetujui: 0,
+    ditolak: 0
+  });
+  const [loadingData, setLoadingData] = useState(true);
+
+  // Function to load penawaran data
+  const loadPenawaranData = async () => {
+    try {
+      setLoadingData(true);
+      
+      // Get user data for filtering (if needed for sales person specific data)
+      const userData = getUserData();
+      if (!userData) {
+        console.error('User data not found');
+        return;
+      }
+
+      // Fetch all penawaran data
+      const response = await penawaranAPI.getAll();
+      
+      console.log('API Response received:', response);
+      
+      if (response && response.success && response.data) {
+        const penawaranList = response.data;
+        console.log('Penawaran list:', penawaranList);
+        
+        // Filter data for current sales person if role is sales
+        let filteredData = penawaranList;
+        if (userData.role_user === 'sales') {
+          // Filter penawaran created by current sales person
+          // Assuming there's a field like created_by or sales_id in the data
+          const filtered = penawaranList.filter(item => 
+            item.sales === userData.nama_user || 
+            item.created_by === userData.id_user ||
+            item.sales === userData.email_user
+          );
+          
+          // For now, if no filtered data found, show all data for sales
+          // Later you can modify this logic based on your business requirements
+          filteredData = filtered.length > 0 ? filtered : penawaranList;
+          console.log('Filtered data for sales:', filteredData);
+        }
+        
+        // Set total count
+        setTotalPenawaran(filteredData.length);
+        
+        // Count by status
+        const counts = {
+          menunggu: filteredData.filter(item => 
+            item.status === 'Menunggu' || item.status === 'menunggu'
+          ).length,
+          disetujui: filteredData.filter(item => 
+            item.status === 'Disetujui' || item.status === 'disetujui' || item.status === 'Setuju'
+          ).length,
+          ditolak: filteredData.filter(item => 
+            item.status === 'Ditolak' || item.status === 'ditolak' || item.status === 'Tidak Setuju'
+          ).length
+        };
+        
+        setStatusCounts(counts);
+        
+        console.log('Dashboard data loaded:', {
+          total: filteredData.length,
+          statusCounts: counts,
+          userData: userData.role_user
+        });
+        
+      } else {
+        console.error('Failed to load penawaran data:', response);
+      }
+    } catch (error) {
+      console.error('Error loading penawaran data:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    loadPenawaranData();
+    
+    // Auto-refresh every 5 minutes
+    const interval = setInterval(() => {
+      loadPenawaranData();
+    }, 5 * 60 * 1000); // 5 minutes
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const colors = {
     primary: '#035b71',
@@ -28,11 +120,11 @@ const Dashboard = () => {
     success: '#3fba8c',
   };
 
-  // Data untuk status penawaran
+  // Data untuk status penawaran - now using dynamic data
   const statusData = [
-    { status: 'Menunggu', count: 20, icon: Clock, color: '#fce40bff' },
-    { status: 'Setuju', count: 25, icon: CheckCircle, color: '#3fba8c' },
-    { status: 'Tidak Setuju', count: 5, icon: XCircle, color: '#EF4444' }
+    { status: 'Menunggu', count: statusCounts.menunggu, icon: Clock, color: '#fce40bff' },
+    { status: 'Setuju', count: statusCounts.disetujui, icon: CheckCircle, color: '#3fba8c' },
+    { status: 'Tidak Setuju', count: statusCounts.ditolak, icon: XCircle, color: '#EF4444' }
   ];
   
   // Data for individual sales person's target and achievement
@@ -81,11 +173,11 @@ const Dashboard = () => {
     { name: 'HJT INTIM', value: 11, color: colors.tertiary }
   ];
 
-  // Data untuk pie chart status penawaran
+  // Data untuk pie chart status penawaran - now using dynamic data
   const statusPenawaranData = [
-    { name: 'Menunggu', value: 40, color: '#fce40bff' },
-    { name: 'Disetujui', value: 50, color: '#3fba8c' },
-    { name: 'Ditolak', value: 10, color: '#EF4444' }
+    { name: 'Menunggu', value: statusCounts.menunggu, color: '#fce40bff' },
+    { name: 'Disetujui', value: statusCounts.disetujui, color: '#3fba8c' },
+    { name: 'Ditolak', value: statusCounts.ditolak, color: '#EF4444' }
   ];
 
   const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary];
@@ -125,6 +217,21 @@ const Dashboard = () => {
       padding: '24px',
       paddingTop: '105px'
     }}>
+      <style>
+        {`
+          @keyframes loading {
+            0% {
+              transform: translateX(-100%);
+            }
+            50% {
+              transform: translateX(200%);
+            }
+            100% {
+              transform: translateX(-100%);
+            }
+          }
+        `}
+      </style>
       <div style={{
         maxWidth: '80rem',
         margin: '0 auto'
@@ -137,17 +244,22 @@ const Dashboard = () => {
           marginBottom: '32px'
         }}>
           {/* Card 1 - Jumlah Total Penawaran */}
-          <div style={{
+          <div 
+            onClick={() => !loadingData && loadPenawaranData()}
+            title={loadingData ? "Loading..." : "Klik untuk refresh data"}
+            style={{
             background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: 'pointer'
+            cursor: loadingData ? 'wait' : 'pointer'
           }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+            if (!loadingData) {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+            }
           }} onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
             e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
@@ -173,8 +285,31 @@ const Dashboard = () => {
                 </div>
                 <div style={{
                   fontSize: '30px',
-                  fontWeight: 'bold'
-                }}>50</div>
+                  fontWeight: 'bold',
+                  minHeight: '36px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  {loadingData ? (
+                    <div style={{
+                      width: '40px',
+                      height: '6px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                      borderRadius: '3px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <div style={{
+                        width: '20px',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        borderRadius: '3px',
+                        animation: 'loading 1.5s ease-in-out infinite',
+                        position: 'absolute'
+                      }} />
+                    </div>
+                  ) : totalPenawaran}
+                </div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -187,17 +322,22 @@ const Dashboard = () => {
           </div>
 
           {/* Card 2 - Status Penawaran */}
-          <div style={{
+          <div 
+            onClick={() => !loadingData && loadPenawaranData()}
+            title={loadingData ? "Loading..." : "Klik untuk refresh data"}
+            style={{
             background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: 'pointer'
+            cursor: loadingData ? 'wait' : 'pointer'
           }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+            if (!loadingData) {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+            }
           }} onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
             e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
@@ -237,8 +377,31 @@ const Dashboard = () => {
                 </div>
                 <div style={{
                   fontSize: '30px',
-                  fontWeight: 'bold'
-                }}>50</div>
+                  fontWeight: 'bold',
+                  minHeight: '36px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  {loadingData ? (
+                    <div style={{
+                      width: '40px',
+                      height: '6px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                      borderRadius: '3px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <div style={{
+                        width: '20px',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        borderRadius: '3px',
+                        animation: 'loading 1.5s ease-in-out infinite',
+                        position: 'absolute'
+                      }} />
+                    </div>
+                  ) : totalPenawaran}
+                </div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -839,7 +1002,7 @@ const Dashboard = () => {
                   fontWeight: 'bold',
                   color: colors.primary
                 }}>
-                  {statusData.reduce((total, item) => total + item.count, 0)}
+                  {loadingData ? '...' : statusData.reduce((total, item) => total + item.count, 0)}
                 </span>
               </div>
             </div>
