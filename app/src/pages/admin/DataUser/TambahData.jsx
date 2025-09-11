@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const TambahData = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
+    nama: '',
     email: '',
     password: '',
     role: ''
@@ -18,7 +19,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    setFormData({ email: '', password: '', role: '' });
+    setFormData({ nama: '', email: '', password: '', role: '' });
     onClose();
   };
 
@@ -27,6 +28,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
     setIsSubmitting(true);
     try {
       const dataToSave = {
+        nama_user: formData.nama,
         email_user: formData.email, 
         kata_sandi: formData.password,
         role_user: formData.role
@@ -43,7 +45,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
   };
 
   const handleCancel = () => {
-    setFormData({ email: '', password: '', role: '' });
+    setFormData({ nama: '', email: '', password: '', role: '' });
     onClose();
   };
 
@@ -132,6 +134,36 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                 maxWidth: '600px',
                 marginBottom: '32px'
               }}>
+                 {/* Input Nama */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '120px 1fr',
+                  alignItems: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <label style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#2D396B'
+                  }}>Nama*</label>
+                  <input
+                    type="text"
+                    name="nama"
+                    placeholder="Masukkan nama lengkap"
+                    value={formData.nama}
+                    onChange={handleChange}
+                    required
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#ffffff',
+                      color: '#2D396B'
+                    }}
+                  />
+                </div>
+
                 {/* Input Email */}
                 <div style={{
                   display: 'grid',
