@@ -10,6 +10,7 @@ export class PenawaranModel {
           `
           *,
           data_user:id_user (
+            nama_user,
             email_user,
             role_user
           )
@@ -33,6 +34,7 @@ export class PenawaranModel {
           `
           *,
           data_user:id_user (
+            nama_user,
             email_user,
             role_user
           ),
@@ -278,6 +280,7 @@ export class PenawaranModel {
           `
           *,
           data_user:id_user (
+            nama_user,
             email_user,
             role_user
           )
@@ -304,6 +307,7 @@ export class PenawaranModel {
           `
           *,
           data_user:id_user (
+            nama_user,
             email_user,
             role_user
           )
