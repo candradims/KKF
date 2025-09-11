@@ -17,10 +17,15 @@ export class PenawaranController {
           req.user.id_user
         );
         penawaran = await PenawaranModel.getPenawaranByUser(req.user.id_user);
-      } else {
-        // Admin dapat melihat semua penawaran
-        console.log("👑 Admin user - getting all penawaran");
+      } else if (
+        req.user.role_user === "admin" ||
+        req.user.role_user === "superAdmin"
+      ) {
+        // Admin dan SuperAdmin dapat melihat semua penawaran
+        console.log("👑 Admin/SuperAdmin user - getting all penawaran");
         penawaran = await PenawaranModel.getAllPenawaran();
+      } else {
+        throw new Error("Role tidak dikenali");
       }
 
       console.log("✅ Retrieved penawaran:", penawaran?.length || 0, "records");
