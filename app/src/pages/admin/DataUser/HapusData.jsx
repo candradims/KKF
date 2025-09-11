@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
   const [formData, setFormData] = useState({
+    nama: '', 
     email: '',
     password: '',
     role: '',
@@ -14,6 +15,7 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
   useEffect(() => {
     if (initialData) {
       setFormData({
+        nama: initialData.nama || '',
         email: initialData.email || '',
         password: '••••••••', // Hide password for security
         role: initialData.role || '',
@@ -146,6 +148,35 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
                 maxWidth: '600px',
                 marginBottom: '32px'
               }}>
+                {/* Input Nama */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '120px 1fr',
+                  alignItems: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <label style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#2D396B'
+                  }}>Nama</label>
+                  <input
+                    type="text"
+                    name="nama"
+                    value={formData.nama}
+                    readOnly
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      fontSize: '14px',
+                      backgroundColor: '#e0e0e0',
+                      color: '#2D396B',
+                      cursor: 'not-allowed'
+                    }}
+                  />
+                </div>
+                
                 {/* Input Email */}
                 <div style={{
                   display: 'grid',
