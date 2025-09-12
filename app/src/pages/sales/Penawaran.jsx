@@ -51,7 +51,6 @@ const Penawaran = () => {
           id_penawaran: item.id_penawaran, // Add this for Detail component
           tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
           namaPelanggan: item.nama_pelanggan,
-          pekerjaan: item.pekerjaan || "-",
           namaSales: item.data_user?.nama_user || "-",
           sales: item.data_user?.nama_user || "-",
           nomorKontrak: item.nomor_kontrak,

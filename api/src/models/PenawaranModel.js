@@ -108,19 +108,6 @@ export class PenawaranModel {
 
       // Optional fields - hanya tambahkan jika ada
       if (
-        penawaranData.pekerjaan ||
-        penawaranData.keterangan ||
-        penawaranData.item
-      ) {
-        dataToInsert.pekerjaan =
-          penawaranData.pekerjaan ||
-          penawaranData.keterangan ||
-          `${penawaranData.item || "Layanan"} - ${
-            penawaranData.jumlah || 1
-          } unit - Rp ${penawaranData.harga || 0}`;
-      }
-
-      if (
         penawaranData.catatan ||
         (penawaranData.item && penawaranData.harga)
       ) {
@@ -204,19 +191,6 @@ export class PenawaranModel {
 
       if (penawaranData.status) {
         updateData.status = penawaranData.status;
-      }
-
-      if (
-        penawaranData.keterangan ||
-        penawaranData.pekerjaan ||
-        penawaranData.item
-      ) {
-        updateData.pekerjaan =
-          penawaranData.pekerjaan ||
-          penawaranData.keterangan ||
-          `${penawaranData.item || "Layanan"} - ${
-            penawaranData.jumlah || 1
-          } unit - Rp ${penawaranData.harga || 0}`;
       }
 
       if (
