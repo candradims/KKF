@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Plus, Calculator, Check } from "lucide-react";
+import { getUserData } from "../../../utils/api";
 
 const layananOptions = [
   "IP VPN (1 sd 10 Mbps)",
@@ -192,6 +193,17 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     jumlah: "",
     discount: "",
   });
+
+  // Auto-fill sales field dengan nama user yang login
+  useEffect(() => {
+    const userData = getUserData();
+    if (userData && userData.nama_user) {
+      setFormData(prev => ({
+        ...prev,
+        sales: userData.nama_user
+      }));
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -401,10 +413,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     type="text"
                     name="sales"
                     value={formData.sales}
-                    onChange={handleInputChange}
-                    disabled={isSaving}
-                    placeholder="Masukkan Nama"
-                    required
+                    readOnly
+                    placeholder="Auto-filled from login"
                     style={{
                       width: "100%",
                       padding: "10px 12px",
@@ -412,10 +422,11 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       borderRadius: "8px",
                       fontSize: "14px",
                       outline: "none",
-                      backgroundColor: isSaving ? "#f5f5f5" : "white",
+                      backgroundColor: "#f8f9fa",
                       boxSizing: "border-box",
-                      cursor: isSaving ? "not-allowed" : "text",
+                      cursor: "not-allowed",
                       transition: "all 0.2s ease-in-out",
+                      color: "#6c757d"
                     }}
                   />
                 </div>
