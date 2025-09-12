@@ -40,8 +40,8 @@ const Index = () => {
           id_penawaran: item.id_penawaran, // Add this for Detail component
           tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
           namaPelanggan: item.nama_pelanggan,
-          namaSales: item.nama_sales || '-', // Add sales name for table display
-          sales: item.nama_sales || '-', // Add sales name for form components
+          namaSales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
+          sales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
           nomorKontrak: item.nomor_kontrak,
           kontrakKe: item.kontrak_tahun,
           referensi: item.wilayah_hjt,

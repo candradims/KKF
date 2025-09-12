@@ -43,6 +43,10 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   const loadPengeluaranData = async () => {
     if (!detailData?.id) return;
     
+    console.log("🔍 Admin Detail - detailData received:", detailData);
+    console.log("🔍 Admin Detail - rawData:", detailData?.rawData);
+    console.log("🔍 Admin Detail - data_user:", detailData?.rawData?.data_user);
+    
     setLoadingPengeluaran(true);
     setErrorPengeluaran(null);
     
@@ -172,7 +176,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Sales</span>
               <input
                 type="text"
-                value={detailData?.rawData?.data_user?.nama_user || detailData?.sales || detailData?.namaSales || '-'}
+                value={detailData?.rawData?.data_user?.nama_user || detailData?.namaSales || detailData?.sales || 'Data sales tidak tersedia'}
                 readOnly
                 style={{
                   width: '200px',
