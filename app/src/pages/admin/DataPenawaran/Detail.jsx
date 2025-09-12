@@ -172,7 +172,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Sales</span>
               <input
                 type="text"
-                value="Admin"
+                value={detailData?.rawData?.data_user?.nama_user || detailData?.sales || detailData?.namaSales || '-'}
                 readOnly
                 style={{
                   width: '200px',
