@@ -152,10 +152,10 @@ const Penawaran = () => {
 
       console.log('🔄 Updating penawaran data:', updatedData);
       console.log('🔍 Selected edit data ID:', selectedEditData.id);
+      console.log('👤 Current user data:', userData);
 
       // Map the updated data to match API format
       const apiData = {
-        nama_sales: updatedData.sales,
         tanggal: updatedData.tanggal,
         pelanggan: updatedData.pelanggan,
         nomorKontrak: updatedData.nomorKontrak,
@@ -177,7 +177,19 @@ const Penawaran = () => {
       
       if (result.success) {
         // Handle pengeluaran updates if the form had pengeluaran data
-        if (updatedData.item && updatedData.keterangan && updatedData.hasrat && updatedData.jumlah) {
+        const hasPengeluaranData = updatedData.item && updatedData.keterangan && 
+                                  (updatedData.hasrat !== undefined && updatedData.hasrat !== '') && 
+                                  (updatedData.jumlah !== undefined && updatedData.jumlah !== '');
+        
+        console.log('💰 Checking pengeluaran data:', {
+          item: updatedData.item,
+          keterangan: updatedData.keterangan,
+          hasrat: updatedData.hasrat,
+          jumlah: updatedData.jumlah,
+          hasPengeluaranData
+        });
+        
+        if (hasPengeluaranData) {
           console.log('💰 Handling pengeluaran update for penawaran ID:', selectedEditData.id);
           
           try {
@@ -194,6 +206,8 @@ const Penawaran = () => {
             };
             
             console.log('💰 Pengeluaran data to save:', pengeluaranData);
+            console.log('💰 Has existing pengeluaran:', hasExistingPengeluaran);
+            console.log('💰 Existing pengeluaran ID:', existingPengeluaranId);
             
             if (hasExistingPengeluaran && existingPengeluaranId) {
               // Update existing pengeluaran
@@ -204,7 +218,7 @@ const Penawaran = () => {
                 headers: {
                   'Content-Type': 'application/json',
                   'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role,
+                  'X-User-Role': userData.role_user,
                   'X-User-Email': userData.email_user
                 },
                 body: JSON.stringify(pengeluaranData)
@@ -228,7 +242,7 @@ const Penawaran = () => {
                 headers: {
                   'Content-Type': 'application/json',
                   'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role,
+                  'X-User-Role': userData.role_user,
                   'X-User-Email': userData.email_user
                 },
                 body: JSON.stringify(pengeluaranData)
@@ -258,7 +272,7 @@ const Penawaran = () => {
               headers: {
                 'Content-Type': 'application/json',
                 'X-User-ID': userData.id_user.toString(),
-                'X-User-Role': userData.role,
+                'X-User-Role': userData.role_user,
                 'X-User-Email': userData.email_user
               }
             });
@@ -286,7 +300,22 @@ const Penawaran = () => {
       }
     } catch (error) {
       console.error('❌ Error updating penawaran:', error);
-      alert(`Terjadi kesalahan saat memperbarui data:\n${error.message}`);
+      console.error('❌ Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      if (error.response?.status === 401) {
+        alert('Authentication data tidak valid. Silakan login kembali.');
+      } else if (error.response?.status === 403) {
+        alert('Anda tidak memiliki izin untuk melakukan aksi ini.');
+      } else if (error.response?.status === 500) {
+        alert('Terjadi kesalahan server. Silakan coba lagi.');
+      } else {
+        alert(`Terjadi kesalahan saat memperbarui data:\n${error.message}`);
+      }
     }
   };
 

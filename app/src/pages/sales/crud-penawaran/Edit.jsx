@@ -348,8 +348,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     const updateData = {
       ...editData,
       ...formData,
-      _hasExistingPengeluaran: !!existingPengeluaran,
-      _existingPengeluaranId: existingPengeluaran?.id_pengeluaran,
+      _hasExistingPengeluaran: !!(existingPengeluaran && existingPengeluaran.length > 0),
+      _existingPengeluaranId: existingPengeluaran && existingPengeluaran.length > 0 ? existingPengeluaran[0].id : null,
     };
     
     onSave(updateData);

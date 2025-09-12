@@ -144,10 +144,6 @@ export class PenawaranModel {
       // Map frontend fields to database fields sama seperti create
       const updateData = {};
 
-      if (penawaranData.sales || penawaranData.nama_sales) {
-        updateData.nama_sales = penawaranData.nama_sales || penawaranData.sales;
-      }
-
       if (penawaranData.tanggal || penawaranData.tanggal_dibuat) {
         updateData.tanggal_dibuat =
           penawaranData.tanggal_dibuat || penawaranData.tanggal;
