@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -15,9 +15,13 @@ import {
   Legend
 } from 'recharts';
 import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import { getUserData, getAuthHeaders } from '../../utils/api';
 
 const Dashboard = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const colors = {
     primary: '#035b71',
@@ -28,11 +32,78 @@ const Dashboard = () => {
     success: '#3fba8c',
   };
 
-  // Data untuk status penawaran
+  // Load dashboard statistics
+  const loadDashboardStats = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders) {
+        throw new Error('User not authenticated');
+      }
+
+      const response = await fetch('http://localhost:3000/api/penawaran/dashboard/stats', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setDashboardStats(data.data);
+      } else {
+        throw new Error(data.message || 'Failed to load dashboard stats');
+      }
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error);
+      setError(error.message);
+      // Set default values on error
+      setDashboardStats({
+        totalPenawaran: 0,
+        statusStats: { menunggu: 0, disetujui: 0, ditolak: 0 },
+        wilayahStats: {},
+        salesStats: {},
+        totalNilaiPenawaran: 0,
+        recentPenawaran: [],
+        summary: { totalSales: 0, totalWilayah: 0, avgNilaiPerPenawaran: 0 }
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardStats();
+  }, []);
+
+  // Data untuk status penawaran - diambil dari API
   const statusData = [
-    { status: 'Menunggu', count: 20, icon: Clock, color: '#fce40bff' },
-    { status: 'Setuju', count: 25, icon: CheckCircle, color: '#3fba8c' },
-    { status: 'Tidak Setuju', count: 5, icon: XCircle, color: '#EF4444' }
+    { 
+      status: 'Menunggu', 
+      count: dashboardStats?.statusStats?.menunggu || 0, 
+      icon: Clock, 
+      color: '#fce40bff' 
+    },
+    { 
+      status: 'Setuju', 
+      count: dashboardStats?.statusStats?.disetujui || 0, 
+      icon: CheckCircle, 
+      color: '#3fba8c' 
+    },
+    { 
+      status: 'Tidak Setuju', 
+      count: dashboardStats?.statusStats?.ditolak || 0, 
+      icon: XCircle, 
+      color: '#EF4444' 
+    }
   ];
   
   // Data sales for Target NR & Pencapaian Sales
@@ -96,10 +167,23 @@ const Dashboard = () => {
   ];
 
   // Data untuk pie chart status penawaran
+  // Data untuk pie chart status penawaran - diambil dari API
   const statusPenawaranData = [
-    { name: 'Menunggu', value: 40, color: '#fce40bff' },
-    { name: 'Disetujui', value: 50, color: '#3fba8c' },
-    { name: 'Ditolak', value: 10, color: '#EF4444' }
+    { 
+      name: 'Menunggu', 
+      value: dashboardStats?.statusStats?.menunggu || 0, 
+      color: '#fce40bff' 
+    },
+    { 
+      name: 'Disetujui', 
+      value: dashboardStats?.statusStats?.disetujui || 0, 
+      color: '#3fba8c' 
+    },
+    { 
+      name: 'Ditolak', 
+      value: dashboardStats?.statusStats?.ditolak || 0, 
+      color: '#EF4444' 
+    }
   ];
 
   const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary];
@@ -188,7 +272,9 @@ const Dashboard = () => {
                 <div style={{
                   fontSize: '30px',
                   fontWeight: 'bold'
-                }}>50</div>
+                }}>
+                  {loading ? '...' : (dashboardStats?.totalPenawaran || 0)}
+                </div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -252,7 +338,7 @@ const Dashboard = () => {
                 <div style={{
                   fontSize: '30px',
                   fontWeight: 'bold'
-                }}>50</div>
+                }}>{loading ? '...' : dashboardStats.totalPenawaran || 0}</div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -302,7 +388,9 @@ const Dashboard = () => {
                 <div style={{
                   fontSize: '24px',
                   fontWeight: 'bold'
-                }}>Rp 52.000.000,-</div>
+                }}>
+                  {loading ? 'Loading...' : `Rp ${(dashboardStats?.totalNilaiPenawaran || 0).toLocaleString('id-ID')}`}
+                </div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',

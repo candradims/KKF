@@ -103,7 +103,7 @@ export class PenawaranModel {
           penawaranData.durasi_kontrak || penawaranData.durasiKontrak || 12
         ),
         status: penawaranData.status || "Menunggu",
-        nama_sales: penawaranData.nama_sales || penawaranData.sales || "",
+        // nama_sales akan diambil dari relasi data_user berdasarkan id_user
       };
 
       // Optional fields - hanya tambahkan jika ada

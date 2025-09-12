@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { getUserData, getAuthHeaders } from '../../../utils/api';
 
 const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   const [tabelPerhitungan, setTabelPerhitungan] = useState([
@@ -22,9 +23,9 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
     }
   ]);
 
-  const [pengeluaranLain, setPengeluaranLain] = useState([
-    { id: 1, item: '', keterangan: '', hasrat: '', jumlah: '', total: '' }
-  ]);
+  const [pengeluaranLain, setPengeluaranLain] = useState([]);
+  const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
+  const [errorPengeluaran, setErrorPengeluaran] = useState(null);
 
   const totals = {
     totalBulan: '11.500.000',
@@ -38,6 +39,50 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
     profitDariHJT: '25.100.000',
     marginDariHJT: '50.20%'
   };
+
+  const loadPengeluaranData = async () => {
+    if (!detailData?.id) return;
+    
+    setLoadingPengeluaran(true);
+    setErrorPengeluaran(null);
+    
+    try {
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders) {
+        throw new Error('User not authenticated');
+      }
+
+      const response = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${detailData.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        setPengeluaranLain(data.data);
+      } else {
+        setPengeluaranLain([]);
+      }
+    } catch (error) {
+      console.error('Error loading pengeluaran data:', error);
+      setErrorPengeluaran(error.message);
+      setPengeluaranLain([]);
+    } finally {
+      setLoadingPengeluaran(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPengeluaranData();
+  }, [detailData?.id]);
 
   if (!isOpen) return null;
 
@@ -60,18 +105,6 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       hargaFinal: ''
     };
     setTabelPerhitungan([...tabelPerhitungan, newRow]);
-  };
-
-  const addPengeluaranRow = () => {
-    const newRow = {
-      id: pengeluaranLain.length + 1,
-      item: '',
-      keterangan: '',
-      hasrat: '',
-      jumlah: '',
-      total: ''
-    };
-    setPengeluaranLain([...pengeluaranLain, newRow]);
   };
 
   return (
@@ -678,65 +711,80 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               B. Pengeluaran Lain-Lain
             </h3>
             
-            <div style={{ overflowX: 'auto', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#F3F4F6' }}>
-                    <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Item ↓
-                    </th>
-                    <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Keterangan ↓
-                    </th>
-                    <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Hasrat ↓
-                    </th>
-                    <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Jumlah ↓
-                    </th>
-                    <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Total (RP) ↓
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pengeluaranLain.map((row, index) => (
-                    <tr key={row.id}>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
-                        <input
-                          type="text"
-                          value={row.item}
-                          readOnly
-                          style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
-                        />
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
-                        <input
-                          type="text"
-                          value={row.keterangan}
-                          readOnly
-                          style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
-                        />
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.hasrat || '-'}
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.jumlah || '-'}
-                      </td>
-                      <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                        {row.total || '-'}
-                      </td>
+            {loadingPengeluaran ? (
+              <div style={{ 
+                padding: '20px', 
+                textAlign: 'center', 
+                border: '1px solid #E5E7EB', 
+                borderRadius: '8px',
+                backgroundColor: '#F9FAFB' 
+              }}>
+                <span style={{ color: '#6B7280' }}>Memuat data pengeluaran...</span>
+              </div>
+            ) : errorPengeluaran ? (
+              <div style={{ 
+                padding: '20px', 
+                textAlign: 'center', 
+                border: '1px solid #F87171', 
+                borderRadius: '8px',
+                backgroundColor: '#FEF2F2' 
+              }}>
+                <span style={{ color: '#DC2626' }}>Error: {errorPengeluaran}</span>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#F3F4F6' }}>
+                      <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                        Item
+                      </th>
+                      <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                        Keterangan
+                      </th>
+                      <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                        Harga Satuan
+                      </th>
+                      <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                        Jumlah
+                      </th>
+                      <th style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                        Total (RP)
+                      </th>
                     </tr>
-                  ))}
-                  <tr>
-                    <td colSpan="5" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
-                      -
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {pengeluaranLain && pengeluaranLain.length > 0 ? (
+                      pengeluaranLain.map((row, index) => (
+                        <tr key={row.id_pengeluaran || index}>
+                          <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
+                            {row.item || '-'}
+                          </td>
+                          <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
+                            {row.keterangan || '-'}
+                          </td>
+                          <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
+                            {row.harga_satuan ? `Rp ${Number(row.harga_satuan).toLocaleString('id-ID')}` : '-'}
+                          </td>
+                          <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
+                            {row.jumlah || '-'}
+                          </td>
+                          <td style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>
+                            {row.total_harga ? `Rp ${Number(row.total_harga).toLocaleString('id-ID')}` : '-'}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" style={{ padding: '20px', textAlign: 'center', fontSize: '12px', color: '#6B7280' }}>
+                          Tidak ada data pengeluaran lain-lain
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
