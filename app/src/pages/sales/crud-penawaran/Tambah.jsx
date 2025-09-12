@@ -205,8 +205,49 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     }
   }, []);
 
+  // Function to get the correct dropdown value for display
+  const getDropdownDiscountValue = () => {
+    const discount = formData.discount;
+    const selectedOption = formData._selectedDiscountOption;
+    
+    // If we have a stored selection, use that
+    if (selectedOption) {
+      return selectedOption;
+    }
+    
+    // Otherwise, try to reverse-map percentage to option
+    if (discount === '10%') {
+      return 'MB Niaga';
+    } else if (discount === '20%') {
+      return 'GM SBU';
+    }
+    
+    // For other values (0%, empty, etc.), return as-is
+    return discount || '';
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Handle discount conversion
+    if (name === 'discount') {
+      let discountValue = value;
+      if (value === 'MB Niaga') {
+        discountValue = '10%';
+      } else if (value === 'GM SBU') {
+        discountValue = '20%';
+      }
+      
+      console.log('🔢 Discount conversion:', { original: value, converted: discountValue });
+      
+      setFormData((prev) => ({
+        ...prev,
+        [name]: discountValue,
+        _selectedDiscountOption: value, // Store original selection for dropdown display
+      }));
+      return;
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -655,7 +696,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   <div style={{ position: "relative" }}>
                     <select
                       name="discount"
-                      value={formData.discount}
+                      value={getDropdownDiscountValue()}
                       onChange={handleInputChange}
                       disabled={isSaving}
                       required

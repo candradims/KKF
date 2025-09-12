@@ -200,6 +200,18 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   // Pre-fill form with existing data when editing and load pengeluaran data
   useEffect(() => {
     if (editData) {
+      const discount = editData.discount || "";
+      let selectedDiscountOption = "";
+      
+      // Reverse-map percentage back to option for editing
+      if (discount === '10%') {
+        selectedDiscountOption = 'MB Niaga';
+      } else if (discount === '20%') {
+        selectedDiscountOption = 'GM SBU';
+      } else {
+        selectedDiscountOption = discount;
+      }
+
       const initialData = {
         sales: editData.rawData?.sales || editData.sales || editData.namaSales || "",
         tanggal: editData.tanggal || "",
@@ -208,7 +220,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         kontrakTahunKe: editData.kontrakKe || editData.kontrakTahunKe || "",
         referensiHJT: editData.referensi || editData.referensiHJT || "",
         durasiKontrak: editData.durasi || editData.durasiKontrak || "",
-        discount: editData.discount || "",
+        discount: discount,
+        _selectedDiscountOption: selectedDiscountOption,
         item: "",
         keterangan: "",
         hasrat: "",
@@ -297,8 +310,51 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
   };
 
+  // Function to get the correct dropdown value for display
+  const getDropdownDiscountValue = () => {
+    const discount = formData.discount;
+    const selectedOption = formData._selectedDiscountOption;
+    
+    console.log('🔍 Getting dropdown value:', { discount, selectedOption });
+    
+    // If we have a stored selection, use that
+    if (selectedOption) {
+      return selectedOption;
+    }
+    
+    // Otherwise, try to reverse-map percentage to option
+    if (discount === '10%') {
+      return 'MB Niaga';
+    } else if (discount === '20%') {
+      return 'GM SBU';
+    }
+    
+    // For other values (0%, empty, etc.), return as-is
+    return discount || '';
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Handle discount conversion
+    if (name === 'discount') {
+      let discountValue = value;
+      if (value === 'MB Niaga') {
+        discountValue = '10%';
+      } else if (value === 'GM SBU') {
+        discountValue = '20%';
+      }
+      
+      console.log('🔢 Discount conversion:', { original: value, converted: discountValue });
+      
+      setFormData((prev) => ({
+        ...prev,
+        [name]: discountValue,
+        _selectedDiscountOption: value, // Store original selection for dropdown display
+      }));
+      return;
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -764,7 +820,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                   <div style={{ position: "relative" }}>
                     <select
                       name="discount"
-                      value={formData.discount}
+                      value={getDropdownDiscountValue()}
                       onChange={handleInputChange}
                       disabled={isSaving}
                       required

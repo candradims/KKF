@@ -8,6 +8,30 @@ import Hapus from './crud-penawaran/Hapus';
 import Detail from './crud-penawaran/Detail';
 import { penawaranAPI, getUserData } from '../../utils/api';
 
+// Helper function untuk konversi diskon
+const convertDiscountToPercentage = (discount) => {
+  // Handle null, undefined, atau empty values
+  if (!discount) {
+    return '0%';
+  }
+  
+  // Convert to string if not already
+  const discountStr = String(discount);
+  
+  if (discountStr === 'MB Niaga') {
+    return '10%';
+  } else if (discountStr === 'GM SBU') {
+    return '20%';
+  }
+  
+  // Pastikan selalu ada tanda % jika berupa angka
+  if (discountStr && !discountStr.includes('%') && !isNaN(discountStr)) {
+    return discountStr + '%';
+  }
+  
+  return discountStr || '0%';
+};
+
 const Penawaran = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -46,24 +70,48 @@ const Penawaran = () => {
       
       if (result.success) {
         // Transform data dari API ke format yang digunakan di frontend
-        const transformedData = result.data.map(item => ({
-          id: item.id_penawaran,
-          id_penawaran: item.id_penawaran, // Add this for Detail component
-          tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
-          namaPelanggan: item.nama_pelanggan,
-          namaSales: item.data_user?.nama_user || "-",
-          sales: item.data_user?.nama_user || "-",
-          nomorKontrak: item.nomor_kontrak,
-          kontrakKe: item.kontrak_tahun,
-          referensi: item.wilayah_hjt,
-          discount: item.diskon || '0%',
-          durasi: item.durasi_kontrak,
-          targetIRR: item.target_irr || '0',
-          status: item.status || 'Menunggu',
-          actions: ['view', 'edit', 'delete'],
-          // Data lengkap untuk detail
-          rawData: item
-        }));
+        const transformedData = result.data.map(item => {
+          try {
+            return {
+              id: item.id_penawaran,
+              id_penawaran: item.id_penawaran, // Add this for Detail component
+              tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
+              namaPelanggan: item.nama_pelanggan,
+              namaSales: item.data_user?.nama_user || "-",
+              sales: item.data_user?.nama_user || "-",
+              nomorKontrak: item.nomor_kontrak,
+              kontrakKe: item.kontrak_tahun,
+              referensi: item.wilayah_hjt,
+              discount: convertDiscountToPercentage(item.diskon),
+              durasi: item.durasi_kontrak,
+              targetIRR: item.target_irr || '0',
+              status: item.status || 'Menunggu',
+              actions: ['view', 'edit', 'delete'],
+              // Data lengkap untuk detail
+              rawData: item
+            };
+          } catch (itemError) {
+            console.error('❌ Error transforming item:', item, itemError);
+            // Return a safe fallback for this item
+            return {
+              id: item.id_penawaran || 'unknown',
+              id_penawaran: item.id_penawaran || 'unknown',
+              tanggal: '-',
+              namaPelanggan: item.nama_pelanggan || '-',
+              namaSales: '-',
+              sales: '-',
+              nomorKontrak: item.nomor_kontrak || '-',
+              kontrakKe: item.kontrak_tahun || '-',
+              referensi: item.wilayah_hjt || '-',
+              discount: '0%',
+              durasi: item.durasi_kontrak || '-',
+              targetIRR: '0',
+              status: 'Error',
+              actions: ['view'],
+              rawData: item
+            };
+          }
+        });
         
         setPenawaranData(transformedData);
         setError(null);
@@ -166,7 +214,7 @@ const Penawaran = () => {
         keterangan: updatedData.keterangan,
         harga: updatedData.harga,
         jumlah: updatedData.jumlah,
-        discount: updatedData.discount
+        discount: convertDiscountToPercentage(updatedData.discount) // Ensure proper % format
       };
 
       console.log('📤 Sending API data:', apiData);
@@ -388,7 +436,13 @@ const Penawaran = () => {
       console.log('💾 User data:', userData);
       console.log('💾 Sending penawaran data:', newData);
 
-      const result = await penawaranAPI.create(newData);
+      // Ensure discount has proper % format
+      const dataToSave = {
+        ...newData,
+        discount: convertDiscountToPercentage(newData.discount)
+      };
+
+      const result = await penawaranAPI.create(dataToSave);
       
       console.log('📬 API Response:', result);
       

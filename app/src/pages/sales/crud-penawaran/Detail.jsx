@@ -2,6 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { pengeluaranAPI, getUserData, getAuthHeaders } from '../../../utils/api';
 
+// Helper function untuk konversi diskon
+const convertDiscountToPercentage = (discount) => {
+  // Handle null, undefined, atau empty values
+  if (!discount) {
+    return '0%';
+  }
+  
+  // Convert to string if not already
+  const discountStr = String(discount);
+  
+  if (discountStr === 'MB Niaga') {
+    return '10%';
+  } else if (discountStr === 'GM SBU') {
+    return '20%';
+  }
+  
+  // Pastikan selalu ada tanda % jika berupa angka
+  if (discountStr && !discountStr.includes('%') && !isNaN(discountStr)) {
+    return discountStr + '%';
+  }
+  
+  return discountStr || '0%';
+};
+
 const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
   const [tabelPerhitungan, setTabelPerhitungan] = useState([
     {
@@ -460,7 +484,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.discount || '0%'}
+                  value={convertDiscountToPercentage(detailData?.discount)}
+                  readOnly
                   style={{
                     flex: 1,
                     padding: '8px 12px',
