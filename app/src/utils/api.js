@@ -54,6 +54,14 @@ export const getAuthHeaders = () => {
     throw new Error("User data tidak ditemukan. Silakan login kembali.");
   }
 
+  console.log("🔐 Auth headers being sent:", {
+    "X-User-ID": userData.id_user.toString(),
+    "X-User-Role": userData.role_user,
+    "X-User-Email": userData.email_user,
+  });
+
+  console.log("🔍 Full userData from localStorage:", userData);
+
   return {
     "Content-Type": "application/json",
     // Send user info in headers for authentication (temporary solution)

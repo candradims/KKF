@@ -2,6 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import { getUserData, getAuthHeaders } from '../../../utils/api';
 
+// Helper function untuk konversi diskon
+const convertDiscountToPercentage = (discount) => {
+  // Handle null, undefined, atau empty values
+  if (!discount) {
+    return '0%';
+  }
+  
+  // Convert to string if not already
+  const discountStr = String(discount);
+  
+  if (discountStr === 'MB Niaga') {
+    return '10%';
+  } else if (discountStr === 'GM SBU') {
+    return '20%';
+  }
+  
+  // Pastikan selalu ada tanda % jika berupa angka
+  if (discountStr && !discountStr.includes('%') && !isNaN(discountStr)) {
+    return discountStr + '%';
+  }
+  
+  return discountStr || '0%';
+};
+
 const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   const [tabelPerhitungan, setTabelPerhitungan] = useState([
     {
@@ -260,31 +284,6 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                   minWidth: '200px',
                   textAlign: 'left'
                 }}>
-                  Pekerjaan
-                </label>
-                <input
-                  type="text"
-                  value="-"
-                  readOnly
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
                   Nomor Kontrak / BAKBB
                 </label>
                 <input
@@ -364,7 +363,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 </label>
                 <input
                   type="text"
-                  value={detailData?.discount || '-'}
+                  value={convertDiscountToPercentage(detailData?.discount)}
                   readOnly
                   style={{
                     flex: 1,
@@ -390,31 +389,6 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 <input
                   type="text"
                   value={detailData?.durasi || '-'}
-                  readOnly
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
-                  Target IRR
-                </label>
-                <input
-                  type="text"
-                  value={detailData?.targetIRR || '-'}
                   readOnly
                   style={{
                     flex: 1,

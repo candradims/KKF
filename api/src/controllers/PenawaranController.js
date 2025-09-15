@@ -561,7 +561,7 @@ export class PenawaranController {
         }
 
         // Sales statistics
-        const salesName = penawaran.nama_sales || "Unknown";
+        const salesName = penawaran.data_user?.nama_user || "Unknown";
         salesStats[salesName] = (salesStats[salesName] || 0) + 1;
 
         // Estimasi nilai (jika ada harga_final)

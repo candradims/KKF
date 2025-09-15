@@ -3,6 +3,30 @@ import { Eye, RotateCcw } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
 
+// Helper function untuk konversi diskon
+const convertDiscountToPercentage = (discount) => {
+  // Handle null, undefined, atau empty values
+  if (!discount) {
+    return '0%';
+  }
+  
+  // Convert to string if not already
+  const discountStr = String(discount);
+  
+  if (discountStr === 'MB Niaga') {
+    return '10%';
+  } else if (discountStr === 'GM SBU') {
+    return '20%';
+  }
+  
+  // Pastikan selalu ada tanda % jika berupa angka
+  if (discountStr && !discountStr.includes('%') && !isNaN(discountStr)) {
+    return discountStr + '%';
+  }
+  
+  return discountStr || '0%';
+};
+
 const Index = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -35,23 +59,46 @@ const Index = () => {
       
       if (result.success) {
         // Transform data dari API ke format yang digunakan di frontend
-        const transformedData = result.data.map(item => ({
-          id: item.id_penawaran,
-          id_penawaran: item.id_penawaran, // Add this for Detail component
-          tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
-          namaPelanggan: item.nama_pelanggan,
-          namaSales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
-          sales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
-          nomorKontrak: item.nomor_kontrak,
-          kontrakKe: item.kontrak_tahun,
-          referensi: item.wilayah_hjt,
-          discount: item.diskon || '0%',
-          durasi: item.durasi_kontrak,
-          status: item.status || 'Menunggu',
-          actions: ['view'],
-          // Tambahan data untuk komponen Detail
-          rawData: item // Data mentah dari API untuk keperluan Detail component
-        }));
+        const transformedData = result.data.map(item => {
+          try {
+            return {
+              id: item.id_penawaran,
+              id_penawaran: item.id_penawaran, // Add this for Detail component
+              tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
+              namaPelanggan: item.nama_pelanggan,
+              namaSales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
+              sales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
+              nomorKontrak: item.nomor_kontrak,
+              kontrakKe: item.kontrak_tahun,
+              referensi: item.wilayah_hjt,
+              discount: convertDiscountToPercentage(item.diskon),
+              durasi: item.durasi_kontrak,
+              status: item.status || 'Menunggu',
+              actions: ['view'],
+              // Tambahan data untuk komponen Detail
+              rawData: item // Data mentah dari API untuk keperluan Detail component
+            };
+          } catch (itemError) {
+            console.error('❌ Error transforming item:', item, itemError);
+            // Return a safe fallback for this item
+            return {
+              id: item.id_penawaran || 'unknown',
+              id_penawaran: item.id_penawaran || 'unknown',
+              tanggal: '-',
+              namaPelanggan: item.nama_pelanggan || '-',
+              namaSales: '-',
+              sales: '-',
+              nomorKontrak: item.nomor_kontrak || '-',
+              kontrakKe: item.kontrak_tahun || '-',
+              referensi: item.wilayah_hjt || '-',
+              discount: '0%',
+              durasi: item.durasi_kontrak || '-',
+              status: 'Error',
+              actions: ['view'],
+              rawData: item
+            };
+          }
+        });
         
         setPenawaranData(transformedData);
         console.log("✅ Data penawaran berhasil dimuat:", transformedData.length, "items");

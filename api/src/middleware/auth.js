@@ -33,7 +33,32 @@ export const authenticate = async (req, res, next) => {
     }
 
     // Verify user role and email match
+    console.log("🔍 Comparing user data:");
+    console.log("  Database user object:", JSON.stringify(user, null, 2));
+    console.log(
+      "  Database role:",
+      user.role_user,
+      "(type:",
+      typeof user.role_user,
+      ")"
+    );
+    console.log("  Header role:", userRole, "(type:", typeof userRole, ")");
+    console.log(
+      "  Database email:",
+      user.email_user,
+      "(type:",
+      typeof user.email_user,
+      ")"
+    );
+    console.log("  Header email:", userEmail, "(type:", typeof userEmail, ")");
+    console.log("  Role match:", user.role_user === userRole);
+    console.log("  Email match:", user.email_user === userEmail);
+
     if (user.role_user !== userRole || user.email_user !== userEmail) {
+      console.log("❌ Authentication mismatch detected!");
+      console.log("❌ Mismatch details:");
+      console.log("  - Role mismatch:", user.role_user !== userRole);
+      console.log("  - Email mismatch:", user.email_user !== userEmail);
       return res.status(401).json({
         success: false,
         message: "Authentication data tidak valid",

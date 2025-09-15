@@ -8,6 +8,30 @@ import Hapus from './crud-penawaran/Hapus';
 import Detail from './crud-penawaran/Detail';
 import { penawaranAPI, getUserData } from '../../utils/api';
 
+// Helper function untuk konversi diskon
+const convertDiscountToPercentage = (discount) => {
+  // Handle null, undefined, atau empty values
+  if (!discount) {
+    return '0%';
+  }
+  
+  // Convert to string if not already
+  const discountStr = String(discount);
+  
+  if (discountStr === 'MB Niaga') {
+    return '10%';
+  } else if (discountStr === 'GM SBU') {
+    return '20%';
+  }
+  
+  // Pastikan selalu ada tanda % jika berupa angka
+  if (discountStr && !discountStr.includes('%') && !isNaN(discountStr)) {
+    return discountStr + '%';
+  }
+  
+  return discountStr || '0%';
+};
+
 const Penawaran = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -46,25 +70,48 @@ const Penawaran = () => {
       
       if (result.success) {
         // Transform data dari API ke format yang digunakan di frontend
-        const transformedData = result.data.map(item => ({
-          id: item.id_penawaran,
-          id_penawaran: item.id_penawaran, // Add this for Detail component
-          tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
-          namaPelanggan: item.nama_pelanggan,
-          pekerjaan: item.pekerjaan || "-",
-          namaSales: item.data_user?.nama_user || "-",
-          sales: item.data_user?.nama_user || "-",
-          nomorKontrak: item.nomor_kontrak,
-          kontrakKe: item.kontrak_tahun,
-          referensi: item.wilayah_hjt,
-          discount: item.diskon || '0%',
-          durasi: item.durasi_kontrak,
-          targetIRR: item.target_irr || '0',
-          status: item.status || 'Menunggu',
-          actions: ['view', 'edit', 'delete'],
-          // Data lengkap untuk detail
-          rawData: item
-        }));
+        const transformedData = result.data.map(item => {
+          try {
+            return {
+              id: item.id_penawaran,
+              id_penawaran: item.id_penawaran, // Add this for Detail component
+              tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
+              namaPelanggan: item.nama_pelanggan,
+              namaSales: item.data_user?.nama_user || "-",
+              sales: item.data_user?.nama_user || "-",
+              nomorKontrak: item.nomor_kontrak,
+              kontrakKe: item.kontrak_tahun,
+              referensi: item.wilayah_hjt,
+              discount: convertDiscountToPercentage(item.diskon),
+              durasi: item.durasi_kontrak,
+              targetIRR: item.target_irr || '0',
+              status: item.status || 'Menunggu',
+              actions: ['view', 'edit', 'delete'],
+              // Data lengkap untuk detail
+              rawData: item
+            };
+          } catch (itemError) {
+            console.error('❌ Error transforming item:', item, itemError);
+            // Return a safe fallback for this item
+            return {
+              id: item.id_penawaran || 'unknown',
+              id_penawaran: item.id_penawaran || 'unknown',
+              tanggal: '-',
+              namaPelanggan: item.nama_pelanggan || '-',
+              namaSales: '-',
+              sales: '-',
+              nomorKontrak: item.nomor_kontrak || '-',
+              kontrakKe: item.kontrak_tahun || '-',
+              referensi: item.wilayah_hjt || '-',
+              discount: '0%',
+              durasi: item.durasi_kontrak || '-',
+              targetIRR: '0',
+              status: 'Error',
+              actions: ['view'],
+              rawData: item
+            };
+          }
+        });
         
         setPenawaranData(transformedData);
         setError(null);
@@ -153,10 +200,10 @@ const Penawaran = () => {
 
       console.log('🔄 Updating penawaran data:', updatedData);
       console.log('🔍 Selected edit data ID:', selectedEditData.id);
+      console.log('👤 Current user data:', userData);
 
       // Map the updated data to match API format
       const apiData = {
-        nama_sales: updatedData.sales,
         tanggal: updatedData.tanggal,
         pelanggan: updatedData.pelanggan,
         nomorKontrak: updatedData.nomorKontrak,
@@ -167,7 +214,7 @@ const Penawaran = () => {
         keterangan: updatedData.keterangan,
         harga: updatedData.harga,
         jumlah: updatedData.jumlah,
-        discount: updatedData.discount
+        discount: convertDiscountToPercentage(updatedData.discount) // Ensure proper % format
       };
 
       console.log('📤 Sending API data:', apiData);
@@ -178,7 +225,19 @@ const Penawaran = () => {
       
       if (result.success) {
         // Handle pengeluaran updates if the form had pengeluaran data
-        if (updatedData.item && updatedData.keterangan && updatedData.hasrat && updatedData.jumlah) {
+        const hasPengeluaranData = updatedData.item && updatedData.keterangan && 
+                                  (updatedData.hasrat !== undefined && updatedData.hasrat !== '') && 
+                                  (updatedData.jumlah !== undefined && updatedData.jumlah !== '');
+        
+        console.log('💰 Checking pengeluaran data:', {
+          item: updatedData.item,
+          keterangan: updatedData.keterangan,
+          hasrat: updatedData.hasrat,
+          jumlah: updatedData.jumlah,
+          hasPengeluaranData
+        });
+        
+        if (hasPengeluaranData) {
           console.log('💰 Handling pengeluaran update for penawaran ID:', selectedEditData.id);
           
           try {
@@ -195,6 +254,8 @@ const Penawaran = () => {
             };
             
             console.log('💰 Pengeluaran data to save:', pengeluaranData);
+            console.log('💰 Has existing pengeluaran:', hasExistingPengeluaran);
+            console.log('💰 Existing pengeluaran ID:', existingPengeluaranId);
             
             if (hasExistingPengeluaran && existingPengeluaranId) {
               // Update existing pengeluaran
@@ -205,7 +266,7 @@ const Penawaran = () => {
                 headers: {
                   'Content-Type': 'application/json',
                   'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role,
+                  'X-User-Role': userData.role_user,
                   'X-User-Email': userData.email_user
                 },
                 body: JSON.stringify(pengeluaranData)
@@ -229,7 +290,7 @@ const Penawaran = () => {
                 headers: {
                   'Content-Type': 'application/json',
                   'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role,
+                  'X-User-Role': userData.role_user,
                   'X-User-Email': userData.email_user
                 },
                 body: JSON.stringify(pengeluaranData)
@@ -259,7 +320,7 @@ const Penawaran = () => {
               headers: {
                 'Content-Type': 'application/json',
                 'X-User-ID': userData.id_user.toString(),
-                'X-User-Role': userData.role,
+                'X-User-Role': userData.role_user,
                 'X-User-Email': userData.email_user
               }
             });
@@ -287,7 +348,22 @@ const Penawaran = () => {
       }
     } catch (error) {
       console.error('❌ Error updating penawaran:', error);
-      alert(`Terjadi kesalahan saat memperbarui data:\n${error.message}`);
+      console.error('❌ Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      if (error.response?.status === 401) {
+        alert('Authentication data tidak valid. Silakan login kembali.');
+      } else if (error.response?.status === 403) {
+        alert('Anda tidak memiliki izin untuk melakukan aksi ini.');
+      } else if (error.response?.status === 500) {
+        alert('Terjadi kesalahan server. Silakan coba lagi.');
+      } else {
+        alert(`Terjadi kesalahan saat memperbarui data:\n${error.message}`);
+      }
     }
   };
 
@@ -360,7 +436,13 @@ const Penawaran = () => {
       console.log('💾 User data:', userData);
       console.log('💾 Sending penawaran data:', newData);
 
-      const result = await penawaranAPI.create(newData);
+      // Ensure discount has proper % format
+      const dataToSave = {
+        ...newData,
+        discount: convertDiscountToPercentage(newData.discount)
+      };
+
+      const result = await penawaranAPI.create(dataToSave);
       
       console.log('📬 API Response:', result);
       
