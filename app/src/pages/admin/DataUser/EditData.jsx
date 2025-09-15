@@ -10,6 +10,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
     role: ''
   });
 
+  const [originalPassword, setOriginalPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [focusedField, setFocusedField] = useState('');
@@ -39,10 +40,14 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
         }
       };
 
+      // Store original password for comparison
+      const originalPass = initialData.kata_sandi || initialData.password || '';
+      setOriginalPassword(originalPass);
+
       setFormData({
         nama: initialData.nama || '',
         email: initialData.email || '',
-        password: '',
+        password: originalPass, // Pre-fill with existing password
         role: convertRoleToDisplay(initialData.role) || '',
       });
     }
@@ -59,11 +64,20 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if any data has changed
+    if (!hasChanges()) {
+      alert('Tidak ada perubahan data untuk disimpan');
+      return;
+    }
+    
     if (!formData.nama || !formData.email || !formData.role) {
       alert('Nama, Email, dan Role wajib diisi');
       return;
     }
-    if (formData.password && formData.password.length < 8) {
+    
+    // Validate password only if it has been changed and is not empty
+    if (formData.password !== originalPassword && formData.password.length < 8) {
       alert('Password minimal 8 karakter');
       return;
     }
@@ -75,9 +89,12 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
         email: formData.email,
         role: formData.role,
       };
-      if (formData.password.trim() !== '') {
+      
+      // Only include password if it has been changed
+      if (formData.password !== originalPassword) {
         dataToUpdate.password = formData.password;
       }
+      
       await onUpdate(dataToUpdate);
       setShowSuccessModal(true);
     } catch (err) {
@@ -89,11 +106,27 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
 
   const hasChanges = () => {
     if (!initialData) return false;
+    
+    // Convert initial role to display format for accurate comparison
+    const convertRoleToDisplay = (dbRole) => {
+      switch(dbRole) {
+        case 'superAdmin': return 'superAdmin';
+        case 'admin': return 'admin';
+        case 'sales': return 'sales';
+        case 'Super Admin': return 'superAdmin';
+        case 'Admin': return 'admin';
+        case 'Sales': return 'sales';
+        default: return dbRole;
+      }
+    };
+    
+    const initialRoleConverted = convertRoleToDisplay(initialData.role);
+    
     return (
       formData.nama !== initialData.nama ||
       formData.email !== initialData.email ||
-      formData.role !== initialData.role ||
-      formData.password.trim() !== ''
+      formData.role !== initialRoleConverted ||
+      formData.password !== originalPassword
     );
   };
 
@@ -378,7 +411,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     marginBottom: '8px',
                     letterSpacing: '0.02em'
                   }}>
-                    Kata Sandi (Opsional)
+                    Kata Sandi
                   </label>
                   <div style={{ position: 'relative' }}>
                     <div style={iconContainerStyle('password')}>
@@ -387,7 +420,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     <input
                       type="password"
                       name="password"
-                      placeholder="Kosongkan jika tidak ingin mengubah"
+                      placeholder="Ubah kata sandi..."
                       value={formData.password}
                       onChange={handleChange}
                       onFocus={() => setFocusedField('password')}
