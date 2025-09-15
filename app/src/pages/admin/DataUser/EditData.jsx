@@ -14,6 +14,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [focusedField, setFocusedField] = useState('');
 
+  // Color palette
   const colors = {
     primary: '#035b71',
     secondary: '#00bfca',
@@ -130,316 +131,530 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
       `}
     </style>
 
-    {/* Modal utama */}
-    <AnimatePresence>
-      {isOpen && !showSuccessModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(3, 91, 113, 0.3)',
-            backdropFilter: 'blur(2px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px',
-            fontFamily: 'Inter, sans-serif'
-          }}
-        >
+      <AnimatePresence>
+        {isOpen && !showSuccessModal && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 50 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 50 }}
-            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={{
-              background: '#e7f3f5ff',
-              borderRadius: '32px',
-              width: '100%',
-              maxWidth: '900px',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
               padding: '20px',
-              boxShadow: '0 12px 30px rgba(0,0,0,0.12)',
-              position: 'relative'
-            }}
-          >
-            {/* Tombol Close */}
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onClose}
-              style={{
-                position: 'absolute',
-                top: '20px', right: '20px',
-                backgroundColor: 'rgba(3, 91, 113, 0.1)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}
-            >
-              <X size={20} color={colors.primary} />
-            </motion.button>
-
-            {/* Header */}
-            <motion.div 
-              initial={{ y: -30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              style={{ padding: '40px 32px 20px', textAlign: 'center' }}
-            >
-              <div style={{
-                width: '80px', height: '80px',
-                borderRadius: '50%',
-                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 20px'
-              }}>
-                <User size={32} color="white" />
-              </div>
-              <h2 style={{
-                fontSize: '32px', fontWeight: '700',
-                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.tertiary} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>
-                Edit Data User
-              </h2>
-              <p style={{ color: colors.accent1, fontSize: '16px', margin: '8px 0 0' }}>
-                Perbarui informasi user
-              </p>
-            </motion.div>
-
-            {/* Form */}
-            <motion.form
-              onSubmit={handleSubmit}
-              style={{
-                background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
-                borderRadius: '20px',
-                padding: '40px',
-                margin: '0 32px 32px',
-                border: `1px solid rgba(0, 192, 202, 0.68)`,
-              }}
-            >
-              {/* Nama */}
-              <div style={{ marginBottom: '24px', position: 'relative' }}>
-                <label style={{ fontWeight: 600, fontSize: 14, color: colors.primary }}>Nama Lengkap *</label>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconContainerStyle('nama')}>
-                    <User size={18}/>
-                  </div>
-                  <input
-                    type="text"
-                    name="nama"
-                    placeholder="Masukkan nama lengkap"
-                    value={formData.nama}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('nama')}
-                    onBlur={() => setFocusedField('')}
-                    required
-                    style={inputStyle('nama')}
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div style={{ marginBottom: '24px', position: 'relative' }}>
-                <label style={{ fontWeight: 600, fontSize: 14, color: colors.primary }}>Email *</label>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconContainerStyle('email')}>
-                    <Mail size={18}/>
-                  </div>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="mail@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('email')}
-                    onBlur={() => setFocusedField('')}
-                    required
-                    style={inputStyle('email')}
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div style={{ marginBottom: '24px', position: 'relative' }}>
-                <label style={{ fontWeight: 600, fontSize: 14, color: colors.primary }}>Kata Sandi (Opsional)</label>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconContainerStyle('password')}>
-                    <Lock size={18}/>
-                  </div>
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Kosongkan jika tidak ingin mengubah"
-                    value={formData.password}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField('')}
-                    style={inputStyle('password')}
-                  />
-                </div>
-              </div>
-
-              {/* Role */}
-              <div style={{ marginBottom: '32px', position: 'relative' }}>
-                <label style={{ fontWeight: 600, fontSize: 14, color: colors.primary }}>Role *</label>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconContainerStyle('role')}>
-                    <Shield size={18}/>
-                  </div>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    onFocus={() => setFocusedField('role')}
-                    onBlur={() => setFocusedField('')}
-                    required
-                    style={{
-                      ...inputStyle('role'),
-                      appearance: 'none',
-                      backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='${encodeURIComponent(focusedField === 'role' ? colors.secondary : colors.primary)}' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 16px center',
-                      backgroundSize: '20px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="" disabled hidden>Pilih role user</option>
-                    <option value="superAdmin">👑 Super Admin</option>
-                    <option value="admin">👨‍💼 Admin</option>
-                    <option value="sales">💼 Sales</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={onClose}
-                  style={{
-                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
-                    color: '#fff',
-                    border: 'none',
-                    padding: '14px 28px',
-                    borderRadius: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  disabled={isSubmitting}
-                  style={{
-                    background: isSubmitting
-                      ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
-                      : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                    color: '#fff',
-                    border: 'none',
-                    padding: '14px 36px',
-                    borderRadius: '12px',
-                    fontWeight: 600,
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {isSubmitting ? 'Menyimpan...' : 'Update Data'}
-                </motion.button>
-              </div>
-            </motion.form>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-
-    {/* Success Modal */}
-    <AnimatePresence>
-      {showSuccessModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'linear-gradient(135deg, rgba(63, 186, 140, 0.8) 0%, rgba(0, 191, 202, 0.6) 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 1000
-          }}
-        >
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.5, opacity: 0 }}
-            style={{
-              background: '#fff',
-              borderRadius: '24px',
-              padding: '40px',
-              textAlign: 'center',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-              maxWidth: '400px',
-              width: '100%',
-              position: 'relative'
+              fontFamily: 'Inter, system-ui, sans-serif'
             }}
           >
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                y: 0,
+                rotate: [0, 0.5, -0.5, 0]
+              }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              transition={{
+                duration: 0.5,
+                ease: [0.4, 0, 0.2, 1]
+              }}
               style={{
-                background: `linear-gradient(135deg, ${colors.success} 0%, #4ade80 100%)`,
-                borderRadius: '50%',
-                width: '100px', height: '100px',
-                margin: '0 auto 24px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                background: '#e7f3f5ff',
+                borderRadius: '32px',
+                width: '100%',
+                maxWidth: '900px',
+                padding: '20px',
+                boxShadow: `
+                  0 12px 30px rgba(0, 0, 0, 0.12), 
+                  0 4px 12px rgba(0, 0, 0, 0.08)`,
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
-              <Check size={48} color="white" strokeWidth={3}/>
+              {/* Decorative highlight */}
+              <div style={{
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '120px',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0))',
+                pointerEvents: 'none'
+              }} />
+
+              {/* Close Button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  backgroundColor: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  zIndex: 10
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.2)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.1)'}
+              >
+                <X size={20} color={colors.primary} />
+              </motion.button>
+
+              {/* Header */}
+              <motion.div 
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                style={{
+                  padding: '40px 32px 20px',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px',
+                  boxShadow: `0 10px 30px rgba(0, 191, 202, 0.3)`
+                }}>
+                  <User size={32} color="white" />
+                </div>
+                <h2 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  margin: 0,
+                  letterSpacing: '-0.02em'
+                }}>
+                  Edit Data User
+                </h2>
+                <p style={{
+                  color: colors.accent1,
+                  fontSize: '16px',
+                  margin: '8px 0 0',
+                  opacity: 0.8
+                }}>
+                  Perbarui informasi user
+                </p>
+              </motion.div>
+
+              {/* Form */}
+              <motion.form 
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                id="form-edit-data" 
+                onSubmit={handleSubmit} 
+                style={{
+                  background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
+                  borderRadius: '20px',
+                  padding: '40px',
+                  margin: '0 32px 32px',
+                  border: `1px solid rgba(0, 192, 202, 0.68)`,
+                  position: 'relative'
+                }}
+              >
+                {/* Nama Field */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Nama Lengkap *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('nama')}>
+                      <User size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="nama"
+                      placeholder="Masukkan nama lengkap"
+                      value={formData.nama}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('nama')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      style={inputStyle('nama')}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Email Field */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Email Address *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('email')}>
+                      <Mail size={18} />
+                    </div>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="mail@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('email')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      style={inputStyle('email')}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Password Field */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Kata Sandi (Opsional)
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('password')}>
+                      <Lock size={18} />
+                    </div>
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Kosongkan jika tidak ingin mengubah"
+                      value={formData.password}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('password')}
+                      onBlur={() => setFocusedField('')}
+                      style={inputStyle('password')}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Role Field */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '32px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Role User *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('role')}>
+                      <Shield size={18} />
+                    </div>
+                    <select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('role')}
+                      onBlur={() => setFocusedField('')}
+                      required 
+                      style={{
+                        ...inputStyle('role'),
+                        appearance: 'none',
+                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === 'role' ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 16px center',
+                        backgroundSize: '20px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option  value="" disabled hidden >Pilih role user</option>
+                      <option value="superAdmin">  👑 Super Admin </option>
+                      <option value="admin"> 👨‍💼 Admin </option>
+                      <option value="sales"> 💼 Sales </option>
+                    </select>
+                  </div>
+                </motion.div>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '16px',
+                  marginTop: '32px'
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={onClose}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 32px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    form="form-edit-data"
+                    disabled={isSubmitting}
+                    style={{
+                      background: isSubmitting 
+                        ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
+                        : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 40px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                      boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em',
+                      opacity: isSubmitting ? 0.8 : 1
+                    }}
+                  >
+                    {isSubmitting ? 'Menyimpan...' : 'Update Data'}
+                  </motion.button>
+                </div>
+              </motion.form>
             </motion.div>
-            <h3 style={{
-              fontSize: '24px', fontWeight: 700,
-              background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              Berhasil!
-            </h3>
-            <p style={{ marginBottom: '24px', color: colors.accent1 }}>
-              Data user berhasil diperbarui
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleCloseSuccessModal}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, rgba(63, 186, 140, 0.8) 0%, rgba(0, 191, 202, 0.6) 100%)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px',
+              fontFamily: 'Inter, system-ui, sans-serif'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+              transition={{ 
+                duration: 0.5, 
+                ease: [0.4, 0, 0.2, 1],
+                type: "spring",
+                stiffness: 300,
+                damping: 20
+              }}
               style={{
-                background: `linear-gradient(135deg, ${colors.success} 0%, #4ade80 100%)`,
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '14px 28px',
-                fontWeight: 600,
-                cursor: 'pointer'
+                background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: '24px',
+                padding: '40px',
+                textAlign: 'center',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                position: 'relative',
+                width: '100%',
+                maxWidth: '400px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              Selesai
-            </motion.button>
+              {/* Success Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.success} 0%, #4ade80 100%)`,
+                  borderRadius: '50%',
+                  width: '100px',
+                  height: '100px',
+                  margin: '0 auto 24px auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: `0 20px 40px rgba(63, 186, 140, 0.4)`
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                >
+                  <Check style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    color: 'white',
+                    strokeWidth: 3
+                  }} />
+                </motion.div>
+              </motion.div>
+
+              <motion.h3 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  margin: '0 0 12px 0',
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Berhasil!
+              </motion.h3>
+              
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{
+                  margin: '0 0 32px 0',
+                  fontSize: '16px',
+                  color: colors.accent1,
+                  lineHeight: '1.5',
+                  opacity: 0.9
+                }}
+              >
+                Data user berhasil diperbarui
+              </motion.p>
+              
+              <motion.button
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.success} 0%, #4ade80 100%)`,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px 32px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.02em'
+                }}
+              >
+                Selesai
+              </motion.button>
+
+              {/* Close button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <X size={18} color={colors.primary} />
+              </motion.button>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
     </>
   );
 };
