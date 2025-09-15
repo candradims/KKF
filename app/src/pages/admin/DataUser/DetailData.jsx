@@ -267,7 +267,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                 </div>
               </motion.form>
 
-              {/* Tombol Tutup */}
+              {/* Tombol Batal */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
@@ -290,7 +290,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                     boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`
                   }}
                 >
-                  Tutup
+                  Batal
                 </motion.button>
               </div>
             </motion.div>
