@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle, Check } from 'lucide-react';
+import { X, AlertTriangle, Check, User, Mail, Lock, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
@@ -11,6 +11,19 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
   });
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Color palette
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+    danger: '#ef4444',
+    dangerLight: '#f87171',
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -26,8 +39,16 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
   const handleDeleteConfirm = async () => {
     if (initialData && initialData.id) {
       console.log("🗑️ Confirming delete for user:", initialData);
-      await onDelete(initialData.id);
-      setShowSuccessModal(true);
+      setIsDeleting(true);
+      try {
+        await onDelete(initialData.id);
+        setShowSuccessModal(true);
+      } catch (error) {
+        console.error("❌ Error deleting user:", error);
+        alert(`Gagal menghapus user: ${error.message}`);
+      } finally {
+        setIsDeleting(false);
+      }
     } else {
       console.error("❌ No user ID found for deletion");
       alert("Error: Tidak dapat menghapus user - ID tidak ditemukan");
@@ -39,10 +60,31 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
     onClose(); // Tutup modal hapus juga setelah sukses
   };
 
+  const inputStyle = {
+    padding: '16px 16px 16px 48px',
+    borderRadius: '12px',
+    border: `2px solid rgba(3, 91, 113, 0.38)`,
+    fontSize: '14px',
+    backgroundColor: '#e0e0e0',
+    color: colors.primary,
+    width: '100%',
+    outline: 'none',
+    cursor: 'not-allowed'
+  };
+
+  const iconContainerStyle = {
+    position: 'absolute',
+    left: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: colors.primary,
+    zIndex: 1
+  };
+
   return (
     <>
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && !showSuccessModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -53,257 +95,356 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
               padding: '20px',
-              fontFamily: 'Inter, sans-serif'
+              fontFamily: 'Inter, system-ui, sans-serif'
             }}
           >
             <motion.div
-              initial={{ x: 0, opacity: 0 }}
-              animate={{
-                x: [0, -5, 5, -5, 5, -3, 3, 0],
-                opacity: 1
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                y: 0,
+                rotate: [0, 0.5, -0.5, 0]
               }}
-              exit={{ opacity: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
               transition={{
                 duration: 0.5,
-                ease: 'easeInOut'
+                ease: [0.4, 0, 0.2, 1]
               }}
               style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
+                background: '#e7f3f5ff',
+                borderRadius: '32px',
                 width: '100%',
-                maxWidth: '800px',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                maxWidth: '900px',
+                padding: '20px',
+                boxShadow: `
+                  0 12px 30px rgba(0, 0, 0, 0.12), 
+                  0 4px 12px rgba(0, 0, 0, 0.08)`,
+                border: '1px solid rgba(255, 255, 255, 0.6)',
                 position: 'relative',
-                padding: '24px',
-                paddingBottom: '32px'
+                overflow: 'hidden',
               }}
             >
+              {/* Decorative highlight */}
+              <div style={{
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '120px',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0))',
+                pointerEvents: 'none'
+              }} />
+
               {/* Close Button */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 style={{
                   position: 'absolute',
-                  top: '16px',
-                  right: '16px',
-                  backgroundColor: 'transparent',
+                  top: '20px',
+                  right: '20px',
+                  backgroundColor: 'rgba(3, 91, 113, 0.1)',
                   border: 'none',
-                  cursor: 'pointer'
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  zIndex: 10
                 }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.2)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.1)'}
               >
-                <X size={20} />
-              </button>
+                <X size={20} color={colors.primary} />
+              </motion.button>
 
               {/* Header */}
-              <div style={{
-                padding: '24px',
-                textAlign: 'center'
-              }}>
+              <motion.div 
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                style={{
+                  padding: '40px 32px 20px',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px',
+                  boxShadow: `0 10px 30px rgba(239, 68, 68, 0.3)`
+                }}>
+                  <AlertTriangle size={32} color="white" />
+                </div>
                 <h2 style={{
-                  fontSize: '26px',
-                  fontWeight: '800',
-                  color: '#2D3A76',
-                  margin: 0
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  margin: 0,
+                  letterSpacing: '-0.02em'
                 }}>
                   Hapus Data User
                 </h2>
-              </div>
+                <p style={{
+                  color: colors.danger,
+                  fontSize: '16px',
+                  margin: '8px 0 0',
+                  opacity: 0.8,
+                  fontWeight: '600'
+                }}>
+                  Tindakan ini tidak dapat dibatalkan
+                </p>
+              </motion.div>
 
-              {/* Icon Peringatan */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginBottom: '20px'
-              }}>
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10.29 3.86L1.82 18A2 2 0 0 0 3.54 21H20.46A2 2 0 0 0 22.18 18L13.71 3.86A2 2 0 0 0 10.29 3.86Z" fill="#00AEEF"/>
-                  <path d="M12 9V13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 17H12.01" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-
-              {/* Pesan Konfirmasi */}
-              <p style={{
-                textAlign: 'center',
-                fontSize: '18px',
-                fontWeight: '540',
-                color: '#2D3A76',
-                marginBottom: '30px'
-              }}>
-                Apakah Anda Yakin Ingin Menghapus Data Berikut?
-              </p>
+              {/* Warning Message */}
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.1) 100%)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  margin: '0 32px 24px',
+                  border: `1px solid rgba(239, 68, 68, 0.3)`,
+                  textAlign: 'center'
+                }}
+              >
+                <p style={{
+                  color: colors.danger,
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  margin: 0,
+                  lineHeight: '1.5'
+                }}>
+                  Apakah Anda yakin ingin menghapus data user berikut?
+                </p>
+              </motion.div>
 
               {/* Form */}
-              <form style={{
-                backgroundColor: '#E9EDF7',
-                borderRadius: '20px',
-                padding: '32px',
-                margin: '0 auto',
-                boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-                maxWidth: '600px',
-                marginBottom: '32px'
-              }}>
-                {/* Input Nama */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '120px 1fr',
-                  alignItems: 'center',
-                  marginBottom: '20px'
-                }}>
+              <motion.div 
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
+                  borderRadius: '20px',
+                  padding: '40px',
+                  margin: '0 32px 32px',
+                  border: `1px solid rgba(0, 192, 202, 0.68)`,
+                  position: 'relative'
+                }}
+              >
+                {/* Nama Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
                   <label style={{
-                    fontSize: '16px',
+                    display: 'block',
+                    fontSize: '14px',
                     fontWeight: '600',
-                    color: '#2D396B'
-                  }}>Nama</label>
-                  <input
-                    type="text"
-                    name="nama"
-                    value={formData.nama}
-                    readOnly
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)',
-                      fontSize: '14px',
-                      backgroundColor: '#e0e0e0',
-                      color: '#2D396B',
-                      cursor: 'not-allowed'
-                    }}
-                  />
-                </div>
-                
-                {/* Input Email */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '120px 1fr',
-                  alignItems: 'center',
-                  marginBottom: '20px'
-                }}>
-                  <label style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#2D396B'
-                  }}>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    readOnly
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)',
-                      fontSize: '14px',
-                      backgroundColor: '#e0e0e0',
-                      color: '#2D396B'
-                    }}
-                  />
-                </div>
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Nama Lengkap
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <User size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="nama"
+                      value={formData.nama}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-                {/* Input Kata Sandi */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '120px 1fr',
-                  alignItems: 'center',
-                  marginBottom: '20px'
-                }}>
+                {/* Email Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
                   <label style={{
-                    fontSize: '16px',
+                    display: 'block',
+                    fontSize: '14px',
                     fontWeight: '600',
-                    color: '#2D3A76'
-                  }}>Kata Sandi</label>
-                  <input
-                    type="text"
-                    name="password"
-                    value={formData.password}
-                    readOnly
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)',
-                      fontSize: '14px',
-                      backgroundColor: '#e0e0e0',
-                      color: '#2D396B'
-                    }}
-                  />
-                </div>
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Email Address
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Mail size={18} />
+                    </div>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-                {/* Pilihan Role */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '120px 1fr',
-                  alignItems: 'center',
-                  marginBottom: '28px'
-                }}>
+                {/* Password Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
                   <label style={{
-                    fontSize: '16px',
+                    display: 'block',
+                    fontSize: '14px',
                     fontWeight: '600',
-                    color: '#2D3A76'
-                  }}>Role</label>
-                  <div
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Kata Sandi
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Lock size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="password"
+                      value={formData.password}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Role Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '32px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Role User
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Shield size={18} />
+                    </div>
+                    <div
+                      style={{
+                        ...inputStyle,
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '48px'
+                      }}
+                    >
+                      {formData.role}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '16px',
+                  marginTop: '32px'
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={onClose}
                     style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(45, 58, 118, 0.5)',
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 32px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
                       fontSize: '14px',
-                      backgroundColor: '#e0e0e0',
-                      color: '#2D396B'
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em'
                     }}
                   >
-                    {formData.role}
-                  </div>
+                    Batal
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleDeleteConfirm}
+                    disabled={isDeleting}
+                    style={{
+                      background: isDeleting 
+                        ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
+                        : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 40px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: isDeleting ? 'not-allowed' : 'pointer',
+                      boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em',
+                      opacity: isDeleting ? 0.8 : 1
+                    }}
+                  >
+                    {isDeleting ? 'Menghapus...' : 'Hapus Data'}
+                  </motion.button>
                 </div>
-              </form>
-
-              {/* Tombol Aksi */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '20px',
-                paddingRight: '65px'
-              }}>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  style={{
-                    backgroundColor: '#2D3A76',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '12px 32px',
-                    borderRadius: '50px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteConfirm}
-                  style={{
-                    backgroundColor: '#00AEEF',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '12px 32px',
-                    borderRadius: '50px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Hapus
-                </button>
-              </div>
+              </motion.div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Pop-up Sukses */}
+      {/* Success Modal */}
       <AnimatePresence>
         {showSuccessModal && (
           <motion.div
@@ -316,110 +457,149 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
               padding: '20px',
-              fontFamily: 'Inter, sans-serif'
+              fontFamily: 'Inter, system-ui, sans-serif'
             }}
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut"}}
+              initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+              transition={{ 
+                duration: 0.5, 
+                ease: [0.4, 0, 0.2, 1],
+                type: "spring",
+                stiffness: 300,
+                damping: 20
+              }}
               style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
-                padding: '24px',
+                background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: '24px',
+                padding: '40px',
                 textAlign: 'center',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
                 position: 'relative',
                 width: '100%',
-                maxWidth: '300px'
+                maxWidth: '400px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
               }}
             >
-              <div style={{
-                backgroundColor: '#00AEEF',
-                borderRadius: '50%',
-                width: '60px',
-                height: '60px',
-                margin: '0 auto 16px auto',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Check style={{ 
-                  width: '30px', 
-                  height: '30px', 
-                  color: 'white'
-                }} />
-              </div>
-              <h3 style={{
-                margin: '0 0 8px 0',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#333'
-              }}>
-                Selamat!
-              </h3>
-              <p style={{
-                margin: '0 0 20px 0',
-                fontSize: '14px',
-                color: '#666',
-                lineHeight: '1.4'
-              }}>
-                Data User Berhasil Dihapus
-              </p>
-              <button
-                onClick={handleCloseSuccessModal}
+              {/* Success Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
                 style={{
-                  backgroundColor: '#00AEEF',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '8px 24px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  minWidth: '80px',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#0088CC';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#00AEEF';
-                }}
-              >
-                Oke
-              </button>
-              <button
-                onClick={handleCloseSuccessModal}
-                style={{
-                  position: 'absolute',
-                  top: '0.75rem',
-                  right: '0.75rem',
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  color: '#666',
-                  cursor: 'pointer',
-                  width: '30px',
-                  height: '30px',
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                  borderRadius: '50%',
+                  width: '100px',
+                  height: '100px',
+                  margin: '0 auto 24px auto',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: '50%',
-                  transition: 'background-color 0.2s'
+                  boxShadow: `0 20px 40px rgba(63, 186, 140, 0.4)`
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
               >
-                ×
-              </button>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                >
+                  <Check style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    color: 'white',
+                    strokeWidth: 3
+                  }} />
+                </motion.div>
+              </motion.div>
+
+              <motion.h3 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  margin: '0 0 12px 0',
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Berhasil!
+              </motion.h3>
+              
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{
+                  margin: '0 0 32px 0',
+                  fontSize: '16px',
+                  color: colors.accent1,
+                  lineHeight: '1.5',
+                  opacity: 0.9
+                }}
+              >
+                Data user berhasil dihapus dari sistem
+              </motion.p>
+              
+              <motion.button
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px 32px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.02em'
+                }}
+              >
+                Selesai
+              </motion.button>
+
+              {/* Close button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <X size={18} color={colors.primary} />
+              </motion.button>
             </motion.div>
           </motion.div>
         )}
