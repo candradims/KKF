@@ -483,8 +483,8 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'linear-gradient(135deg, rgba(63, 186, 140, 0.8) 0%, rgba(0, 191, 202, 0.6) 100%)',
-              backdropFilter: 'blur(8px)',
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -522,7 +522,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
                 style={{
-                  background: `linear-gradient(135deg, ${colors.success} 0%, #4ade80 100%)`,
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                   borderRadius: '50%',
                   width: '100px',
                   height: '100px',
@@ -587,7 +587,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCloseSuccessModal}
                 style={{
-                  background: `linear-gradient(135deg, ${colors.success} 0%, #4ade80 100%)`,
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
