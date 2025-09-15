@@ -87,6 +87,16 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
     }
   };
 
+  const hasChanges = () => {
+    if (!initialData) return false;
+    return (
+      formData.nama !== initialData.nama ||
+      formData.email !== initialData.email ||
+      formData.role !== initialData.role ||
+      formData.password.trim() !== ''
+    );
+  };
+
   const inputStyle = (fieldName) => ({
     padding: '16px 16px 16px 48px',
     borderRadius: '12px',
@@ -463,31 +473,31 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     Batal
                   </motion.button>
                   
-                  <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    form="form-edit-data"
-                    disabled={isSubmitting}
-                    style={{
-                      background: isSubmitting 
-                        ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
-                        : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '16px 40px',
-                      borderRadius: '12px',
-                      fontWeight: '600',
-                      fontSize: '14px',
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                      boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
-                      transition: 'all 0.3s ease',
-                      letterSpacing: '0.02em',
-                      opacity: isSubmitting ? 0.8 : 1
-                    }}
-                  >
-                    {isSubmitting ? 'Menyimpan...' : 'Simpan Data'}
-                  </motion.button>
+                 <motion.button
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  form="form-edit-data"
+                  disabled={isSubmitting || !hasChanges()}
+                  style={{
+                    background: isSubmitting || !hasChanges() 
+                      ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
+                      : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '16px 40px',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    cursor: isSubmitting || !hasChanges() ? 'not-allowed' : 'pointer',
+                    boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
+                    transition: 'all 0.3s ease',
+                    letterSpacing: '0.02em',
+                    opacity: isSubmitting || !hasChanges() ? 0.6 : 1
+                  }}
+                >
+                  {isSubmitting ? 'Menyimpan...' : 'Simpan Data'}
+                </motion.button>
                 </div>
               </motion.form>
             </motion.div>
