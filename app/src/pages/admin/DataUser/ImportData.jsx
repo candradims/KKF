@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Check } from 'lucide-react';
+import { Upload, Check, X, FileSpreadsheet } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const ImportData = ({ isOpen, onClose, onImport }) => {
@@ -7,6 +7,18 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Color palette
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+    gray300: '#cbd5e1',
+    gray400: '#94a3b8',
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -67,291 +79,465 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
             style={{
               position: 'fixed',
               top: 0,
               left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
-              fontFamily: 'Inter, sans-serif'
+              padding: '20px',
+              fontFamily: 'Inter, system-ui, sans-serif'
             }}
           >
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '32px',
-              maxWidth: '500px',
-              width: '100%',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              position: 'relative'
-            }}>
-              {/* Close Button */}
-              <button
-                onClick={handleCloseModal}
-                style={{
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  color: '#666',
-                  cursor: 'pointer',
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '50%',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-              >
-                ×
-              </button>
-
-              {/* Title */}
-              <h2 style={{
-                fontSize: '26px',
-                fontWeight: '800',
-                color: '#2D3A76',
-                textAlign: 'center',
-                marginBottom: '50px',
-                width: '100%'
-              }}>
-                Import Data Pengguna
-              </h2>
-
-              {/* File Input */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '550',
-                  color: '#374151',
-                  marginBottom: '8px'
-                }}>
-                  Pilih File Excel/CSV
-                </label>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px dashed #d1d5db',
-                  borderRadius: '8px',
-                  padding: '24px',
-                  cursor: 'pointer',
-                  position: 'relative'
-                }}>
-                  <input
-                    type="file"
-                    accept=".csv, .xlsx, .xls"
-                    onChange={handleFileChange}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      opacity: 0,
-                      cursor: 'pointer'
-                    }}
-                  />
-                  <div style={{ textAlign: 'center' }}>
-                    <Upload style={{
-                      width: '32px',
-                      height: '32px',
-                      color: '#9ca3af',
-                      marginBottom: '8px'
-                    }} />
-                    <p style={{ fontSize: '14px', color: '#6b7280' }}>
-                      {file ? file.name : 'Tarik & letakkan file atau klik di sini'}
-                    </p>
-                  </div>
-                </div>
-                {error && (
-                  <p style={{
-                    color: '#ef4444',
-                    fontSize: '12px',
-                    marginTop: '8px'
-                  }}>
-                    {error}
-                  </p>
-                )}
-              </div>
-
-              {/* Buttons */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px'
-              }}>
-                <button
-                  onClick={handleCloseModal}
-                  style={{
-                    backgroundColor: '#2D3A76',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '12px 32px',
-                    borderRadius: '50px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleImportClick}
-                  disabled={!file || isLoading}
-                  style={{
-                    backgroundColor: '#00AEEF',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '12px 32px',
-                    borderRadius: '50px',
-                    fontWeight: '600',
-                    cursor: !file || isLoading ? 'not-allowed' : 'pointer',
-                    opacity: !file || isLoading ? 0.7 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Mengimpor...
-                    </>
-                  ) : (
-                    <>
-                      <Upload style={{ width: '16px', height: '16px' }} />
-                      Import
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Success Modal */}
-          {showSuccessModal && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+                y: 0,
+                rotate: [0, 0.5, -0.5, 0]
+              }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              transition={{
+                duration: 0.5,
+                ease: [0.4, 0, 0.2, 1]
+              }}
               style={{
-                position: 'fixed',
+                background: '#e7f3f5ff',
+                borderRadius: '32px',
+                width: '100%',
+                maxWidth: '600px',
+                padding: '20px',
+                boxShadow: `
+                  0 12px 30px rgba(0, 0, 0, 0.12), 
+                  0 4px 12px rgba(0, 0, 0, 0.08)`,
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Decorative highlight */}
+              <div style={{
+                content: '""',
+                position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1001,
-                padding: '20px',
-                fontFamily: 'Inter, sans-serif'
-              }}
-            >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
+                height: '120px',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0))',
+                pointerEvents: 'none'
+              }} />
+
+              {/* Close Button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCloseModal}
                 style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '16px',
-                  padding: '39px',
-                  textAlign: 'center',
-                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                  position: 'relative',
-                  width: '100%',
-                  maxWidth: '500px'
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  backgroundColor: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  zIndex: 10
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.2)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.1)'}
+              >
+                <X size={20} color={colors.primary} />
+              </motion.button>
+
+              {/* Header */}
+              <motion.div
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                style={{
+                  padding: '40px 32px 20px',
+                  textAlign: 'center'
                 }}
               >
                 <div style={{
-                  backgroundColor: '#00AEEF',
+                  width: '80px',
+                  height: '80px',
                   borderRadius: '50%',
-                  width: '60px',
-                  height: '60px',
-                  margin: '0 auto 1rem auto',
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  margin: '0 auto 20px',
+                  boxShadow: `0 10px 30px rgba(0, 191, 202, 0.3)`
                 }}>
-                  <Check size={46} strokeWidth={3} color="#fff" />
+                  <FileSpreadsheet size={32} color="white" />
                 </div>
-                <h3 style={{
-                  color: '#2D396B',
-                  fontSize: '26px',
-                  fontWeight: '800',
-                  marginBottom: '0.5rem'
+                <h2 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  margin: 0,
+                  letterSpacing: '-0.02em'
                 }}>
-                  Selamat!
-                </h3>
+                  Import Data User
+                </h2>
                 <p style={{
-                  color: '#2D396B',
-                  marginBottom: '1.5rem',
-                  fontSize: '23px',
-                  fontWeight: '525'
+                  color: colors.accent1,
+                  fontSize: '16px',
+                  margin: '8px 0 0',
+                  opacity: 0.8
                 }}>
-                  Data User Berhasil Disimpan
+                  Unggah file Excel/CSV untuk mengimpor data
                 </p>
-                <button
-                  onClick={handleCloseSuccessModal}
-                  style={{
-                    backgroundColor: '#00AEEF',
-                    border: 'none',
-                    borderRadius: '9999px',
-                    padding: '0.75rem 3rem',
-                    color: 'white',
+              </motion.div>
+
+              {/* Form */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
+                  borderRadius: '20px',
+                  padding: '40px',
+                  margin: '0 32px 32px',
+                  border: `1px solid rgba(0, 192, 202, 0.68)`,
+                  position: 'relative'
+                }}
+              >
+                {/* File Input */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
                     fontWeight: '600',
-                    cursor: 'pointer',
-                    fontSize: '0.95rem',
-                    transition: 'background-color 0.2s'
-                  }}
-                >
-                  Oke
-                </button>
-                <button
-                  onClick={handleCloseSuccessModal}
-                  style={{
-                    position: 'absolute',
-                    top: '0.75rem',
-                    right: '0.75rem',
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '1.5rem',
-                    color: '#666',
-                    cursor: 'pointer',
-                    width: '30px',
-                    height: '30px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '50%',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-                >
-                  ×
-                </button>
+                    color: colors.primary,
+                    marginBottom: '12px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Pilih File Excel/CSV
+                  </label>
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: `2px dashed ${file ? colors.success : colors.secondary}40`,
+                      borderRadius: '12px',
+                      padding: '32px',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      background: file ? `${colors.success}10` : `${colors.secondary}08`,
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept=".csv, .xlsx, .xls"
+                      onChange={handleFileChange}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <div style={{ textAlign: 'center' }}>
+                      <Upload style={{
+                        width: '40px',
+                        height: '40px',
+                        color: file ? colors.success : colors.secondary,
+                        marginBottom: '12px'
+                      }} />
+                      <p style={{
+                        fontSize: '14px',
+                        color: file ? colors.success : colors.primary,
+                        fontWeight: file ? '600' : '400'
+                      }}>
+                        {file ? file.name : 'Tarik & letakkan file atau klik di sini'}
+                      </p>
+                      <p style={{
+                        fontSize: '12px',
+                        color: colors.accent1,
+                        marginTop: '4px'
+                      }}>
+                        Format yang didukung: .xlsx, .xls, .csv
+                      </p>
+                    </div>
+                  </motion.div>
+                  {error && (
+                    <p style={{
+                      color: '#ef4444',
+                      fontSize: '12px',
+                      marginTop: '8px',
+                      fontWeight: '500'
+                    }}>
+                      {error}
+                    </p>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '16px',
+                  marginTop: '32px'
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleCloseModal}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 32px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleImportClick}
+                    disabled={!file || isLoading}
+                    style={{
+                      background: isLoading
+                        ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
+                        : !file
+                          ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
+                          : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 40px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: (!file || isLoading) ? 'not-allowed' : 'pointer',
+                      boxShadow: !file
+                        ? 'none'
+                        : `0 4px 20px rgba(0, 191, 202, 0.4)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em',
+                      opacity: (!file || isLoading) ? 0.6 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    {isLoading ? (
+                      <>
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          border: '2px solid transparent',
+                          borderTop: '2px solid white',
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }} />
+                        Mengimpor...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={16} />
+                        Import Data
+                      </>
+                    )}
+                  </motion.button>
+                </div>
               </motion.div>
             </motion.div>
-          )}
+          </motion.div>
+
+          {/* Success Modal */}
+          <AnimatePresence>
+            {showSuccessModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(3, 91, 113, 0.3)',
+                  backdropFilter: 'blur(2px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1001,
+                  padding: '20px',
+                  fontFamily: 'Inter, system-ui, sans-serif'
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                  exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+                  transition={{
+                    duration: 0.5,
+                    ease: [0.4, 0, 0.2, 1],
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20
+                  }}
+                  style={{
+                    background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                    borderRadius: '24px',
+                    padding: '40px',
+                    textAlign: 'center',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '400px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                  }}
+                >
+                  {/* Success Icon */}
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                      borderRadius: '50%',
+                      width: '100px',
+                      height: '100px',
+                      margin: '0 auto 24px auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: `0 20px 40px rgba(63, 186, 140, 0.4)`
+                    }}
+                  >
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                    >
+                      <Check style={{
+                        width: '48px',
+                        height: '48px',
+                        color: 'white',
+                        strokeWidth: 3
+                      }} />
+                    </motion.div>
+                  </motion.div>
+
+                  <motion.h3
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    style={{
+                      margin: '0 0 12px 0',
+                      fontSize: '24px',
+                      fontWeight: '700',
+                      background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}
+                  >
+                    Berhasil!
+                  </motion.h3>
+
+                  <motion.p
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    style={{
+                      margin: '0 0 32px 0',
+                      fontSize: '16px',
+                      color: colors.accent1,
+                      lineHeight: '1.5',
+                      opacity: 0.9
+                    }}
+                  >
+                    Data user berhasil diimpor ke sistem
+                  </motion.p>
+
+                  <motion.button
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleCloseSuccessModal}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      padding: '16px 32px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    Selesai
+                  </motion.button>
+
+                  {/* Close button */}
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleCloseSuccessModal}
+                    style={{
+                      position: 'absolute',
+                      top: '16px',
+                      right: '16px',
+                      background: 'rgba(3, 91, 113, 0.1)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '36px',
+                      height: '36px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <X size={18} color={colors.primary} />
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
     </AnimatePresence>
