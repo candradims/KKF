@@ -57,7 +57,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
+              animate={{ scale: 1, opacity: 1, y: 0, rotate: [0, 0.5, -0.5, 0]}}
               exit={{ scale: 0.9, opacity: 0, y: 50 }}
               transition={{
                 duration: 0.5,
