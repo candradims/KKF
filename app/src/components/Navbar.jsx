@@ -245,6 +245,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             <input
               type="text"
               placeholder="Cari sesuatu..."
+              className="navbar-search-input" 
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
@@ -311,10 +312,29 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           100% { background-position: 200% center; }
         }
 
-        input::placeholder {
-          color: rgba(255, 255, 255, 0.95);
-          opacity: 1;
+        .navbar-search-input::placeholder {
+          color: rgba(255, 255, 255, 0.8) !important;
+          opacity: 1 !important;
+          transition: all 0.3s ease;
         }
+        
+        .navbar-search-input:focus::placeholder {
+          color: rgba(3, 91, 113, 0.5) !important;
+        }
+        
+        .navbar-search-input:not(:focus)::placeholder {
+          color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Fallback untuk browser lain */
+        input.navbar-search-input::-webkit-input-placeholder {
+          color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        input.navbar-search-input:focus::-webkit-input-placeholder {
+          color: rgba(3, 91, 113, 0.5) !important;
+        }
+
       `}</style>
     </>
   );
