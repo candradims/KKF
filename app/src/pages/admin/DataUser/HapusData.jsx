@@ -65,7 +65,7 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
     borderRadius: '12px',
     border: `2px solid rgba(3, 91, 113, 0.38)`,
     fontSize: '14px',
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#f0f4f5',
     color: colors.primary,
     width: '100%',
     outline: 'none',
