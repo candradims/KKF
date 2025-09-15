@@ -453,7 +453,7 @@ const Index = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: `linear-gradient(135deg, ${colors.light}40 0%, ${colors.gray50} 100%)`,
+      background: '#e7f3f5ff',
       padding: '24px',
       fontFamily: 'Inter, sans-serif',
       position: 'relative'
