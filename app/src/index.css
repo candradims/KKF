@@ -2,4 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global font setting with high priority */
+* {
+  font-family: 'Open Sans', sans-serif !important;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif !important;
+}
+
+#root {
+  font-family: 'Open Sans', sans-serif !important;
+}
+
+/* Ensure all input and interactive elements use Open Sans */
+input, textarea, select, button {
+  font-family: 'Open Sans', sans-serif !important;
+}
+
+/* Override any specific font-family declarations */
+h1, h2, h3, h4, h5, h6, p, div, span, a, li, td, th {
+  font-family: 'Open Sans', sans-serif !important;
+}
+
 

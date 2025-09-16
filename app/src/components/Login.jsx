@@ -116,7 +116,7 @@ const Login = () => {
       html, body {
         margin: 0;
         padding: 0;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Open Sans', sans-serif;
         overflow-x: hidden;
         background: linear-gradient(135deg, ${colors.darker} 0%, ${colors.dark} 50%, ${colors.primary} 100%);
         min-height: 100vh;
@@ -695,7 +695,7 @@ const Login = () => {
                     fontSize: '1rem',
                     backgroundColor: 'rgba(15, 23, 42, 0.6)',
                     color: 'white',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'Open Sans, sans-serif',
                     fontWeight: '500',
                     outline: 'none',
                     transition: 'all 0.3s ease',
@@ -762,7 +762,7 @@ const Login = () => {
                     fontSize: '1rem',
                     backgroundColor: 'rgba(15, 23, 42, 0.6)',
                     color: 'white',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'Open Sans, sans-serif',
                     fontWeight: '500',
                     outline: 'none',
                     transition: 'all 0.3s ease',
@@ -861,7 +861,7 @@ const Login = () => {
                     appearance: 'none',
                     cursor: 'pointer',
                     outline: 'none',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'Open Sans, sans-serif',
                     fontWeight: '500',
                     transition: 'all 0.3s ease',
                     backdropFilter: 'blur(10px)'

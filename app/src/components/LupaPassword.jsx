@@ -110,7 +110,7 @@ const ForgotPassword = () => {
       html, body {
         margin: 0;
         padding: 0;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Open Sans', sans-serif;
         overflow-x: hidden;
         background: linear-gradient(135deg, ${colors.darker} 0%, ${colors.dark} 50%, ${colors.primary} 100%);
         min-height: 100vh;
