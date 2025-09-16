@@ -354,6 +354,100 @@ export class PenawaranController {
     }
   }
 
+  // Perbarui discount penawaran (Khusus Admin)
+  static async updateDiscount(req, res) {
+    try {
+      console.log("🎯 updateDiscount called");
+      console.log("🎯 Request headers:", req.headers);
+      console.log("🎯 Request params:", req.params);
+      console.log("🎯 Request body:", req.body);
+      console.log("🎯 Request body type:", typeof req.body);
+      console.log("🎯 Request body stringified:", JSON.stringify(req.body));
+
+      const { id } = req.params;
+      const { discount, catatan } = req.body;
+
+      console.log("🎯 Extracted values:", { id, discount, catatan });
+      console.log("🎯 Discount type:", typeof discount);
+
+      if (!discount) {
+        console.log("❌ Discount validation failed: empty discount");
+        return res.status(400).json({
+          success: false,
+          message: "Discount harus diisi",
+        });
+      }
+
+      // Validasi nilai discount yang diizinkan
+      const allowedDiscounts = ["0%", "10%", "20%"];
+      console.log("🎯 Allowed discounts:", allowedDiscounts);
+      console.log(
+        "🎯 Is discount in allowed list?",
+        allowedDiscounts.includes(discount)
+      );
+
+      if (!allowedDiscounts.includes(discount)) {
+        console.log("❌ Discount validation failed: invalid value", discount);
+        return res.status(400).json({
+          success: false,
+          message: "Discount harus 0%, 10%, atau 20%",
+        });
+      }
+
+      console.log("🎯 About to call PenawaranModel.updateDiscount");
+      const updatedPenawaran = await PenawaranModel.updateDiscount(
+        id,
+        discount,
+        catatan || `Discount diubah menjadi ${discount} oleh Admin`
+      );
+
+      console.log("🎯 PenawaranModel.updateDiscount result:", updatedPenawaran);
+
+      if (!updatedPenawaran || updatedPenawaran.length === 0) {
+        console.log("❌ No penawaran found with id:", id);
+        return res.status(404).json({
+          success: false,
+          message: "Penawaran tidak ditemukan",
+        });
+      }
+
+      // Convert discount percentage to numeric for response consistency
+      let numericDiscount;
+      switch (discount) {
+        case "0%":
+          numericDiscount = 0;
+          break;
+        case "10%":
+          numericDiscount = 10;
+          break;
+        case "20%":
+          numericDiscount = 20;
+          break;
+        default:
+          numericDiscount =
+            parseFloat(discount.toString().replace("%", "")) || 0;
+      }
+
+      console.log("✅ Discount updated successfully");
+      res.status(200).json({
+        success: true,
+        message: "Discount penawaran berhasil diperbarui",
+        data: {
+          ...updatedPenawaran[0],
+          diskon: numericDiscount, // Ensure we return the numeric value
+        },
+      });
+    } catch (error) {
+      console.error("❌ Error updating discount:", error);
+      console.error("❌ Error stack:", error.stack);
+      res.status(500).json({
+        success: false,
+        message: "Gagal memperbarui discount penawaran",
+        error: error.message,
+      });
+    }
+  }
+
   // Ambil penawaran berdasarkan status
   static async getPenawaranByStatus(req, res) {
     try {

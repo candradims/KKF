@@ -38,5 +38,6 @@ router.post(
 
 // Rute yang hanya dapat diakses oleh admin
 router.put("/:id/status", adminOnly, PenawaranController.updateStatus);
+router.put("/:id/discount", adminOnly, PenawaranController.updateDiscount);
 
 export default router;
