@@ -92,14 +92,17 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
         input::placeholder {
           color: ${colors.accent1};
           opacity: 0.6;
+          font-family: "Open Sans", sans-serif;
         }
         select:invalid {
           color: ${colors.accent1};
           opacity: 0.6;
+          font-family: "Open Sans", sans-serif;
         }
         select option {
           color: ${colors.primary};
           background-color: #e7f3f5ff;
+          font-family: "Open Sans", sans-serif;
         }
       `}
     </style>
@@ -123,7 +126,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
               justifyContent: 'center',
               zIndex: 1000,
               padding: '20px',
-              fontFamily: 'Inter, system-ui, sans-serif'
+              fontFamily: '"Open Sans", sans-serif'
             }}
           >
             <motion.div
@@ -490,7 +493,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
               justifyContent: 'center',
               zIndex: 1000,
               padding: '20px',
-              fontFamily: 'Inter, system-ui, sans-serif'
+              fontFamily: '"Open Sans", sans-serif'
             }}
           >
             <motion.div
