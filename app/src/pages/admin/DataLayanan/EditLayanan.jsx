@@ -81,11 +81,20 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
         
         // Ambil unique nama_layanan, satuan, dan wilayah_hjt dari database
         const uniqueLayanan = [...new Set(data.map(item => item.nama_layanan).filter(Boolean))];
-        const uniqueSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
+        const rawSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
         const uniqueHjt = [...new Set(data.map(item => item.wilayah_hjt).filter(Boolean))];
         
+        // Normalize dan filter satuan untuk hanya Mbps dan units
+        const normalizedSatuan = rawSatuan
+          .map(satuan => satuan.toLowerCase())
+          .filter(satuan => satuan === 'mbps' || satuan === 'units')
+          .map(satuan => satuan === 'mbps' ? 'Mbps' : 'units');
+        
+        // Remove duplicates and sort
+        const uniqueSatuan = [...new Set(normalizedSatuan)].sort();
+        
         setLayananOptions(uniqueLayanan.sort());
-        setSatuanOptions(uniqueSatuan.sort());
+        setSatuanOptions(uniqueSatuan.length > 0 ? uniqueSatuan : ["Mbps", "units"]);
         setHjtOptions(uniqueHjt.sort());
         
         console.log("✅ Options loaded:", { 
@@ -111,23 +120,7 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
           "Cloud Service",
           "Dark Fiber"
         ]);
-        setSatuanOptions([
-          "Mbps",
-          "Gbps", 
-          "Port",
-          "Unit",
-          "Rack",
-          "Slot",
-          "Bandwidth",
-          "Connection",
-          "License",
-          "Instance",
-          "TB",
-          "GB",
-          "User",
-          "Device",
-          "Site"
-        ]);
+        setSatuanOptions(["Mbps", "units"]);
         setHjtOptions([
           "Jakarta",
           "Sumatra",

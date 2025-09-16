@@ -24,7 +24,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   
   // State untuk custom input
   const [showCustomLayanan, setShowCustomLayanan] = useState(false);
-  const [showCustomSatuan, setShowCustomSatuan] = useState(false);
 
   // Fetch data dari database ketika komponen dimount
   useEffect(() => {
@@ -46,11 +45,20 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       
       // Ambil unique nama_layanan, satuan, dan wilayah_hjt dari database
       const uniqueLayanan = [...new Set(data.map(item => item.nama_layanan).filter(Boolean))];
-      const uniqueSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
+      const rawSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
       const uniqueHjt = [...new Set(data.map(item => item.wilayah_hjt).filter(Boolean))];
       
+      // Normalize dan filter satuan untuk hanya Mbps dan units
+      const normalizedSatuan = rawSatuan
+        .map(satuan => satuan.toLowerCase())
+        .filter(satuan => satuan === 'mbps' || satuan === 'units')
+        .map(satuan => satuan === 'mbps' ? 'Mbps' : 'units');
+      
+      // Remove duplicates and sort
+      const uniqueSatuan = [...new Set(normalizedSatuan)].sort();
+      
       setLayananOptions(uniqueLayanan.sort());
-      setSatuanOptions(uniqueSatuan.sort());
+      setSatuanOptions(uniqueSatuan.length > 0 ? uniqueSatuan : ["Mbps", "units"]);
       setHjtOptions(uniqueHjt.sort());
       
       console.log("✅ Options loaded:", { 
@@ -75,7 +83,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
         "IBBC CIR4-BW10 On-Net FTTH",
         "Cloud 1corevCPU 2GB Mem Cap 50GB"
       ]);
-      setSatuanOptions(["Mbps", "Units"]);
+      setSatuanOptions(["Mbps", "units"]);
       setHjtOptions(["Sumatra", "Jawa Bali", "Jabodetabek", "Intim"]);
     } finally {
       setIsLoadingOptions(false);
@@ -95,16 +103,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
         setFormData((prev) => ({ ...prev, [name]: value }));
       }
     }
-    // Handle custom satuan
-    else if (name === 'satuan') {
-      if (value === 'custom') {
-        setShowCustomSatuan(true);
-        setFormData((prev) => ({ ...prev, [name]: '' }));
-      } else {
-        setShowCustomSatuan(false);
-        setFormData((prev) => ({ ...prev, [name]: value }));
-      }
-    }
     else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -121,7 +119,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       tarif: "",
     });
     setShowCustomLayanan(false);
-    setShowCustomSatuan(false);
     onClose();
   };
 
@@ -137,7 +134,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       tarif: "",
     });
     setShowCustomLayanan(false);
-    setShowCustomSatuan(false);
     onClose();
   };
 
@@ -450,50 +446,8 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                         {option}
                       </option>
                     ))}
-                    <option value="custom">Lainnya (Input Manual)</option>
                   </select>
                 </div>
-
-                {/* Custom Satuan Input */}
-                {showCustomSatuan && (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "120px 1fr",
-                      alignItems: "center",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    <label
-                      htmlFor="customSatuan"
-                      style={{
-                        fontSize: "16px",
-                        fontWeight: "600",
-                        color: "#2D3A76",
-                      }}
-                    >
-                      Input Satuan*
-                    </label>
-                    <input
-                      type="text"
-                      id="customSatuan"
-                      name="satuan"
-                      value={formData.satuan}
-                      onChange={handleChange}
-                      placeholder="Masukkan satuan baru"
-                      required
-                      style={{
-                        padding: "12px 16px",
-                        borderRadius: "10px",
-                        border: "1px solid rgba(45, 58, 118, 0.5)",
-                        fontSize: "14px",
-                        backgroundColor: "#ffffff",
-                        width: "100%",
-                        color: "#2D396B",
-                      }}
-                    />
-                  </div>
-                )}
 
                 {/* Input Backbone */}
                 <div
