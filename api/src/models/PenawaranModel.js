@@ -310,4 +310,58 @@ export class PenawaranModel {
       throw new Error(`Gagal memperbarui status penawaran: ${error.message}`);
     }
   }
+
+  // Perbarui discount penawaran (untuk admin)
+  static async updateDiscount(id, discount, catatan = null) {
+    try {
+      console.log("🔧 PenawaranModel.updateDiscount called with:", {
+        id,
+        discount,
+        catatan,
+      });
+
+      // Convert discount string to numeric value for database
+      let numericDiscount;
+      switch (discount) {
+        case "0%":
+          numericDiscount = 0;
+          break;
+        case "10%": // MB Niaga
+          numericDiscount = 10;
+          break;
+        case "20%": // GM SBU
+          numericDiscount = 20;
+          break;
+        default:
+          // If it's already a number or percentage string, parse it
+          numericDiscount =
+            parseFloat(discount.toString().replace("%", "")) || 0;
+      }
+
+      console.log("🔧 Converted discount to numeric:", numericDiscount);
+
+      const updateData = { diskon: numericDiscount };
+      if (catatan) updateData.catatan = catatan;
+
+      console.log("🔧 Update data object:", updateData);
+      console.log("🔧 Where condition:", { id_penawaran: id });
+
+      const { data, error } = await db.update("data_penawaran", updateData, {
+        id_penawaran: id,
+      });
+
+      console.log("🔧 Database update result:", { data, error });
+
+      if (error) {
+        console.error("🔧 Database error:", error);
+        throw error;
+      }
+
+      console.log("🔧 Update successful, returning data:", data);
+      return data;
+    } catch (error) {
+      console.error("🔧 PenawaranModel.updateDiscount error:", error);
+      throw new Error(`Gagal memperbarui discount penawaran: ${error.message}`);
+    }
+  }
 }

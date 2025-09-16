@@ -5,26 +5,32 @@ import { penawaranAPI, getUserData } from '../../../utils/api';
 
 // Helper function untuk konversi diskon
 const convertDiscountToPercentage = (discount) => {
+  console.log("🔄 convertDiscountToPercentage input:", discount, "type:", typeof discount);
+  
   // Handle null, undefined, atau empty values
-  if (!discount) {
+  if (!discount && discount !== 0) {
+    console.log("🔄 convertDiscountToPercentage returning 0% for null/undefined");
     return '0%';
   }
   
-  // Convert to string if not already
-  const discountStr = String(discount);
+  // Convert numeric discount to display format
+  const numericValue = parseFloat(discount);
+  console.log("🔄 convertDiscountToPercentage parsed numeric:", numericValue);
   
-  if (discountStr === 'MB Niaga') {
-    return '10%';
-  } else if (discountStr === 'GM SBU') {
-    return '20%';
+  if (numericValue === 10) {
+    console.log("🔄 convertDiscountToPercentage returning MB Niaga");
+    return '10% (MB Niaga)';
+  } else if (numericValue === 20) {
+    console.log("🔄 convertDiscountToPercentage returning GM SBU");
+    return '20% (GM SBU)';
+  } else if (numericValue === 0) {
+    console.log("🔄 convertDiscountToPercentage returning 0%");
+    return '0%';
   }
   
-  // Pastikan selalu ada tanda % jika berupa angka
-  if (discountStr && !discountStr.includes('%') && !isNaN(discountStr)) {
-    return discountStr + '%';
-  }
-  
-  return discountStr || '0%';
+  // For any other numeric value, show as percentage
+  console.log("🔄 convertDiscountToPercentage returning generic percentage:", numericValue + '%');
+  return numericValue + '%';
 };
 
 const Index = () => {
@@ -35,6 +41,11 @@ const Index = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatusItem, setSelectedStatusItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
+  
+  // State untuk discount modal
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [selectedDiscountItem, setSelectedDiscountItem] = useState(null);
+  const [newDiscount, setNewDiscount] = useState('');
 
   // State untuk data dari API
   const [penawaranData, setPenawaranData] = useState([]);
@@ -61,7 +72,8 @@ const Index = () => {
         // Transform data dari API ke format yang digunakan di frontend
         const transformedData = result.data.map(item => {
           try {
-            return {
+            console.log("🔧 Transforming item:", item.id_penawaran, "diskon:", item.diskon);
+            const transformedItem = {
               id: item.id_penawaran,
               id_penawaran: item.id_penawaran, // Add this for Detail component
               tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
@@ -71,13 +83,16 @@ const Index = () => {
               nomorKontrak: item.nomor_kontrak,
               kontrakKe: item.kontrak_tahun,
               referensi: item.wilayah_hjt,
-              discount: convertDiscountToPercentage(item.diskon),
+              diskon: item.diskon, // Preserve the raw numeric value for editing
+              discount: convertDiscountToPercentage(item.diskon), // Display format
               durasi: item.durasi_kontrak,
               status: item.status || 'Menunggu',
               actions: ['view'],
               // Tambahan data untuk komponen Detail
               rawData: item // Data mentah dari API untuk keperluan Detail component
             };
+            console.log("🔧 Transformed item:", transformedItem.id, "diskon:", transformedItem.diskon, "display:", transformedItem.discount);
+            return transformedItem;
           } catch (itemError) {
             console.error('❌ Error transforming item:', item, itemError);
             // Return a safe fallback for this item
@@ -91,6 +106,7 @@ const Index = () => {
               nomorKontrak: item.nomor_kontrak || '-',
               kontrakKe: item.kontrak_tahun || '-',
               referensi: item.wilayah_hjt || '-',
+              diskon: 0, // Preserve numeric value
               discount: '0%',
               durasi: item.durasi_kontrak || '-',
               status: 'Error',
@@ -228,6 +244,118 @@ const Index = () => {
     setShowStatusModal(false);
     setSelectedStatusItem(null);
     setNewStatus('');
+  };
+
+  // Discount handlers
+  const handleDiscountClick = (item) => {
+    setSelectedDiscountItem(item);
+    
+    // Convert numeric discount back to selection value
+    const numericDiscount = parseFloat(item.diskon);
+    let initialDiscount;
+    
+    if (numericDiscount === 10) {
+      initialDiscount = '10%';
+    } else if (numericDiscount === 20) {
+      initialDiscount = '20%';
+    } else {
+      initialDiscount = '0%';
+    }
+    
+    setNewDiscount(initialDiscount);
+    setShowDiscountModal(true);
+  };
+
+  const handleDiscountSelectChange = (e) => {
+    setNewDiscount(e.target.value);
+  };
+
+  const isDiscountUnchanged = () => {
+    if (!newDiscount || !selectedDiscountItem) return true;
+    
+    const currentNumericDiscount = parseFloat(selectedDiscountItem.diskon);
+    
+    return (
+      (newDiscount === '0%' && currentNumericDiscount === 0) ||
+      (newDiscount === '10%' && currentNumericDiscount === 10) ||
+      (newDiscount === '20%' && currentNumericDiscount === 20)
+    );
+  };
+
+  const handleDiscountChange = async () => {
+    if (!selectedDiscountItem || newDiscount === null || newDiscount === undefined) {
+      console.log("❌ Missing data:", { selectedDiscountItem, newDiscount });
+      return;
+    }
+    
+    try {
+      console.log("📝 Updating discount for penawaran:", selectedDiscountItem.id, "to:", newDiscount);
+      console.log("📝 User data:", getUserData());
+      
+      // Call API to update discount
+      const userData = getUserData();
+      console.log("📝 About to make API call with user data:", userData);
+      console.log("📝 Request body:", JSON.stringify({
+        discount: newDiscount,
+        catatan: `Discount diubah oleh Admin menjadi ${newDiscount}`
+      }));
+      
+      const response = await fetch(`http://localhost:3000/api/penawaran/${selectedDiscountItem.id}/discount`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userData.id_user.toString(),
+          'X-User-Role': userData.role_user,
+          'X-User-Email': userData.email_user
+        },
+        body: JSON.stringify({
+          discount: newDiscount,
+          catatan: `Discount diubah oleh Admin menjadi ${newDiscount}`
+        })
+      });
+
+      console.log("📝 Response status:", response.status);
+      console.log("📝 Response headers:", response.headers);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Response error text:", errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log("📝 Response result:", result);
+      
+      if (result.success) {
+        console.log("✅ API Update successful, result:", result);
+        
+        // Show success message
+        alert(`Discount penawaran berhasil diubah menjadi "${newDiscount}"`);
+        
+        // Close modal first
+        setShowDiscountModal(false);
+        setSelectedDiscountItem(null);
+        setNewDiscount('');
+        
+        // Refresh data untuk memastikan sinkronisasi dengan database
+        console.log("🔄 Refreshing data from database...");
+        fetchPenawaranData();
+        
+      } else {
+        throw new Error(result.message || 'Failed to update discount');
+      }
+      
+    } catch (error) {
+      console.error("❌ Error updating discount:", error);
+      alert(`Gagal mengubah discount: ${error.message}`);
+    }
+    // Don't close modal here in case user wants to retry
+  };
+
+  const handleCloseDiscountModal = () => {
+    setShowDiscountModal(false);
+    setSelectedDiscountItem(null);
+    setNewDiscount('');
   };
 
   const getStatusStyle = (status) => {
@@ -601,7 +729,32 @@ const Index = () => {
                     fontSize: '14px',
                     color: '#374151'
                   }}>
-                    {item.discount}
+                    <button
+                      onClick={() => handleDiscountClick(item)}
+                      style={{
+                        backgroundColor: '#F3F4F6',
+                        color: '#374151',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        border: '1px solid #D1D5DB',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        outline: 'none'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#E5E7EB';
+                        e.target.style.transform = 'scale(1.02)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = '#F3F4F6';
+                        e.target.style.transform = 'scale(1)';
+                      }}
+                      title="Klik untuk mengubah discount"
+                    >
+                      {convertDiscountToPercentage(item.diskon)} {/* Changed from 'discount' to 'diskon' */}
+                    </button>
                   </td>
                   <td style={{
                     padding: '12px 16px',
@@ -895,6 +1048,138 @@ const Index = () => {
                 }}
                 onMouseOut={(e) => {
                   if (newStatus && newStatus !== selectedStatusItem?.status) {
+                    e.target.style.backgroundColor = '#00AEEF';
+                  }
+                }}
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit Discount */}
+      {showDiscountModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}
+          onClick={handleCloseDiscountModal}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: '30px',
+              borderRadius: '12px',
+              width: '500px',
+              maxWidth: '90vw',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ 
+              margin: '0 0 20px 0', 
+              fontSize: '20px', 
+              fontWeight: '600',
+              color: '#1F2937'
+            }}>
+              Edit Discount
+            </h3>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ 
+                display: 'block', 
+                marginBottom: '8px', 
+                fontSize: '14px', 
+                fontWeight: '500',
+                color: '#374151'
+              }}>
+                Pilih Discount:
+              </label>
+              <select
+                value={newDiscount}
+                onChange={handleDiscountSelectChange}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '2px solid #E5E7EB',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#00AEEF';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#E5E7EB';
+                }}
+              >
+                <option value="">Pilih discount...</option>
+                <option value="0%">0%</option>
+                <option value="10%">10% (MB Niaga)</option>
+                <option value="20%">20% (GM SBU)</option>
+              </select>
+            </div>
+
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px', 
+              justifyContent: 'flex-end' 
+            }}>
+              <button
+                onClick={handleCloseDiscountModal}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#F3F4F6',
+                  color: '#374151',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#E5E7EB';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#F3F4F6';
+                }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDiscountChange}
+                disabled={isDiscountUnchanged()}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: isDiscountUnchanged() ? '#D1D5DB' : '#00AEEF',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: isDiscountUnchanged() ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  if (!isDiscountUnchanged()) {
+                    e.target.style.backgroundColor = '#0097A7';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isDiscountUnchanged()) {
                     e.target.style.backgroundColor = '#00AEEF';
                   }
                 }}

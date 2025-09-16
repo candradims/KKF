@@ -7,25 +7,23 @@ import { penawaranAPI, getUserData } from '../../../utils/api';
 // Helper function untuk konversi diskon
 const convertDiscountToPercentage = (discount) => {
   // Handle null, undefined, atau empty values
-  if (!discount) {
+  if (!discount && discount !== 0) {
     return '0%';
   }
   
-  // Convert to string if not already
-  const discountStr = String(discount);
+  // Convert numeric discount to display format
+  const numericValue = parseFloat(discount);
   
-  if (discountStr === 'MB Niaga') {
-    return '10%';
-  } else if (discountStr === 'GM SBU') {
-    return '20%';
+  if (numericValue === 10) {
+    return '10% (MB Niaga)';
+  } else if (numericValue === 20) {
+    return '20% (GM SBU)';
+  } else if (numericValue === 0) {
+    return '0%';
   }
   
-  // Pastikan selalu ada tanda % jika berupa angka
-  if (discountStr && !discountStr.includes('%') && !isNaN(discountStr)) {
-    return discountStr + '%';
-  }
-  
-  return discountStr || '0%';
+  // For any other numeric value, show as percentage
+  return numericValue + '%';
 };
 
 const Index = () => {

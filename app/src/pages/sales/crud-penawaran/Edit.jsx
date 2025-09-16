@@ -190,7 +190,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     kontrakTahunKe: "",
     referensiHJT: "",
     durasiKontrak: "",
-    discount: "",
     item: "",
     keterangan: "",
     hasrat: "",
@@ -200,18 +199,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   // Pre-fill form with existing data when editing and load pengeluaran data
   useEffect(() => {
     if (editData) {
-      const discount = editData.discount || "";
-      let selectedDiscountOption = "";
-      
-      // Reverse-map percentage back to option for editing
-      if (discount === '10%') {
-        selectedDiscountOption = 'MB Niaga';
-      } else if (discount === '20%') {
-        selectedDiscountOption = 'GM SBU';
-      } else {
-        selectedDiscountOption = discount;
-      }
-
       const initialData = {
         sales: editData.rawData?.sales || editData.sales || editData.namaSales || "",
         tanggal: editData.tanggal || "",
@@ -220,8 +207,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         kontrakTahunKe: editData.kontrakKe || editData.kontrakTahunKe || "",
         referensiHJT: editData.referensi || editData.referensiHJT || "",
         durasiKontrak: editData.durasi || editData.durasiKontrak || "",
-        discount: discount,
-        _selectedDiscountOption: selectedDiscountOption,
         item: "",
         keterangan: "",
         hasrat: "",
@@ -310,50 +295,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
   };
 
-  // Function to get the correct dropdown value for display
-  const getDropdownDiscountValue = () => {
-    const discount = formData.discount;
-    const selectedOption = formData._selectedDiscountOption;
-    
-    console.log('🔍 Getting dropdown value:', { discount, selectedOption });
-    
-    // If we have a stored selection, use that
-    if (selectedOption) {
-      return selectedOption;
-    }
-    
-    // Otherwise, try to reverse-map percentage to option
-    if (discount === '10%') {
-      return 'MB Niaga';
-    } else if (discount === '20%') {
-      return 'GM SBU';
-    }
-    
-    // For other values (0%, empty, etc.), return as-is
-    return discount || '';
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Handle discount conversion
-    if (name === 'discount') {
-      let discountValue = value;
-      if (value === 'MB Niaga') {
-        discountValue = '10%';
-      } else if (value === 'GM SBU') {
-        discountValue = '20%';
-      }
-      
-      console.log('🔢 Discount conversion:', { original: value, converted: discountValue });
-      
-      setFormData((prev) => ({
-        ...prev,
-        [name]: discountValue,
-        _selectedDiscountOption: value, // Store original selection for dropdown display
-      }));
-      return;
-    }
     
     setFormData((prev) => ({
       ...prev,
@@ -787,61 +730,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       <option value="kalimantan">Kalimantan</option>
                       <option value="jawa-bali">Jawa-Bali</option>
                       <option value="intim">Intim</option>
-                    </select>
-                    <div
-                      style={{
-                        position: "absolute",
-                        right: "12px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        pointerEvents: "none",
-                        fontSize: "12px",
-                        color: "#666",
-                      }}
-                    >
-                      ▼
-                    </div>
-                  </div>
-                </div>
-
-                {/* Discount */}
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                      color: "#374151",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    Discount*
-                  </label>
-                  <div style={{ position: "relative" }}>
-                    <select
-                      name="discount"
-                      value={getDropdownDiscountValue()}
-                      onChange={handleInputChange}
-                      disabled={isSaving}
-                      required
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        border: "2px solid #B0BEC5",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        outline: "none",
-                        backgroundColor: isSaving ? "#f5f5f5" : "white",
-                        boxSizing: "border-box",
-                        appearance: "none",
-                        cursor: isSaving ? "not-allowed" : "pointer",
-                        transition: "all 0.2s ease-in-out",
-                      }}
-                    >
-                      <option value="">Pilih Discount</option>
-                      <option value="0%">0%</option>
-                      <option value="MB Niaga">MB Niaga</option>
-                      <option value="GM SBU">GM SBU</option>
                     </select>
                     <div
                       style={{
