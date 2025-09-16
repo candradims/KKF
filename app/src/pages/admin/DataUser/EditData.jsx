@@ -339,7 +339,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     marginBottom: '8px',
                     letterSpacing: '0.02em'
                   }}>
-                    Nama Lengkap *
+                    Nama Lengkap 
                   </label>
                   <div style={{ position: 'relative' }}>
                     <div style={iconContainerStyle('nama')}>
@@ -375,7 +375,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     marginBottom: '8px',
                     letterSpacing: '0.02em'
                   }}>
-                    Email Address *
+                    Email Address 
                   </label>
                   <div style={{ position: 'relative' }}>
                     <div style={iconContainerStyle('email')}>
@@ -446,7 +446,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     marginBottom: '8px',
                     letterSpacing: '0.02em'
                   }}>
-                    Role User *
+                    Role User
                   </label>
                   <div style={{ position: 'relative' }}>
                     <div style={iconContainerStyle('role')}>
