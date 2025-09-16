@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Eye, RotateCcw } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
@@ -28,6 +29,7 @@ const convertDiscountToPercentage = (discount) => {
 };
 
 const Index = () => {
+  const location = useLocation();
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -40,6 +42,13 @@ const Index = () => {
   const [penawaranData, setPenawaranData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Apply filter from dashboard navigation
+  useEffect(() => {
+    if (location.state?.filterStatus) {
+      setFilterStatus(location.state.filterStatus);
+    }
+  }, [location.state]);
 
   // Fetch data penawaran dari API
   const fetchPenawaranData = async () => {

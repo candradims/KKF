@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LineChart,
   Line,
@@ -18,6 +19,8 @@ import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircl
 import { getUserData, getAuthHeaders } from '../../utils/api';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [showDetailModal, setShowDetailModal] = useState(null); // null, 'ditolak', 'menunggu', 'disetujui'
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,21 @@ const Dashboard = () => {
     accent1: '#008bb0',
     accent2: '#0090a8',
     success: '#3fba8c',
+  };
+
+  // Navigate to data penawaran with status filter
+  const navigateToDataPenawaran = (status) => {
+    setShowDetailModal(null); // Close modal first
+    
+    // Convert status format to match DataPenawaran options
+    let filterStatus = '';
+    if (status === 'ditolak') filterStatus = 'Ditolak';
+    else if (status === 'menunggu') filterStatus = 'Menunggu';
+    else if (status === 'disetujui') filterStatus = 'Disetujui';
+    
+    navigate('/superAdmin/data-penawaran', { 
+      state: { filterStatus: filterStatus } 
+    });
   };
 
   // Load dashboard statistics
@@ -59,6 +77,12 @@ const Dashboard = () => {
       
       if (data.success) {
         setDashboardStats(data.data);
+        // Debug: Log data untuk melihat struktur
+        console.log('Dashboard Stats:', data.data);
+        console.log('Recent Penawaran:', data.data.recentPenawaran);
+        if (data.data.recentPenawaran && data.data.recentPenawaran.length > 0) {
+          console.log('Sample status:', data.data.recentPenawaran[0].status);
+        }
       } else {
         throw new Error(data.message || 'Failed to load dashboard stats');
       }
@@ -226,185 +250,100 @@ const Dashboard = () => {
         maxWidth: '80rem',
         margin: '0 auto'
       }}>
-        {/* Header Cards */}
+        {/* Header Cards - Status Detail */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '24px',
           marginBottom: '32px'
         }}>
-          {/* Card 1 - Jumlah Total Penawaran */}
-          <div style={{
-            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+          {/* Card 1 - Ditolak */}
+           <div style={{
+            background: `linear-gradient(135deg, #EF4444 0%, #f87171 100%)`,
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             cursor: 'pointer'
-          }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
-                }}>
-                  <Users style={{ width: '20px', height: '20px' }} />
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    opacity: '0.9'
-                  }}>Jumlah Total Penawaran</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                   <XCircle style={{ width: '20px', height: '20px' }} />
+                   <span style={{ fontSize: '14px', fontWeight: '500', opacity: '0.9' }}>Ditolak</span>
+                   <span style={{ marginLeft: '6px', cursor: 'pointer', opacity: 0.8 }} onClick={() => setShowDetailModal('ditolak')}>
+                     <ChevronDown style={{ width: '18px', height: '18px' }} />
+                   </span>
                 </div>
-                <div style={{
-                  fontSize: '30px',
-                  fontWeight: 'bold'
-                }}>
-                  {loading ? '...' : (dashboardStats?.totalPenawaran || 0)}
+                <div style={{ fontSize: '30px', fontWeight: 'bold' }}>
+                  {loading ? '...' : (dashboardStats?.statusStats?.ditolak || 0)}
                 </div>
               </div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
-              }}>
-                <BarChart3 style={{ width: '24px', height: '24px' }} />
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '8px' }}>
+                <XCircle style={{ width: '24px', height: '24px' }} />
               </div>
             </div>
           </div>
 
-          {/* Card 2 - Status Penawaran */}
+          {/* Card 2 - Menunggu */}
           <div style={{
-            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+            background: `linear-gradient(135deg, #fce40bff 0%, #fde68a 100%)`,
             borderRadius: '12px',
             padding: '24px',
-            color: 'white',
+            color: 'black',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             cursor: 'pointer'
-          }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
-                }}>
-                  <TrendingUp style={{ width: '20px', height: '20px' }} />
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    opacity: '0.9'
-                  }}>Status Penawaran</span>
-                  <ChevronDown 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowStatusModal(true);
-                    }}
-                    style={{ 
-                      width: '16px', 
-                      height: '16px',
-                      marginLeft: '4px',
-                      opacity: '0.8',
-                      cursor: 'pointer',
-                      transition: 'opacity 0.2s'
-                    }} 
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <Clock style={{ width: '20px', height: '20px', color: '#f59e42' }} />
+                  <span style={{ fontSize: '14px', fontWeight: '500', opacity: '0.9' }}>Menunggu</span>
+                  <span style={{ marginLeft: '6px', cursor: 'pointer', opacity: 0.8 }} onClick={() => setShowDetailModal('menunggu')}>
+                    <ChevronDown style={{ width: '18px', height: '18px' }} />
+                  </span>
                 </div>
-                <div style={{
-                  fontSize: '30px',
-                  fontWeight: 'bold'
-                }}>
-                  {loading ? '...' : (
-                    (dashboardStats?.statusStats?.menunggu || 0) +
-                    (dashboardStats?.statusStats?.disetujui || 0) +
-                    (dashboardStats?.statusStats?.ditolak || 0)
-                  )}
+                <div style={{ fontSize: '30px', fontWeight: 'bold' }}>
+                  {loading ? '...' : (dashboardStats?.statusStats?.menunggu || 0)}
                 </div>
               </div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
-              }}>
-                <BarChart3 style={{ width: '24px', height: '24px' }} />
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '8px' }}>
+                <Clock style={{ width: '24px', height: '24px', color: '#f59e42' }} />
               </div>
             </div>
+
           </div>
 
-          {/* Card 3 - Total Revenue */}
+          {/* Card 3 - Disetujui */}
           <div style={{
-            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+            background: `linear-gradient(135deg, #3fba8c 0%, #6ee7b7 100%)`,
             borderRadius: '12px',
             padding: '24px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             cursor: 'pointer'
-          }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
-                }}>
-                  <DollarSign style={{ width: '20px', height: '20px' }} />
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    opacity: '0.9'
-                  }}>Total Revenue</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <CheckCircle style={{ width: '20px', height: '20px' }} />
+                  <span style={{ fontSize: '14px', fontWeight: '500', opacity: '0.9' }}>Disetujui</span>
+                  <span style={{ marginLeft: '6px', cursor: 'pointer', opacity: 0.8 }} onClick={() => setShowDetailModal('disetujui')}>
+                    <ChevronDown style={{ width: '18px', height: '18px' }} />
+                  </span>
                 </div>
-                <div style={{
-                  fontSize: '24px',
-                  fontWeight: 'bold'
-                }}>
-                  {loading ? 'Loading...' : `Rp ${(dashboardStats?.totalNilaiPenawaran || 0).toLocaleString('id-ID')}`}
+                <div style={{ fontSize: '30px', fontWeight: 'bold' }}>
+                  {loading ? '...' : (dashboardStats?.statusStats?.disetujui || 0)}
                 </div>
               </div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
-              }}>
-                <DollarSign style={{ width: '24px', height: '24px' }} />
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '8px' }}>
+                <CheckCircle style={{ width: '24px', height: '24px' }} />
               </div>
             </div>
+
           </div>
         </div>
 
@@ -947,6 +886,215 @@ const Dashboard = () => {
                 }}>
                   {statusData.reduce((total, item) => total + item.count, 0)}
                 </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Penawaran Modal */}
+      {showDetailModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }} onClick={() => setShowDetailModal(null)}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '600px',
+            maxHeight: '80vh',
+            width: '90%',
+            overflow: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }} onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              paddingBottom: '16px',
+              borderBottom: '2px solid #f3f4f6'
+            }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: '20px',
+                fontWeight: 'bold',
+                color: '#1f2937',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                {showDetailModal === 'ditolak' && (
+                  <>
+                    <XCircle style={{ width: '24px', height: '24px', color: '#ef4444' }} />
+                    Detail Penawaran Ditolak
+                  </>
+                )}
+                {showDetailModal === 'menunggu' && (
+                  <>
+                    <Clock style={{ width: '24px', height: '24px', color: '#f59e42' }} />
+                    Detail Penawaran Menunggu
+                  </>
+                )}
+                {showDetailModal === 'disetujui' && (
+                  <>
+                    <CheckCircle style={{ width: '24px', height: '24px', color: '#10b981' }} />
+                    Detail Penawaran Disetujui
+                  </>
+                )}
+              </h3>
+              <button
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  hover: 'backgroundColor: #f3f4f6'
+                }}
+                onClick={() => setShowDetailModal(null)}
+              >
+                <X style={{ width: '20px', height: '20px', color: '#6b7280' }} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {dashboardStats?.recentPenawaran && dashboardStats.recentPenawaran.length > 0 ? (
+                <div>
+                  {dashboardStats.recentPenawaran
+                    .filter(p => {
+                      const status = p.status?.toLowerCase();
+                      if (showDetailModal === 'ditolak') {
+                        return status === 'ditolak' || status === 'rejected' || status === 'decline';
+                      } else if (showDetailModal === 'menunggu') {
+                        return status === 'pending' || status === 'menunggu' || status === 'waiting' || status === 'in_review';
+                      } else if (showDetailModal === 'disetujui') {
+                        return status === 'approved' || status === 'disetujui' || status === 'accept' || status === 'completed';
+                      }
+                      return false;
+                    })
+                    .map((p, idx) => (
+                      <div key={idx} style={{
+                        marginBottom: '16px',
+                        padding: '16px',
+                        backgroundColor: '#f9fafb',
+                        borderRadius: '12px',
+                        border: '1px solid #e5e7eb'
+                      }}>
+                        <div style={{ marginBottom: '8px' }}>
+                          <span style={{ fontWeight: '600', color: '#374151' }}>Pelanggan:</span>
+                          <span style={{ marginLeft: '8px', color: '#6b7280' }}>
+                            {p.nama_pelanggan || p.pelanggan || '-'}
+                          </span>
+                        </div>
+                        <div style={{ marginBottom: '8px' }}>
+                          <span style={{ fontWeight: '600', color: '#374151' }}>Kontrak:</span>
+                          <span style={{ marginLeft: '8px', color: '#6b7280' }}>
+                            {p.nomor_kontrak || '-'}
+                          </span>
+                        </div>
+                        <div style={{ marginBottom: '8px' }}>
+                          <span style={{ fontWeight: '600', color: '#374151' }}>Sales:</span>
+                          <span style={{ marginLeft: '8px', color: '#6b7280' }}>
+                            {p.data_user?.nama_user || p.sales || '-'}
+                          </span>
+                        </div>
+                        <div>
+                          <span style={{ fontWeight: '600', color: '#374151' }}>Tanggal:</span>
+                          <span style={{ marginLeft: '8px', color: '#6b7280' }}>
+                            {p.tanggal_dibuat ? new Date(p.tanggal_dibuat).toLocaleDateString('id-ID') : '-'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: '#6b7280'
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+                  <div style={{ fontSize: '16px', fontWeight: '500' }}>
+                    Tidak ada penawaran {showDetailModal === 'ditolak' ? 'yang ditolak' : 
+                                         showDetailModal === 'menunggu' ? 'yang menunggu' : 
+                                         'yang disetujui'}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              marginTop: '20px',
+              paddingTop: '16px',
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                Total: {dashboardStats?.recentPenawaran ? 
+                  dashboardStats.recentPenawaran.filter(p => {
+                    const status = p.status?.toLowerCase();
+                    if (showDetailModal === 'ditolak') {
+                      return status === 'ditolak' || status === 'rejected' || status === 'decline';
+                    } else if (showDetailModal === 'menunggu') {
+                      return status === 'pending' || status === 'menunggu' || status === 'waiting' || status === 'in_review';
+                    } else if (showDetailModal === 'disetujui') {
+                      return status === 'approved' || status === 'disetujui' || status === 'accept' || status === 'completed';
+                    }
+                    return false;
+                  }).length : 0} penawaran
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  style={{
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                  onClick={() => navigateToDataPenawaran(showDetailModal)}
+                >
+                  📊 Selengkapnya
+                </button>
+                <button
+                  style={{
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                  onClick={() => setShowDetailModal(null)}
+                >
+                  Tutup
+                </button>
               </div>
             </div>
           </div>

@@ -516,7 +516,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   />
                 </div>
 
-                {/* Pelanggan */}
+                {/* Pelanggan sesuai dengan NPWP */}
                 <div>
                   <label
                     style={{
@@ -527,7 +527,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Pelanggan*
+                    Pelanggan sesuai dengan NPWP*
                   </label>
                   <input
                     type="text"
@@ -535,7 +535,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     value={formData.pelanggan}
                     onChange={handleInputChange}
                     disabled={isSaving}
-                    placeholder="Masukkan nama Pelanggan"
+                    placeholder="Masukkan nama pelanggan sesuai NPWP"
                     required
                     style={{
                       width: "100%",
