@@ -483,7 +483,7 @@ const Index = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Cari berdasarkan nama atau HJT..."
+                placeholder="Cari sesuatu..."
                 style={{
                   width: '100%',
                   padding: '12px 16px',
