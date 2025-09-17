@@ -142,7 +142,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
     boxShadow: focusedField === fieldName 
       ? `0 0 0 3px rgba(0, 191, 202, 0.1)` 
       : '0 1px 3px rgba(0, 0, 0, 0.1)',
-    outline: 'none'
+    outline: 'none',
+    fontFamily: "'Open Sans', sans-serif !important"
   });
 
   const iconContainerStyle = (fieldName) => ({
@@ -162,14 +163,17 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
         input::placeholder {
           color: ${colors.accent1};
           opacity: 0.6;
+          font-family: 'Open Sans', sans-serif !important;
         }
         select:invalid {
           color: ${colors.accent1};
           opacity: 0.6;
+          font-family: 'Open Sans', sans-serif !important;
         }
         select option {
           color: ${colors.primary};
           background-color: #e7f3f5ff;
+          font-family: 'Open Sans', sans-serif !important;
         }
       `}
     </style>
@@ -193,7 +197,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
               justifyContent: 'center',
               zIndex: 1000,
               padding: '20px',
-              fontFamily: 'Inter, system-ui, sans-serif'
+              fontFamily: "'Open Sans', sans-serif !important"
             }}
           >
             <motion.div
@@ -221,6 +225,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                 border: '1px solid rgba(255, 255, 255, 0.6)',
                 position: 'relative',
                 overflow: 'hidden',
+                fontFamily: "'Open Sans', sans-serif !important"
               }}
             >
               {/* Decorative highlight */}
@@ -293,7 +298,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                   margin: 0,
-                  letterSpacing: '-0.02em'
+                  letterSpacing: '-0.02em',
+                  fontFamily: "'Open Sans', sans-serif !important"
                 }}>
                   Edit Data User
                 </h2>
@@ -301,7 +307,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                   color: colors.accent1,
                   fontSize: '16px',
                   margin: '8px 0 0',
-                  opacity: 0.8
+                  opacity: 0.8,
+                  fontFamily: "'Open Sans', sans-serif !important"
                 }}>
                   Perbarui informasi user
                 </p>
@@ -320,7 +327,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                   padding: '40px',
                   margin: '0 32px 32px',
                   border: `1px solid rgba(0, 192, 202, 0.68)`,
-                  position: 'relative'
+                  position: 'relative',
+                  fontFamily: "'Open Sans', sans-serif !important"
                 }}
               >
                 {/* Nama Field */}
@@ -337,7 +345,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    letterSpacing: '0.02em'
+                    letterSpacing: '0.02em',
+                    fontFamily: "'Open Sans', sans-serif !important"
                   }}>
                     Nama Lengkap 
                   </label>
@@ -373,7 +382,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    letterSpacing: '0.02em'
+                    letterSpacing: '0.02em',
+                    fontFamily: "'Open Sans', sans-serif !important"
                   }}>
                     Email Address 
                   </label>
@@ -409,7 +419,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    letterSpacing: '0.02em'
+                    letterSpacing: '0.02em',
+                    fontFamily: "'Open Sans', sans-serif !important"
                   }}>
                     Kata Sandi
                   </label>
@@ -444,7 +455,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    letterSpacing: '0.02em'
+                    letterSpacing: '0.02em',
+                    fontFamily: "'Open Sans', sans-serif !important"
                   }}>
                     Role User
                   </label>
@@ -500,7 +512,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                       cursor: 'pointer',
                       boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
                       transition: 'all 0.3s ease',
-                      letterSpacing: '0.02em'
+                      letterSpacing: '0.02em',
+                      fontFamily: "'Open Sans', sans-serif !important"
                     }}
                   >
                     Batal
@@ -526,7 +539,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                     boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
                     transition: 'all 0.3s ease',
                     letterSpacing: '0.02em',
-                    opacity: isSubmitting || !hasChanges() ? 0.6 : 1
+                    opacity: isSubmitting || !hasChanges() ? 0.6 : 1,
+                    fontFamily: "'Open Sans', sans-serif !important"
                   }}
                 >
                   {isSubmitting ? 'Menyimpan...' : 'Simpan Data'}
@@ -558,7 +572,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
               justifyContent: 'center',
               zIndex: 1000,
               padding: '20px',
-              fontFamily: 'Inter, system-ui, sans-serif'
+              fontFamily: "'Open Sans', sans-serif !important"
             }}
           >
             <motion.div
@@ -581,7 +595,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                 position: 'relative',
                 width: '100%',
                 maxWidth: '400px',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                fontFamily: "'Open Sans', sans-serif !important"
               }}
             >
               {/* Success Icon */}
@@ -626,7 +641,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                   background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
+                  backgroundClip: 'text',
+                  fontFamily: "'Open Sans', sans-serif !important"
                 }}
               >
                 Berhasil!
@@ -641,7 +657,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                   fontSize: '16px',
                   color: colors.accent1,
                   lineHeight: '1.5',
-                  opacity: 0.9
+                  opacity: 0.9,
+                  fontFamily: "'Open Sans', sans-serif !important"
                 }}
               >
                 Data user berhasil diperbarui
@@ -665,7 +682,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                   cursor: 'pointer',
                   boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
                   transition: 'all 0.3s ease',
-                  letterSpacing: '0.02em'
+                  letterSpacing: '0.02em',
+                  fontFamily: "'Open Sans', sans-serif !important"
                 }}
               >
                 Selesai
