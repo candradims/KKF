@@ -382,7 +382,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                     marginBottom: "8px",
                     letterSpacing: "0.02em"
                   }}>
-                    Layanan *
+                    Nama Layanan *
                   </label>
                   <div style={{ position: "relative" }}>
                     <div style={iconContainerStyle('namaLayanan')}>
@@ -413,48 +413,9 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                           {option}
                         </option>
                       ))}
-                      <option value="custom">Lainnya (Input Manual)</option>
                     </select>
                   </div>
                 </motion.div>
-
-                {/* Custom Nama Layanan Input */}
-                {showCustomLayanan && (
-                  <motion.div 
-                    whileHover={{ y: -2 }}
-                    style={{
-                      marginBottom: "24px",
-                      position: "relative"
-                    }}
-                  >
-                    <label style={{
-                      display: "block",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: colors.primary,
-                      marginBottom: "8px",
-                      letterSpacing: "0.02em"
-                    }}>
-                      Input Layanan *
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <div style={iconContainerStyle('customNamaLayanan')}>
-                        <Box size={18} />
-                      </div>
-                      <input
-                        type="text"
-                        name="namaLayanan"
-                        value={formData.namaLayanan}
-                        onChange={handleChange}
-                        onFocus={() => setFocusedField('customNamaLayanan')}
-                        onBlur={() => setFocusedField('')}
-                        placeholder="Masukkan nama layanan baru"
-                        required
-                        style={inputStyle('customNamaLayanan')}
-                      />
-                    </div>
-                  </motion.div>
-                )}
 
                 {/* Select Hjt */}
                 <motion.div 
