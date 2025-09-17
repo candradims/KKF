@@ -455,7 +455,7 @@ const Index = () => {
       minHeight: '100vh',
       background: '#e7f3f5ff',
       padding: '24px',
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: "'Open Sans', sans-serif !important",
       position: 'relative'
     }}>
       {/* Background Pattern */}
@@ -1108,7 +1108,7 @@ const Index = () => {
                           padding: '8px 12px',
                           borderRadius: '8px',
                           fontSize: '13px',
-                          fontFamily: 'monospace',
+                          fontFamily: "'Open Sans', sans-serif !important",
                           border: `1px solid ${colors.gray200}`,
                           display: 'inline-block'
                         }}>
@@ -1126,7 +1126,7 @@ const Index = () => {
                           padding: '8px 12px',
                           borderRadius: '8px',
                           fontSize: '13px',
-                          fontFamily: 'monospace',
+                          fontFamily: "'Open Sans', sans-serif !important",
                           border: `1px solid ${colors.gray200}`,
                           display: 'inline-flex',
                           alignItems: 'center',
