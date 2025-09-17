@@ -93,17 +93,17 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
           input::placeholder {
             color: ${colors.accent1};
             opacity: 0.6;
-            fontFamily: "'Open Sans', sans-serif !important"
+            fontFamily: "'Open Sans', sans-serif !important";
           }
           select:invalid {
             color: ${colors.accent1};
             opacity: 0.6;
-            fontFamily: "'Open Sans', sans-serif !important"
+            fontFamily: "'Open Sans', sans-serif !important";
           }
           select option {
             color: ${colors.primary};
             background-color: #e7f3f5ff;
-            fontFamily: "'Open Sans', sans-serif !important"
+            fontFamily: "'Open Sans', sans-serif !important";
           }
         `}
       </style>
