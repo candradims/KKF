@@ -1,30 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle, Check } from 'lucide-react';
+import { X, AlertTriangle, Check, Package, MapPin, Cpu, Server, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
-  const [formData, setFormData] = useState(initialData || {
-    id: null,
-    namaLayanan: "",
-    hjt: "",
-    satuan: "",
-    backbone: "",
-    port: "",
-    tarifAkses: "",
-    tarif: "",
-  });
+  const [formData, setFormData] = useState({
+    id: null,
+    namaLayanan: "",
+    hjt: "",
+    satuan: "",
+    backbone: "",
+    port: "",
+    tarifAkses: "",
+    tarif: "",
+  });
 
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    }
-  }, [initialData]);
+  // Color palette
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+    danger: '#ef4444',
+    dangerLight: '#f87171',
+  };
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleDeleteConfirm = async () => {
     try {
       console.log("🗑️ Deleting layanan:", formData);
+      setIsDeleting(true);
       
       // Call the onDelete function passed from parent with the ID
       if (onDelete && formData.id) {
@@ -37,362 +51,667 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
     } catch (error) {
       console.error("❌ Error deleting layanan:", error);
       alert("Gagal menghapus layanan: " + error.message);
+    } finally {
+      setIsDeleting(false);
     }
-  };  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    onClose(); 
-  };
-  
-  const formatCurrency = (value) => {
-    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
-    if (!isNaN(numericValue) && numericValue !== null) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(numericValue);
-    }
-    return value;
-  };
+  };
 
-  return (
-    <>
-      <AnimatePresence>
-        {isOpen && !showSuccessModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-              padding: '20px',
-              fontFamily: 'Inter, sans-serif'
-            }}
-          >
-            <motion.div
-              initial={{ x: 0, opacity: 0 }}
-              animate={{
-                x: [0, -5, 5, -5, 5, -3, 3, 0],
-                opacity: 1
-              }}
-              exit={{ opacity: 0 }}
-              transition={{
-                duration: 0.5,
-                ease: 'easeInOut'
-              }}
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
-                width: '100%',
-                maxWidth: '800px',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                position: 'relative',
-                padding: '24px',
-                paddingBottom: '32px'
-              }}
-            >
-              {/* Close Button */}
-              <button
-                onClick={onClose}
-                style={{
-                  position: 'absolute',
-                  top: '16px',
-                  right: '16px',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <X size={20} />
-              </button>
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    onClose(); 
+  };
+  
+  const formatCurrency = (value) => {
+    if (!value && value !== 0) return '-';
+    
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (!isNaN(numericValue) && numericValue !== null) {
+      return new Intl.NumberFormat('id-ID', { 
+        style: 'currency', 
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(numericValue);
+    }
+    return value;
+  };
 
-              {/* Header */}
-              <div style={{
-                padding: '24px',
-                textAlign: 'center'
-              }}>
-                <h2 style={{
-                  fontSize: '26px',
-                  fontWeight: '800',
-                  color: '#2D3A76',
-                  margin: 0
-                }}>
-                  Hapus Layanan
-                </h2>
-              </div>
+  const inputStyle = {
+    padding: '16px 16px 16px 48px',
+    borderRadius: '12px',
+    border: `2px solid rgba(3, 91, 113, 0.38)`,
+    fontSize: '14px',
+    backgroundColor: '#f0f4f5',
+    color: colors.primary,
+    width: '100%',
+    outline: 'none',
+    cursor: 'not-allowed'
+  };
 
-               {/* Icon Peringatan */}
+  const iconContainerStyle = {
+    position: 'absolute',
+    left: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: colors.primary,
+    zIndex: 1
+  };
+
+  return (
+    <>
+      <AnimatePresence>
+        {isOpen && !showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px',
+              fontFamily: "'Open Sans', sans-serif !important"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                y: 0,
+                rotate: [0, 0.5, -0.5, 0]
+              }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              transition={{
+                duration: 0.5,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+              style={{
+                background: '#e7f3f5ff',
+                borderRadius: '32px',
+                width: '100%',
+                maxWidth: '900px',
+                padding: '20px',
+                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Decorative highlight */}
               <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginBottom: '20px'
-              }}>
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10.29 3.86L1.82 18A2 2 0 0 0 3.54 21H20.46A2 2 0 0 0 22.18 18L13.71 3.86A2 2 0 0 0 10.29 3.86Z" fill="#00AEEF"/>
-                  <path d="M12 9V13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 17H12.01" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '120px',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0))',
+                pointerEvents: 'none'
+              }} />
 
-              {/* Pesan Konfirmasi */}
-              <p style={{
-                textAlign: 'center',
-                fontSize: '18px',
-                fontWeight: '540',
-                color: '#2D3A76',
-                marginBottom: '30px'
-              }}>
-                Apakah Anda Yakin Ingin Menghapus Data Layanan Ini?
-              </p>
+              {/* Close Button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  backgroundColor: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  zIndex: 10
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.2)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.1)'}
+              >
+                <X size={20} color={colors.primary} />
+              </motion.button>
 
-              {/* Read-Only Form */}
-              <div style={{
-                backgroundColor: '#E9EDF7', borderRadius: '20px', padding: '32px',
-                margin: '0 auto', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-                maxWidth: '600px', marginBottom: '32px'
-              }}>
-                {/* Field: Nama Layanan */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <div style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                    Layanan
-                </div>
-                  <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: '#e0e7f9', color: '#2D396B', fontWeight: '500', border: '1px solid #2D3A76' }}>
-                    {formData.namaLayanan}
-                </div>
-              </div>
+              {/* Header */}
+              <motion.div 
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                style={{
+                  padding: '40px 32px 20px',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px',
+                  boxShadow: `0 10px 30px rgba(239, 68, 68, 0.3)`
+                }}>
+                  <AlertTriangle size={32} color="white" />
+                </div>
+                <h2 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  margin: 0,
+                  letterSpacing: '-0.02em'
+                }}>
+                  Hapus Layanan
+                </h2>
+                <p style={{
+                  color: colors.danger,
+                  fontSize: '16px',
+                  margin: '8px 0 0',
+                  opacity: 0.8,
+                  fontWeight: '600'
+                }}>
+                  Tindakan ini tidak dapat dibatalkan
+                </p>
+              </motion.div>
 
-                {/* Field: HJT */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                  <div style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                    HJT
-                </div>
-                  <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: '#e0e7f9', color: '#2D396B', fontWeight: '500', border: '1px solid #2D3A76' }}>
-                    {formData.hjt}
-                </div>
-              </div>
+              {/* Warning Message */}
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.1) 100%)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  margin: '0 32px 24px',
+                  border: `1px solid rgba(239, 68, 68, 0.3)`,
+                  textAlign: 'center'
+                }}
+              >
+                <p style={{
+                  color: colors.danger,
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  margin: 0,
+                  lineHeight: '1.5'
+                }}>
+                  Apakah Anda yakin ingin menghapus data layanan berikut?
+                </p>
+              </motion.div>
 
-              {/* Field: Satuan */}
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                  Satuan
-                </div>
-                <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: '#e0e7f9', color: '#2D396B', fontWeight: '500', border: '1px solid #2D3A76' }}>
-                  {formData.satuan}
-                </div>
-              </div>
+              {/* Form */}
+              <motion.div 
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
+                  borderRadius: '20px',
+                  padding: '40px',
+                  margin: '0 32px 32px',
+                  border: `1px solid rgba(0, 192, 202, 0.68)`,
+                  position: 'relative'
+                }}
+              >
+                {/* Nama Layanan Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Nama Layanan
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Package size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="namaLayanan"
+                      value={formData.namaLayanan || '-'}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-              {/* Field: Backbone */}
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                  Backbone
-                </div>
-                <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: '#e0e7f9', color: '#2D396B', fontWeight: '500', border: '1px solid #2D3A76' }}>
-                  {formData.backbone}
-                </div>
-              </div>
+                {/* HJT Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    HJT
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <MapPin size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="hjt"
+                      value={formData.hjt || '-'}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-              {/* Field: Port */}
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                  Port
-                </div>
-                <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: '#e0e7f9', color: '#2D396B', fontWeight: '500', border: '1px solid #2D3A76' }}>
-                  {formData.port}
-                </div>
-              </div>
+                {/* Satuan Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Satuan
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Cpu size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="satuan"
+                      value={formData.satuan || '-'}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-              {/* Field: Tarif Akses */}
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center', marginBottom: '20px' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                  Tarif Akses
-                </div>
-                <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: '#e0e7f9', color: '#2D396B', fontWeight: '500', border: '1px solid #2D3A76' }}>
-                  {formatCurrency(formData.tarifAkses)}
-                </div>
-              </div>
+                {/* Backbone Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Backbone
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Server size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="backbone"
+                      value={formData.backbone || '-'}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-              {/* Field: Tarif */}
-              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', alignItems: 'center' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: '#2D396B' }}>
-                  Tarif
-                </div>
-                <div style={{ padding: '12px 16px', borderRadius: '10px', backgroundColor: '#e0e7f9', color: '#2D396B', fontWeight: '500', border: '1px solid #2D3A76' }}>
-                  {formatCurrency(formData.tarif)}
-                </div>
-              </div>
-              </div>
+                {/* Port Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Port
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Cpu size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="port"
+                      value={formData.port || '-'}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-              {/* Tombol Aksi */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '20px',
-                paddingRight: '65px'
-              }}>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  style={{
-                    backgroundColor: '#2D3A76',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '12px 32px',
-                    borderRadius: '50px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteConfirm}
-                  style={{
-                    backgroundColor: '#DC2626',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '12px 32px',
-                    borderRadius: '50px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Hapus
-                </button>
-              </div>
-            </motion.div>
-        </motion.div>
-        )}
-      </AnimatePresence>
+                {/* Tarif Akses Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Tarif Akses
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <DollarSign size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="tarifAkses"
+                      value={formatCurrency(formData.tarifAkses)}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
 
-      {/* Pop-up Sukses */}
-      <AnimatePresence>
-        {showSuccessModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-              padding: '20px',
-              fontFamily: 'Inter, sans-serif'
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut"}}
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
-                padding: '24px',
-                textAlign: 'center',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                position: 'relative',
-                width: '100%',
-                maxWidth: '300px'
-              }}
-            >
-              <div style={{
-                backgroundColor: '#00AEEF',
-                borderRadius: '50%',
-                width: '60px',
-                height: '60px',
-                margin: '0 auto 16px auto',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Check style={{ 
-                  width: '30px', 
-                  height: '30px', 
-                  color: 'white'
-                }} />
-              </div>
-              <h3 style={{
-                margin: '0 0 8px 0',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#333'
-              }}>
-                Selamat!
-              </h3>
-              <p style={{
-                margin: '0 0 20px 0',
-                fontSize: '14px',
-                color: '#666',
-                lineHeight: '1.4'
-              }}>
-                Data Layanan Berhasil Dihapus
-              </p>
-              <button
-                onClick={handleCloseSuccessModal}
-                style={{
-                  backgroundColor: '#00AEEF',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '8px 24px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  minWidth: '80px',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#0088CC';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#00AEEF';
-                }}
-              >
-                Oke
-              </button>
-              <button
-                onClick={handleCloseSuccessModal}
-                style={{
-                  position: 'absolute',
-                  top: '0.75rem',
-                  right: '0.75rem',
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  color: '#666',
-                  cursor: 'pointer',
-                  width: '30px',
-                  height: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '50%',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-              >
-                ×
-              </button>
-            </motion.div>
+                {/* Tarif Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '32px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Tarif
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <DollarSign size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="tarif"
+                      value={formatCurrency(formData.tarif)}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '16px',
+                  marginTop: '32px'
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={onClose}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 32px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleDeleteConfirm}
+                    disabled={isDeleting}
+                    style={{
+                      background: isDeleting 
+                        ? `linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)`
+                        : `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 40px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: isDeleting ? 'not-allowed' : 'pointer',
+                      boxShadow: isDeleting 
+                        ? 'none' 
+                        : `0 4px 20px rgba(239, 68, 68, 0.4)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em',
+                      opacity: isDeleting ? 0.8 : 1
+                    }}
+                  >
+                    {isDeleting ? 'Menghapus...' : 'Hapus Data'}
+                  </motion.button>
+                </div>
+              </motion.div>
             </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px',
+              fontFamily: "'Open Sans', sans-serif !important"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+              transition={{ 
+                duration: 0.5, 
+                ease: [0.4, 0, 0.2, 1],
+                type: "spring",
+                stiffness: 300,
+                damping: 20
+              }}
+              style={{
+                background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: '24px',
+                padding: '40px',
+                textAlign: 'center',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                position: 'relative',
+                width: '100%',
+                maxWidth: '400px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              {/* Success Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                  borderRadius: '50%',
+                  width: '100px',
+                  height: '100px',
+                  margin: '0 auto 24px auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: `0 20px 40px rgba(63, 186, 140, 0.4)`
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                >
+                  <Check style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    color: 'white',
+                    strokeWidth: 3
+                  }} />
+                </motion.div>
+              </motion.div>
+
+              <motion.h3 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  margin: '0 0 12px 0',
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Berhasil!
+              </motion.h3>
+              
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{
+                  margin: '0 0 32px 0',
+                  fontSize: '16px',
+                  color: colors.accent1,
+                  lineHeight: '1.5',
+                  opacity: 0.9
+                }}
+              >
+                Data layanan berhasil dihapus dari sistem
+              </motion.p>
+              
+              <motion.button
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px 32px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.02em'
+                }}
+              >
+                Selesai
+              </motion.button>
+
+              {/* Close button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <X size={18} color={colors.primary} />
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
 };
 
 export default HapusLayanan;
