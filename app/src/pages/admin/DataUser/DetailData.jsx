@@ -52,7 +52,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
               justifyContent: 'center',
               zIndex: 1000,
               padding: '20px',
-              fontFamily: 'Inter, system-ui, sans-serif'
+              fontFamily: "'Open Sans', sans-serif !important"
             }}
           >
             <motion.div
