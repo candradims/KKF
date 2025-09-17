@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Check, Package, MapPin, Cpu, Server, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -67,6 +67,32 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [focusedField, setFocusedField] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
+
+  const compareData = useMemo(() => {
+    return (initialData, formData) => {
+      if (!initialData) return false;
+      
+      return (
+        initialData.namaLayanan !== formData.namaLayanan ||
+        initialData.hjt !== formData.hjt ||
+        initialData.satuan !== formData.satuan ||
+        initialData.backbone !== formData.backbone ||
+        initialData.port !== formData.port ||
+        initialData.tarifAkses !== formData.tarifAkses ||
+        initialData.tarif !== formData.tarif
+      );
+    };
+  }, []);
+
+  // Effect untuk mendeteksi perubahan
+  useEffect(() => {
+    if (initialData && isOpen) {
+      const changesDetected = compareData(initialData, formData);
+      setHasChanges(changesDetected);
+    }
+  }, [formData, initialData, isOpen, compareData]);
 
   // Fetch dynamic options from database
   useEffect(() => {
@@ -152,6 +178,7 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
         tarifAkses: initialData.tarifAkses || '',
         tarif: initialData.tarif || ''
       });
+      setHasChanges(false);
     }
   }, [initialData, isOpen]);
 
@@ -165,6 +192,12 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!hasChanges) {
+      console.log("Tidak ada perubahan, submit dibatalkan");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     // Validate required fields
@@ -755,14 +788,16 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
                   </motion.button>
                   
                   <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={hasChanges ? { scale: 1.02, y: -2 } : {}}
+                    whileTap={hasChanges ? { scale: 0.98 } : {}}
                     type="submit"
                     form="form-edit-layanan"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !hasChanges}
                     style={{
                       background: isSubmitting 
                         ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
+                        : !hasChanges
+                        ?  `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
                         : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
                       color: '#ffffff',
                       border: 'none',
@@ -770,11 +805,11 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
                       borderRadius: '12px',
                       fontWeight: '600',
                       fontSize: '14px',
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                      boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
+                      cursor: isSubmitting || !hasChanges ? 'not-allowed' : 'pointer',
+                      boxShadow: hasChanges ? `0 4px 20px rgba(0, 191, 202, 0.4)` : 'none',
                       transition: 'all 0.3s ease',
                       letterSpacing: '0.02em',
-                      opacity: isSubmitting ? 0.8 : 1
+                      opacity: isSubmitting || !hasChanges ? 0.7 : 1
                     }}
                   >
                     {isSubmitting ? 'Menyimpan...' : 'Simpan Data'}
