@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Settings, MapPin, Box, Server, Cpu, DollarSign } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TambahLayanan = ({ isOpen, onClose, onSave }) => {
@@ -24,6 +24,17 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   
   // State untuk custom input
   const [showCustomLayanan, setShowCustomLayanan] = useState(false);
+  const [focusedField, setFocusedField] = useState('');
+
+  // Color palette 
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+  };
 
   // Fetch data dari database ketika komponen dimount
   useEffect(() => {
@@ -160,8 +171,55 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
     }
   };
 
+  // Styles untuk input dan select
+  const inputStyle = (fieldName) => ({
+    padding: '16px 16px 16px 48px',
+    borderRadius: '12px',
+    border: `2px solid ${focusedField === fieldName ? colors.secondary : 'rgba(3, 91, 113, 0.38)'}`,
+    fontSize: '14px',
+    backgroundColor: focusedField === fieldName ? 'rgba(0, 191, 202, 0.05)' : '#ffffff',
+    color: colors.primary,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    width: '100%',
+    boxShadow: focusedField === fieldName 
+      ? `0 0 0 3px rgba(0, 191, 202, 0.1)` 
+      : '0 1px 3px rgba(0, 0, 0, 0.1)',
+    outline: 'none',
+    fontFamily: "'Open Sans', sans-serif !important"
+  });
+
+  const iconContainerStyle = (fieldName) => ({
+    position: 'absolute',
+    left: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: focusedField === fieldName ? colors.secondary : colors.primary,
+    transition: 'color 0.3s ease',
+    zIndex: 1
+  });
+
   return (
     <>
+      <style>
+        {`
+          input::placeholder {
+            color: ${colors.accent1};
+            opacity: 0.6;
+            fontFamily: "'Open Sans', sans-serif !important";
+          }
+          select:invalid {
+            color: ${colors.accent1};
+            opacity: 0.6;
+            fontFamily: "'Open Sans', sans-serif !important";
+          }
+          select option {
+            color: ${colors.primary};
+            background-color: #e7f3f5ff;
+            fontFamily: "'Open Sans', sans-serif !important";
+          }
+        `}
+      </style>
+
       <AnimatePresence>
         {isOpen && !showSuccessModal && (
           <motion.div
@@ -174,488 +232,541 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              backgroundColor: "rgba(3, 91, 113, 0.3)",
+              backdropFilter: "blur(2px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               zIndex: 1000,
-              padding: "20px",
-              fontFamily: "Inter, sans-serif",
+              padding: "20px"
             }}
           >
             <motion.div
-              initial={{ x: 0, opacity: 0 }}
-              animate={{
-                x: [0, -5, 5, -5, 5, -3, 3, 0],
-                opacity: 1,
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                y: 0,
+                rotate: [0, 0.5, -0.5, 0]
               }}
-              exit={{ opacity: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
               transition={{
                 duration: 0.5,
-                ease: "easeInOut",
+                ease: [0.4, 0, 0.2, 1]
               }}
               style={{
-                backgroundColor: "#ffffff",
-                borderRadius: "16px",
+                background: "#e7f3f5ff",
+                borderRadius: "32px",
                 width: "100%",
-                maxWidth: "800px",
-                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                maxWidth: "900px",
+                padding: "20px",
+                boxShadow: "0 12px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.6)",
                 position: "relative",
-                padding: "24px",
-                paddingBottom: "32px",
+                overflow: "hidden",
               }}
             >
+              {/* Decorative highlight */}
+              <div style={{
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '120px',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0))',
+                pointerEvents: 'none'
+              }} />
+
               {/* Close Button */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 style={{
                   position: "absolute",
-                  top: "16px",
-                  right: "16px",
-                  backgroundColor: "transparent",
+                  top: "20px",
+                  right: "20px",
+                  backgroundColor: "rgba(3, 91, 113, 0.1)",
                   border: "none",
+                  borderRadius: "50%",
+                  width: "40px",
+                  height: "40px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  zIndex: 10
                 }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = "rgba(3, 91, 113, 0.2)"}
+                onMouseLeave={(e) => e.target.style.backgroundColor = "rgba(3, 91, 113, 0.1)"}
               >
-                <X size={20} />
-              </button>
+                <X size={20} color={colors.primary} />
+              </motion.button>
 
               {/* Header */}
-              <div
+              <motion.div 
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
                 style={{
-                  padding: "24px",
-                  textAlign: "center",
+                  padding: "40px 32px 20px",
+                  textAlign: "center"
                 }}
               >
-                <h2
-                  style={{
-                    fontSize: "26px",
-                    fontWeight: "800",
-                    color: "#2D3A76",
-                    margin: 0,
-                  }}
-                >
+                <div style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 20px",
+                  boxShadow: `0 10px 30px rgba(0, 191, 202, 0.3)`
+                }}>
+                  <Settings size={32} color="white" />
+                </div>
+                <h2 style={{
+                  fontSize: "32px",
+                  fontWeight: "700",
+                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  margin: 0,
+                  letterSpacing: "-0.02em"
+                }}>
                   Tambah Layanan
                 </h2>
-              </div>
+                <p style={{
+                  color: colors.accent1,
+                  fontSize: "16px",
+                  margin: "8px 0 0",
+                  opacity: 0.8
+                }}>
+                  Lengkapi informasi layanan baru
+                </p>
+              </motion.div>
 
               {/* Form */}
-              <form
+              <motion.form 
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
                 id="form-tambah-layanan"
                 onSubmit={handleSubmit}
                 style={{
-                  backgroundColor: "#E9EDF7",
+                  background: "linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)",
                   borderRadius: "20px",
-                  padding: "32px",
-                  margin: "0 auto",
-                  boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-                  maxWidth: "600px",
-                  marginBottom: "32px",
+                  padding: "40px",
+                  margin: "0 32px 32px",
+                  border: "1px solid rgba(0, 192, 202, 0.68)",
+                  position: "relative"
                 }}
               >
                 {/* Select Layanan */}
-                <div
+                <motion.div 
+                  whileHover={{ y: -2 }}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    alignItems: "center",
-                    marginBottom: "20px",
+                    marginBottom: "24px",
+                    position: "relative"
                   }}
                 >
-                  <label
-                    htmlFor="layanan"
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#2D396B",
-                    }}
-                  >
-                    Layanan*
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    Layanan *
                   </label>
-                  <select
-                    id="layanan"
-                    name="namaLayanan"
-                    value={formData.namaLayanan}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      padding: "12px 32px 12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid rgba(45, 58, 118, 0.5)",
-                      fontSize: "14px",
-                      backgroundColor: "#ffffff",
-                      width: "100%",
-                      appearance: "none",
-                      backgroundImage:
-                        'url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")',
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "right 12px center",
-                      backgroundSize: "16px",
-                      color: "#2D396B",
-                    }}
-                  >
-                    <option value="">
-                      {isLoadingOptions ? "Memuat layanan..." : "Pilih layanan"}
-                    </option>
-                    {layananOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                    <option value="custom">Lainnya (Input Manual)</option>
-                  </select>
-                </div>
-
-                {/* Custom Nama Layanan Input */}
-                {showCustomLayanan && (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "120px 1fr",
-                      alignItems: "center",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    <label
-                      htmlFor="customNamaLayanan"
-                      style={{
-                        fontSize: "16px",
-                        fontWeight: "600",
-                        color: "#2D3A76",
-                      }}
-                    >
-                      Input Layanan*
-                    </label>
-                    <input
-                      type="text"
-                      id="customNamaLayanan"
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('namaLayanan')}>
+                      <Box size={18} />
+                    </div>
+                    <select
                       name="namaLayanan"
                       value={formData.namaLayanan}
                       onChange={handleChange}
-                      placeholder="Masukkan nama layanan baru"
+                      onFocus={() => setFocusedField('namaLayanan')}
+                      onBlur={() => setFocusedField('')}
                       required
                       style={{
-                        padding: "12px 16px",
-                        borderRadius: "10px",
-                        border: "1px solid rgba(45, 58, 118, 0.5)",
-                        fontSize: "14px",
-                        backgroundColor: "#ffffff",
-                        width: "100%",
-                        color: "#2D396B",
+                        ...inputStyle('namaLayanan'),
+                        appearance: "none",
+                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === 'namaLayanan' ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 16px center",
+                        backgroundSize: "20px",
+                        cursor: "pointer"
                       }}
-                    />
+                    >
+                      <option value="" disabled hidden>
+                        {isLoadingOptions ? "Memuat layanan..." : "Pilih layanan"}
+                      </option>
+                      {layananOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                      <option value="custom">Lainnya (Input Manual)</option>
+                    </select>
                   </div>
+                </motion.div>
+
+                {/* Custom Nama Layanan Input */}
+                {showCustomLayanan && (
+                  <motion.div 
+                    whileHover={{ y: -2 }}
+                    style={{
+                      marginBottom: "24px",
+                      position: "relative"
+                    }}
+                  >
+                    <label style={{
+                      display: "block",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: colors.primary,
+                      marginBottom: "8px",
+                      letterSpacing: "0.02em"
+                    }}>
+                      Input Layanan *
+                    </label>
+                    <div style={{ position: "relative" }}>
+                      <div style={iconContainerStyle('customNamaLayanan')}>
+                        <Box size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="namaLayanan"
+                        value={formData.namaLayanan}
+                        onChange={handleChange}
+                        onFocus={() => setFocusedField('customNamaLayanan')}
+                        onBlur={() => setFocusedField('')}
+                        placeholder="Masukkan nama layanan baru"
+                        required
+                        style={inputStyle('customNamaLayanan')}
+                      />
+                    </div>
+                  </motion.div>
                 )}
 
                 {/* Select Hjt */}
-                <div
+                <motion.div 
+                  whileHover={{ y: -2 }}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    alignItems: "center",
-                    marginBottom: "20px",
+                    marginBottom: "24px",
+                    position: "relative"
                   }}
                 >
-                  <label
-                    htmlFor="hjt"
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#2D3A76",
-                    }}
-                  >
-                    Hjt*
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    HJT *
                   </label>
-                  <select
-                    id="hjt"
-                    name="hjt"
-                    value={formData.hjt}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      padding: "12px 32px 12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid rgba(45, 58, 118, 0.5)",
-                      fontSize: "14px",
-                      backgroundColor: "#ffffff",
-                      width: "100%",
-                      appearance: "none",
-                      backgroundImage:
-                        'url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")',
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "right 12px center",
-                      backgroundSize: "16px",
-                      color: "#2D396B",
-                    }}
-                  >
-                    <option value="">Pilih Hjt</option>
-                    {hjtOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('hjt')}>
+                      <MapPin size={18} />
+                    </div>
+                    <select
+                      name="hjt"
+                      value={formData.hjt}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('hjt')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      style={{
+                        ...inputStyle('hjt'),
+                        appearance: "none",
+                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === 'hjt' ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 16px center",
+                        backgroundSize: "20px",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <option value="" disabled hidden>Pilih HJT</option>
+                      {hjtOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </motion.div>
 
                 {/* Select Satuan */}
-                <div
+                <motion.div 
+                  whileHover={{ y: -2 }}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    alignItems: "center",
-                    marginBottom: "20px",
+                    marginBottom: "24px",
+                    position: "relative"
                   }}
                 >
-                  <label
-                    htmlFor="satuan"
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#2D3A76",
-                    }}
-                  >
-                    Satuan*
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    Satuan *
                   </label>
-                  <select
-                    id="satuan"
-                    name="satuan"
-                    value={formData.satuan}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      padding: "12px 32px 12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid rgba(45, 58, 118, 0.5)",
-                      fontSize: "14px",
-                      backgroundColor: "#ffffff",
-                      width: "100%",
-                      appearance: "none",
-                      backgroundImage:
-                        'url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E")',
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "right 12px center",
-                      backgroundSize: "16px",
-                      color: "#2D396B",
-                    }}
-                  >
-                    <option value="">
-                      {isLoadingOptions ? "Memuat satuan..." : "Pilih satuan"}
-                    </option>
-                    {satuanOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('satuan')}>
+                      <Cpu size={18} />
+                    </div>
+                    <select
+                      name="satuan"
+                      value={formData.satuan}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('satuan')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      style={{
+                        ...inputStyle('satuan'),
+                        appearance: "none",
+                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === 'satuan' ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 16px center",
+                        backgroundSize: "20px",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <option value="" disabled hidden>
+                        {isLoadingOptions ? "Memuat satuan..." : "Pilih satuan"}
                       </option>
-                    ))}
-                  </select>
-                </div>
+                      {satuanOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </motion.div>
 
                 {/* Input Backbone */}
-                <div
+                <motion.div 
+                  whileHover={{ y: -2 }}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    alignItems: "center",
-                    marginBottom: "20px",
+                    marginBottom: "24px",
+                    position: "relative"
                   }}
                 >
-                  <label
-                    htmlFor="backbone"
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#2D3A76",
-                    }}
-                  >
-                    Backbone*
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    Backbone *
                   </label>
-                  <input
-                    id="backbone"
-                    name="backbone"
-                    type="text"
-                    placeholder="Backbone"
-                    value={formData.backbone}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      padding: "12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid rgba(45, 58, 118, 0.5)",
-                      fontSize: "14px",
-                      backgroundColor: "#ffffff",
-                      color: "#2D396B",
-                    }}
-                  />
-                </div>
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('backbone')}>
+                      <Server size={18} />
+                    </div>
+                    <input
+                      name="backbone"
+                      type="text"
+                      placeholder="Backbone"
+                      value={formData.backbone}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('backbone')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      style={inputStyle('backbone')}
+                    />
+                  </div>
+                </motion.div>
 
                 {/* Input Port */}
-                <div
+                <motion.div 
+                  whileHover={{ y: -2 }}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    alignItems: "center",
-                    marginBottom: "20px",
+                    marginBottom: "24px",
+                    position: "relative"
                   }}
                 >
-                  <label
-                    htmlFor="port"
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#2D3A76",
-                    }}
-                  >
-                    Port*
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    Port *
                   </label>
-                  <input
-                    id="port"
-                    name="port"
-                    type="number"
-                    placeholder="Port"
-                    value={formData.port}
-                    onChange={handleChange}
-                    required
-                    min={0}
-                    style={{
-                      padding: "12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid rgba(45, 58, 118, 0.5)",
-                      fontSize: "14px",
-                      backgroundColor: "#ffffff",
-                      color: "#2D396B",
-                    }}
-                  />
-                </div>
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('port')}>
+                      <Cpu size={18} />
+                    </div>
+                    <input
+                      name="port"
+                      type="number"
+                      placeholder="Port"
+                      value={formData.port}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('port')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      min={0}
+                      style={inputStyle('port')}
+                    />
+                  </div>
+                </motion.div>
 
                 {/* Input Tarif Akses */}
-                <div
+                <motion.div 
+                  whileHover={{ y: -2 }}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    alignItems: "center",
-                    marginBottom: "20px",
+                    marginBottom: "24px",
+                    position: "relative"
                   }}
                 >
-                  <label
-                    htmlFor="tarifAkses"
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#2D3A76",
-                    }}
-                  >
-                    Tarif Akses*
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    Tarif Akses *
                   </label>
-                  <input
-                    id="tarifAkses"
-                    name="tarifAkses"
-                    type="number"
-                    placeholder="Tarif Akses"
-                    value={formData.tarifAkses}
-                    onChange={handleChange}
-                    required
-                    min={0}
-                    step="0.01"
-                    style={{
-                      padding: "12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid rgba(45, 58, 118, 0.5)",
-                      fontSize: "14px",
-                      backgroundColor: "#ffffff",
-                      color: "#2D396B",
-                    }}
-                  />
-                </div>
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('tarifAkses')}>
+                      <DollarSign size={18} />
+                    </div>
+                    <input
+                      name="tarifAkses"
+                      type="number"
+                      placeholder="Tarif Akses"
+                      value={formData.tarifAkses}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('tarifAkses')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      min={0}
+                      step="0.01"
+                      style={inputStyle('tarifAkses')}
+                    />
+                  </div>
+                </motion.div>
 
                 {/* Input Tarif */}
-                <div
+                <motion.div 
+                  whileHover={{ y: -2 }}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "120px 1fr",
-                    alignItems: "center",
                     marginBottom: "0",
+                    position: "relative"
                   }}
                 >
-                  <label
-                    htmlFor="tarif"
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: "600",
-                      color: "#2D3A76",
-                    }}
-                  >
-                    Tarif*
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    Tarif *
                   </label>
-                  <input
-                    id="tarif"
-                    name="tarif"
-                    type="number"
-                    placeholder="Tarif"
-                    value={formData.tarif}
-                    onChange={handleChange}
-                    required
-                    min={0}
-                    step="0.01"
-                    style={{
-                      padding: "12px 16px",
-                      borderRadius: "10px",
-                      border: "1px solid rgba(45, 58, 118, 0.5)",
-                      fontSize: "14px",
-                      backgroundColor: "#ffffff",
-                      color: "#2D396B",
-                    }}
-                  />
-                </div>
-              </form>
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('tarif')}>
+                      <DollarSign size={18} />
+                    </div>
+                    <input
+                      name="tarif"
+                      type="number"
+                      placeholder="Tarif"
+                      value={formData.tarif}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('tarif')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      min={0}
+                      step="0.01"
+                      style={inputStyle('tarif')}
+                    />
+                  </div>
+                </motion.div>
 
-              {/* Tombol Aksi */}
-              <div
-                style={{
+                {/* Action Buttons */}
+                <div style={{
                   display: "flex",
                   justifyContent: "flex-end",
-                  gap: "20px",
-                  paddingRight: "65px",
-                  marginTop: "16px",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  style={{
-                    backgroundColor: "#2D3A76",
-                    color: "#ffffff",
-                    border: "none",
-                    padding: "12px 32px",
-                    borderRadius: "50px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                >
-                  Batal
-                </button>
-                {/* Tombol Simpan */}
-                <button
-                  type="submit"
-                  form="form-tambah-layanan"
-                  disabled={isSubmitting}
-                  style={{
-                    backgroundColor: "#00AEEF",
-                    color: "#ffffff",
-                    border: "none",
-                    padding: "12px 32px",
-                    borderRadius: "50px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                >
-                  {isSubmitting ? "Menyimpan..." : "Simpan"}
-                </button>
-              </div>
+                  gap: "16px",
+                  marginTop: "32px"
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleCancel}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "16px 32px",
+                      borderRadius: "12px",
+                      fontWeight: "600",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 15px rgba(3, 91, 113, 0.3)",
+                      transition: "all 0.3s ease",
+                      letterSpacing: "0.02em"
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    form="form-tambah-layanan"
+                    disabled={isSubmitting}
+                    style={{
+                      background: isSubmitting 
+                        ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
+                        : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "16px 40px",
+                      borderRadius: "12px",
+                      fontWeight: "600",
+                      fontSize: "14px",
+                      cursor: isSubmitting ? "not-allowed" : "pointer",
+                      boxShadow: "0 4px 20px rgba(0, 191, 202, 0.4)",
+                      transition: "all 0.3s ease",
+                      letterSpacing: "0.02em",
+                      opacity: isSubmitting ? 0.8 : 1
+                    }}
+                  >
+                    {isSubmitting ? "Menyimpan..." : "Simpan Data"}
+                  </motion.button>
+                </div>
+              </motion.form>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Pop-up Sukses */}
+      {/* Success Modal */}
       <AnimatePresence>
         {showSuccessModal && (
           <motion.div
@@ -668,118 +779,149 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              backgroundColor: "rgba(3, 91, 113, 0.3)",
+              backdropFilter: "blur(2px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               zIndex: 1000,
-              padding: "20px",
-              fontFamily: "Inter, sans-serif",
+              padding: "20px"
             }}
           >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+              transition={{ 
+                duration: 0.5, 
+                ease: [0.4, 0, 0.2, 1],
+                type: "spring",
+                stiffness: 300,
+                damping: 20
+              }}
               style={{
-                backgroundColor: "#ffffff",
-                borderRadius: "16px",
-                padding: "24px",
+                background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
+                borderRadius: "24px",
+                padding: "40px",
                 textAlign: "center",
-                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
                 position: "relative",
                 width: "100%",
-                maxWidth: "300px",
+                maxWidth: "400px",
+                border: "1px solid rgba(255, 255, 255, 0.2)"
               }}
             >
-              <div
+              {/* Success Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
                 style={{
-                  backgroundColor: "#00AEEF",
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                   borderRadius: "50%",
-                  width: "60px",
-                  height: "60px",
-                  margin: "0 auto 16px auto",
+                  width: "100px",
+                  height: "100px",
+                  margin: "0 auto 24px auto",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  boxShadow: "0 20px 40px rgba(63, 186, 140, 0.4)"
                 }}
               >
-                <Check
-                  style={{
-                    width: "30px",
-                    height: "30px",
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                >
+                  <Check style={{ 
+                    width: "48px", 
+                    height: "48px", 
                     color: "white",
-                  }}
-                />
-              </div>
-              <h3
+                    strokeWidth: 3
+                  }} />
+                </motion.div>
+              </motion.div>
+
+              <motion.h3 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
                 style={{
-                  margin: "0 0 8px 0",
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  color: "#333",
+                  margin: "0 0 12px 0",
+                  fontSize: "24px",
+                  fontWeight: "700",
+                  background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text"
                 }}
               >
-                Selamat!
-              </h3>
-              <p
+                Berhasil!
+              </motion.h3>
+              
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
                 style={{
-                  margin: "0 0 20px 0",
-                  fontSize: "14px",
-                  color: "#666",
-                  lineHeight: "1.4",
+                  margin: "0 0 32px 0",
+                  fontSize: "16px",
+                  color: colors.accent1,
+                  lineHeight: "1.5",
+                  opacity: 0.9
                 }}
               >
-                Data Layanan Berhasil Disimpan
-              </p>
-              <button
+                Data layanan baru telah berhasil disimpan ke sistem
+              </motion.p>
+              
+              <motion.button
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleCloseSuccessModal}
                 style={{
-                  backgroundColor: "#00AEEF",
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                   color: "white",
                   border: "none",
-                  borderRadius: "6px",
-                  padding: "8px 24px",
-                  fontSize: "14px",
-                  fontWeight: "500",
+                  borderRadius: "12px",
+                  padding: "16px 32px",
+                  fontSize: "16px",
+                  fontWeight: "600",
                   cursor: "pointer",
-                  minWidth: "80px",
-                  transition: "all 0.2s ease-in-out",
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = "#0088CC";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = "#00AEEF";
+                  boxShadow: "0 8px 25px rgba(63, 186, 140, 0.3)",
+                  transition: "all 0.3s ease",
+                  letterSpacing: "0.02em"
                 }}
               >
-                Oke
-              </button>
-              <button
+                Selesai
+              </motion.button>
+
+              {/* Close button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={handleCloseSuccessModal}
                 style={{
                   position: "absolute",
-                  top: "0.75rem",
-                  right: "0.75rem",
-                  background: "none",
+                  top: "16px",
+                  right: "16px",
+                  background: "rgba(3, 91, 113, 0.1)",
                   border: "none",
-                  fontSize: "1.5rem",
-                  color: "#666",
-                  cursor: "pointer",
-                  width: "30px",
-                  height: "30px",
+                  borderRadius: "50%",
+                  width: "36px",
+                  height: "36px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  borderRadius: "50%",
-                  transition: "background-color 0.2s",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease"
                 }}
-                onMouseOver={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-                onMouseOut={(e) => (e.target.style.backgroundColor = "transparent")}
+              
               >
-                ×
-              </button>
+                <X size={18} color={colors.primary} />
+              </motion.button>
             </motion.div>
           </motion.div>
         )}
