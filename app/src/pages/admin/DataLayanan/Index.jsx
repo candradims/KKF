@@ -500,7 +500,7 @@ const Index = () => {
                   e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = colors.gray200;
+                  e.target.style.borderColor = colors.secondary;
                   e.target.style.boxShadow = 'none';
                 }}
               />
@@ -541,7 +541,7 @@ const Index = () => {
                   e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = colors.gray200;
+                  e.target.style.borderColor = colors.secondary;
                   e.target.style.boxShadow = 'none';
                 }}
               >
