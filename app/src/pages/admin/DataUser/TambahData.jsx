@@ -72,7 +72,8 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
     boxShadow: focusedField === fieldName 
       ? `0 0 0 3px rgba(0, 191, 202, 0.1)` 
       : '0 1px 3px rgba(0, 0, 0, 0.1)',
-    outline: 'none'
+    outline: 'none',
+    fontFamily: "'Open Sans', sans-serif !important"
   });
 
   const iconContainerStyle = (fieldName) => ({
@@ -87,25 +88,25 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
 
   return (
     <>
-    <style>
-      {`
-        input::placeholder {
-          color: ${colors.accent1};
-          opacity: 0.6;
-          font-family: "Open Sans", sans-serif;
-        }
-        select:invalid {
-          color: ${colors.accent1};
-          opacity: 0.6;
-          font-family: "Open Sans", sans-serif;
-        }
-        select option {
-          color: ${colors.primary};
-          background-color: #e7f3f5ff;
-          font-family: "Open Sans", sans-serif;
-        }
-      `}
-    </style>
+      <style>
+        {`
+          input::placeholder {
+            color: ${colors.accent1};
+            opacity: 0.6;
+            fontFamily: "'Open Sans', sans-serif !important"
+          }
+          select:invalid {
+            color: ${colors.accent1};
+            opacity: 0.6;
+            fontFamily: "'Open Sans', sans-serif !important"
+          }
+          select option {
+            color: ${colors.primary};
+            background-color: #e7f3f5ff;
+            fontFamily: "'Open Sans', sans-serif !important"
+          }
+        `}
+      </style>
 
       <AnimatePresence>
         {isOpen && !showSuccessModal && (
@@ -125,8 +126,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
-              padding: '20px',
-              fontFamily: '"Open Sans", sans-serif'
+              padding: '20px'
             }}
           >
             <motion.div
@@ -404,10 +404,10 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                         cursor: 'pointer'
                       }}
                     >
-                      <option  value="" disabled hidden >Pilih role user</option>
-                      <option value="superAdmin">  👑 Super Admin </option>
-                      <option value="admin"> 👨‍💼 Admin </option>
-                      <option value="sales"> 💼 Sales </option>
+                      <option value="" disabled hidden>Pilih role user</option>
+                      <option value="superAdmin">👑 Super Admin</option>
+                      <option value="admin">👨‍💼 Admin</option>
+                      <option value="sales">💼 Sales</option>
                     </select>
                   </div>
                 </motion.div>
@@ -492,8 +492,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
-              padding: '20px',
-              fontFamily: '"Open Sans", sans-serif'
+              padding: '20px'
             }}
           >
             <motion.div
