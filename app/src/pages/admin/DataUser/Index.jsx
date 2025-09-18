@@ -458,6 +458,27 @@ const Index = () => {
       fontFamily: "'Open Sans', sans-serif !important",
       position: 'relative'
     }}>
+      
+      <style>
+      {`
+        .search-input::placeholder {
+          color: ${colors.gray500};
+          opacity: 1;
+          font-family: 'Open Sans', sans-serif;
+        }
+        
+        .search-input::-ms-input-placeholder {
+          color: ${colors.gray550};
+          font-family: 'Open Sans', sans-serif;
+        }
+        
+        .search-input::-webkit-input-placeholder {
+          color: ${colors.gray550};
+          font-family: 'Open Sans', sans-serif;
+        }
+      `}
+      </style>
+
       {/* Background Pattern */}
       <div style={{
         position: 'absolute',
@@ -644,6 +665,50 @@ const Index = () => {
             alignItems: 'end',
             position: 'relative',
           }}>
+            {/* Filter Search */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: colors.primary,
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <Filter size={16} />
+                Cari User
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Cari sesuatu..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border:'1px solid #035b71',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  backgroundColor: colors.white,
+                  color: colors.gray700,
+                  fontFamily: "'Open Sans', sans-serif"
+                }}
+                className="search-input"
+                onFocus={(e) => {
+                  e.target.style.borderColor = colors.secondary;
+                  e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = colors.secondary;
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+            </div>
+            
             {/* Filter By Role */}
             <div>
               <label style={{
@@ -679,11 +744,11 @@ const Index = () => {
                   e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = colors.gray200;
+                  e.target.style.borderColor = colors.secondary;
                   e.target.style.boxShadow = 'none';
                 }}
               >
-                <option value="">-- Semua Role --</option>
+                <option  value="" disabled hidden>-- Semua Role --</option>
                 <option value="Super Admin">Super Admin</option>
                 <option value="Admin">Admin</option>
                 <option value="Sales">Sales</option>
@@ -726,12 +791,12 @@ const Index = () => {
                   e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = colors.gray200;
+                  e.target.style.borderColor = colors.secondary;
                   e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
-
+            
             {/* Refresh Button */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'end' }}>
               <button
