@@ -140,7 +140,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           width: isSidebarOpen ? 'calc(100% - 270px)' : '100%',
           zIndex: 100,
           overflow: 'hidden',
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
+          fontFamily: "'Open Sans', sans-serif",
       }}>
         {/* Background Pattern */}
         <div style={{
@@ -239,8 +240,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             fontWeight: '700',
             color: 'white',
             textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
-            letterSpacing: '1px',
-            fontFamily: 'monospace'
+            letterSpacing: '1px'
           }}>
             {formatTime(currentTime)}
           </div>
