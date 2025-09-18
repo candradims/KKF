@@ -582,7 +582,6 @@ const Index = () => {
                 }}
               >
                 <RotateCcw size={16} />
-                Reset Filter
               </button>
             </div>
           </div>
