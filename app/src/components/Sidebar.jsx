@@ -333,12 +333,17 @@ const Sidebar = () => {
 
         {/* Logout Button */}
         <div style={{
-          padding: '20px 0',
+          padding: '10px 0',
           position: 'relative'
         }}>
           <button
             onClick={handleLogout}
-            style={logoutButtonStyle}
+            style={{
+              ...logoutButtonStyle,
+              padding: '18px 22px',
+              fontSize: '19px',
+              fontWeight: '600',
+            }}
             onMouseOver={(e) => {
               e.target.style.transform = 'translateY(-2px)';
               e.target.style.boxShadow = '0 6px 20px rgba(0, 191, 202, 0.4)';
@@ -364,7 +369,7 @@ const Sidebar = () => {
               alignItems: 'center',
               zIndex: 1
             }}>
-              <LogoutIcon fontSize="small" />
+              <LogoutIcon fontSize="medium" />
             </span>
             <span style={{ zIndex: 1 }}>Logout</span>
           </button>
