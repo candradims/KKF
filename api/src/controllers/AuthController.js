@@ -31,12 +31,6 @@ export class AuthController {
         });
       }
 
-      // Debug logging untuk password comparison
-      console.log("🔐 Password comparison:");
-      console.log("Input password:", kata_sandi);
-      console.log("Stored password:", user.kata_sandi);
-      console.log("Password match:", user.kata_sandi === kata_sandi);
-
       // Periksa password
       if (user.kata_sandi !== kata_sandi) {
         return res.status(401).json({
@@ -53,12 +47,19 @@ export class AuthController {
         });
       }
 
-      // Hapus password dari response
-      const { kata_sandi: _, ...userWithoutPassword } = user;
+      const userResponse = {
+        id_user: user.id_user,
+        nama_user: user.nama_user,
+        email_user: user.email_user,
+        role_user: user.role_user,
+        is_active: user.is_active,
+        created_at: user.created_at,
+        updated_at: user.updated_at
+      };
 
       res.status(200).json({
         success: true,
-        data: userWithoutPassword,
+        data: userResponse,
       });
     } catch (error) {
       console.error("❌ Login error:", error);
