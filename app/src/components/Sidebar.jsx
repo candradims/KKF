@@ -185,28 +185,8 @@ const Sidebar = () => {
     filter: isActive(item.path) ? 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.3))' : 'none'
   });
 
-  const userProfileStyle = {
-    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-    padding: '20px',
-    background: `linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)`,
-    backdropFilter: 'blur(10px)'
-  };
-
-  const avatarStyle = {
-    width: '42px',
-    height: '42px',
-    borderRadius: '12px',
-    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: '12px',
-    boxShadow: '0 4px 12px rgba(0, 191, 202, 0.3)',
-    border: '2px solid rgba(255, 255, 255, 0.2)'
-  };
-
   const logoutButtonStyle = {
-    width: '100%',
+    width: 'calc(100% - 24px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -220,7 +200,7 @@ const Sidebar = () => {
     fontWeight: '600',
     transition: 'all 0.3s ease',
     boxSizing: 'border-box',
-    margin: '0',
+    margin: '12px',
     outline: 'none',
     boxShadow: '0 4px 15px rgba(0, 191, 202, 0.3)',
     position: 'relative',
@@ -351,44 +331,11 @@ const Sidebar = () => {
           ))}
         </div>
 
-        {/* User Profile Section */}
-        <div style={userProfileStyle}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '20px'
-          }}>
-            <div style={avatarStyle}>
-              <span style={{
-                color: 'white',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
-              }}>
-                {userRole === 'sales' ? 'S' : userRole === 'superAdmin' ? 'SA' : 'A'}
-              </span>
-            </div>
-            <div>
-              <div style={{
-                fontSize: '15px',
-                fontWeight: '600',
-                color: 'white',
-                marginBottom: '4px',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
-              }}>
-                {userRole === 'sales' ? 'Sales' : userRole === 'superAdmin' ? 'Super Admin' : 'Admin'}
-              </div>
-              <div style={{
-                fontSize: '12px',
-                color: 'rgba(255, 255, 255, 0.7)',
-                letterSpacing: '0.2px'
-              }}>
-                {userRole === 'sales' ? 'sales@pln.co.id' : userRole === 'superAdmin' ? 'superadmin@pln.co.id' : 'admin@pln.co.id'}
-              </div>
-            </div>
-          </div>
-          
-          {/* Logout Button */}
+        {/* Logout Button */}
+        <div style={{
+          padding: '20px 0',
+          position: 'relative'
+        }}>
           <button
             onClick={handleLogout}
             style={logoutButtonStyle}
