@@ -18,6 +18,7 @@ const Login = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [focusedField, setFocusedField] = useState('');
+  const [userName, setUserName] = useState('');
 
   const colors = {
     primary: '#035b71',
@@ -259,9 +260,18 @@ const Login = () => {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        localStorage.setItem('userData', JSON.stringify(result.data));
-        localStorage.setItem('userRole', result.data.role_user);
+        const userDataToStore = {
+          nama_user: result.data.nama_user || result.data.name || result.data.nama || formData.email.split('@')[0],
+          email_user: result.data.email_user || result.data.email || formData.email,
+          role_user: result.data.role_user || result.data.role || formData.role,
+          ...result.data
+        };
         
+        console.log("Data yang disimpan ke localStorage:", userDataToStore);
+        localStorage.setItem('userData', JSON.stringify(userDataToStore));
+        localStorage.setItem('userRole', userDataToStore.role_user);
+        
+        setUserName(userDataToStore.nama_user);
         setShowModal(true);
         setIsLoading(false);
       } else {
@@ -284,6 +294,7 @@ const Login = () => {
       }
       
     } catch (error) {
+      console.error("Login error:", error);
       setMessage({ type: "error", text: "Terjadi kesalahan koneksi server" });
       setIsLoading(false);
     }
@@ -1161,6 +1172,7 @@ const Login = () => {
               marginBottom: '2.5rem',
               lineHeight: '1.6'
             }}>
+              Halo <strong style={{color: colors.secondary}}>{userName}</strong>!<br/>
               Anda berhasil masuk ke sistem. <br/>
               Mengarahkan ke dashboard sesuai peran Anda...
             </p>
