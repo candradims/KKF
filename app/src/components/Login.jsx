@@ -313,6 +313,7 @@ const Login = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem 1rem',
+      fontFamily: "'Open Sans', sans-serif !important",
       background: `linear-gradient(135deg, ${colors.darker} 0%, ${colors.dark} 50%, ${colors.primary} 100%)`
     }}>
       
