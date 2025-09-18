@@ -1,17 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, Notifications, Settings, AccountCircle, Menu } from '@mui/icons-material';
+import { Notifications, Settings, AccountCircle, Menu } from '@mui/icons-material';
 
 const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [pageTitle, setPageTitle] = useState("Dashboard");
-  const [searchValue, setSearchValue] = useState("");
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [userRole, setUserRole] = useState("admin");
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
+    const userDataString = localStorage.getItem("userData");
+    console.log("Raw userData from localStorage:", userDataString);
+    
+    let userData = {};
+    try {
+      userData = userDataString ? JSON.parse(userDataString) : {};
+    } catch (error) {
+      console.error("Error parsing userData:", error);
+    }
+    
+    console.log("Parsed userData:", userData);
+    
+    console.log("Available keys in userData:", Object.keys(userData));
+    
+    const userName = userData.nama_user || userData.nama || userData.name || 
+                    userData.email_user || userData.email || "User";
+    
+    const userEmail = userData.email_user || userData.email || "";
+    
+    console.log("Extracted user info:", { userName, userEmail });
+    
+    setUserName(userName);
+    setUserEmail(userEmail);
+    
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -79,6 +103,24 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
     accent1: '#008bb0',
     accent2: '#0090a8',
     success: '#3fba8c',
+  };
+
+  const getRoleDisplayName = (role) => {
+    switch(role) {
+      case "sales": return "Sales";
+      case "admin": return "Admin";
+      case "superAdmin": return "Super Admin";
+      default: return "User";
+    }
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    
+    const names = name.split(' ');
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    
+    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
   };
 
   return (
@@ -213,7 +255,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           </div>
         </div>
 
-        {/* Right side - Search and User Info */}
+        {/* Right side - User Profile */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -222,69 +264,98 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           position: 'relative',
           zIndex: 2
         }}>
-          {/* Enhanced Search Bar */}
-          <div style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          {/* User Profile Section */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.9rem',
+              padding: '2px 26px',
+              borderRadius: '20px',
+              background: 'rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.25)',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              minWidth: '220px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.18)';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            {/* Avatar with Gradient Border + Status */}
             <div style={{
-              position: 'absolute',
-              left: '14px',
-              zIndex: 1,
-              transition: 'all 0.3s ease'
+              position: 'relative',
+              width: '50px',
+              height: '45px',
+              borderRadius: '50%',
+              padding: '3px',
+              background: `conic-gradient(${colors.secondary}, ${colors.success}, ${colors.accent2}, ${colors.secondary})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
-              <Search 
-                style={{
-                  color: isSearchFocused ? colors.secondary : 'rgba(255, 255, 255, 0.95)',
-                  fontSize: '20px',
-                  filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))'
-                }}
-              />
-            </div>
-            <input
-              type="text"
-              placeholder="Cari sesuatu..."
-              className="navbar-search-input" 
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              style={{
-                padding: '12px 16px 12px 46px',
-                borderRadius: '16px',
-                border: isSearchFocused 
-                  ? `2px solid ${colors.secondary}` 
-                  : '2px solid rgba(255, 255, 255, 1)',
-                backgroundColor: isSearchFocused 
-                  ? 'rgba(255, 255, 255, 0.95)' 
-                  : 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px)',
-                fontSize: '14px',
-                width: '260px',
-                outline: 'none',
-                transition: 'all 0.3s ease',
-                color: isSearchFocused ? colors.primary : 'white',
-                fontWeight: '500',
-                boxShadow: isSearchFocused 
-                  ? `0 8px 25px rgba(0, 191, 202, 0.3)` 
-                  : 'none'
-              }}
-            />
-            
-            {/* Search Focus Effect */}
-            {isSearchFocused && (
+              <div style={{
+                width: '90%',
+                height: '90%',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg,#1e293b,#334155)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '18px',
+                color: 'white',
+                boxShadow: '0 0 12px rgba(0,191,202,0.5) inset'
+              }}>
+                {getInitials(userName)}
+              </div>
+
+              {/* Status dot (online) */}
               <div style={{
                 position: 'absolute',
-                bottom: '-2px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '60%',
-                height: '2px',
-                background: `linear-gradient(90deg, transparent, ${colors.secondary}, transparent)`,
-                animation: 'shimmer 1s ease-in-out infinite'
+                bottom: '4px',
+                right: '4px',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                background: '#3fba8c',
+                border: '2px solid #1e293b'
               }} />
-            )}
+            </div>
+
+            {/* User Info */}
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '700',
+                color: 'white',
+                marginBottom: '2px',
+                textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                {userName}
+              </div>
+              <div style={{
+                fontSize: '15px',
+                color: 'rgba(255,255,255,0.85)',
+                letterSpacing: '0.3px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontStyle: 'italic'
+              }}>
+                {userEmail || getRoleDisplayName(userRole)}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -306,35 +377,6 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           padding: 0;
           overflow-x: hidden;
         }
-        
-        @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-
-        .navbar-search-input::placeholder {
-          color: rgba(255, 255, 255, 0.8) !important;
-          opacity: 1 !important;
-          transition: all 0.3s ease;
-        }
-        
-        .navbar-search-input:focus::placeholder {
-          color: rgba(3, 91, 113, 0.5) !important;
-        }
-        
-        .navbar-search-input:not(:focus)::placeholder {
-          color: rgba(255, 255, 255, 0.8) !important;
-        }
-
-        /* Fallback untuk browser lain */
-        input.navbar-search-input::-webkit-input-placeholder {
-          color: rgba(255, 255, 255, 0.8) !important;
-        }
-        
-        input.navbar-search-input:focus::-webkit-input-placeholder {
-          color: rgba(3, 91, 113, 0.5) !important;
-        }
-
       `}</style>
     </>
   );
