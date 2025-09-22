@@ -181,7 +181,18 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const [showAdditionalSection, setShowAdditionalSection] = useState(false);
   const [originalData, setOriginalData] = useState({});
   const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
-  const [existingPengeluaran, setExistingPengeluaran] = useState(null);
+  const [existingPengeluaran, setExistingPengeluaran] = useState([]);
+  
+  // Multiple pengeluaran data
+  const [pengeluaranItems, setPengeluaranItems] = useState([{
+    id: null, // null for new items, will have id for existing items
+    item: "",
+    keterangan: "",
+    hasrat: "",
+    jumlah: "",
+    isExisting: false
+  }]);
+  
   const [formData, setFormData] = useState({
     sales: "",
     tanggal: "",
@@ -190,10 +201,11 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     kontrakTahunKe: "",
     referensiHJT: "",
     durasiKontrak: "",
-    item: "",
-    keterangan: "",
-    hasrat: "",
-    jumlah: "",
+    // Remove single pengeluaran fields as we now use pengeluaranItems array
+    // item: "",
+    // keterangan: "",
+    // hasrat: "",
+    // jumlah: "",
   });
 
   // Pre-fill form with existing data when editing and load pengeluaran data
@@ -249,32 +261,22 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         const result = await response.json();
         console.log('API Response result:', result);
         if (result.success && result.data.length > 0) {
-          // For Edit, we want to handle multiple pengeluaran items
-          const pengeluaranItems = result.data.map(item => ({
+          // For Edit, handle multiple pengeluaran items
+          const loadedPengeluaranItems = result.data.map(item => ({
             id: item.id_pengeluaran,
             item: item.item || "",
             keterangan: item.keterangan || "",
             hasrat: item.harga_satuan?.toString() || "",
             jumlah: item.jumlah?.toString() || "",
-            total: item.total_harga || 0
+            total: item.total_harga || 0,
+            isExisting: true
           }));
           
-          setExistingPengeluaran(pengeluaranItems);
+          setExistingPengeluaran(loadedPengeluaranItems);
+          setPengeluaranItems(loadedPengeluaranItems);
           
-          // Update form with first pengeluaran data 
-          if (pengeluaranItems.length > 0) {
-            const pengeluaranData = pengeluaranItems[0];
-            setFormData(prev => ({
-              ...prev,
-              item: pengeluaranData.item,
-              keterangan: pengeluaranData.keterangan,
-              hasrat: pengeluaranData.hasrat,
-              jumlah: pengeluaranData.jumlah,
-            }));
-            
-            // Automatically show the edit section since we have data
-            setShowAdditionalSection(true);
-          }
+          // Automatically show the edit section since we have data
+          setShowAdditionalSection(true);
 
           console.log('Pengeluaran data loaded:', pengeluaranItems);
         } else {
@@ -304,9 +306,114 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }));
   };
 
+  // Helper functions for multiple pengeluaran items
+  const handlePengeluaranItemChange = (index, field, value) => {
+    setPengeluaranItems(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      
+      // Calculate total for this item
+      if (field === 'hasrat' || field === 'jumlah') {
+        const hasrat = parseFloat(field === 'hasrat' ? value : updated[index].hasrat) || 0;
+        const jumlah = parseFloat(field === 'jumlah' ? value : updated[index].jumlah) || 0;
+        updated[index].total = hasrat * jumlah;
+      }
+      
+      console.log('📝 Pengeluaran item changed:', { index, field, value });
+      return updated;
+    });
+  };
+
+  const addPengeluaranItem = () => {
+    setPengeluaranItems(prev => [...prev, {
+      id: null,
+      item: "",
+      keterangan: "",
+      hasrat: "",
+      jumlah: "",
+      isExisting: false
+    }]);
+    console.log('➕ Added new pengeluaran item');
+  };
+
+  const removePengeluaranItem = (index) => {
+    if (pengeluaranItems.length > 1) {
+      setPengeluaranItems(prev => prev.filter((_, i) => i !== index));
+      console.log('🗑️ Removed pengeluaran item at index:', index);
+    }
+  };
+
+  const getTotalPengeluaran = () => {
+    return pengeluaranItems.reduce((total, item) => {
+      const hasrat = parseFloat(item.hasrat) || 0;
+      const jumlah = parseFloat(item.jumlah) || 0;
+      return total + (hasrat * jumlah);
+    }, 0);
+  };
+
   // Function to check if form data has changed
   const hasDataChanged = () => {
-    return JSON.stringify(formData) !== JSON.stringify(originalData);
+    // Check if main form data has changed
+    const formChanged = JSON.stringify(formData) !== JSON.stringify(originalData);
+    
+    // Check if pengeluaran items have changed
+    const pengeluaranChanged = checkPengeluaranChanges();
+    
+    console.log('🔍 Change detection:', {
+      formChanged,
+      pengeluaranChanged,
+      hasAnyChanges: formChanged || pengeluaranChanged
+    });
+    
+    return formChanged || pengeluaranChanged;
+  };
+
+  // Function to check if pengeluaran items have changed
+  const checkPengeluaranChanges = () => {
+    // If additional section is shown but wasn't before, that's a change
+    if (showAdditionalSection && existingPengeluaran.length === 0) {
+      return pengeluaranItems.some(item => item.item || item.keterangan || item.hasrat || item.jumlah);
+    }
+    
+    // If additional section is hidden but there was existing data, that's a change
+    if (!showAdditionalSection && existingPengeluaran.length > 0) {
+      return true;
+    }
+    
+    // If no additional section shown and no existing data, no change
+    if (!showAdditionalSection && existingPengeluaran.length === 0) {
+      return false;
+    }
+    
+    // Compare current items with existing data
+    if (existingPengeluaran.length !== pengeluaranItems.length) {
+      return true;
+    }
+    
+    // Check each item for changes
+    for (let i = 0; i < pengeluaranItems.length; i++) {
+      const current = pengeluaranItems[i];
+      const existing = existingPengeluaran[i];
+      
+      if (!existing) {
+        // New item that has data
+        if (current.item || current.keterangan || current.hasrat || current.jumlah) {
+          return true;
+        }
+      } else {
+        // Compare with existing item
+        if (
+          current.item !== (existing.item || '') ||
+          current.keterangan !== (existing.keterangan || '') ||
+          current.hasrat !== (existing.harga_satuan?.toString() || '') ||
+          current.jumlah !== (existing.jumlah?.toString() || '')
+        ) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
   };
 
   const handleSubmit = (e) => {
@@ -326,19 +433,20 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       return;
     }
 
-    // Validasi pengeluaran jika ada data yang diisi (optional)
-    const pengeluaranFields = ['item', 'keterangan', 'hasrat', 'jumlah'];
-    const filledPengeluaranFields = pengeluaranFields.filter(field => formData[field]);
-    
-    // Jika ada field pengeluaran yang diisi, pastikan semua field wajib diisi
-    if (filledPengeluaranFields.length > 0 && filledPengeluaranFields.length < pengeluaranFields.length) {
-      const missingPengeluaranFields = pengeluaranFields.filter(field => !formData[field]);
-      alert(`Jika mengisi pengeluaran lain-lain, harap lengkapi semua field: ${missingPengeluaranFields.join(', ')}`);
+    // Validasi pengeluaran items (optional but if filled, must be complete)
+    const hasIncompletePengeluaran = pengeluaranItems.some(item => {
+      const hasAnyField = item.item || item.keterangan || item.hasrat || item.jumlah;
+      const hasAllFields = item.item && item.keterangan && item.hasrat && item.jumlah;
+      return hasAnyField && !hasAllFields;
+    });
+
+    if (hasIncompletePengeluaran) {
+      alert('Jika mengisi pengeluaran lain-lain, harap lengkapi semua field (Item, Keterangan, Harga Satuan, Jumlah) untuk setiap item.');
       return;
     }
 
     console.log('📝 Updating penawaran data:', formData);
-    console.log('📝 Existing pengeluaran:', existingPengeluaran);
+    console.log('📝 Pengeluaran items:', pengeluaranItems);
     console.log('📝 Show additional section:', showAdditionalSection);
 
     setIsSaving(true);
@@ -349,8 +457,11 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       id: editData.id,
       id_penawaran: editData.id_penawaran,
       ...formData,
+      // Include pengeluaran items data
+      pengeluaranItems: pengeluaranItems.filter(item => 
+        item.item && item.keterangan && item.hasrat && item.jumlah
+      ),
       _hasExistingPengeluaran: !!(existingPengeluaran && existingPengeluaran.length > 0),
-      _existingPengeluaranId: existingPengeluaran && existingPengeluaran.length > 0 ? existingPengeluaran[0].id : null,
     };
     
     console.log('📤 Sending update data:', updateData);
@@ -373,11 +484,18 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       referensiHJT: "",
       durasiKontrak: "",
       discount: "",
+    });
+    
+    // Reset pengeluaran items
+    setPengeluaranItems([{
+      id: null,
       item: "",
       keterangan: "",
       hasrat: "",
       jumlah: "",
-    });
+      isExisting: false
+    }]);
+    setExistingPengeluaran([]);
     setShowAdditionalSection(false);
     onClose();
   };
@@ -408,20 +526,22 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const handleConfirmYes = () => {
     setShowConfirmModal(false);
     setShowAdditionalSection(true);
+    console.log('✅ Additional section enabled');
   };
 
   const handleConfirmNo = () => {
     setShowConfirmModal(false);
     setShowAdditionalSection(false);
-    // Reset additional fields when user chooses No
-    setFormData((prev) => ({
-      ...prev,
+    // Reset pengeluaran items when user chooses No
+    setPengeluaranItems([{
+      id: null,
       item: "",
       keterangan: "",
       hasrat: "",
       jumlah: "",
-      discount: "",
-    }));
+      isExisting: false
+    }]);
+    console.log('❌ Additional section disabled and pengeluaran reset');
   };
 
   if (!isOpen && !showSuccessModal) return null;
@@ -1126,163 +1246,252 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       </div>
                     ) : (
                       <div>
-                        {/* Item */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '12px',
-                          minHeight: '40px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
+                        {/* Multiple Pengeluaran Items */}
+                        {pengeluaranItems.map((item, index) => (
+                          <div key={index} style={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '8px',
+                            padding: '16px',
+                            marginBottom: '12px',
+                            position: 'relative'
                           }}>
-                            Item*
-                          </label>
-                          <input
-                            type="text"
-                            name="item"
-                            value={formData.item || ""}
-                            onChange={handleInputChange}
-                            disabled={isSaving}
-                            placeholder="Masukkan Item"
-                            style={{
-                              flex: 1,
-                              padding: '8px 12px',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              outline: 'none',
-                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
-                              cursor: isSaving ? 'not-allowed' : 'text'
-                            }}
-                          />
-                        </div>
+                            {/* Header dengan nomor item dan tombol hapus */}
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: '12px',
+                              borderBottom: '1px solid #f0f0f0',
+                              paddingBottom: '8px'
+                            }}>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1565C0'
+                              }}>
+                                Item #{index + 1}
+                              </span>
+                              {pengeluaranItems.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removePengeluaranItem(index)}
+                                  style={{
+                                    backgroundColor: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '4px 8px',
+                                    fontSize: '11px',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Hapus
+                                </button>
+                              )}
+                            </div>
 
-                        {/* Keterangan */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '12px',
-                          minHeight: '40px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
-                          }}>
-                            Keterangan*
-                          </label>
-                          <input
-                            type="text"
-                            name="keterangan"
-                            value={formData.keterangan || ""}
-                            onChange={handleInputChange}
-                            disabled={isSaving}
-                            placeholder="Masukkan keterangan"
-                            style={{
-                              flex: 1,
-                              padding: '8px 12px',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              outline: 'none',
-                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
-                              cursor: isSaving ? 'not-allowed' : 'text'
-                            }}
-                          />
-                        </div>
+                            {/* Item */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              marginBottom: '12px',
+                              minHeight: '40px'
+                            }}>
+                              <label style={{
+                                width: '120px',
+                                fontSize: '12px',
+                                color: '#333',
+                                fontWeight: '500',
+                                flexShrink: 0
+                              }}>
+                                Item*
+                              </label>
+                              <input
+                                type="text"
+                                value={item.item}
+                                onChange={(e) => handlePengeluaranItemChange(index, 'item', e.target.value)}
+                                disabled={isSaving}
+                                placeholder="Masukkan Item"
+                                style={{
+                                  flex: 1,
+                                  padding: '8px 12px',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  outline: 'none',
+                                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                                  cursor: isSaving ? 'not-allowed' : 'text'
+                                }}
+                              />
+                            </div>
 
-                        {/* Hasrat */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '12px',
-                          minHeight: '40px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
-                          }}>
-                            Hasrat*
-                          </label>
-                          <input
-                            type="text"
-                            name="hasrat"
-                            value={formData.hasrat || ""}
-                            onChange={handleInputChange}
-                            disabled={isSaving}
-                            placeholder="Masukkan hasrat"
-                            style={{
-                              flex: 1,
-                              padding: '8px 12px',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              outline: 'none',
-                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
-                              cursor: isSaving ? 'not-allowed' : 'text'
-                            }}
-                          />
-                        </div>
+                            {/* Keterangan */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              marginBottom: '12px',
+                              minHeight: '40px'
+                            }}>
+                              <label style={{
+                                width: '120px',
+                                fontSize: '12px',
+                                color: '#333',
+                                fontWeight: '500',
+                                flexShrink: 0
+                              }}>
+                                Keterangan*
+                              </label>
+                              <input
+                                type="text"
+                                value={item.keterangan}
+                                onChange={(e) => handlePengeluaranItemChange(index, 'keterangan', e.target.value)}
+                                disabled={isSaving}
+                                placeholder="Masukkan keterangan"
+                                style={{
+                                  flex: 1,
+                                  padding: '8px 12px',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  outline: 'none',
+                                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                                  cursor: isSaving ? 'not-allowed' : 'text'
+                                }}
+                              />
+                            </div>
 
-                        {/* Jumlah */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          minHeight: '40px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
-                          }}>
-                            Jumlah*
-                          </label>
-                          <input
-                            type="text"
-                            name="jumlah"
-                            value={formData.jumlah || ""}
-                            onChange={handleInputChange}
-                            disabled={isSaving}
-                            placeholder="Masukkan Jumlah"
-                            style={{
-                              flex: 1,
-                              padding: '8px 12px',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              outline: 'none',
-                              backgroundColor: isSaving ? '#f5f5f5' : 'white',
-                              cursor: isSaving ? 'not-allowed' : 'text'
-                            }}
-                          />
-                        </div>
-                        
-                        {/* Display calculated total */}
-                        {formData.hasrat && formData.jumlah && (
+                            {/* Harga Satuan */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              marginBottom: '12px',
+                              minHeight: '40px'
+                            }}>
+                              <label style={{
+                                width: '120px',
+                                fontSize: '12px',
+                                color: '#333',
+                                fontWeight: '500',
+                                flexShrink: 0
+                              }}>
+                                Harga Satuan*
+                              </label>
+                              <input
+                                type="number"
+                                value={item.hasrat}
+                                onChange={(e) => handlePengeluaranItemChange(index, 'hasrat', e.target.value)}
+                                disabled={isSaving}
+                                placeholder="0"
+                                style={{
+                                  flex: 1,
+                                  padding: '8px 12px',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  outline: 'none',
+                                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                                  cursor: isSaving ? 'not-allowed' : 'text'
+                                }}
+                              />
+                            </div>
+
+                            {/* Jumlah */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              marginBottom: '12px',
+                              minHeight: '40px'
+                            }}>
+                              <label style={{
+                                width: '120px',
+                                fontSize: '12px',
+                                color: '#333',
+                                fontWeight: '500',
+                                flexShrink: 0
+                              }}>
+                                Jumlah*
+                              </label>
+                              <input
+                                type="number"
+                                value={item.jumlah}
+                                onChange={(e) => handlePengeluaranItemChange(index, 'jumlah', e.target.value)}
+                                disabled={isSaving}
+                                placeholder="0"
+                                style={{
+                                  flex: 1,
+                                  padding: '8px 12px',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  outline: 'none',
+                                  backgroundColor: isSaving ? '#f5f5f5' : 'white',
+                                  cursor: isSaving ? 'not-allowed' : 'text'
+                                }}
+                              />
+                            </div>
+                            
+                            {/* Display calculated total untuk item ini */}
+                            {item.hasrat && item.jumlah && (
+                              <div style={{
+                                padding: '8px 12px',
+                                backgroundColor: '#f0f8ff',
+                                border: '1px solid #bbdefb',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                color: '#1565C0',
+                                textAlign: 'right'
+                              }}>
+                                <strong>Subtotal: Rp {(parseFloat(item.hasrat || 0) * parseInt(item.jumlah || 0)).toLocaleString('id-ID')}</strong>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+
+                        {/* Total keseluruhan */}
+                        {pengeluaranItems.some(item => item.hasrat && item.jumlah) && (
                           <div style={{
-                            marginTop: '12px',
-                            padding: '8px 12px',
-                            backgroundColor: '#f0f8ff',
-                            border: '1px solid #bbdefb',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            color: '#1565C0'
+                            padding: '12px',
+                            backgroundColor: '#e8f5e8',
+                            border: '2px solid #4caf50',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            color: '#2e7d32',
+                            textAlign: 'right',
+                            fontWeight: 'bold',
+                            marginBottom: '16px'
                           }}>
-                            <strong>Total: Rp {(parseFloat(formData.hasrat || 0) * parseInt(formData.jumlah || 0)).toLocaleString('id-ID')}</strong>
+                            Total Semua Pengeluaran: Rp {getTotalPengeluaran().toLocaleString('id-ID')}
                           </div>
                         )}
+
+                        {/* Tombol Tambah Item */}
+                        <div style={{
+                          textAlign: 'center',
+                          marginTop: '16px'
+                        }}>
+                          <button
+                            type="button"
+                            onClick={addPengeluaranItem}
+                            disabled={isSaving}
+                            style={{
+                              backgroundColor: '#22c55e',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '8px 16px',
+                              fontSize: '12px',
+                              cursor: isSaving ? 'not-allowed' : 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              margin: '0 auto'
+                            }}
+                          >
+                            <Plus style={{ width: '14px', height: '14px' }} />
+                            Tambah Item Pengeluaran
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
