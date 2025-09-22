@@ -63,6 +63,12 @@ const Sidebar = () => {
       path: "/superAdmin/data-penawaran",
       icon: <BuildIcon />,
       color: colors.tertiary
+    },
+    {
+      title: "Analisis",
+      path: "/superAdmin/laporan-laba",
+      icon: <AssessmentIcon />,
+      color: colors.success
     }
   ];
 
