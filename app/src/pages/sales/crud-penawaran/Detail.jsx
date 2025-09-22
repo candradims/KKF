@@ -538,11 +538,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
                   minWidth: '200px',
                   textAlign: 'left'
                 }}>
-                  Durasi Kontrak (n thn)
+                  Durasi Kontrak (in thn)
                 </label>
                 <input
                   type="text"
-                  value={detailData?.durasi || 'Durasi kontrak (n thn)'}
+                  value={detailData?.durasi || 'Durasi kontrak (in thn)'}
                   style={{
                     flex: 1,
                     padding: '8px 12px',

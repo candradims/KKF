@@ -585,7 +585,7 @@ const Index = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
-                }}>Durasi</th>
+                }}>Durasi Kontrak (in thn)</th>
                 <th style={{
                   padding: '12px 16px',
                   textAlign: 'left',

@@ -396,7 +396,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                   minWidth: '200px',
                   textAlign: 'left'
                 }}>
-                  Durasi Kontrak (n thn)
+                  Durasi Kontrak (in thn)
                 </label>
                 <input
                   type="text"
