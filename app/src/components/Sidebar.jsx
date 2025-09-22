@@ -93,7 +93,7 @@ const Sidebar = () => {
       color: colors.accent2
     },
     {
-      title: "Laporan Laba",
+      title: "Analisis",
       path: "/admin/laporan-laba",
       icon: <AssessmentIcon />,
       color: colors.success
@@ -115,7 +115,7 @@ const Sidebar = () => {
       color: colors.tertiary
     },
     {
-      title: "Laporan Laba",
+      title: "Analisis",
       path: "/sales/laporan-laba",
       icon: <AssessmentIcon />,
       color: colors.success
