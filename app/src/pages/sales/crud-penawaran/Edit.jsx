@@ -344,12 +344,16 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     setIsSaving(true);
     
     // Include pengeluaran info for the parent component
+    // Do not include the full editData object to avoid carrying extra data
     const updateData = {
-      ...editData,
+      id: editData.id,
+      id_penawaran: editData.id_penawaran,
       ...formData,
       _hasExistingPengeluaran: !!(existingPengeluaran && existingPengeluaran.length > 0),
       _existingPengeluaranId: existingPengeluaran && existingPengeluaran.length > 0 ? existingPengeluaran[0].id : null,
     };
+    
+    console.log('📤 Sending update data:', updateData);
     
     onSave(updateData);
 

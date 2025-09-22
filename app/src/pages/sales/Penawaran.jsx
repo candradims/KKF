@@ -178,7 +178,14 @@ const Penawaran = () => {
   };
 
   const handleEditData = (item) => {
-    setSelectedEditData(item);
+    // Make sure both ID properties are set
+    const editData = {
+      ...item,
+      id: item.id || item.id_penawaran,
+      id_penawaran: item.id_penawaran || item.id
+    };
+    console.log('🖊️ Setting edit data:', editData);
+    setSelectedEditData(editData);
     setShowEditModal(true);
   };
 
@@ -200,9 +207,40 @@ const Penawaran = () => {
       console.log('🔍 Selected edit data ID:', selectedEditData.id);
       console.log('👤 Current user data:', userData);
 
+      // Make sure we're using the correct ID from the selected data
+      const penawaranId = selectedEditData.id_penawaran || selectedEditData.id;
+      
+      if (!penawaranId) {
+        alert('ID penawaran tidak ditemukan. Silakan coba lagi.');
+        return;
+      }
+
+      // Format the date correctly to ISO format YYYY-MM-DD
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        
+        try {
+          // Check if it's DD/MM/YYYY format
+          if (dateString.includes('/')) {
+            const [day, month, year] = dateString.split('/');
+            // Create a date object and return ISO format
+            const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+            if (!isNaN(date.getTime())) {
+              return date.toISOString().split('T')[0]; // YYYY-MM-DD
+            }
+          }
+          
+          // If not DD/MM/YYYY or parsing fails, return as is
+          return dateString;
+        } catch (error) {
+          console.error('❌ Error formatting date:', error);
+          return dateString;
+        }
+      };
+      
       // Map the updated data to match API format
       const apiData = {
-        tanggal: updatedData.tanggal,
+        tanggal: formatDate(updatedData.tanggal),
         pelanggan: updatedData.pelanggan,
         nomorKontrak: updatedData.nomorKontrak,
         kontrakTahunKe: updatedData.kontrakTahunKe,
@@ -212,13 +250,24 @@ const Penawaran = () => {
         keterangan: updatedData.keterangan,
         harga: updatedData.harga,
         jumlah: updatedData.jumlah,
-        discount: convertDiscountToPercentage(updatedData.discount) // Ensure proper % format
+        discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0'
       };
 
-      console.log('📤 Sending API data:', apiData);
-
-      const result = await penawaranAPI.update(selectedEditData.id, apiData);
+      // Ensure numeric ID
+      const numericId = parseInt(penawaranId, 10);
       
+      console.log('📤 Sending API data for ID:', numericId, apiData);
+      console.log('📤 Original ID values:', {
+        selectedEditDataId: selectedEditData.id,
+        selectedEditDataPenawaranId: selectedEditData.id_penawaran,
+        penawaranId
+      });
+
+      // Make deep copy of apiData to avoid reference issues
+      const cleanApiData = JSON.parse(JSON.stringify(apiData));
+      
+      // Use the penawaranId that was already declared
+      const result = await penawaranAPI.update(numericId, cleanApiData);
       console.log('📬 API Response:', result);
       
       if (result.success) {
@@ -244,7 +293,7 @@ const Penawaran = () => {
             const existingPengeluaranId = updatedData._existingPengeluaranId;
             
             const pengeluaranData = {
-              id_penawaran: selectedEditData.id,
+              id_penawaran: penawaranId, // Use the consistent ID
               item: updatedData.item,
               keterangan: updatedData.keterangan,
               hasrat: parseFloat(updatedData.hasrat) || 0,
