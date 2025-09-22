@@ -41,6 +41,7 @@ const Index = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatusItem, setSelectedStatusItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
+  const [statusCatatan, setStatusCatatan] = useState(''); // State untuk catatan status
   
   // State untuk discount modal
   const [showDiscountModal, setShowDiscountModal] = useState(false);
@@ -177,14 +178,29 @@ const Index = () => {
   const handleStatusClick = (item) => {
     setSelectedStatusItem(item);
     setNewStatus(item.status);
+    setStatusCatatan(''); // Reset catatan
     setShowStatusModal(true);
   };
 
   const handleStatusChange = async () => {
     if (!selectedStatusItem || !newStatus) return;
     
+    // Jika status ditolak dan belum ada catatan, tampilkan peringatan
+    if (newStatus === 'Ditolak' && !statusCatatan.trim()) {
+      alert('Catatan wajib diisi untuk status Ditolak');
+      return;
+    }
+    
     try {
       console.log("📝 Updating status for penawaran:", selectedStatusItem.id, "to:", newStatus);
+      
+      // Buat catatan berdasarkan status
+      let finalCatatan;
+      if (newStatus === 'Ditolak' && statusCatatan.trim()) {
+        finalCatatan = `Status ditolak oleh Admin. Alasan: ${statusCatatan}`;
+      } else {
+        finalCatatan = `Status diubah oleh Admin menjadi ${newStatus}`;
+      }
       
       // Call API to update status
       const response = await fetch(`http://localhost:3000/api/penawaran/${selectedStatusItem.id}/status`, {
@@ -197,7 +213,7 @@ const Index = () => {
         },
         body: JSON.stringify({
           status: newStatus,
-          catatan: `Status diubah oleh Admin menjadi ${newStatus}`
+          catatan: finalCatatan
         })
       });
 
@@ -1000,6 +1016,52 @@ const Index = () => {
               </select>
             </div>
 
+            {newStatus === 'Ditolak' && (
+              <div style={{
+                marginBottom: '20px'
+              }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#374151',
+                  marginBottom: '8px'
+                }}>
+                  Catatan Penolakan <span style={{ color: '#DC2626' }}>*</span>:
+                </label>
+                <textarea
+                  value={statusCatatan}
+                  onChange={(e) => setStatusCatatan(e.target.value)}
+                  placeholder="Masukkan alasan penolakan..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '2px solid #D1D5DB',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    backgroundColor: 'white',
+                    resize: 'vertical',
+                    minHeight: '80px',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#00AEEF';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#D1D5DB';
+                  }}
+                />
+                <p style={{
+                  fontSize: '12px',
+                  color: '#6B7280',
+                  margin: '4px 0 0 0'
+                }}>
+                  Catatan wajib diisi untuk status Ditolak
+                </p>
+              </div>
+            )}
+
             <div style={{
               display: 'flex',
               gap: '12px',
@@ -1029,25 +1091,25 @@ const Index = () => {
               </button>
               <button
                 onClick={handleStatusChange}
-                disabled={!newStatus || newStatus === selectedStatusItem?.status}
+                disabled={!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())}
                 style={{
                   padding: '10px 20px',
-                  backgroundColor: (!newStatus || newStatus === selectedStatusItem?.status) ? '#D1D5DB' : '#00AEEF',
+                  backgroundColor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? '#D1D5DB' : '#00AEEF',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
-                  cursor: (!newStatus || newStatus === selectedStatusItem?.status) ? 'not-allowed' : 'pointer',
+                  cursor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
                   transition: 'background-color 0.2s'
                 }}
                 onMouseOver={(e) => {
-                  if (newStatus && newStatus !== selectedStatusItem?.status) {
+                  if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
                     e.target.style.backgroundColor = '#0097A7';
                   }
                 }}
                 onMouseOut={(e) => {
-                  if (newStatus && newStatus !== selectedStatusItem?.status) {
+                  if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
                     e.target.style.backgroundColor = '#00AEEF';
                   }
                 }}

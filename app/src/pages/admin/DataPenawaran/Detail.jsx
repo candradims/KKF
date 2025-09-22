@@ -48,6 +48,38 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   ]);
 
   const [pengeluaranLain, setPengeluaranLain] = useState([]);
+  const [fullDetailData, setFullDetailData] = useState(null);
+
+  // Fetch full detail data including catatan
+  const loadFullDetailData = async () => {
+    if (!detailData?.id_penawaran) return;
+    
+    try {
+      console.log("🔍 Loading full detail data for penawaran:", detailData.id_penawaran);
+      
+      const response = await fetch(`http://localhost:3000/api/penawaran/${detailData.id_penawaran}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': getUserData().id_user.toString(),
+          'X-User-Role': getUserData().role_user,
+          'X-User-Email': getUserData().email_user
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        console.log("✅ Full detail data loaded:", result.data);
+        setFullDetailData(result.data);
+      }
+    } catch (error) {
+      console.error("❌ Error loading full detail data:", error);
+    }
+  };
   const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
   const [errorPengeluaran, setErrorPengeluaran] = useState(null);
 
@@ -110,7 +142,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
 
   useEffect(() => {
     loadPengeluaranData();
-  }, [detailData?.id]);
+    loadFullDetailData(); // Load full detail data when component opens
+  }, [detailData?.id_penawaran]); // Use id_penawaran instead of id
 
   if (!isOpen) return null;
 
@@ -429,6 +462,35 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                   }}
                 />
               </div>
+              
+              {((fullDetailData?.catatan || detailData?.catatan) || (fullDetailData?.status === 'Ditolak' || detailData?.status === 'Ditolak')) && (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                  <label style={{
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#374151',
+                    minWidth: '200px',
+                    textAlign: 'left'
+                  }}>
+                    Catatan
+                  </label>
+                  <textarea
+                    value={fullDetailData?.catatan || detailData?.catatan || 'Tidak ada catatan'}
+                    readOnly
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      border: '1px solid #D1D5DB',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      backgroundColor: '#F9FAFB',
+                      color: '#374151',
+                      resize: 'none',
+                      minHeight: '60px'
+                    }}
+                  />
+                </div>
+              )}
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <label style={{
