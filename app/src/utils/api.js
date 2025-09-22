@@ -86,16 +86,43 @@ export const apiRequest = async (url, options = {}) => {
   };
 
   try {
+    console.log(
+      `🌐 Making API ${options.method || "GET"} request to:`,
+      `${API_CONFIG.BASE_URL}${url}`
+    );
+    console.log("🌐 Request options:", {
+      method: mergedOptions.method || "GET",
+      headers: mergedOptions.headers,
+      bodyPreview: mergedOptions.body
+        ? `${mergedOptions.body.substring(0, 100)}...`
+        : null,
+    });
+
     const response = await fetch(`${API_CONFIG.BASE_URL}${url}`, mergedOptions);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Try to parse the response body regardless of status
+    let responseData;
+    const contentType = response.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      responseData = await response.json();
+    } else {
+      responseData = await response.text();
     }
 
-    const result = await response.json();
-    return result;
+    if (!response.ok) {
+      // Enhanced error with response data
+      const enhancedError = new Error(`HTTP error! status: ${response.status}`);
+      enhancedError.status = response.status;
+      enhancedError.responseData = responseData;
+      throw enhancedError;
+    }
+
+    console.log("🌐 API Response:", responseData);
+    return responseData;
   } catch (error) {
-    console.error("API Request Error:", error);
+    console.error("❌ API Request Error:", error);
+    console.error("❌ Error details:", error.responseData || error.message);
     throw error;
   }
 };

@@ -216,13 +216,25 @@ export class PenawaranController {
       const { id } = req.params;
       const updateData = req.body;
 
-      console.log("🔄 Update penawaran ID:", id);
+      // Validate ID is a number
+      const penawaranId = parseInt(id, 10);
+      if (isNaN(penawaranId)) {
+        return res.status(400).json({
+          success: false,
+          message: "ID penawaran tidak valid",
+        });
+      }
+
+      console.log("🔄 Update penawaran ID:", penawaranId);
       console.log("📝 Update data received:", updateData);
       console.log("👤 User info:", req.user);
 
       // Cek apakah penawaran ada dan user memiliki izin
-      const existingPenawaran = await PenawaranModel.getPenawaranById(id);
+      const existingPenawaran = await PenawaranModel.getPenawaranById(
+        penawaranId
+      );
       if (!existingPenawaran) {
+        console.error(`❌ Penawaran with ID ${penawaranId} not found`);
         return res.status(404).json({
           success: false,
           message: "Penawaran tidak ditemukan",
@@ -243,8 +255,32 @@ export class PenawaranController {
         });
       }
 
+      // Ensure id_user is preserved from the existing record
+      updateData.id_user = existingPenawaran.id_user;
+
+      // Make sure required fields are present
+      const requiredFields = ["pelanggan", "nomorKontrak", "durasiKontrak"];
+      const missingFields = [];
+
+      requiredFields.forEach((field) => {
+        if (
+          !updateData[field] &&
+          !updateData[PenawaranController.getDbFieldName(field)]
+        ) {
+          // Check if the field exists in updateData or as DB field name
+          missingFields.push(field);
+        }
+      });
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Field yang wajib diisi: ${missingFields.join(", ")}`,
+        });
+      }
+
       const updatedPenawaran = await PenawaranModel.updatePenawaran(
-        id,
+        penawaranId,
         updateData
       );
 
@@ -257,12 +293,67 @@ export class PenawaranController {
       });
     } catch (error) {
       console.error("❌ Error in updatePenawaran:", error);
+      console.error("❌ Stack trace:", error.stack);
+      console.error("❌ Error details:", JSON.stringify(error, null, 2));
+
+      // Log database error details if available
+      if (error.code) {
+        console.error(`❌ Database error code: ${error.code}`);
+      }
+      if (error.details) {
+        console.error(`❌ Error details: ${error.details}`);
+      }
+
+      // Provide more specific error messages
+      if (error.message.includes("not found")) {
+        return res.status(404).json({
+          success: false,
+          message: "Penawaran tidak ditemukan",
+          error: error.message,
+        });
+      } else if (
+        error.message.includes("violates") ||
+        error.message.includes("constraint")
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Data tidak valid untuk diperbarui",
+          error: error.message,
+        });
+      } else if (
+        error.message.includes("date/time") ||
+        error.message.includes("out of range")
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Format tanggal tidak valid. Gunakan format DD/MM/YYYY atau YYYY-MM-DD.",
+          error: error.message,
+        });
+      }
+
       res.status(500).json({
         success: false,
-        message: "Gagal memperbarui penawaran",
+        message: "Gagal memperbarui penawaran: " + error.message,
         error: error.message,
+        details: error.details || error.stack,
       });
     }
+  }
+
+  // Helper function to convert frontend field names to database field names
+  static getDbFieldName(frontendField) {
+    const fieldMap = {
+      pelanggan: "nama_pelanggan",
+      nomorKontrak: "nomor_kontrak",
+      kontrakTahunKe: "kontrak_tahun",
+      referensiHJT: "wilayah_hjt",
+      durasiKontrak: "durasi_kontrak",
+      tanggal: "tanggal_dibuat",
+      discount: "diskon",
+    };
+
+    return fieldMap[frontendField] || frontendField;
   }
 
   // Hapus penawaran

@@ -178,7 +178,14 @@ const Penawaran = () => {
   };
 
   const handleEditData = (item) => {
-    setSelectedEditData(item);
+    // Make sure both ID properties are set
+    const editData = {
+      ...item,
+      id: item.id || item.id_penawaran,
+      id_penawaran: item.id_penawaran || item.id
+    };
+    console.log('🖊️ Setting edit data:', editData);
+    setSelectedEditData(editData);
     setShowEditModal(true);
   };
 
@@ -200,9 +207,40 @@ const Penawaran = () => {
       console.log('🔍 Selected edit data ID:', selectedEditData.id);
       console.log('👤 Current user data:', userData);
 
+      // Make sure we're using the correct ID from the selected data
+      const penawaranId = selectedEditData.id_penawaran || selectedEditData.id;
+      
+      if (!penawaranId) {
+        alert('ID penawaran tidak ditemukan. Silakan coba lagi.');
+        return;
+      }
+
+      // Format the date correctly to ISO format YYYY-MM-DD
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        
+        try {
+          // Check if it's DD/MM/YYYY format
+          if (dateString.includes('/')) {
+            const [day, month, year] = dateString.split('/');
+            // Create a date object and return ISO format
+            const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+            if (!isNaN(date.getTime())) {
+              return date.toISOString().split('T')[0]; // YYYY-MM-DD
+            }
+          }
+          
+          // If not DD/MM/YYYY or parsing fails, return as is
+          return dateString;
+        } catch (error) {
+          console.error('❌ Error formatting date:', error);
+          return dateString;
+        }
+      };
+      
       // Map the updated data to match API format
       const apiData = {
-        tanggal: updatedData.tanggal,
+        tanggal: formatDate(updatedData.tanggal),
         pelanggan: updatedData.pelanggan,
         nomorKontrak: updatedData.nomorKontrak,
         kontrakTahunKe: updatedData.kontrakTahunKe,
@@ -212,76 +250,85 @@ const Penawaran = () => {
         keterangan: updatedData.keterangan,
         harga: updatedData.harga,
         jumlah: updatedData.jumlah,
-        discount: convertDiscountToPercentage(updatedData.discount) // Ensure proper % format
+        discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0'
       };
 
-      console.log('📤 Sending API data:', apiData);
-
-      const result = await penawaranAPI.update(selectedEditData.id, apiData);
+      // Ensure numeric ID
+      const numericId = parseInt(penawaranId, 10);
       
+      console.log('📤 Sending API data for ID:', numericId, apiData);
+      console.log('📤 Original ID values:', {
+        selectedEditDataId: selectedEditData.id,
+        selectedEditDataPenawaranId: selectedEditData.id_penawaran,
+        penawaranId
+      });
+
+      // Make deep copy of apiData to avoid reference issues
+      const cleanApiData = JSON.parse(JSON.stringify(apiData));
+      
+      // Use the penawaranId that was already declared
+      const result = await penawaranAPI.update(numericId, cleanApiData);
       console.log('📬 API Response:', result);
       
       if (result.success) {
-        // Handle pengeluaran updates if the form had pengeluaran data
-        const hasPengeluaranData = updatedData.item && updatedData.keterangan && 
-                                  (updatedData.hasrat !== undefined && updatedData.hasrat !== '') && 
-                                  (updatedData.jumlah !== undefined && updatedData.jumlah !== '');
+        // Handle multiple pengeluaran items if the form had pengeluaran data
+        const pengeluaranItems = updatedData.pengeluaranItems || [];
+        console.log('💰 Checking multiple pengeluaran items:', pengeluaranItems);
         
-        console.log('💰 Checking pengeluaran data:', {
-          item: updatedData.item,
-          keterangan: updatedData.keterangan,
-          hasrat: updatedData.hasrat,
-          jumlah: updatedData.jumlah,
-          hasPengeluaranData
-        });
-        
-        if (hasPengeluaranData) {
-          console.log('💰 Handling pengeluaran update for penawaran ID:', selectedEditData.id);
+        if (pengeluaranItems.length > 0) {
+          console.log('💰 Handling multiple pengeluaran update for penawaran ID:', selectedEditData.id);
           
           try {
-            // Check if there's existing pengeluaran data
-            const hasExistingPengeluaran = updatedData._hasExistingPengeluaran;
-            const existingPengeluaranId = updatedData._existingPengeluaranId;
-            
-            const pengeluaranData = {
-              id_penawaran: selectedEditData.id,
-              item: updatedData.item,
-              keterangan: updatedData.keterangan,
-              hasrat: parseFloat(updatedData.hasrat) || 0,
-              jumlah: parseInt(updatedData.jumlah) || 0
-            };
-            
-            console.log('💰 Pengeluaran data to save:', pengeluaranData);
-            console.log('💰 Has existing pengeluaran:', hasExistingPengeluaran);
-            console.log('💰 Existing pengeluaran ID:', existingPengeluaranId);
-            
-            if (hasExistingPengeluaran && existingPengeluaranId) {
-              // Update existing pengeluaran
-              console.log('🔄 Updating existing pengeluaran ID:', existingPengeluaranId);
-              
-              const pengeluaranResult = await fetch(`http://localhost:3000/api/pengeluaran/${existingPengeluaranId}`, {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role_user,
-                  'X-User-Email': userData.email_user
-                },
-                body: JSON.stringify(pengeluaranData)
-              });
-              
-              const pengeluaranResponse = await pengeluaranResult.json();
-              console.log('📋 Pengeluaran update response:', pengeluaranResponse);
-              
-              if (pengeluaranResult.ok && pengeluaranResponse.success) {
-                console.log('✅ Pengeluaran updated successfully');
-              } else {
-                console.error('❌ Failed to update pengeluaran:', pengeluaranResponse);
-                alert(`Gagal memperbarui pengeluaran: ${pengeluaranResponse.message || 'Unknown error'}`);
+            // Get all existing pengeluaran items for this penawaran and delete them
+            const getExistingResult = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${selectedEditData.id}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-User-ID': userData.id_user.toString(),
+                'X-User-Role': userData.role_user,
+                'X-User-Email': userData.email_user
               }
-            } else {
-              // Create new pengeluaran
-              console.log('➕ Creating new pengeluaran');
+            });
+            
+            if (getExistingResult.ok) {
+              const existingData = await getExistingResult.json();
+              console.log('📋 Found existing pengeluaran data:', existingData);
+              
+              // Delete all existing pengeluaran items
+              if (existingData.success && existingData.data && existingData.data.length > 0) {
+                console.log(`🗑️ Deleting ${existingData.data.length} existing pengeluaran items`);
+                
+                const deletePromises = existingData.data.map(async (existingItem) => {
+                  const deleteResult = await fetch(`http://localhost:3000/api/pengeluaran/${existingItem.id_pengeluaran}`, {
+                    method: 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-User-ID': userData.id_user.toString(),
+                      'X-User-Role': userData.role_user,
+                      'X-User-Email': userData.email_user
+                    }
+                  });
+                  console.log(`🗑️ Delete result for item ${existingItem.id_pengeluaran}:`, deleteResult.ok);
+                  return deleteResult.ok;
+                });
+                
+                // Wait for all deletions to complete
+                await Promise.all(deletePromises);
+                console.log(`✅ Successfully deleted existing pengeluaran items`);
+              }
+            }
+            
+            // Create new pengeluaran items
+            const pengeluaranPromises = pengeluaranItems.map(async (item, index) => {
+              const pengeluaranData = {
+                id_penawaran: selectedEditData.id,
+                item: item.item,
+                keterangan: item.keterangan,
+                hasrat: parseFloat(item.hasrat) || 0,
+                jumlah: parseInt(item.jumlah) || 0
+              };
+              
+              console.log(`💰 Creating pengeluaran item ${index + 1}:`, pengeluaranData);
               
               const pengeluaranResult = await fetch('http://localhost:3000/api/pengeluaran', {
                 method: 'POST',
@@ -295,22 +342,40 @@ const Penawaran = () => {
               });
               
               const pengeluaranResponse = await pengeluaranResult.json();
-              console.log('📋 Pengeluaran create response:', pengeluaranResponse);
+              console.log(`📋 Pengeluaran item ${index + 1} create response:`, pengeluaranResponse);
               
-              if (pengeluaranResult.ok && pengeluaranResponse.success) {
-                console.log('✅ Pengeluaran created successfully');
-              } else {
-                console.error('❌ Failed to create pengeluaran:', pengeluaranResponse);
-                alert(`Gagal membuat pengeluaran: ${pengeluaranResponse.message || 'Unknown error'}`);
-              }
+              return {
+                success: pengeluaranResult.ok && pengeluaranResponse.success,
+                response: pengeluaranResponse,
+                item: item,
+                index: index + 1
+              };
+            });
+            
+            // Wait for all pengeluaran items to be processed
+            const pengeluaranResults = await Promise.all(pengeluaranPromises);
+            
+            // Check results
+            const successCount = pengeluaranResults.filter(r => r.success).length;
+            const failedCount = pengeluaranResults.filter(r => !r.success).length;
+            
+            console.log(`✅ Pengeluaran results: ${successCount} successful, ${failedCount} failed`);
+            
+            if (failedCount > 0) {
+              const failedItems = pengeluaranResults.filter(r => !r.success);
+              console.error('❌ Failed pengeluaran items:', failedItems);
+              alert(`${successCount} pengeluaran berhasil disimpan, ${failedCount} gagal disimpan.`);
+            } else {
+              console.log('✅ All pengeluaran items created successfully');
             }
+            
           } catch (pengeluaranError) {
-            console.error('❌ Error handling pengeluaran:', pengeluaranError);
+            console.error('❌ Error handling multiple pengeluaran:', pengeluaranError);
             // Don't fail the whole operation for pengeluaran errors
           }
         } else if (updatedData._hasExistingPengeluaran && updatedData._existingPengeluaranId) {
-          // If pengeluaran fields are cleared, delete existing pengeluaran
-          console.log('🗑️ Deleting existing pengeluaran (fields cleared)');
+          // If no pengeluaran items but there's existing data, delete it
+          console.log('🗑️ Deleting existing pengeluaran (no new items)');
           
           try {
             const deleteResult = await fetch(`http://localhost:3000/api/pengeluaran/${updatedData._existingPengeluaranId}`, {
@@ -324,12 +389,12 @@ const Penawaran = () => {
             });
             
             if (deleteResult.ok) {
-              console.log('✅ Pengeluaran deleted successfully');
+              console.log('✅ Existing pengeluaran deleted successfully');
             } else {
-              console.error('❌ Failed to delete pengeluaran');
+              console.error('❌ Failed to delete existing pengeluaran');
             }
           } catch (deleteError) {
-            console.error('❌ Error deleting pengeluaran:', deleteError);
+            console.error('❌ Error deleting existing pengeluaran:', deleteError);
           }
         }
         
@@ -445,7 +510,75 @@ const Penawaran = () => {
       console.log('📬 API Response:', result);
       
       if (result.success) {
-        alert('Data penawaran berhasil disimpan');
+        // Handle multiple pengeluaran items if provided
+        const pengeluaranItems = newData.pengeluaranItems || [];
+        console.log('💰 Checking multiple pengeluaran items for new penawaran:', pengeluaranItems);
+        
+        if (pengeluaranItems.length > 0 && result.data) {
+          const penawaranId = result.data.id_penawaran || result.data.id;
+          console.log('💰 Creating multiple pengeluaran for new penawaran ID:', penawaranId);
+          
+          try {
+            // Create all pengeluaran items
+            const pengeluaranPromises = pengeluaranItems.map(async (item, index) => {
+              const pengeluaranData = {
+                id_penawaran: penawaranId,
+                item: item.item,
+                keterangan: item.keterangan,
+                hasrat: parseFloat(item.hasrat) || 0,
+                jumlah: parseInt(item.jumlah) || 0
+              };
+              
+              console.log(`💰 Creating pengeluaran item ${index + 1}:`, pengeluaranData);
+              
+              const pengeluaranResult = await fetch('http://localhost:3000/api/pengeluaran', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-User-ID': userData.id_user.toString(),
+                  'X-User-Role': userData.role_user,
+                  'X-User-Email': userData.email_user
+                },
+                body: JSON.stringify(pengeluaranData)
+              });
+              
+              const pengeluaranResponse = await pengeluaranResult.json();
+              console.log(`📋 Pengeluaran item ${index + 1} create response:`, pengeluaranResponse);
+              
+              return {
+                success: pengeluaranResult.ok && pengeluaranResponse.success,
+                response: pengeluaranResponse,
+                item: item,
+                index: index + 1
+              };
+            });
+            
+            // Wait for all pengeluaran items to be processed
+            const pengeluaranResults = await Promise.all(pengeluaranPromises);
+            
+            // Check results
+            const successCount = pengeluaranResults.filter(r => r.success).length;
+            const failedCount = pengeluaranResults.filter(r => !r.success).length;
+            
+            console.log(`✅ Pengeluaran results: ${successCount} successful, ${failedCount} failed`);
+            
+            if (failedCount > 0) {
+              const failedItems = pengeluaranResults.filter(r => !r.success);
+              console.error('❌ Failed pengeluaran items:', failedItems);
+              alert(`Data penawaran berhasil disimpan. ${successCount} pengeluaran berhasil disimpan, ${failedCount} gagal disimpan.`);
+            } else {
+              console.log('✅ All pengeluaran items created successfully');
+              alert('Data penawaran dan semua pengeluaran berhasil disimpan');
+            }
+            
+          } catch (pengeluaranError) {
+            console.error('❌ Error handling multiple pengeluaran:', pengeluaranError);
+            alert('Data penawaran berhasil disimpan, tetapi ada kesalahan saat menyimpan pengeluaran.');
+          }
+        } else {
+          alert('Data penawaran berhasil disimpan');
+        }
+        
         // Refresh data setelah save
         await fetchPenawaranData();
         // Trigger refresh of detail data if modal is open
@@ -491,7 +624,7 @@ const Penawaran = () => {
         'Nomor Kontrak/BAKB',
         'Kontrak Ke-',
         'Referensi',
-        'Durasi',
+        'Durasi Kontrak (in thn)',
         'Status'
       ];
       
@@ -914,7 +1047,7 @@ const Penawaran = () => {
                   fontWeight: '600',
                   color: '#374151',
                   borderBottom: '1px solid #E5E7EB'
-                }}>Durasi</th>
+                }}>Durasi Kontrak (in thn)</th>
                 <th style={{
                   padding: '12px 16px',
                   textAlign: 'left',

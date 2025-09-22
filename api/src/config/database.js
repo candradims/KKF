@@ -41,8 +41,10 @@ export const db = {
 
   insert: (table, data) => supabase.from(table).insert(data).select(),
 
-  update: (table, data, condition) =>
-    supabase.from(table).update(data).match(condition).select(),
+  update: async (table, data, condition) => {
+    console.log(`📊 DB Update on table ${table}:`, { data, condition });
+    return supabase.from(table).update(data).match(condition).select();
+  },
 
   delete: (table, condition) =>
     supabase.from(table).delete().match(condition).select(),
