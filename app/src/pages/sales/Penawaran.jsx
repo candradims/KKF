@@ -250,14 +250,16 @@ const Penawaran = () => {
         keterangan: updatedData.keterangan,
         harga: updatedData.harga,
         jumlah: updatedData.jumlah,
-        discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0'
+        discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0',
+        total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0
       };
 
       // Ensure numeric ID
       const numericId = parseInt(penawaranId, 10);
       
       console.log('📤 Sending API data for ID:', numericId, apiData);
-      console.log('📤 Original ID values:', {
+      console.log('� Total pengeluaran lain-lain being sent:', updatedData.total_pengeluaran_lain_lain);
+      console.log('�📤 Original ID values:', {
         selectedEditDataId: selectedEditData.id,
         selectedEditDataPenawaranId: selectedEditData.id_penawaran,
         penawaranId
@@ -498,6 +500,7 @@ const Penawaran = () => {
 
       console.log('💾 User data:', userData);
       console.log('💾 Sending penawaran data:', newData);
+      console.log('💰 Total pengeluaran lain-lain:', newData.total_pengeluaran_lain_lain);
 
       // Ensure discount has proper % format
       const dataToSave = {
