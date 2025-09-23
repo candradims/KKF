@@ -306,11 +306,11 @@ const LaporanLaba = () => {
             }
           ].map((stat, index) => (
             <div key={index} style={{
-              background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+              background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
+              border: '1px solid #035b71',
               borderRadius: '20px',
               padding: '24px',
               boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)`,
-              border: `1px solid ${colors.gray200}`,
               position: 'relative',
               overflow: 'hidden',
               transition: 'all 0.3s ease',
@@ -380,11 +380,11 @@ const LaporanLaba = () => {
 
         {/* Enhanced Filter Section */}
         <div style={{
-          background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
+          border: '1px solid #035b71',
           borderRadius: '24px',
           padding: '32px',
           boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1)`,
-          border: `1px solid ${colors.gray200}`,
           marginBottom: '32px',
           position: 'relative',
           overflow: 'hidden',
@@ -545,11 +545,11 @@ const LaporanLaba = () => {
 
         {/* Enhanced Charts Section */}
         <div style={{
-          background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
+          border: '1px solid #035b71',
           borderRadius: '24px',
           padding: '32px',
           boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1)`,
-          border: `1px solid ${colors.gray200}`,
           marginBottom: '32px',
           position: 'relative',
           overflow: 'hidden'
@@ -860,11 +860,11 @@ const LaporanLaba = () => {
 
         {/* Enhanced Sales Data Table */}
         <div style={{
-          background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
+          border: '1px solid #035b71',
           borderRadius: '24px',
           padding: '32px',
           boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1)`,
-          border: `1px solid ${colors.gray200}`,
           position: 'relative',
           overflow: 'hidden'
         }}>
@@ -904,7 +904,9 @@ const LaporanLaba = () => {
             <table style={{
               width: '100%',
               borderCollapse: 'separate',
-              borderSpacing: 0
+              borderSpacing: 0,
+              borderRadius: '16px',
+              overflow: 'hidden'
             }}>
               <thead>
                 <tr style={{
