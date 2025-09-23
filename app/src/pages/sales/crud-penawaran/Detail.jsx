@@ -238,13 +238,21 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
     }
   ]);
 
+  // Calculate totals dynamically
+  const calculateTotalPengeluaranLain = () => {
+    return pengeluaranLain.reduce((total, item) => {
+      const itemTotal = parseFloat(item.total.replace(/[^\d]/g, '') || 0);
+      return total + itemTotal;
+    }, 0);
+  };
+
   const totals = {
     totalBulan: '11.500.000',
     totalBulan2: '22.500.000',
     grandTotal12Bulan: '50.700.000',
     grandTotal12Bulan2: '95.500.000',
     discount: '-',
-    totalPengeluaranLain: '9.700.000',
+    totalPengeluaranLain: `Rp ${calculateTotalPengeluaranLain().toLocaleString('id-ID')}`,
     grandTotalDisc: '41.000.000',
     grandTotalDisc2: '85.800.000',
     profitDariHJT: '20.400.000',

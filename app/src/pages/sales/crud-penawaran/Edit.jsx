@@ -461,6 +461,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       pengeluaranItems: pengeluaranItems.filter(item => 
         item.item && item.keterangan && item.hasrat && item.jumlah
       ),
+      // Include total pengeluaran lain-lain
+      total_pengeluaran_lain_lain: getTotalPengeluaran(),
       _hasExistingPengeluaran: !!(existingPengeluaran && existingPengeluaran.length > 0),
     };
     

@@ -287,7 +287,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     // Prepare data to send to parent
     const dataToSend = {
       ...formData,
-      pengeluaranItems: showAdditionalSection ? pengeluaranItems : []
+      pengeluaranItems: showAdditionalSection ? pengeluaranItems : [],
+      total_pengeluaran_lain_lain: showAdditionalSection ? getTotalPengeluaran() : 0
     };
     
     // Call parent save function
