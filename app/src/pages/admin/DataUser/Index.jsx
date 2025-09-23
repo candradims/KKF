@@ -1422,55 +1422,206 @@ const Index = () => {
               </button>
 
               <div style={{ display: 'flex', gap: '4px' }}>
-                {[...Array(totalPages)].map((_, index) => {
-                  const page = index + 1;
-                  const isCurrentPage = page === currentPage;
+                {(() => {
+                  const maxVisiblePages = 10;
+                  let startPage, endPage;
 
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      style={{
-                        width: '44px',
-                        height: '44px',
-                        border: `2px solid ${isCurrentPage ? colors.secondary : colors.gray300}`,
-                        borderRadius: '10px',
-                        background: isCurrentPage 
-                          ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
-                          : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
-                        color: isCurrentPage ? 'white' : colors.gray600,
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: isCurrentPage 
-                          ? `0 4px 12px ${colors.secondary}30`
-                          : '0 2px 8px rgba(0,0,0,0.05)'
-                      }}
-                      onMouseOver={(e) => {
-                        if (!isCurrentPage) {
-                          e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
-                          e.target.style.borderColor = colors.secondary;
-                          e.target.style.color = colors.secondary;
-                        }
-                        e.target.style.transform = 'translateY(-2px)';
-                      }}
-                      onMouseOut={(e) => {
-                        if (!isCurrentPage) {
-                          e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
-                          e.target.style.borderColor = colors.gray300;
-                          e.target.style.color = colors.gray600;
-                        }
-                        e.target.style.transform = 'translateY(0)';
-                      }}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
+                  if (totalPages <= maxVisiblePages) {
+                    startPage = 1;
+                    endPage = totalPages;
+                  } else {
+                    if (currentPage <= 6) {
+                      startPage = 1;
+                      endPage = maxVisiblePages;
+                    } else if (currentPage + 4 >= totalPages) {
+                      startPage = totalPages - 9;
+                      endPage = totalPages;
+                    } else {
+                      startPage = currentPage - 5;
+                      endPage = currentPage + 4;
+                    }
+                  }
+
+                  const pages = [];
+                  
+                  if (startPage > 1) {
+                    pages.push(
+                      <button
+                        key={1}
+                        onClick={() => handlePageChange(1)}
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          border: `2px solid ${1 === currentPage ? colors.secondary : colors.gray300}`,
+                          borderRadius: '10px',
+                          background: 1 === currentPage 
+                            ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                            : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                          color: 1 === currentPage ? 'white' : colors.gray600,
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: 1 === currentPage 
+                            ? `0 4px 12px ${colors.secondary}30`
+                            : '0 2px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onMouseOver={(e) => {
+                          if (1 !== currentPage) {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                            e.target.style.borderColor = colors.secondary;
+                            e.target.style.color = colors.secondary;
+                          }
+                          e.target.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseOut={(e) => {
+                          if (1 !== currentPage) {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                            e.target.style.borderColor = colors.gray300;
+                            e.target.style.color = colors.gray600;
+                          }
+                          e.target.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        1
+                      </button>
+                    );
+
+                    if (startPage > 2) {
+                      pages.push(
+                        <span key="ellipsis1" style={{
+                          width: '44px',
+                          height: '44px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: colors.gray500,
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}>
+                          ...
+                        </span>
+                      );
+                    }
+                  }
+
+                  for (let page = startPage; page <= endPage; page++) {
+                    const isCurrentPage = page === currentPage;
+                    
+                    pages.push(
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          border: `2px solid ${isCurrentPage ? colors.secondary : colors.gray300}`,
+                          borderRadius: '10px',
+                          background: isCurrentPage 
+                            ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                            : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                          color: isCurrentPage ? 'white' : colors.gray600,
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: isCurrentPage 
+                            ? `0 4px 12px ${colors.secondary}30`
+                            : '0 2px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onMouseOver={(e) => {
+                          if (!isCurrentPage) {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                            e.target.style.borderColor = colors.secondary;
+                            e.target.style.color = colors.secondary;
+                          }
+                          e.target.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseOut={(e) => {
+                          if (!isCurrentPage) {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                            e.target.style.borderColor = colors.gray300;
+                            e.target.style.color = colors.gray600;
+                          }
+                          e.target.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        {page}
+                      </button>
+                    );
+                  }
+                  if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                      pages.push(
+                        <span key="ellipsis2" style={{
+                          width: '44px',
+                          height: '44px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: colors.gray500,
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}>
+                          ...
+                        </span>
+                      );
+                    }
+
+                    pages.push(
+                      <button
+                        key={totalPages}
+                        onClick={() => handlePageChange(totalPages)}
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          border: `2px solid ${totalPages === currentPage ? colors.secondary : colors.gray300}`,
+                          borderRadius: '10px',
+                          background: totalPages === currentPage 
+                            ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                            : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                          color: totalPages === currentPage ? 'white' : colors.gray600,
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: totalPages === currentPage 
+                            ? `0 4px 12px ${colors.secondary}30`
+                            : '0 2px 8px rgba(0,0,0,0.05)'
+                        }}
+                        onMouseOver={(e) => {
+                          if (totalPages !== currentPage) {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                            e.target.style.borderColor = colors.secondary;
+                            e.target.style.color = colors.secondary;
+                          }
+                          e.target.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseOut={(e) => {
+                          if (totalPages !== currentPage) {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                            e.target.style.borderColor = colors.gray300;
+                            e.target.style.color = colors.gray600;
+                          }
+                          e.target.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        {totalPages}
+                      </button>
+                    );
+                  }
+
+                  return pages;
+                })()}
               </div>
 
               <button
