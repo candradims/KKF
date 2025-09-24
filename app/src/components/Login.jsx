@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import logoImage from '../assets/Logo_PLN_Icon_Plus.png';
+import loginImage from '../assets/Login.png';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from "lucide-react";
 
@@ -40,7 +41,7 @@ const Login = () => {
 
     const style = document.createElement('style');
     style.innerHTML = `
-      @keyframes fadeInUp {
+      @keyframes fadeInUp { 
         from { 
           opacity: 0; 
           transform: translateY(40px) scale(0.95); 
@@ -177,7 +178,7 @@ const Login = () => {
           padding: 1.5rem !important;
         }
       }
-        @keyframes pulse {
+      @keyframes pulse {
         0%, 100% { transform: scale(1); opacity: 0.8; }
         50% { transform: scale(1.3); opacity: 1; }
       }
@@ -360,10 +361,33 @@ const Login = () => {
         `
       }} />
 
+      {/* Image Elements */}
+      <div style={{
+        position: 'absolute',
+        top: '2%',
+        left: '2%',
+        width: '220px',
+        height: 'auto',
+        animation: 'fadeInUp 2s ease-out 1s both'
+      }}>
+        <img src={loginImage} alt="Decorative background element" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+      </div>
+
+      <div style={{
+        position: 'absolute',
+        bottom: '2%',
+        right: '2%',
+        width: '240px',
+        height: 'auto',
+        animation: 'fadeInUp 2s ease-out 1s both'
+      }}>
+        <img src={loginImage} alt="Decorative background element" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+      </div>
+
       {/* Small Electric Bolt Icons */}
       <div style={{
         position: 'absolute',
-        top: '12%',
+        top: '15%',
         left: '8%',
         width: '16px',
         height: '16px',
@@ -374,8 +398,19 @@ const Login = () => {
 
       <div style={{
         position: 'absolute',
-        top: '25%',
+        top: '35%',
         right: '12%',
+        width: '12px',
+        height: '12px',
+        color: '#FFD700',
+        animation: 'electricSpark 2.5s infinite 0.5s',
+        fontSize: '12px'
+      }}>⚡</div>
+
+      <div style={{
+        position: 'absolute',
+        top: '55%',
+        left: '12%',
         width: '12px',
         height: '12px',
         color: '#FFD700',
@@ -511,8 +546,8 @@ const Login = () => {
       {/* Small Energy/Power Symbols */}
       <div style={{
         position: 'absolute',
-        top: '55%',
-        left: '8%',
+        top: '25%',
+        left: '19%',
         width: '12px',
         height: '12px',
         color: '#90EE90',
@@ -1009,7 +1044,7 @@ const Login = () => {
               </div>
             </div>
 
-           {/* Enhanced Password Field */}
+            {/* Enhanced Password Field */}
             <div style={{ position: 'relative' }}>
               <label htmlFor="password" style={{
                 display: 'block',
@@ -1355,7 +1390,7 @@ const Login = () => {
           fontWeight: '500',
           letterSpacing: '0.5px'
         }}>
-         © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System
+          © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System
         </footer>
       </div>
 
