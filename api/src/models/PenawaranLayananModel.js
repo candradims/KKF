@@ -33,26 +33,38 @@ export class PenawaranLayananModel {
   // Buat layanan penawaran baru
   static async createPenawaranLayanan(penawaranLayananData) {
     try {
-      const { data, error } = await db.insert("data_penawaran_layanan", {
+      console.log(
+        "🔧 Creating penawaran layanan with data:",
+        penawaranLayananData
+      );
+
+      const dataToInsert = {
         id_penawaran: penawaranLayananData.id_penawaran,
         id_layanan: penawaranLayananData.id_layanan,
-        keterangan: penawaranLayananData.keterangan,
+        nama_layanan: penawaranLayananData.nama_layanan, // Store nama layanan directly
+        detail_layanan: penawaranLayananData.detail_layanan, // Store detail layanan
         kapasitas: penawaranLayananData.kapasitas,
         qty: penawaranLayananData.qty,
         akses_existing: penawaranLayananData.akses_existing,
-        harga_final_sebelum_ppn: penawaranLayananData.harga_final_sebelum_ppn,
         satuan: penawaranLayananData.satuan,
-        backbone: penawaranLayananData.backbone,
-        port: penawaranLayananData.port,
-        tarif_akses: penawaranLayananData.tarif_akses,
-        tarif: penawaranLayananData.tarif,
-        tarif_akses_terbaru: penawaranLayananData.tarif_akses_terbaru,
-        tarif_terbaru: penawaranLayananData.tarif_terbaru,
-        harga_dasar_icon: penawaranLayananData.harga_dasar_icon,
-      });
-      if (error) throw error;
+      };
+
+      console.log("🔧 Data to insert:", dataToInsert);
+
+      const { data, error } = await db.insert(
+        "data_penawaran_layanan",
+        dataToInsert
+      );
+
+      if (error) {
+        console.error("❌ Database error:", error);
+        throw error;
+      }
+
+      console.log("✅ Penawaran layanan created successfully:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in createPenawaranLayanan:", error);
       throw new Error(`Gagal membuat layanan penawaran baru: ${error.message}`);
     }
   }

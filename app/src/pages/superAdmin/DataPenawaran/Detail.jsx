@@ -27,35 +27,21 @@ const convertDiscountToPercentage = (discount) => {
 };
 
 const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
-  const [tabelPerhitungan, setTabelPerhitungan] = useState([
-    {
-      id: 1,
-      jenisLayanan: '6 KVA (100 Ampere)',
-      keterangan: 'Sumatera',
-      kapasitas: 100,
-      satuan: 'Mega',
-      qty: 2,
-      backbone: '-',
-      port: '-',
-      tarifAkses: '-',
-      aksesExisting: '-',
-      tarif: '-',
-      akhirTahun: '-',
-      akhirTahun2: '-',
-      hargaDasar: '11.000.000',
-      hargaFinal: '22.500.000'
-    }
-  ]);
+  const [tabelPerhitungan, setTabelPerhitungan] = useState([]);
 
   const [pengeluaranLain, setPengeluaranLain] = useState([]);
   const [fullDetailData, setFullDetailData] = useState(null);
 
   // Fetch full detail data including catatan
   const loadFullDetailData = async () => {
-    if (!detailData?.id_penawaran) return;
+    if (!detailData?.id_penawaran) {
+      console.log("⚠️ No id_penawaran found in detailData:", detailData);
+      return;
+    }
     
     try {
       console.log("🔍 Loading full detail data for penawaran:", detailData.id_penawaran);
+      console.log("🔍 Detail data received:", detailData);
       
       const response = await fetch(`http://localhost:3000/api/penawaran/${detailData.id_penawaran}`, {
         method: 'GET',
@@ -74,7 +60,43 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       const result = await response.json();
       if (result.success) {
         console.log("✅ Full detail data loaded:", result.data);
+        console.log("🔍 Checking penawaran layanan data:", result.data.data_penawaran_layanan);
         setFullDetailData(result.data);
+        
+        // Load penawaran layanan data for table
+        if (result.data.data_penawaran_layanan && result.data.data_penawaran_layanan.length > 0) {
+          console.log("📊 Found layanan data, processing...");
+          const layananTableData = result.data.data_penawaran_layanan.map((item, index) => {
+            console.log(`🔧 Processing item ${index}:`, item);
+            return {
+              id: item.id_penawaran_layanan || index + 1,
+              jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-', // Use nama_layanan column first, fallback to relation
+              keterangan: item.detail_layanan || '-', // Use detail_layanan column
+              kapasitas: item.kapasitas || '-',
+              satuan: item.satuan || '-',
+              qty: item.qty || '-',
+              backbone: '-', // Static for now
+              port: '-', // Static for now
+              tarifAkses: '-', // Static for now
+              aksesExisting: item.akses_existing || '-',
+              tarif: '-', // Static for now
+              akhirTahun: '-', // Static for now
+              hargaDasar: '-', // Static for now
+              hargaFinal: '-' // Static for now
+            };
+          });
+          setTabelPerhitungan(layananTableData);
+          console.log("✅ Table data loaded:", layananTableData);
+        } else {
+          console.log("⚠️ No penawaran layanan data found or empty array");
+          console.log("📊 Data structure:", {
+            hasData: !!result.data,
+            hasLayananArray: !!result.data.data_penawaran_layanan,
+            layananLength: result.data.data_penawaran_layanan?.length
+          });
+          // Set empty array to clear any existing data
+          setTabelPerhitungan([]);
+        }
       }
     } catch (error) {
       console.error("❌ Error loading full detail data:", error);
@@ -547,7 +569,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 <thead>
                   <tr style={{ backgroundColor: '#F3F4F6' }}>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Detail Layanan
+                      Nama Layanan
                     </th>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
                       Keterangan

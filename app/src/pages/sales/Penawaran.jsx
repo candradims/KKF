@@ -251,7 +251,20 @@ const Penawaran = () => {
         harga: updatedData.harga,
         jumlah: updatedData.jumlah,
         discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0',
-        total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0
+        total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0,
+        // Add layanan data for tabel perhitungan
+        selectedLayananId: updatedData.selectedLayananId,
+        hjtWilayah: updatedData.hjtWilayah,
+        namaLayanan: updatedData.namaLayanan, 
+        detailLayanan: updatedData.detailLayanan,
+        kapasitas: updatedData.kapasitas,
+        satuan: updatedData.satuan,
+        qty: updatedData.qty,
+        backbone: updatedData.backbone,
+        port: updatedData.port,
+        tarifAkses: updatedData.tarifAkses,
+        aksesExisting: updatedData.aksesExisting,
+        tarif: updatedData.tarif
       };
 
       // Ensure numeric ID
@@ -501,8 +514,22 @@ const Penawaran = () => {
       console.log('💾 User data:', userData);
       console.log('💾 Sending penawaran data:', newData);
       console.log('💰 Total pengeluaran lain-lain:', newData.total_pengeluaran_lain_lain);
+      console.log('🔧 Layanan data in newData:', {
+        selectedLayananId: newData.selectedLayananId,
+        hjtWilayah: newData.hjtWilayah,
+        namaLayanan: newData.namaLayanan,
+        detailLayanan: newData.detailLayanan,
+        kapasitas: newData.kapasitas,
+        satuan: newData.satuan,
+        qty: newData.qty,
+        backbone: newData.backbone,
+        port: newData.port,
+        tarifAkses: newData.tarifAkses,
+        aksesExisting: newData.aksesExisting,
+        tarif: newData.tarif
+      });
 
-      // Ensure discount has proper % format
+      // Ensure discount has proper % format and include layanan data
       const dataToSave = {
         ...newData,
         discount: convertDiscountToPercentage(newData.discount)
