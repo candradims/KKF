@@ -211,6 +211,35 @@ const Login = () => {
         50% { transform: translateX(10px) translateY(-10px) rotate(5deg); }
         75% { transform: translateX(-5px) translateY(5px) rotate(-3deg); }
       }
+
+      @keyframes electricSpark {
+        0%, 100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+        20% { opacity: 1; transform: scale(1.2) rotate(45deg); }
+        40% { opacity: 0.3; transform: scale(0.9) rotate(90deg); }
+        60% { opacity: 1; transform: scale(1.1) rotate(135deg); }
+        80% { opacity: 0.5; transform: scale(1) rotate(180deg); }
+      }
+
+      @keyframes circuitFlow {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: -50; }
+      }
+
+      @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+      }
+
+      @keyframes fadeInOut {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+      }
+
+      @keyframes slideUp {
+        0% { transform: translateY(20px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+      }
     `;
     document.head.appendChild(style);
     
@@ -330,6 +359,244 @@ const Login = () => {
           linear-gradient(180deg, ${colors.accent2} 0%, ${colors.primary} 0%, ${colors.tertiary} 100%)
         `
       }} />
+
+      {/* Small Electric Bolt Icons */}
+      <div style={{
+        position: 'absolute',
+        top: '12%',
+        left: '8%',
+        width: '16px',
+        height: '16px',
+        color: '#FFD700',
+        animation: 'electricSpark 3s infinite',
+        fontSize: '16px'
+      }}>⚡</div>
+
+      <div style={{
+        position: 'absolute',
+        top: '25%',
+        right: '12%',
+        width: '12px',
+        height: '12px',
+        color: '#FFD700',
+        animation: 'electricSpark 2.5s infinite 0.5s',
+        fontSize: '12px'
+      }}>⚡</div>
+
+      <div style={{
+        position: 'absolute',
+        bottom: '20%',
+        right: '8%',
+        width: '14px',
+        height: '14px',
+        color: '#FFD700',
+        animation: 'electricSpark 3.5s infinite 1s',
+        fontSize: '14px'
+      }}>⚡</div>
+
+      {/* Small Power Lines/Circuit Elements */}
+      <svg style={{
+        position: 'absolute',
+        top: '15%',
+        left: '15%',
+        width: '40px',
+        height: '20px',
+        opacity: 0.6
+      }}>
+        <line x1="0" y1="10" x2="40" y2="10" stroke={colors.secondary} strokeWidth="2" strokeDasharray="5,5" style={{ animation: 'circuitFlow 2s linear infinite' }} />
+        <circle cx="8" cy="10" r="2" fill={colors.accent1} />
+        <circle cx="32" cy="10" r="2" fill={colors.accent1} />
+      </svg>
+
+      <svg style={{
+        position: 'absolute',
+        bottom: '30%',
+        left: '20%',
+        width: '60px',
+        height: '30px',
+        opacity: 0.5
+      }}>
+        <path d="M0,15 L15,5 L30,25 L45,10 L60,20" stroke={colors.tertiary} strokeWidth="2" fill="none" strokeDasharray="3,3" style={{ animation: 'circuitFlow 3s linear infinite' }} />
+        <circle cx="15" cy="5" r="1.5" fill={colors.secondary} />
+        <circle cx="45" cy="10" r="1.5" fill={colors.secondary} />
+      </svg>
+
+      {/* Small Gear/Cog Icons */}
+      <div style={{
+        position: 'absolute',
+        top: '35%',
+        left: '5%',
+        width: '18px',
+        height: '18px',
+        color: colors.accent2,
+        animation: 'rotateOrb 8s linear infinite',
+        fontSize: '18px',
+        opacity: 0.7
+      }}>⚙️</div>
+
+      <div style={{
+        position: 'absolute',
+        bottom: '40%',
+        right: '6%',
+        width: '14px',
+        height: '14px',
+        color: colors.accent1,
+        animation: 'rotateOrb 6s linear infinite reverse',
+        fontSize: '14px',
+        opacity: 0.6
+      }}>⚙️</div>
+
+      {/* Small Network/Connection Dots */}
+      <div style={{
+        position: 'absolute',
+        top: '18%',
+        left: '25%',
+        width: '6px',
+        height: '6px',
+        borderRadius: '50%',
+        background: colors.secondary,
+        boxShadow: `0 0 8px ${colors.secondary}`,
+        animation: 'pulse 2s infinite'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        top: '45%',
+        left: '12%',
+        width: '5px',
+        height: '5px',
+        borderRadius: '50%',
+        background: colors.accent1,
+        boxShadow: `0 0 6px ${colors.accent1}`,
+        animation: 'pulse 2.5s infinite 0.5s'
+      }} />
+
+      <div style={{
+        position: 'absolute',
+        bottom: '25%',
+        right: '15%',
+        width: '7px',
+        height: '7px',
+        borderRadius: '50%',
+        background: colors.tertiary,
+        boxShadow: `0 0 10px ${colors.tertiary}`,
+        animation: 'pulse 3s infinite 1s'
+      }} />
+
+      {/* Mix Icons */}
+      <div style={{
+        position: 'absolute',
+        top: '8%',
+        right: '25%',
+        width: '20px',
+        height: '20px',
+        color: colors.secondary,
+        animation: 'bounce 4s infinite',
+        fontSize: '20px',
+        opacity: 0.8
+      }}>⚡</div>
+
+      <div style={{
+        position: 'absolute',
+        bottom: '15%',
+        left: '25%',
+        width: '16px',
+        height: '16px',
+        color: colors.accent2,
+        animation: 'bounce 3.5s infinite 0.5s',
+        fontSize: '16px',
+        opacity: 0.7
+      }}>💡</div>
+
+      {/* Small Energy/Power Symbols */}
+      <div style={{
+        position: 'absolute',
+        top: '55%',
+        left: '8%',
+        width: '12px',
+        height: '12px',
+        color: '#90EE90',
+        animation: 'fadeInOut 2s infinite',
+        fontSize: '12px'
+      }}>💡</div>
+
+      <div style={{
+        position: 'absolute',
+        bottom: '35%',
+        right: '20%',
+        width: '14px',
+        height: '14px',
+        color: '#90EE90',
+        animation: 'fadeInOut 2.5s infinite 0.8s',
+        fontSize: '14px'
+      }}>🔋</div>
+
+      {/* Small Circuit Board Patterns */}
+      <div style={{
+        position: 'absolute',
+        top: '65%',
+        left: '15%',
+        width: '30px',
+        height: '20px',
+        opacity: 0.4
+      }}>
+        <div style={{
+          width: '100%',
+          height: '2px',
+          background: colors.accent1,
+          position: 'absolute',
+          top: '9px'
+        }} />
+        <div style={{
+          width: '2px',
+          height: '100%',
+          background: colors.accent1,
+          position: 'absolute',
+          left: '14px'
+        }} />
+        <div style={{
+          width: '4px',
+          height: '4px',
+          background: colors.secondary,
+          borderRadius: '50%',
+          position: 'absolute',
+          top: '8px',
+          left: '12px'
+        }} />
+      </div>
+
+      <div style={{
+        position: 'absolute',
+        top: '25%',
+        right: '30%',
+        width: '25px',
+        height: '15px',
+        opacity: 0.3
+      }}>
+        <div style={{
+          width: '100%',
+          height: '1px',
+          background: colors.tertiary,
+          position: 'absolute',
+          top: '7px'
+        }} />
+        <div style={{
+          width: '1px',
+          height: '100%',
+          background: colors.tertiary,
+          position: 'absolute',
+          left: '12px'
+        }} />
+        <div style={{
+          width: '3px',
+          height: '3px',
+          background: colors.accent2,
+          borderRadius: '50%',
+          position: 'absolute',
+          top: '6px',
+          left: '11px'
+        }} />
+      </div>
 
       {/* Floating geometric shapes */}
       <div style={{
