@@ -27,25 +27,7 @@ const convertDiscountToPercentage = (discount) => {
 };
 
 const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
-  const [tabelPerhitungan, setTabelPerhitungan] = useState([
-    {
-      id: 1,
-      jenisLayanan: '6 KVA (100 Ampere)',
-      keterangan: 'Sumatera',
-      kapasitas: 100,
-      satuan: 'Mega',
-      qty: 2,
-      backbone: '-',
-      port: '-',
-      tarifAkses: '-',
-      aksesExisting: '-',
-      tarif: '-',
-      akhirTahun: '-',
-      akhirTahun2: '-',
-      hargaDasar: '11.000.000',
-      hargaFinal: '22.500.000'
-    }
-  ]);
+  const [tabelPerhitungan, setTabelPerhitungan] = useState([]);
 
   const [pengeluaranLain, setPengeluaranLain] = useState([]);
   const [fullDetailData, setFullDetailData] = useState(null);
@@ -75,6 +57,30 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
       if (result.success) {
         console.log("✅ Full detail data loaded:", result.data);
         setFullDetailData(result.data);
+        
+        // Load penawaran layanan data for table
+        if (result.data.data_penawaran_layanan && result.data.data_penawaran_layanan.length > 0) {
+          const layananTableData = result.data.data_penawaran_layanan.map((item, index) => ({
+            id: item.id_penawaran_layanan || index + 1,
+            jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-',
+            keterangan: item.detail_layanan || '-',
+            kapasitas: item.kapasitas || '-',
+            satuan: item.satuan || '-',
+            qty: item.qty || '-',
+            backbone: '-',
+            port: '-',
+            tarifAkses: '-',
+            aksesExisting: item.akses_existing || '-',
+            tarif: '-',
+            akhirTahun: '-',
+            hargaDasar: '-',
+            hargaFinal: '-'
+          }));
+          setTabelPerhitungan(layananTableData);
+          console.log("✅ Table data loaded:", layananTableData);
+        } else {
+          setTabelPerhitungan([]);
+        }
       }
     } catch (error) {
       console.error("❌ Error loading full detail data:", error);
@@ -637,7 +643,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
                 <thead>
                   <tr style={{ backgroundColor: '#F3F4F6' }}>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
-                      Detail Layanan
+                      Nama Layanan
                     </th>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
                       Detail Layanan

@@ -49,6 +49,8 @@ export class PenawaranController {
   static async getPenawaranById(req, res) {
     try {
       const { id } = req.params;
+      console.log("🔍 Getting penawaran by ID:", id);
+
       const penawaran = await PenawaranModel.getPenawaranById(id);
 
       if (!penawaran) {
@@ -56,6 +58,23 @@ export class PenawaranController {
           success: false,
           message: "Penawaran tidak ditemukan",
         });
+      }
+
+      console.log("📊 Penawaran data retrieved:");
+      console.log("  - Main data keys:", Object.keys(penawaran));
+      console.log(
+        "  - Has data_penawaran_layanan:",
+        !!penawaran.data_penawaran_layanan
+      );
+      console.log(
+        "  - Layanan data length:",
+        penawaran.data_penawaran_layanan?.length
+      );
+      if (penawaran.data_penawaran_layanan?.length > 0) {
+        console.log(
+          "  - First layanan item:",
+          penawaran.data_penawaran_layanan[0]
+        );
       }
 
       // Cek apakah user sales hanya dapat mengakses penawaran mereka sendiri
@@ -76,6 +95,7 @@ export class PenawaranController {
         data: penawaran,
       });
     } catch (error) {
+      console.error("❌ Error in getPenawaranById:", error);
       res.status(500).json({
         success: false,
         message: "Gagal mengambil data penawaran",
@@ -125,6 +145,52 @@ export class PenawaranController {
       }
 
       console.log("📋 Extracted penawaran ID:", penawaranId);
+
+      // Save layanan data to data_penawaran_layanan if present
+      console.log("🔍 Checking layanan data conditions:");
+      console.log("  - penawaranId:", penawaranId);
+      console.log("  - selectedLayananId:", req.body.selectedLayananId);
+      console.log("  - namaLayanan:", req.body.namaLayanan);
+      console.log("  - detailLayanan:", req.body.detailLayanan);
+      console.log("  - kapasitas:", req.body.kapasitas);
+      console.log("  - satuan:", req.body.satuan);
+      console.log("  - qty:", req.body.qty);
+      console.log("  - aksesExisting:", req.body.aksesExisting);
+
+      if (penawaranId && req.body.selectedLayananId) {
+        console.log("🔧 Saving layanan data for penawaran:", penawaranId);
+
+        const layananData = {
+          id_penawaran: penawaranId,
+          id_layanan: req.body.selectedLayananId,
+          nama_layanan: req.body.namaLayanan, // Store nama layanan
+          detail_layanan: req.body.detailLayanan, // Store detail layanan
+          kapasitas: req.body.kapasitas,
+          qty: parseInt(req.body.qty) || 1,
+          akses_existing: req.body.aksesExisting || null,
+          satuan: req.body.satuan,
+        };
+
+        console.log("🔧 Layanan data to save:", layananData);
+
+        try {
+          const layananResult =
+            await PenawaranLayananModel.createPenawaranLayanan(layananData);
+          console.log("✅ Layanan data saved successfully:", layananResult);
+        } catch (layananError) {
+          console.error("⚠️ Error saving layanan data:", layananError);
+          console.error("⚠️ Layanan error stack:", layananError.stack);
+          // Don't fail the whole request if layanan save fails, just log it
+        }
+      } else {
+        console.log("ℹ️ No layanan data provided or missing penawaran ID");
+        if (!penawaranId) {
+          console.log("❌ Missing penawaran ID");
+        }
+        if (!req.body.selectedLayananId) {
+          console.log("❌ Missing selectedLayananId");
+        }
+      }
 
       // Jika ada data pengeluaran lain-lain, simpan juga
       console.log("🔍 Checking pengeluaran fields:", {
@@ -285,6 +351,52 @@ export class PenawaranController {
       );
 
       console.log("✅ Penawaran updated successfully:", updatedPenawaran);
+
+      // Update layanan data in data_penawaran_layanan if present
+      if (updateData.selectedLayananId) {
+        console.log("🔧 Updating layanan data for penawaran:", penawaranId);
+
+        // Check if layanan data already exists for this penawaran
+        const existingLayanan =
+          await PenawaranLayananModel.getPenawaranLayananByPenawaranId(
+            penawaranId
+          );
+
+        const layananData = {
+          id_penawaran: penawaranId,
+          id_layanan: updateData.selectedLayananId,
+          nama_layanan: updateData.namaLayanan, // Store nama layanan
+          detail_layanan: updateData.detailLayanan, // Store detail layanan
+          kapasitas: updateData.kapasitas,
+          qty: parseInt(updateData.qty) || 1,
+          akses_existing: updateData.aksesExisting || null,
+          satuan: updateData.satuan,
+        };
+
+        console.log("🔧 Layanan data to update:", layananData);
+
+        try {
+          if (existingLayanan && existingLayanan.length > 0) {
+            // Update existing layanan record
+            const updateResult =
+              await PenawaranLayananModel.updatePenawaranLayanan(
+                existingLayanan[0].id,
+                layananData
+              );
+            console.log("✅ Layanan data updated successfully:", updateResult);
+          } else {
+            // Create new layanan record
+            const createResult =
+              await PenawaranLayananModel.createPenawaranLayanan(layananData);
+            console.log("✅ Layanan data created successfully:", createResult);
+          }
+        } catch (layananError) {
+          console.error("⚠️ Error updating layanan data:", layananError);
+          // Don't fail the whole request if layanan update fails, just log it
+        }
+      } else {
+        console.log("ℹ️ No layanan data provided for update");
+      }
 
       res.status(200).json({
         success: true,
