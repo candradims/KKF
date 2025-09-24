@@ -361,27 +361,49 @@ const Login = () => {
         `
       }} />
 
-      {/* Image Elements */}
-      <div style={{
-        position: 'absolute',
-        top: '2%',
-        left: '2%',
-        width: '220px',
-        height: 'auto',
-        animation: 'fadeInUp 2s ease-out 1s both'
-      }}>
-        <img src={loginImage} alt="Decorative background element" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+     {/* Image Elements */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '2%',
+          left: '2%',
+          width: '220px',
+          height: 'auto',
+          animation: 'float 4s ease-in-out infinite',
+          filter: 'drop-shadow(0px 18px 25px rgba(0,0,0,0.3))'
+        }}
+      >
+        <img
+          src={loginImage}
+          alt="Decorative background element"
+          style={{
+            width: '100%',
+            height: 'auto',
+            objectFit: 'contain'
+          }}
+        />
       </div>
 
-      <div style={{
-        position: 'absolute',
-        bottom: '2%',
-        right: '2%',
-        width: '240px',
-        height: 'auto',
-        animation: 'fadeInUp 2s ease-out 1s both'
-      }}>
-        <img src={loginImage} alt="Decorative background element" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '2%',
+          right: '2%',
+          width: '240px',
+          height: 'auto',
+          animation: 'float 5s ease-in-out infinite',
+          filter: 'drop-shadow(0px 18px 25px rgba(0,0,0,0.3))'
+        }}
+      >
+        <img
+          src={loginImage}
+          alt="Decorative background element"
+          style={{
+            width: '100%',
+            height: 'auto',
+            objectFit: 'contain'
+          }}
+        />
       </div>
 
       {/* Small Electric Bolt Icons */}
@@ -1533,6 +1555,11 @@ const Login = () => {
           background-color: #1e293b !important;
           color: white !important;
           padding: 0.5rem !important;
+        }
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-15px); }
+          100% { transform: translateY(0px); }
         }
       `}</style>
     </div>
