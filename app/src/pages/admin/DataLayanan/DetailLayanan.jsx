@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, Package, MapPin, Ruler, Server, Cpu, DollarSign } from 'lucide-react';
+import { X, Package, MapPin, Ruler, Server, Cpu, DollarSign, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DetailLayanan = ({ isOpen, onClose, initialData }) => {
   const [formData, setFormData] = useState({
     id: null,
     namaLayanan: "",
+    jenisLayanan: "",
     hjt: "",
     satuan: "",
     backbone: "",
@@ -43,6 +44,28 @@ const DetailLayanan = ({ isOpen, onClose, initialData }) => {
 
   return (
     <>
+      <style>
+        {`
+          .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 191, 202, 0.3) transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 191, 202, 0.1);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0, 191, 202, 0.3);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 191, 202, 0.5);
+          }
+        `}
+      </style>
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -83,11 +106,13 @@ const DetailLayanan = ({ isOpen, onClose, initialData }) => {
                 borderRadius: '32px',
                 width: '100%',
                 maxWidth: '900px',
-                padding: '20px',
+                maxHeight: '90vh',
                 boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.6)',
                 position: 'relative',
                 overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
               }}
             >
               {/* Decorative highlight */}
@@ -128,6 +153,13 @@ const DetailLayanan = ({ isOpen, onClose, initialData }) => {
               >
                 <X size={20} color={colors.primary} />
               </motion.button>
+
+              {/* Scrollable Container */}
+              <div className="custom-scrollbar" style={{
+                flex: 1,
+                overflow: 'auto',
+                padding: '20px'
+              }}>
 
               {/* Header */}
               <motion.div
@@ -208,6 +240,29 @@ const DetailLayanan = ({ isOpen, onClose, initialData }) => {
                   }}>
                     <Package size={18} style={{ marginRight: '12px' }} />
                     {formData.namaLayanan}
+                  </div>
+                </div>
+
+                {/* Field: Jenis Layanan */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    display: 'block'
+                  }}>Jenis Layanan</label>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(3, 91, 113, 0.3)',
+                    backgroundColor: '#f0f4f5',
+                    color: colors.primary
+                  }}>
+                    <Tag size={18} style={{ marginRight: '12px' }} />
+                    {formData.jenisLayanan || '-'}
                   </div>
                 </div>
 
@@ -349,12 +404,14 @@ const DetailLayanan = ({ isOpen, onClose, initialData }) => {
                   </div>
                 </div>
               </motion.div>
+              </div> {/* End of scrollable container */}
 
               {/* Tombol Tutup */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                paddingRight: '65px'
+                padding: '20px',
+                paddingTop: '0'
               }}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}

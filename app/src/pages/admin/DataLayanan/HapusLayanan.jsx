@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle, Check, Package, MapPin, Cpu, Server, DollarSign } from 'lucide-react';
+import { X, AlertTriangle, Check, Package, MapPin, Cpu, Server, DollarSign, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
   const [formData, setFormData] = useState({
     id: null,
     namaLayanan: "",
+    jenisLayanan: "",
     hjt: "",
     satuan: "",
     backbone: "",
@@ -99,6 +100,28 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
 
   return (
     <>
+      <style>
+        {`
+          .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 191, 202, 0.3) transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 191, 202, 0.1);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0, 191, 202, 0.3);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 191, 202, 0.5);
+          }
+        `}
+      </style>
       <AnimatePresence>
         {isOpen && !showSuccessModal && (
           <motion.div
@@ -139,11 +162,13 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
                 borderRadius: '32px',
                 width: '100%',
                 maxWidth: '900px',
-                padding: '20px',
+                maxHeight: '90vh',
                 boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.6)',
                 position: 'relative',
                 overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
               }}
             >
               {/* Decorative highlight */}
@@ -184,6 +209,13 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
               >
                 <X size={20} color={colors.primary} />
               </motion.button>
+
+              {/* Scrollable Container */}
+              <div className="custom-scrollbar" style={{
+                flex: 1,
+                overflow: 'auto',
+                padding: '20px'
+              }}>
 
               {/* Header */}
               <motion.div 
@@ -295,6 +327,37 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
                       type="text"
                       name="namaLayanan"
                       value={formData.namaLayanan || '-'}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Jenis Layanan Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Jenis Layanan
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Tag size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="jenisLayanan"
+                      value={formData.jenisLayanan || '-'}
                       readOnly
                       style={inputStyle}
                     />
@@ -492,7 +555,9 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
                   display: 'flex',
                   justifyContent: 'flex-end',
                   gap: '16px',
-                  marginTop: '32px'
+                  marginTop: '32px',
+                  paddingTop: '20px',
+                  borderTop: '1px solid rgba(0, 192, 202, 0.1)'
                 }}>
                   <motion.button
                     whileHover={{ scale: 1.02, y: -2 }}
@@ -545,6 +610,7 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
                   </motion.button>
                 </div>
               </motion.div>
+              </div> {/* End of scrollable container */}
             </motion.div>
           </motion.div>
         )}
