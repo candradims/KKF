@@ -425,9 +425,9 @@ const Index = () => {
     switch(role.toLowerCase()) {
       case 'super admin':
         return {
-          backgroundColor: `${colors.secondary}15`,
-          color: colors.secondary,
-          border: `1px solid ${colors.secondary}30`
+          backgroundColor: `${colors.primary}15`,
+          color: colors.primary,
+          border: `1px solid ${colors.primary}40`
         };
       case 'admin':
         return {
@@ -439,7 +439,7 @@ const Index = () => {
         return {
           backgroundColor: `${colors.success}15`,
           color: colors.success,
-          border: `1px solid ${colors.success}30`
+          border: `1px solid ${colors.success}40`
         };
       default:
         return {
@@ -1106,7 +1106,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -1117,16 +1117,15 @@ const Index = () => {
                           <span style={{ fontWeight: '600' }}>{user.date}</span>
                           <span style={{ 
                             fontSize: '12px', 
-                            color: colors.gray500 
+                            color: colors.primary 
                           }}>
-                            Registered
                           </span>
                         </div>
                       </td>
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -1153,19 +1152,14 @@ const Index = () => {
                             <div style={{ fontWeight: '600', marginBottom: '2px' }}>
                               {user.nama}
                             </div>
-                            <div style={{ 
-                              fontSize: '12px', 
-                              color: colors.gray500 
-                            }}>
-                              User Profile
-                            </div>
+                            
                           </div>
                         </div>
                       </td>
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -1174,7 +1168,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-block'
                         }}>
                           {user.email}
@@ -1183,7 +1177,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -1192,7 +1186,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '8px',
