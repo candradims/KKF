@@ -427,25 +427,25 @@ const Index = () => {
         return {
           backgroundColor: `${colors.primary}15`,
           color: colors.primary,
-          border: `1px solid ${colors.primary}40`
+          border: `1px solid ${colors.primary}`
         };
       case 'admin':
         return {
           backgroundColor: `${colors.tertiary}15`,
           color: colors.tertiary,
-          border: `1px solid ${colors.tertiary}30`
+          border: `1px solid ${colors.tertiary}`
         };
       case 'sales':
         return {
           backgroundColor: `${colors.success}15`,
           color: colors.success,
-          border: `1px solid ${colors.success}40`
+          border: `1px solid ${colors.success}`
         };
       default:
         return {
           backgroundColor: `${colors.gray400}15`,
           color: colors.gray600,
-          border: `1px solid ${colors.gray400}30`
+          border: `1px solid ${colors.gray400}`
         };
     }
   };
