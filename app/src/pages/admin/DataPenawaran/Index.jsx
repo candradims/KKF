@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, RotateCcw } from 'lucide-react';
+import { Eye, RotateCcw, Filter, Calendar } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
 
@@ -33,6 +33,17 @@ const convertDiscountToPercentage = (discount) => {
   return numericValue + '%';
 };
 
+// Helper function untuk format tanggal dari DD/MM/YYYY menjadi DD-MM-YYYY
+const formatTanggal = (tanggal) => {
+  if (!tanggal) return '-';
+  
+  // Jika sudah menggunakan format DD-MM-YYYY, return langsung
+  if (tanggal.includes('-')) return tanggal;
+  
+  // Konversi dari DD/MM/YYYY ke DD-MM-YYYY
+  return tanggal.replace(/\//g, '-');
+};
+
 const Index = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -41,7 +52,7 @@ const Index = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatusItem, setSelectedStatusItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
-  const [statusCatatan, setStatusCatatan] = useState(''); // State untuk catatan status
+  const [statusCatatan, setStatusCatatan] = useState('');
   
   // State untuk discount modal
   const [showDiscountModal, setShowDiscountModal] = useState(false);
@@ -52,6 +63,27 @@ const Index = () => {
   const [penawaranData, setPenawaranData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+    light: '#cbebea',
+    white: '#ffffff',
+    gray50: '#f8fafc',
+    gray100: '#f1f5f9',
+    gray200: '#e2e8f0',
+    gray300: '#cbd5e1',
+    gray400: '#94a3b8',
+    gray500: '#64748b',
+    gray600: '#475569',
+    gray700: '#334155',
+    gray800: '#1e293b',
+    gray900: '#0f172a'
+  };
 
   // Fetch data penawaran dari API
   const fetchPenawaranData = async () => {
@@ -74,29 +106,32 @@ const Index = () => {
         const transformedData = result.data.map(item => {
           try {
             console.log("🔧 Transforming item:", item.id_penawaran, "diskon:", item.diskon);
+            
+            // Format tanggal dari DD/MM/YYYY ke DD-MM-YYYY
+            const originalDate = new Date(item.tanggal_dibuat).toLocaleDateString('id-ID');
+            const formattedTanggal = formatTanggal(originalDate);
+            
             const transformedItem = {
               id: item.id_penawaran,
-              id_penawaran: item.id_penawaran, // Add this for Detail component
-              tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
+              id_penawaran: item.id_penawaran,
+              tanggal: formattedTanggal,
               namaPelanggan: item.nama_pelanggan,
-              namaSales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
-              sales: item.data_user?.nama_user || '-', // Get sales name from relasi data_user
+              namaSales: item.data_user?.nama_user || '-',
+              sales: item.data_user?.nama_user || '-',
               nomorKontrak: item.nomor_kontrak,
               kontrakKe: item.kontrak_tahun,
               referensi: item.wilayah_hjt,
-              diskon: item.diskon, // Preserve the raw numeric value for editing
-              discount: convertDiscountToPercentage(item.diskon), // Display format
+              diskon: item.diskon,
+              discount: convertDiscountToPercentage(item.diskon),
               durasi: item.durasi_kontrak,
               status: item.status || 'Menunggu',
               actions: ['view'],
-              // Tambahan data untuk komponen Detail
-              rawData: item // Data mentah dari API untuk keperluan Detail component
+              rawData: item
             };
-            console.log("🔧 Transformed item:", transformedItem.id, "diskon:", transformedItem.diskon, "display:", transformedItem.discount);
+            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount);
             return transformedItem;
           } catch (itemError) {
             console.error('❌ Error transforming item:', item, itemError);
-            // Return a safe fallback for this item
             return {
               id: item.id_penawaran || 'unknown',
               id_penawaran: item.id_penawaran || 'unknown',
@@ -107,7 +142,7 @@ const Index = () => {
               nomorKontrak: item.nomor_kontrak || '-',
               kontrakKe: item.kontrak_tahun || '-',
               referensi: item.wilayah_hjt || '-',
-              diskon: 0, // Preserve numeric value
+              diskon: 0,
               discount: '0%',
               durasi: item.durasi_kontrak || '-',
               status: 'Error',
@@ -125,7 +160,7 @@ const Index = () => {
     } catch (error) {
       console.error("❌ Error fetching penawaran data:", error);
       setError(error.message);
-      setPenawaranData([]); // Set empty array on error
+      setPenawaranData([]);
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +174,9 @@ const Index = () => {
   const itemsPerPage = 10;
 
   const filteredData = penawaranData.filter(item => {
-    const matchesDate = filterDate ? item.tanggal.includes(filterDate) : true;
+    // Format filter date untuk matching dengan format DD-MM-YYYY
+    const formattedFilterDate = filterDate ? formatTanggal(new Date(filterDate).toLocaleDateString('id-ID')) : '';
+    const matchesDate = filterDate ? item.tanggal.includes(formattedFilterDate) : true;
     const matchesStatus = filterStatus ? item.status === filterStatus : true;
     return matchesDate && matchesStatus;
   });
@@ -178,14 +215,13 @@ const Index = () => {
   const handleStatusClick = (item) => {
     setSelectedStatusItem(item);
     setNewStatus(item.status);
-    setStatusCatatan(''); // Reset catatan
+    setStatusCatatan('');
     setShowStatusModal(true);
   };
 
   const handleStatusChange = async () => {
     if (!selectedStatusItem || !newStatus) return;
     
-    // Jika status ditolak dan belum ada catatan, tampilkan peringatan
     if (newStatus === 'Ditolak' && !statusCatatan.trim()) {
       alert('Catatan wajib diisi untuk status Ditolak');
       return;
@@ -194,7 +230,6 @@ const Index = () => {
     try {
       console.log("📝 Updating status for penawaran:", selectedStatusItem.id, "to:", newStatus);
       
-      // Buat catatan berdasarkan status
       let finalCatatan;
       if (newStatus === 'Ditolak' && statusCatatan.trim()) {
         finalCatatan = `Status ditolak oleh Admin. Alasan: ${statusCatatan}`;
@@ -202,7 +237,6 @@ const Index = () => {
         finalCatatan = `Status diubah oleh Admin menjadi ${newStatus}`;
       }
       
-      // Call API to update status
       const response = await fetch(`http://localhost:3000/api/penawaran/${selectedStatusItem.id}/status`, {
         method: 'PUT',
         headers: {
@@ -224,7 +258,6 @@ const Index = () => {
       const result = await response.json();
       
       if (result.success) {
-        // Update local state dengan data dari API
         setPenawaranData(prevData =>
           prevData.map(item =>
             item.id === selectedStatusItem.id
@@ -234,11 +267,7 @@ const Index = () => {
         );
         
         console.log("✅ Status updated successfully:", result.data);
-        
-        // Show success message (you can replace this with a toast notification)
         alert(`Status penawaran berhasil diubah menjadi "${newStatus}"`);
-        
-        // Refresh data untuk memastikan sinkronisasi dengan database
         fetchPenawaranData();
         
       } else {
@@ -249,7 +278,6 @@ const Index = () => {
       console.error("❌ Error updating status:", error);
       alert(`Gagal mengubah status: ${error.message}`);
     } finally {
-      // Close modal regardless of success/failure
       setShowStatusModal(false);
       setSelectedStatusItem(null);
       setNewStatus('');
@@ -266,7 +294,6 @@ const Index = () => {
   const handleDiscountClick = (item) => {
     setSelectedDiscountItem(item);
     
-    // Convert numeric discount back to selection value
     const numericDiscount = parseFloat(item.diskon);
     let initialDiscount;
     
@@ -306,16 +333,8 @@ const Index = () => {
     
     try {
       console.log("📝 Updating discount for penawaran:", selectedDiscountItem.id, "to:", newDiscount);
-      console.log("📝 User data:", getUserData());
       
-      // Call API to update discount
       const userData = getUserData();
-      console.log("📝 About to make API call with user data:", userData);
-      console.log("📝 Request body:", JSON.stringify({
-        discount: newDiscount,
-        catatan: `Discount diubah oleh Admin menjadi ${newDiscount}`
-      }));
-      
       const response = await fetch(`http://localhost:3000/api/penawaran/${selectedDiscountItem.id}/discount`, {
         method: 'PUT',
         headers: {
@@ -330,31 +349,18 @@ const Index = () => {
         })
       });
 
-      console.log("📝 Response status:", response.status);
-      console.log("📝 Response headers:", response.headers);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ Response error text:", errorText);
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log("📝 Response result:", result);
       
       if (result.success) {
-        console.log("✅ API Update successful, result:", result);
-        
-        // Show success message
         alert(`Discount penawaran berhasil diubah menjadi "${newDiscount}"`);
-        
-        // Close modal first
         setShowDiscountModal(false);
         setSelectedDiscountItem(null);
         setNewDiscount('');
-        
-        // Refresh data untuk memastikan sinkronisasi dengan database
-        console.log("🔄 Refreshing data from database...");
         fetchPenawaranData();
         
       } else {
@@ -365,7 +371,6 @@ const Index = () => {
       console.error("❌ Error updating discount:", error);
       alert(`Gagal mengubah discount: ${error.message}`);
     }
-    // Don't close modal here in case user wants to retry
   };
 
   const handleCloseDiscountModal = () => {
@@ -380,6 +385,7 @@ const Index = () => {
         return {
           backgroundColor: '#FEF3C7',
           color: '#92400E',
+          border: '2px solid #F59E0B',
           padding: '4px 8px',
           borderRadius: '12px',
           fontSize: '12px',
@@ -389,6 +395,7 @@ const Index = () => {
         return {
           backgroundColor: '#D1FAE5',
           color: '#065F46',
+          border: '2px solid #10B981',
           padding: '4px 8px',
           borderRadius: '12px',
           fontSize: '12px',
@@ -398,6 +405,7 @@ const Index = () => {
         return {
           backgroundColor: '#FEE2E2',
           color: '#991B1B',
+          border: '2px solid #EF4444',
           padding: '4px 8px',
           borderRadius: '12px',
           fontSize: '12px',
@@ -407,6 +415,7 @@ const Index = () => {
         return {
           backgroundColor: '#F3F4F6',
           color: '#374151',
+          border: '2px solid #9CA3AF',
           padding: '4px 8px',
           borderRadius: '12px',
           fontSize: '12px',
@@ -415,716 +424,1207 @@ const Index = () => {
     }
   };
 
+  // Function untuk mendapatkan border color berdasarkan konten card
+  const getCardBorderColor = (cardType) => {
+    switch (cardType) {
+      case 'total':
+        return colors.secondary;
+      case 'filtered':
+        return colors.success;
+      default:
+        return colors.primary;
+    }
+  };
+
   return (
     <div style={{
-      padding: '20px',
-      backgroundColor: '#f8f9fa',
-      minHeight: '100vh'
+      minHeight: '100vh',
+      background: '#e7f3f5ff',
+      padding: '24px',
+      fontFamily: "'Open Sans', sans-serif !important",
+      position: 'relative'
     }}>
-      {/* Loading State */}
-      {isLoading && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '200px',
-          fontSize: '16px',
-          color: '#6B7280'
-        }}>
-          Memuat data penawaran...
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && !isLoading && (
-        <div style={{
-          backgroundColor: '#FEE2E2',
-          border: '1px solid #FECACA',
-          borderRadius: '8px',
-          padding: '16px',
-          marginBottom: '20px',
-          color: '#DC2626'
-        }}>
-          <strong>Error:</strong> {error}
-          <button 
-            onClick={fetchPenawaranData}
-            style={{
-              marginLeft: '16px',
-              padding: '8px 16px',
-              backgroundColor: '#DC2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Coba Lagi
-          </button>
-        </div>
-      )}
-
-      {/* Main Content - hanya tampil jika tidak loading dan tidak error */}
-      {!isLoading && !error && (
-        <>
-      {/* Filter Section */}  
+      {/* Background Pattern */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
-        gap: '24px',
-        alignItems: 'end',
-        marginBottom: '20px'
-      }}>
-        {/* Left side - Filters */}
-        <div style={{
-          display: 'flex',
-          gap: '16px',
-          alignItems: 'end',
-          flexWrap: 'wrap'
-        }}>
-          {/* Filter by Date */}
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `
+          radial-gradient(circle at 20% 20%, ${colors.secondary}05 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, ${colors.success}05 0%, transparent 50%)
+        `,
+        pointerEvents: 'none'
+      }} />
+
+      <div style={{ maxWidth: '80rem', margin: '0 auto', position: 'relative' }}>
+        {/* Header Section */}
+        <div style={{ marginBottom: '32px' }}>
+          {/* Stats Cards */}
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '20px',
+            marginBottom: '24px'
           }}>
-            <label style={{
-              fontSize: '12px',
-              fontWeight: '500',
-              color: '#374151'
-            }}>
-              Filter by Tanggal
-            </label>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px',
-                fontSize: '14px',
-                backgroundColor: 'white',
-                minWidth: '150px'
-              }}
-            />
-          </div>
-
-          {/* Filter by Status */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px'
-          }}>
-            <label style={{
-              fontSize: '12px',
-              fontWeight: '500',
-              color: '#374151'
-            }}>
-              Filter by Status
-            </label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px',
-                fontSize: '14px',
-                backgroundColor: 'white',
-                minWidth: '150px'
-              }}
-            >
-              <option value="">Semua Status</option>
-              <option value="Menunggu">Menunggu</option>
-              <option value="Disetujui">Disetujui</option>
-              <option value="Ditolak">Ditolak</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Right side - Reset Filter Button */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'flex-end',
-          paddingRight: '24px'
-        }}>
-          <button
-            onClick={() => {
-              setFilterDate('');
-              setFilterStatus('');
-              setCurrentPage(1);
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 20px',
-              backgroundColor: '#00AEEF',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'background-color 0.2s',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.backgroundColor = '#0097A7';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.backgroundColor = '#00AEEF';
-            }}
-          >
-            <RotateCcw style={{ width: '16px', height: '16px' }} />
-            Reset Filter
-          </button>
-        </div>
-      </div>
-
-      {/* Table Section */}
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-      }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse'
-          }}>
-            <thead>
-              <tr style={{ backgroundColor: '#F9FAFB' }}>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>No</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Tanggal</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Nama Pelanggan</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Sales</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Nomor Kontrak/BAKB</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Kontrak Ke-</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Referensi</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Discount</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Durasi Kontrak (in thn)</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Status</th>
-                <th style={{
-                  padding: '12px 16px',
-                  textAlign: 'center',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  borderBottom: '1px solid #E5E7EB'
-                }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentData.map((item, index) => (
-                <tr key={item.id} style={{
-                  borderBottom: '1px solid #E5E7EB'
-                }}>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {startIndex + index + 1}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.tanggal}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.namaPelanggan}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.namaSales}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.nomorKontrak}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.kontrakKe}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.referensi}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    <button
-                      onClick={() => handleDiscountClick(item)}
-                      style={{
-                        backgroundColor: '#F3F4F6',
-                        color: '#374151',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        border: '1px solid #D1D5DB',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        outline: 'none'
-                      }}
-                      onMouseOver={(e) => {
-                        e.target.style.backgroundColor = '#E5E7EB';
-                        e.target.style.transform = 'scale(1.02)';
-                      }}
-                      onMouseOut={(e) => {
-                        e.target.style.backgroundColor = '#F3F4F6';
-                        e.target.style.transform = 'scale(1)';
-                      }}
-                      title="Klik untuk mengubah discount"
-                    >
-                      {convertDiscountToPercentage(item.diskon)} {/* Changed from 'discount' to 'diskon' */}
-                    </button>
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    {item.durasi}
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    color: '#374151'
-                  }}>
-                    <button
-                      onClick={() => handleStatusClick(item)}
-                      style={{
-                        ...getStatusStyle(item.status),
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        outline: 'none'
-                      }}
-                      onMouseOver={(e) => {
-                        e.target.style.opacity = '0.8';
-                        e.target.style.transform = 'scale(1.02)';
-                      }}
-                      onMouseOut={(e) => {
-                        e.target.style.opacity = '1';
-                        e.target.style.transform = 'scale(1)';
-                      }}
-                      title="Klik untuk mengubah status"
-                    >
-                      {item.status}
-                    </button>
-                  </td>
-                  <td style={{
-                    padding: '12px 16px',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      gap: '8px',
-                      justifyContent: 'center'
-                    }}>
-                      <button
-                        onClick={() => handleDetailData(item)}
-                        style={{
-                          backgroundColor: '#e0f2fe',
-                          color: '#0284c7',
-                          padding: '6px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseOver={(e) => {
-                          e.target.style.backgroundColor = '#bae6fd';
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.backgroundColor = '#e0f2fe';
-                        }}
-                        title="View Details"
-                      >
-                        <Eye style={{ width: '14px', height: '14px' }} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '16px',
-          backgroundColor: '#F9FAFB',
-          borderTop: '1px solid #E5E7EB'
-        }}>
-          <div style={{
-            fontSize: '14px',
-            color: '#6B7280'
-          }}>
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} entries
-          </div>
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center'
-          }}>
-            <button
-              onClick={handlePrevious}
-              disabled={currentPage === 1}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: currentPage === 1 ? '#F3F4F6' : '#FFFFFF',
-                color: currentPage === 1 ? '#9CA3AF' : '#374151',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px',
-                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Previous
-            </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                style={{
-                  padding: '8px 12px',
-                  backgroundColor: page === currentPage ? '#3B82F6' : '#FFFFFF',
-                  color: page === currentPage ? '#FFFFFF' : '#374151',
-                  border: '1px solid #D1D5DB',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  minWidth: '40px'
-                }}
-              >
-                {page}
-              </button>
-            ))}
-            
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: currentPage === totalPages ? '#F3F4F6' : '#FFFFFF',
-                color: currentPage === totalPages ? '#9CA3AF' : '#374151',
-                border: '1px solid #D1D5DB',
-                borderRadius: '6px',
-                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal Components */}
-      <Detail
-        isOpen={showDetailModal}
-        onClose={handleCloseDetailModal}
-        detailData={selectedDetailData}
-      />
-
-      {/* Status Change Modal */}
-      {showStatusModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '400px',
-            maxWidth: '90vw',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#374151',
-              margin: '0 0 16px 0'
-            }}>
-              Ubah Status Penawaran
-            </h3>
-            
+            {/* Total Penawaran Card */}
             <div style={{
-              marginBottom: '16px'
+              background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+              borderRadius: '16px',
+              padding: '20px',
+              boxShadow: `0 4px 20px ${colors.primary}10`,
+              border: `2px solid ${getCardBorderColor('total')}`,
+              position: 'relative',
+              overflow: 'hidden'
             }}>
-              <p style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                margin: '0 0 8px 0'
-              }}>
-                Pelanggan: <strong>{selectedStatusItem?.namaPelanggan}</strong>
-              </p>
-              <p style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                margin: '0 0 16px 0'
-              }}>
-                Nomor Kontrak: <strong>{selectedStatusItem?.nomorKontrak}</strong>
-              </p>
-            </div>
-
-            <div style={{
-              marginBottom: '20px'
-            }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '8px'
-              }}>
-                Status Baru:
-              </label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #D1D5DB',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: 'white',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#00AEEF';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#D1D5DB';
-                }}
-              >
-                <option value="Menunggu">Menunggu</option>
-                <option value="Disetujui">Disetujui</option>
-                <option value="Ditolak">Ditolak</option>
-              </select>
-            </div>
-
-            {newStatus === 'Ditolak' && (
               <div style={{
-                marginBottom: '20px'
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '60px',
+                height: '60px',
+                background: `linear-gradient(135deg, ${colors.secondary}20 0%, ${colors.secondary}10 100%)`,
+                borderRadius: '50%'
+              }} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                position: 'relative'
               }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '8px'
-                }}>
-                  Catatan Penolakan <span style={{ color: '#DC2626' }}>*</span>:
-                </label>
-                <textarea
-                  value={statusCatatan}
-                  onChange={(e) => setStatusCatatan(e.target.value)}
-                  placeholder="Masukkan alasan penolakan..."
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #D1D5DB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: 'white',
-                    resize: 'vertical',
-                    minHeight: '80px',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#00AEEF';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#D1D5DB';
-                  }}
-                />
-                <p style={{
-                  fontSize: '12px',
-                  color: '#6B7280',
-                  margin: '4px 0 0 0'
-                }}>
-                  Catatan wajib diisi untuk status Ditolak
-                </p>
-              </div>
-            )}
-
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end'
-            }}>
-              <button
-                onClick={handleCloseStatusModal}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#F3F4F6',
-                  color: '#374151',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#E5E7EB';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#F3F4F6';
-                }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleStatusChange}
-                disabled={!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? '#D1D5DB' : '#00AEEF',
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
-                    e.target.style.backgroundColor = '#0097A7';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
-                    e.target.style.backgroundColor = '#00AEEF';
-                  }
-                }}
-              >
-                Simpan
-              </button>
+                  boxShadow: `0 4px 12px ${colors.secondary}30`
+                }}>
+                  <Filter size={24} />
+                </div>
+                <div>
+                  <p style={{
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    color: colors.primary,
+                    margin: '0 0 4px 0'
+                  }}>
+                    {penawaranData.length}
+                  </p>
+                  <p style={{
+                    fontSize: '14px',
+                    color: colors.gray600,
+                    margin: 0
+                  }}>
+                    Total Penawaran
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Terfilter Card */}
+            <div style={{
+              background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+              borderRadius: '16px',
+              padding: '20px',
+              boxShadow: `0 4px 20px ${colors.primary}10`,
+              border: `2px solid ${getCardBorderColor('filtered')}`,
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '60px',
+                height: '60px',
+                background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.success}10 100%)`,
+                borderRadius: '50%'
+              }} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                position: 'relative'
+              }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  boxShadow: `0 4px 12px ${colors.success}30`
+                }}>
+                  <Filter size={24} />
+                </div>
+                <div>
+                  <p style={{
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    color: colors.primary,
+                    margin: '0 0 4px 0'
+                  }}>
+                    {filteredData.length}
+                  </p>
+                  <p style={{
+                    fontSize: '14px',
+                    color: colors.gray600,
+                    margin: 0
+                  }}>
+                    Data Terfilter
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Modal Edit Discount */}
-      {showDiscountModal && (
-        <div
-          style={{
+        {/* Loading State */}
+        {isLoading && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '200px',
+            fontSize: '16px',
+            color: colors.gray600,
+            background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+            borderRadius: '16px',
+            border: `2px solid ${colors.primary}`
+          }}>
+            Memuat data penawaran...
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <div style={{
+            backgroundColor: '#FEE2E2',
+            border: '2px solid #EF4444',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '24px',
+            color: '#DC2626',
+            background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`
+          }}>
+            <strong>Error:</strong> {error}
+            <button 
+              onClick={fetchPenawaranData}
+              style={{
+                marginLeft: '16px',
+                padding: '10px 20px',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600'
+              }}
+            >
+              Coba Lagi
+            </button>
+          </div>
+        )}
+
+        {/* Main Content */}
+        {!isLoading && !error && (
+          <>
+            {/* Filter Section */}
+            <div style={{
+              background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+              borderRadius: '20px',
+              padding: '28px',
+              boxShadow: `0 8px 32px ${colors.primary}08`,
+              border: `2px solid ${colors.primary}`,
+              marginBottom: '24px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Decorative elements */}
+              <div style={{
+                position: 'absolute',
+                top: '-20px',
+                left: '-20px',
+                width: '120px',
+                height: '120px',
+                background: `radial-gradient(circle, ${colors.secondary}10 0%, transparent 70%)`,
+                borderRadius: '50%'
+              }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '-30px',
+                right: '-30px',
+                width: '150px',
+                height: '150px',
+                background: `radial-gradient(circle, ${colors.success}08 0%, transparent 70%)`,
+                borderRadius: '50%'
+              }} />
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '24px',
+                alignItems: 'end',
+                position: 'relative',
+              }}>
+                {/* Filter by Date */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <Calendar size={16} />
+                    Filter by Tanggal
+                  </label>
+                  <input
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: `1px solid ${colors.primary}`,
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                      backgroundColor: colors.white,
+                      color: colors.gray700
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.secondary;
+                      e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = colors.primary;
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {/* Filter by Status */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <Filter size={16} />
+                    Filter by Status
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: `1px solid ${colors.primary}`,
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                      backgroundColor: colors.white,
+                      color: colors.gray700,
+                      cursor: 'pointer'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.secondary;
+                      e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = colors.primary;
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  >
+                    <option value="">Semua Status</option>
+                    <option value="Menunggu">Menunggu</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Ditolak">Ditolak</option>
+                  </select>
+                </div>
+
+                {/* Refresh Button */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'end' }}>
+                  <button
+                    onClick={() => {
+                      setFilterDate('');
+                      setFilterStatus('');
+                      setCurrentPage(1);
+                    }}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                      color: 'white',
+                      padding: '12px 20px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'all 0.3s ease',
+                      boxShadow: `0 4px 15px ${colors.primary}30`,
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = `0 6px 20px ${colors.primary}40`;
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = `0 4px 15px ${colors.primary}30`;
+                    }}
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Table Section */}
+            <div style={{
+              background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+              borderRadius: '20px',
+              overflow: 'hidden',
+              boxShadow: `0 12px 40px ${colors.primary}08`,
+              border: `2px solid ${colors.primary}`,
+              position: 'relative'
+            }}>
+              {/* Table Header */}
+              <div style={{
+                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                padding: '20px 24px',
+                borderBottom: `1px solid ${colors.gray200}`,
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '-50%',
+                  left: '-10%',
+                  width: '120%',
+                  height: '200%',
+                  background: `radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+                  transform: 'rotate(-15deg)',
+                  pointerEvents: 'none'
+                }} />
+                <h3 style={{
+                  color: colors.white,
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  margin: 0,
+                  position: 'relative',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                  Daftar Penawaran
+                </h3>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'separate',
+                  borderSpacing: 0
+                }}>
+                  <thead>
+                    <tr style={{
+                      background: `linear-gradient(135deg, ${colors.light}60 0%, ${colors.gray100} 100%)`
+                    }}>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                        width: '80px'
+                      }}>
+                        No.
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                        width: '140px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Calendar size={16} />
+                          Tanggal
+                        </div>
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Nama Pelanggan
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Sales
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Nomor Kontrak
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Kontrak Ke-
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Referensi
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Discount
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Durasi Kontrak
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Status
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                        width: '100px'
+                      }}>
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {currentData.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="11"
+                          style={{
+                            padding: '60px 20px',
+                            textAlign: 'center',
+                            color: colors.gray500,
+                            fontSize: '16px',
+                            background: `linear-gradient(135deg, ${colors.gray50} 0%, ${colors.white} 100%)`
+                          }}
+                        >
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '12px'
+                          }}>
+                            <Filter size={48} style={{ color: colors.gray300 }} />
+                            <span>Tidak ada data yang ditemukan</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentData.map((item, index) => (
+                        <tr
+                          key={item.id}
+                          style={{
+                            background: index % 2 === 0 
+                              ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
+                              : colors.white,
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = `linear-gradient(135deg, ${colors.light}30 0%, ${colors.secondary}05 100%)`;
+                            e.currentTarget.style.transform = 'scale(1.005)';
+                            e.currentTarget.style.boxShadow = `0 8px 25px ${colors.primary}08`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = index % 2 === 0 
+                              ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
+                              : colors.white;
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          <td style={{
+                            padding: '20px 16px',
+                            textAlign: 'center',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                              borderRadius: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              margin: '0 auto',
+                              boxShadow: `0 2px 8px ${colors.secondary}30`
+                            }}>
+                              {startIndex + index + 1}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '2px'
+                            }}>
+                              <span style={{ fontWeight: '600' }}>{item.tanggal}</span>
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px'
+                            }}>
+                              <div style={{
+                                width: '40px',
+                                height: '40px',
+                                background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                                borderRadius: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '16px',
+                                fontWeight: '700',
+                                boxShadow: `0 4px 12px ${colors.success}25`
+                              }}>
+                                {item.namaPelanggan.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: '600', marginBottom: '2px' }}>
+                                  {item.namaPelanggan}
+                                </div>
+                                <div style={{ 
+                                  fontSize: '12px', 
+                                  color: colors.gray500 
+                                }}>
+                                  Pelanggan
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.namaSales}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.nomorKontrak}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.kontrakKe}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.referensi}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.gray700,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <button
+                              onClick={() => handleDiscountClick(item)}
+                              style={{
+                                background: `linear-gradient(135deg, ${colors.tertiary}15 0%, ${colors.tertiary}25 100%)`,
+                                color: colors.tertiary,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: `1px solid ${colors.primary}`,
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                boxShadow: `0 2px 8px ${colors.tertiary}20`,
+                                fontWeight: '600'
+                              }}
+                              onMouseOver={(e) => {
+                                e.target.style.background = colors.tertiary;
+                                e.target.style.color = 'white';
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = `0 4px 12px ${colors.tertiary}40`;
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.tertiary}15 0%, ${colors.tertiary}25 100%)`;
+                                e.target.style.color = colors.tertiary;
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = `0 2px 8px ${colors.tertiary}20`;
+                              }}
+                              title="Klik untuk mengubah discount"
+                            >
+                              {convertDiscountToPercentage(item.diskon)}
+                            </button>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.durasi} tahun
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.gray700,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <button
+                              onClick={() => handleStatusClick(item)}
+                              style={{
+                                ...getStatusStyle(item.status),
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                outline: 'none',
+                                fontWeight: '600'
+                              }}
+                              onMouseOver={(e) => {
+                                e.target.style.opacity = '0.8';
+                                e.target.style.transform = 'scale(1.02)';
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.opacity = '1';
+                                e.target.style.transform = 'scale(1)';
+                              }}
+                              title="Klik untuk mengubah status"
+                            >
+                              {item.status}
+                            </button>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            textAlign: 'center',
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px'
+                            }}>
+                              <button
+                                onClick={() => handleDetailData(item)}
+                                style={{
+                                  background: `linear-gradient(135deg, ${colors.secondary}15 0%, ${colors.secondary}25 100%)`,
+                                  color: colors.secondary,
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  border: `1px solid ${colors.tertiary}90`,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.3s ease',
+                                  boxShadow: `0 2px 8px ${colors.secondary}20`
+                                }}
+                                onMouseOver={(e) => {
+                                  e.target.style.background = colors.secondary;
+                                  e.target.style.color = 'white';
+                                  e.target.style.transform = 'translateY(-2px)';
+                                  e.target.style.boxShadow = `0 4px 12px ${colors.secondary}40`;
+                                }}
+                                onMouseOut={(e) => {
+                                  e.target.style.background = `linear-gradient(135deg, ${colors.secondary}15 0%, ${colors.secondary}25 100%)`;
+                                  e.target.style.color = colors.secondary;
+                                  e.target.style.transform = 'translateY(0)';
+                                  e.target.style.boxShadow = `0 2px 8px ${colors.secondary}20`;
+                                }}
+                                title="View Details"
+                              >
+                                <Eye size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Enhanced Pagination */}
+              <div style={{
+                padding: '24px',
+                borderTop: `1px solid ${colors.gray200}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: `linear-gradient(135deg, ${colors.gray50} 0%, ${colors.white} 100%)`,
+                flexWrap: 'wrap',
+                gap: '16px'
+              }}>
+                <div style={{
+                  fontSize: '14px',
+                  color: colors.gray600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    padding: '6px 12px',
+                    background: `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`,
+                    borderRadius: '8px',
+                    border: `1px solid ${colors.primary}`,
+                    fontWeight: '600',
+                    color: colors.primary
+                  }}>
+                    {startIndex + 1}-{Math.min(endIndex, filteredData.length)} dari {filteredData.length} data
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <button
+                    onClick={handlePrevious}
+                    disabled={currentPage === 1}
+                    style={{
+                      padding: '10px 16px',
+                      border: `2px solid ${currentPage === 1 ? colors.gray400 : colors.secondary}`,
+                      borderRadius: '10px',
+                      background: currentPage === 1 
+                        ? colors.gray100 
+                        : `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`,
+                      color: currentPage === 1 ? colors.gray400 : colors.secondary,
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                    onMouseOver={(e) => {
+                      if (currentPage !== 1) {
+                        e.target.style.background = colors.secondary;
+                        e.target.style.color = 'white';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (currentPage !== 1) {
+                        e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`;
+                        e.target.style.color = colors.secondary;
+                        e.target.style.transform = 'translateY(0)';
+                      }
+                    }}
+                  >
+                    ← Previous
+                  </button>
+
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    {(() => {
+                      const maxVisiblePages = 10;
+                      let startPage, endPage;
+
+                      if (totalPages <= maxVisiblePages) {
+                        startPage = 1;
+                        endPage = totalPages;
+                      } else {
+                        if (currentPage <= 6) {
+                          startPage = 1;
+                          endPage = maxVisiblePages;
+                        } else if (currentPage + 4 >= totalPages) {
+                          startPage = totalPages - 9;
+                          endPage = totalPages;
+                        } else {
+                          startPage = currentPage - 5;
+                          endPage = currentPage + 4;
+                        }
+                      }
+
+                      const pages = [];
+                      
+                      if (startPage > 1) {
+                        pages.push(
+                          <button
+                            key={1}
+                            onClick={() => handlePageChange(1)}
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              border: `2px solid ${1 === currentPage ? colors.secondary : colors.gray300}`,
+                              borderRadius: '10px',
+                              background: 1 === currentPage 
+                                ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                                : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                              color: 1 === currentPage ? 'white' : colors.gray600,
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: 1 === currentPage 
+                                ? `0 4px 12px ${colors.secondary}30`
+                                : '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                            onMouseOver={(e) => {
+                              if (1 !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                                e.target.style.borderColor = colors.secondary;
+                                e.target.style.color = colors.secondary;
+                              }
+                              e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseOut={(e) => {
+                              if (1 !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                                e.target.style.borderColor = colors.gray300;
+                                e.target.style.color = colors.gray600;
+                              }
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            1
+                          </button>
+                        );
+
+                        if (startPage > 2) {
+                          pages.push(
+                            <span key="ellipsis1" style={{
+                              width: '44px',
+                              height: '44px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: colors.gray500,
+                              fontSize: '14px',
+                              fontWeight: '600'
+                            }}>
+                              ...
+                            </span>
+                          );
+                        }
+                      }
+
+                      for (let page = startPage; page <= endPage; page++) {
+                        const isCurrentPage = page === currentPage;
+                        
+                        pages.push(
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              border: `2px solid ${isCurrentPage ? colors.secondary : colors.gray300}`,
+                              borderRadius: '10px',
+                              background: isCurrentPage 
+                                ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                                : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                              color: isCurrentPage ? 'white' : colors.gray600,
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: isCurrentPage 
+                                ? `0 4px 12px ${colors.secondary}30`
+                                : '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                            onMouseOver={(e) => {
+                              if (!isCurrentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                                e.target.style.borderColor = colors.secondary;
+                                e.target.style.color = colors.secondary;
+                              }
+                              e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseOut={(e) => {
+                              if (!isCurrentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                                e.target.style.borderColor = colors.gray300;
+                                e.target.style.color = colors.gray600;
+                              }
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            {page}
+                          </button>
+                        );
+                      }
+                      if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                          pages.push(
+                            <span key="ellipsis2" style={{
+                              width: '44px',
+                              height: '44px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: colors.gray500,
+                              fontSize: '14px',
+                              fontWeight: '600'
+                            }}>
+                              ...
+                            </span>
+                          );
+                        }
+
+                        pages.push(
+                          <button
+                            key={totalPages}
+                            onClick={() => handlePageChange(totalPages)}
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              border: `2px solid ${totalPages === currentPage ? colors.secondary : colors.gray300}`,
+                              borderRadius: '10px',
+                              background: totalPages === currentPage 
+                                ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                                : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                              color: totalPages === currentPage ? 'white' : colors.gray600,
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: totalPages === currentPage 
+                                ? `0 4px 12px ${colors.secondary}30`
+                                : '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                            onMouseOver={(e) => {
+                              if (totalPages !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                                e.target.style.borderColor = colors.secondary;
+                                e.target.style.color = colors.secondary;
+                              }
+                              e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseOut={(e) => {
+                              if (totalPages !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                                e.target.style.borderColor = colors.gray300;
+                                e.target.style.color = colors.gray600;
+                              }
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            {totalPages}
+                          </button>
+                        );
+                      }
+
+                      return pages;
+                    })()}
+                  </div>
+
+                  <button
+                    onClick={handleNext}
+                    disabled={currentPage === totalPages}
+                    style={{
+                      padding: '10px 16px',
+                      border: `2px solid ${currentPage === totalPages ? colors.gray400 : colors.secondary}`,
+                      borderRadius: '10px',
+                      background: currentPage === totalPages 
+                        ? colors.gray100 
+                        : `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`,
+                      color: currentPage === totalPages ? colors.gray400 : colors.secondary,
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                    onMouseOver={(e) => {
+                      if (currentPage !== totalPages) {
+                        e.target.style.background = colors.secondary;
+                        e.target.style.color = 'white';
+                        e.target.style.transform = 'translateY(-1px)';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (currentPage !== totalPages) {
+                        e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`;
+                        e.target.style.color = colors.secondary;
+                        e.target.style.transform = 'translateY(0)';
+                      }
+                    }}
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Modal Components */}
+        <Detail
+          isOpen={showDetailModal}
+          onClose={handleCloseDetailModal}
+          detailData={selectedDetailData}
+        />
+
+        {/* Status Change Modal */}
+        {showStatusModal && (
+          <div style={{
             position: 'fixed',
             top: 0,
             left: 0,
@@ -1132,128 +1632,342 @@ const Index = () => {
             bottom: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             display: 'flex',
-            justifyContent: 'center',
             alignItems: 'center',
+            justifyContent: 'center',
             zIndex: 1000
-          }}
-          onClick={handleCloseDiscountModal}
-        >
-          <div
-            style={{
+          }}>
+            <div style={{
               backgroundColor: 'white',
-              padding: '30px',
-              borderRadius: '12px',
-              width: '500px',
+              borderRadius: '16px',
+              padding: '28px',
+              width: '450px',
               maxWidth: '90vw',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 style={{ 
-              margin: '0 0 20px 0', 
-              fontSize: '20px', 
-              fontWeight: '600',
-              color: '#1F2937'
+              boxShadow: `0 20px 25px ${colors.primary}10`,
+              border: `2px solid ${colors.primary}`
             }}>
-              Edit Discount
-            </h3>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '8px', 
-                fontSize: '14px', 
-                fontWeight: '500',
-                color: '#374151'
+              <h3 style={{
+                fontSize: '20px',
+                fontWeight: '700',
+                color: colors.primary,
+                margin: '0 0 20px 0'
               }}>
-                Pilih Discount:
-              </label>
-              <select
-                value={newDiscount}
-                onChange={handleDiscountSelectChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
+                Ubah Status Penawaran
+              </h3>
+              
+              <div style={{
+                marginBottom: '20px'
+              }}>
+                <p style={{
                   fontSize: '14px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#00AEEF';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#E5E7EB';
-                }}
-              >
-                <option value="">Pilih discount...</option>
-                <option value="0%">0%</option>
-                <option value="10%">10% (MB Niaga)</option>
-                <option value="20%">20% (GM SBU)</option>
-              </select>
-            </div>
+                  color: colors.gray600,
+                  margin: '0 0 8px 0'
+                }}>
+                  Pelanggan: <strong>{selectedStatusItem?.namaPelanggan}</strong>
+                </p>
+                <p style={{
+                  fontSize: '14px',
+                  color: colors.gray600,
+                  margin: '0 0 16px 0'
+                }}>
+                  Nomor Kontrak: <strong>{selectedStatusItem?.nomorKontrak}</strong>
+                </p>
+              </div>
 
-            <div style={{ 
-              display: 'flex', 
-              gap: '12px', 
-              justifyContent: 'flex-end' 
-            }}>
-              <button
-                onClick={handleCloseDiscountModal}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#F3F4F6',
-                  color: '#374151',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
+              <div style={{
+                marginBottom: '24px'
+              }}>
+                <label style={{
+                  display: 'block',
                   fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#E5E7EB';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#F3F4F6';
-                }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleDiscountChange}
-                disabled={isDiscountUnchanged()}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: isDiscountUnchanged() ? '#D1D5DB' : '#00AEEF',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: isDiscountUnchanged() ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  if (!isDiscountUnchanged()) {
-                    e.target.style.backgroundColor = '#0097A7';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!isDiscountUnchanged()) {
-                    e.target.style.backgroundColor = '#00AEEF';
-                  }
-                }}
-              >
-                Simpan
-              </button>
+                  fontWeight: '600',
+                  color: colors.primary,
+                  marginBottom: '8px'
+                }}>
+                  Status Baru:
+                </label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: `1px solid ${colors.primary}`,
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    backgroundColor: colors.white,
+                    transition: 'all 0.3s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.secondary;
+                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = colors.primary;
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  <option value="Menunggu">Menunggu</option>
+                  <option value="Disetujui">Disetujui</option>
+                  <option value="Ditolak">Ditolak</option>
+                </select>
+              </div>
+
+              {newStatus === 'Ditolak' && (
+                <div style={{
+                  marginBottom: '24px'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px'
+                  }}>
+                    Catatan Penolakan <span style={{ color: '#DC2626' }}>*</span>:
+                  </label>
+                  <textarea
+                    value={statusCatatan}
+                    onChange={(e) => setStatusCatatan(e.target.value)}
+                    placeholder="Masukkan alasan penolakan..."
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: `1px solid ${colors.primary}`,
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      backgroundColor: colors.white,
+                      resize: 'vertical',
+                      minHeight: '80px',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.secondary;
+                      e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = colors.primary;
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  />
+                  <p style={{
+                    fontSize: '12px',
+                    color: colors.gray500,
+                    margin: '4px 0 0 0'
+                  }}>
+                    Catatan wajib diisi untuk status Ditolak
+                  </p>
+                </div>
+              )}
+
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'flex-end'
+              }}>
+                <button
+                  onClick={handleCloseStatusModal}
+                  style={{
+                    padding: '12px 24px',
+                    background: `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`,
+                    color: colors.gray700,
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = `linear-gradient(135deg, ${colors.gray200} 0%, ${colors.gray300} 100%)`;
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`;
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleStatusChange}
+                  disabled={!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())}
+                  style={{
+                    padding: '12px 24px',
+                    background: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
+                      ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
+                      : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.boxShadow = `0 4px 12px ${colors.secondary}30`;
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
+                    }
+                  }}
+                >
+                  Simpan
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-        </>
-      )}
+        )}
+
+        {/* Modal Edit Discount */}
+        {showDiscountModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1000
+            }}
+            onClick={handleCloseDiscountModal}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '16px',
+                width: '500px',
+                maxWidth: '90vw',
+                boxShadow: `0 20px 25px ${colors.primary}10`,
+                border: `2px solid ${colors.primary}`
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ 
+                margin: '0 0 20px 0', 
+                fontSize: '20px', 
+                fontWeight: '700',
+                color: colors.primary
+              }}>
+                Edit Discount
+              </h3>
+              
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '8px', 
+                  fontSize: '14px', 
+                  fontWeight: '600',
+                  color: colors.primary
+                }}>
+                  Pilih Discount:
+                </label>
+                <select
+                  value={newDiscount}
+                  onChange={handleDiscountSelectChange}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: `1px solid ${colors.primary}`,
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    backgroundColor: colors.white,
+                    transition: 'all 0.3s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.secondary;
+                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = colors.primary;
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  <option value="">Pilih discount...</option>
+                  <option value="0%">0%</option>
+                  <option value="10%">10% (MB Niaga)</option>
+                  <option value="20%">20% (GM SBU)</option>
+                </select>
+              </div>
+
+              <div style={{ 
+                display: 'flex', 
+                gap: '12px', 
+                justifyContent: 'flex-end' 
+              }}>
+                <button
+                  onClick={handleCloseDiscountModal}
+                  style={{
+                    padding: '12px 24px',
+                    background: `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`,
+                    color: colors.gray700,
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = `linear-gradient(135deg, ${colors.gray200} 0%, ${colors.gray300} 100%)`;
+                    e.target.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`;
+                    e.target.style.transform = 'translateY(0)';
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={handleDiscountChange}
+                  disabled={isDiscountUnchanged()}
+                  style={{
+                    padding: '12px 24px',
+                    background: isDiscountUnchanged() 
+                      ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
+                      : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: isDiscountUnchanged() ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    if (!isDiscountUnchanged()) {
+                      e.target.style.transform = 'translateY(-1px)';
+                      e.target.style.boxShadow = `0 4px 12px ${colors.secondary}30`;
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isDiscountUnchanged()) {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
+                    }
+                  }}
+                >
+                  Simpan
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
