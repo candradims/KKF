@@ -885,16 +885,14 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
-                          background: `${colors.gray100}`,
                           padding: '8px 12px',
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
                           display: 'inline-block',
                           fontWeight: '600',
                           color: colors.primary
@@ -905,7 +903,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -932,19 +930,13 @@ const Index = () => {
                             <div style={{ fontWeight: '600', marginBottom: '2px' }}>
                               {item.namaLayanan}
                             </div>
-                            <div style={{ 
-                              fontSize: '12px', 
-                              color: colors.gray500 
-                            }}>
-                              Layanan
-                            </div>
                           </div>
                         </div>
                       </td>
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -953,7 +945,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-block'
                         }}>
                           {item.jenisLayanan}
@@ -962,7 +954,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -971,7 +963,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-block'
                         }}>
                           {item.satuan}
@@ -980,7 +972,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -989,7 +981,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-block'
                         }}>
                           {item.backbone}
@@ -998,7 +990,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -1007,7 +999,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-block'
                         }}>
                           {item.port}
@@ -1016,7 +1008,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -1025,7 +1017,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-block'
                         }}>
                           {item.tarifAkses}
@@ -1034,7 +1026,7 @@ const Index = () => {
                       <td style={{
                         padding: '20px 16px',
                         fontSize: '14px',
-                        color: colors.gray700,
+                        color: colors.primary,
                         borderBottom: `2px solid #035b71 `,
                       }}>
                         <div style={{
@@ -1043,7 +1035,7 @@ const Index = () => {
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.gray200}`,
+                          border: `1px solid ${colors.primary}`,
                           display: 'inline-block'
                         }}>
                           {item.tarif}
