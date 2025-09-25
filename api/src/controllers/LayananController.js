@@ -52,6 +52,7 @@ export class LayananController {
     try {
       const {
         nama_layanan,
+        jenis_layanan,
         wilayah_hjt,
         satuan,
         backbone,
@@ -60,15 +61,17 @@ export class LayananController {
         tarif,
       } = req.body;
 
-      if (!nama_layanan || !wilayah_hjt || !satuan) {
+      if (!nama_layanan || !jenis_layanan || !wilayah_hjt || !satuan) {
         return res.status(400).json({
           success: false,
-          message: "Nama layanan, wilayah, dan satuan wajib diisi",
+          message:
+            "Nama layanan, jenis layanan, wilayah, dan satuan wajib diisi",
         });
       }
 
       const newLayanan = await LayananModel.createLayanan({
         nama_layanan,
+        jenis_layanan,
         wilayah_hjt,
         satuan,
         backbone: backbone || 0.0,

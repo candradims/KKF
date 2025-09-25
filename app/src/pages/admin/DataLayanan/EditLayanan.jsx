@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Check, Package, MapPin, Cpu, Server, DollarSign } from 'lucide-react';
+import { X, Check, Package, MapPin, Cpu, Server, DollarSign, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
@@ -56,6 +56,7 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
   // Form state
   const [formData, setFormData] = useState({
     namaLayanan: '',
+    jenisLayanan: '',
     hjt: '',
     satuan: '',
     backbone: '',
@@ -76,6 +77,7 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
       
       return (
         initialData.namaLayanan !== formData.namaLayanan ||
+        initialData.jenisLayanan !== formData.jenisLayanan ||
         initialData.hjt !== formData.hjt ||
         initialData.satuan !== formData.satuan ||
         initialData.backbone !== formData.backbone ||
@@ -171,6 +173,7 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
       console.log('EditLayanan initialData:', initialData);
       setFormData({
         namaLayanan: initialData.namaLayanan || '',
+        jenisLayanan: initialData.jenisLayanan || '',
         hjt: initialData.hjt || '',
         satuan: initialData.satuan || '',
         backbone: initialData.backbone || '',
@@ -206,6 +209,11 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
       setIsSubmitting(false);
       return;
     }
+    if (!formData.jenisLayanan) {
+      alert('Jenis layanan harus diisi!');
+      setIsSubmitting(false);
+      return;
+    }
     if (!formData.hjt) {
       alert('HJT harus dipilih!');
       setIsSubmitting(false);
@@ -223,6 +231,7 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
       const dataToSave = {
         ...initialData,
         namaLayanan: formData.namaLayanan,
+        jenisLayanan: formData.jenisLayanan,
         hjt: formData.hjt,
         satuan: formData.satuan,
         backbone: formData.backbone,
@@ -311,6 +320,24 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
             background-color: #e7f3f5ff;
             fontFamily: "'Open Sans', sans-serif !important";
           }
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 191, 202, 0.1);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%);
+            border-radius: 10px;
+            box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.primary} 100%);
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%);
+          }
         `}
       </style>
 
@@ -353,11 +380,13 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
                 borderRadius: '32px',
                 width: '100%',
                 maxWidth: '900px',
-                padding: '20px',
+                maxHeight: '90vh',
                 boxShadow: '0 12px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
                 border: '1px solid rgba(255, 255, 255, 0.6)',
                 position: 'relative',
                 overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
               }}
             >
               {/* Decorative highlight */}
@@ -399,13 +428,20 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
                 <X size={20} color={colors.primary} />
               </motion.button>
 
+              {/* Scrollable Container */}
+              <div className="custom-scrollbar" style={{
+                flex: 1,
+                overflow: 'auto',
+                padding: '20px'
+              }}>
+
               {/* Header */}
               <motion.div 
                 initial={{ y: -30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
                 style={{
-                  padding: '40px 32px 20px',
+                  padding: '20px 12px 20px',
                   textAlign: 'center'
                 }}
               >
@@ -508,6 +544,42 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
                         </option>
                       ))}
                     </select>
+                  </div>
+                </motion.div>
+
+                {/* Jenis Layanan Field */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Jenis Layanan *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('jenisLayanan')}>
+                      <Tag size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="jenisLayanan"
+                      value={formData.jenisLayanan}
+                      onChange={handleInputChange}
+                      onFocus={() => setFocusedField('jenisLayanan')}
+                      onBlur={() => setFocusedField('')}
+                      placeholder="Masukkan jenis layanan"
+                      required
+                      style={inputStyle('jenisLayanan')}
+                    />
                   </div>
                 </motion.div>
 
@@ -816,6 +888,7 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
                   </motion.button>
                 </div>
               </motion.form>
+              </div> {/* End of scrollable container */}
             </motion.div>
           </motion.div>
         )}

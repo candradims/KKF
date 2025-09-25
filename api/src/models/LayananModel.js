@@ -66,6 +66,7 @@ export class LayananModel {
         .from("data_layanan")
         .insert({
           nama_layanan: layananData.nama_layanan,
+          jenis_layanan: layananData.jenis_layanan,
           wilayah_hjt: layananData.wilayah_hjt,
           satuan: layananData.satuan,
           backbone: layananData.backbone || 0,

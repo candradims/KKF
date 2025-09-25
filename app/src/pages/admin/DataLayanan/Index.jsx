@@ -146,7 +146,7 @@ const Index = () => {
         },
         body: JSON.stringify({
           nama_layanan: updatedData.namaLayanan,
-          jenis_layanan: newData.jenisLayanan,
+          jenis_layanan: updatedData.jenisLayanan,
           wilayah_hjt: updatedData.hjt,
           satuan: updatedData.satuan,
           backbone: parseFloat(updatedData.backbone) || 0,

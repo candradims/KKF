@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { X, Check, Settings, MapPin, Box, Server, Cpu, DollarSign } from "lucide-react";
+import { X, Check, Settings, MapPin, Box, Server, Cpu, DollarSign, Tag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     namaLayanan: "",
+    jenisLayanan: "",
     hjt: "",
     satuan: "",
     backbone: "",
@@ -18,6 +19,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   
   // State untuk data dari database
   const [layananOptions, setLayananOptions] = useState([]);
+  const [jenisLayananOptions, setJenisLayananOptions] = useState([]);
   const [satuanOptions, setSatuanOptions] = useState([]);
   const [hjtOptions, setHjtOptions] = useState([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
@@ -54,8 +56,9 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       const result = await response.json();
       const data = Array.isArray(result) ? result : result.data || [];
       
-      // Ambil unique nama_layanan, satuan, dan wilayah_hjt dari database
+      // Ambil unique nama_layanan, jenis_layanan, satuan, dan wilayah_hjt dari database
       const uniqueLayanan = [...new Set(data.map(item => item.nama_layanan).filter(Boolean))];
+      const uniqueJenisLayanan = [...new Set(data.map(item => item.jenis_layanan).filter(Boolean))];
       const rawSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
       const uniqueHjt = [...new Set(data.map(item => item.wilayah_hjt).filter(Boolean))];
       
@@ -69,11 +72,21 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       const uniqueSatuan = [...new Set(normalizedSatuan)].sort();
       
       setLayananOptions(uniqueLayanan.sort());
+      setJenisLayananOptions(uniqueJenisLayanan.length > 0 ? uniqueJenisLayanan.sort() : [
+        "Internet",
+        "VPN",
+        "Cloud",
+        "CCTV",
+        "Monitoring",
+        "Wireless",
+        "Premium"
+      ]);
       setSatuanOptions(uniqueSatuan.length > 0 ? uniqueSatuan : ["Mbps", "units"]);
       setHjtOptions(uniqueHjt.sort());
       
       console.log("✅ Options loaded:", { 
-        layanan: uniqueLayanan.length, 
+        layanan: uniqueLayanan.length,
+        jenisLayanan: uniqueJenisLayanan.length,
         satuan: uniqueSatuan.length,
         hjt: uniqueHjt.length 
       });
@@ -93,6 +106,15 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
         "Non Analytic CCTV (Basic)",
         "IBBC CIR4-BW10 On-Net FTTH",
         "Cloud 1corevCPU 2GB Mem Cap 50GB"
+      ]);
+      setJenisLayananOptions([
+        "Internet",
+        "VPN",
+        "Cloud",
+        "CCTV",
+        "Monitoring",
+        "Wireless",
+        "Premium"
       ]);
       setSatuanOptions(["Mbps", "units"]);
       setHjtOptions(["Sumatra", "Jawa Bali", "Jabodetabek", "Intim"]);
@@ -122,6 +144,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   const handleCancel = () => {
     setFormData({
       namaLayanan: "",
+      jenisLayanan: "",
       hjt: "",
       satuan: "",
       backbone: "",
@@ -137,6 +160,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
     setShowSuccessModal(false);
     setFormData({
       namaLayanan: "",
+      jenisLayanan: "",
       hjt: "",
       satuan: "",
       backbone: "",
@@ -153,8 +177,8 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
     setIsSubmitting(true);
     try {
       // Validate required fields
-      if (!formData.namaLayanan || !formData.hjt || !formData.satuan) {
-        alert("Nama layanan, HJT, dan satuan wajib diisi!");
+      if (!formData.namaLayanan || !formData.jenisLayanan || !formData.hjt || !formData.satuan) {
+        alert("Nama layanan, jenis layanan, HJT, dan satuan wajib diisi!");
         return;
       }
 
@@ -217,6 +241,26 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
             background-color: #e7f3f5ff;
             fontFamily: "'Open Sans', sans-serif !important";
           }
+          
+          /* Custom Scrollbar Styles */
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(3, 91, 113, 0.1);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent1} 100%);
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(135deg, ${colors.accent1} 0%, ${colors.primary} 100%);
+          }
         `}
       </style>
 
@@ -259,11 +303,14 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                 borderRadius: "32px",
                 width: "100%",
                 maxWidth: "900px",
+                maxHeight: "90vh",
                 padding: "20px",
                 boxShadow: "0 12px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
                 border: "1px solid rgba(255, 255, 255, 0.6)",
                 position: "relative",
                 overflow: "hidden",
+                display: "flex",
+                flexDirection: "column"
               }}
             >
               {/* Decorative highlight */}
@@ -275,7 +322,8 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                 right: 0,
                 height: '120px',
                 background: 'linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0))',
-                pointerEvents: 'none'
+                pointerEvents: 'none',
+                zIndex: 1
               }} />
 
               {/* Close Button */}
@@ -304,6 +352,16 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
               >
                 <X size={20} color={colors.primary} />
               </motion.button>
+
+              {/* Scrollable Content Container */}
+              <div 
+                className="custom-scrollbar"
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  paddingRight: "5px"
+                }}
+              >
 
               {/* Header */}
               <motion.div 
@@ -414,6 +472,42 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                         </option>
                       ))}
                     </select>
+                  </div>
+                </motion.div>
+
+                {/* Input Jenis Layanan */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: "24px",
+                    position: "relative"
+                  }}
+                >
+                  <label style={{
+                    display: "block",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: colors.primary,
+                    marginBottom: "8px",
+                    letterSpacing: "0.02em"
+                  }}>
+                    Jenis Layanan *
+                  </label>
+                  <div style={{ position: "relative" }}>
+                    <div style={iconContainerStyle('jenisLayanan')}>
+                      <Tag size={18} />
+                    </div>
+                    <input
+                      name="jenisLayanan"
+                      type="text"
+                      placeholder="Masukkan jenis layanan (contoh: Internet, VPN, Cloud, CCTV, dll)"
+                      value={formData.jenisLayanan}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('jenisLayanan')}
+                      onBlur={() => setFocusedField('')}
+                      required
+                      style={inputStyle('jenisLayanan')}
+                    />
                   </div>
                 </motion.div>
 
@@ -722,6 +816,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                   </motion.button>
                 </div>
               </motion.form>
+              </div> {/* Close Scrollable Content Container */}
             </motion.div>
           </motion.div>
         )}
