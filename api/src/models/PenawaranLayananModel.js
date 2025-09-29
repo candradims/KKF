@@ -41,12 +41,16 @@ export class PenawaranLayananModel {
       const dataToInsert = {
         id_penawaran: penawaranLayananData.id_penawaran,
         id_layanan: penawaranLayananData.id_layanan,
-        nama_layanan: penawaranLayananData.nama_layanan, // Store nama layanan directly
-        detail_layanan: penawaranLayananData.detail_layanan, // Store detail layanan
+        nama_layanan: penawaranLayananData.nama_layanan,
+        detail_layanan: penawaranLayananData.detail_layanan,
         kapasitas: penawaranLayananData.kapasitas,
         qty: penawaranLayananData.qty,
         akses_existing: penawaranLayananData.akses_existing,
         satuan: penawaranLayananData.satuan,
+        backbone: penawaranLayananData.backbone,
+        port: penawaranLayananData.port,
+        tarif_akses: penawaranLayananData.tarif_akses, 
+        tarif: penawaranLayananData.tarif,
       };
 
       console.log("🔧 Data to insert:", dataToInsert);
@@ -123,6 +127,64 @@ export class PenawaranLayananModel {
       throw new Error(
         `Gagal membuat beberapa layanan penawaran: ${error.message}`
       );
+    }
+  }
+  static async addLayananToPenawaran(req, res) {
+    try {
+      const { idPenawaran } = req.params;
+      const { id_layanan } = req.body;
+
+      const existingPenawaran = await PenawaranModel.getPenawaranById(idPenawaran);
+      if (!existingPenawaran) {
+        return res.status(404).json({
+          success: false,
+          message: "Penawaran tidak ditemukan",
+        });
+      }
+
+      if (
+        req.user.role_user === "sales" &&
+        existingPenawaran.id_user !== req.user.id_user
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "Akses ditolak. Anda hanya dapat memodifikasi penawaran milik Anda sendiri.",
+        });
+      }
+
+      const layanan = await LayananModel.getLayananById(id_layanan);
+      if (!layanan) {
+        return res.status(404).json({
+          success: false,
+          message: "Layanan tidak ditemukan",
+        });
+      }
+      const layananData = {
+        ...req.body,
+        id_penawaran: idPenawaran,
+        id_layanan: layanan.id_layanan,
+        nama_layanan: layanan.nama_layanan,
+        detail_layanan: layanan.jenis_layanan,
+        satuan: layanan.satuan,
+        backbone: layanan.backbone,
+        port: layanan.port,
+        tarif_akses: layanan.tarif_akses,
+        tarif: layanan.tarif,
+      };
+
+      const newPenawaranLayanan = await PenawaranLayananModel.createPenawaranLayanan(layananData);
+
+      res.status(201).json({
+        success: true,
+        message: "Layanan berhasil ditambahkan ke penawaran",
+        data: newPenawaranLayanan[0],
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Gagal menambahkan layanan ke penawaran",
+        error: error.message,
+      });
     }
   }
 }
