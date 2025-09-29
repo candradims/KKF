@@ -174,6 +174,15 @@ const layananOptions = [
   "Cloud 12corevCPU 96Gb Mem Cap 1TB",
 ];
 
+// Helper untuk format tanggal yyyy-mm-dd
+const getTodayDate = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const Tambah = ({ isOpen, onClose, onSave }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -186,20 +195,19 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const [availableDetailLayanan, setAvailableDetailLayanan] = useState([]);
   const [loadingLayanan, setLoadingLayanan] = useState(false);
   const [selectedLayanan, setSelectedLayanan] = useState(null);
-  
+  const [availableReferensiHJT, setAvailableReferensiHJT] = useState([]);
+
   const [formData, setFormData] = useState({
     sales: "",
-    tanggal: "",
+    tanggal: getTodayDate(),
     pelanggan: "",
     nomorKontrak: "",
     kontrakTahunKe: "",
     referensiHJT: "",
     durasiKontrak: "",
-    hjtWilayah: "",
     namaLayanan: "",
     detailLayanan: "",
     kapasitas: "",
-    satuan: "",
     qty: "",
     aksesExisting: "",
     discount: "",
@@ -266,20 +274,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Layanan API result:', result);
         if (result.success && result.data) {
-          console.log('📋 Raw layanan data:', result.data);
           setLayananData(result.data);
-          
-          // Extract unique HJT wilayah
-          const uniqueWilayah = [...new Set(result.data.map(item => item.wilayah_hjt))];
-          const filteredWilayah = uniqueWilayah.filter(Boolean); // Remove null/undefined values
-          setAvailableHjtWilayah(filteredWilayah);
-          
-          console.log('🗺️ Available HJT Wilayah:', filteredWilayah);
-          console.log('📊 Total layanan items:', result.data.length);
-        } else {
-          console.error('❌ API returned error:', result.message);
+
+          const uniqueWilayah = [...new Set(result.data.map(item => item.wilayah_hjt))].filter(Boolean);
+          setAvailableHjtWilayah(uniqueWilayah);
+          setAvailableReferensiHJT(uniqueWilayah); 
         }
       } else {
         const errorText = await response.text();
@@ -295,78 +295,58 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   // Function to get the correct dropdown value for display
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Handle HJT Wilayah selection and filter nama layanan
-    if (name === 'hjtWilayah') {
-      // Filter layanan based on selected HJT wilayah
-      const filtered = layananData.filter(layanan => layanan.wilayah_hjt === value);
-      setFilteredLayananData(filtered);
-      
-      // Extract unique nama_layanan for the selected wilayah
-      const uniqueNamaLayanan = [...new Set(filtered.map(item => item.nama_layanan))];
-      const filteredNamaLayanan = uniqueNamaLayanan.filter(Boolean);
-      setAvailableNamaLayanan(filteredNamaLayanan);
-      
-      // Reset dependent selections
+
+    if (name === 'referensiHJT') {
       setFormData((prev) => ({
         ...prev,
-        hjtWilayah: value,
-        namaLayanan: '', // Reset nama layanan selection
-        detailLayanan: '' // Reset detail layanan selection
+        referensiHJT: value,
+        namaLayanan: "",
+        detailLayanan: "",
       }));
-      setAvailableDetailLayanan([]); // Clear detail layanan options
+      const filtered = layananData.filter(layanan => layanan.wilayah_hjt === value);
+      setFilteredLayananData(filtered);
+      const uniqueNamaLayanan = [...new Set(filtered.map(item => item.nama_layanan))].filter(Boolean);
+      setAvailableNamaLayanan(uniqueNamaLayanan);
+      setAvailableDetailLayanan([]);
       setSelectedLayanan(null);
-      
-      console.log('🗺️ HJT Wilayah selected:', value);
-      console.log('📋 Available nama layanan:', filteredNamaLayanan);
+      return;
     }
+
     // Handle nama layanan selection and filter detail layanan
-    else if (name === 'namaLayanan') {
-      // Filter detail layanan (jenis_layanan) based on selected nama_layanan and wilayah
-      const filtered = layananData.filter(layanan => 
-        layanan.wilayah_hjt === formData.hjtWilayah && layanan.nama_layanan === value
+    if (name === 'namaLayanan') {
+      const filtered = layananData.filter(layanan =>
+        layanan.wilayah_hjt === formData.referensiHJT && layanan.nama_layanan === value
       );
-      
-      // Extract unique jenis_layanan for the selected nama_layanan
-      const uniqueDetailLayanan = [...new Set(filtered.map(item => item.jenis_layanan))];
-      const filteredDetailLayanan = uniqueDetailLayanan.filter(Boolean);
-      setAvailableDetailLayanan(filteredDetailLayanan);
-      
-      // Reset detail layanan selection
+      const uniqueDetailLayanan = [...new Set(filtered.map(item => item.jenis_layanan))].filter(Boolean);
+      setAvailableDetailLayanan(uniqueDetailLayanan);
       setFormData((prev) => ({
         ...prev,
         namaLayanan: value,
-        detailLayanan: '' // Reset detail layanan selection
+        detailLayanan: ''
       }));
-      
-      console.log('🎯 Nama Layanan selected:', value);
-      console.log('📝 Available detail layanan:', filteredDetailLayanan);
+      return;
     }
+
     // Handle detail layanan selection
-    else if (name === 'detailLayanan') {
-      // Find the selected layanan data
-      const selectedLayananData = layananData.find(layanan => 
-        layanan.wilayah_hjt === formData.hjtWilayah && 
-        layanan.nama_layanan === formData.namaLayanan && 
+    if (name === 'detailLayanan') {
+      const selectedLayananData = layananData.find(layanan =>
+        layanan.wilayah_hjt === formData.referensiHJT &&
+        layanan.nama_layanan === formData.namaLayanan &&
         layanan.jenis_layanan === value
       );
       setSelectedLayanan(selectedLayananData);
-      
       setFormData((prev) => ({
         ...prev,
         detailLayanan: value
       }));
-      
-      console.log('📊 Detail Layanan selected:', value);
-      console.log('✅ Selected layanan data:', selectedLayananData);
-    } 
-    // Handle other form fields
-    else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      return;
     }
+
+    // Handle other form fields
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   // Helper functions for managing multiple pengeluaran items
@@ -402,7 +382,17 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     e.preventDefault();
     
     // Validasi form - hanya field penawaran yang wajib
-    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak', 'hjtWilayah', 'namaLayanan', 'detailLayanan', 'kapasitas', 'satuan', 'qty', 'aksesExisting'];
+    const requiredFields = [
+      'pelanggan',
+      'nomorKontrak',
+      'durasiKontrak',
+      'referensiHJT',
+      'namaLayanan',
+      'detailLayanan',
+      'kapasitas',
+      'qty',
+      'aksesExisting'
+    ];
     const missingFields = requiredFields.filter(field => !formData[field]);
     
     if (missingFields.length > 0) {
@@ -410,7 +400,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
         'pelanggan': 'Pelanggan',
         'nomorKontrak': 'Nomor Kontrak',
         'durasiKontrak': 'Durasi Kontrak',
-        'hjtWilayah': 'HJT Wilayah',
+        'referensiHJT': 'Referensi HJT',
         'namaLayanan': 'Nama Layanan',
         'detailLayanan': 'Detail Layanan',
         'kapasitas': 'Kapasitas',
@@ -457,7 +447,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       ...formData,
       // Add selected layanan data for backend reference
       selectedLayananId: selectedLayanan?.id_layanan,
-      piliLayanan: `${formData.namaLayanan} - ${formData.detailLayanan}`, // For display/backward compatibility
+      satuan: selectedLayanan.satuan,
+      backbone: selectedLayanan.backbone,
+      port: selectedLayanan.port,
+      tarif_akses: selectedLayanan.tarif_akses,
+      tarif: selectedLayanan.tarif,
+      piliLayanan: `${formData.namaLayanan} - ${formData.detailLayanan}`,
       pengeluaranItems: showAdditionalSection ? pengeluaranItems : [],
       total_pengeluaran_lain_lain: showAdditionalSection ? getTotalPengeluaran() : 0
     };
@@ -470,13 +465,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     setShowSuccessModal(false);
     setFormData({
       sales: "",
-      tanggal: "",
+      tanggal: getTodayDate(),
       pelanggan: "",
       nomorKontrak: "",
       kontrakTahunKe: "",
       referensiHJT: "",
       durasiKontrak: "",
-      hjtWilayah: "",
       namaLayanan: "",
       detailLayanan: "",
       kapasitas: "",
@@ -497,13 +491,13 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const handleCancel = () => {
     setFormData({
       sales: "",
-      tanggal: "",
+      tanggal: getTodayDate(),
       pelanggan: "",
       nomorKontrak: "",
       kontrakTahunKe: "",
       referensiHJT: "",
       durasiKontrak: "",
-      hjtWilayah: "",
+      // hjtWilayah: "",
       namaLayanan: "",
       detailLayanan: "",
       kapasitas: "",
@@ -681,7 +675,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     name="tanggal"
                     value={formData.tanggal}
                     onChange={handleInputChange}
-                    disabled={isSaving}
+                    readOnly
+                    disabled
                     required
                     style={{
                       width: "100%",
@@ -841,10 +836,9 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       }}
                     >
                       <option value="">Pilih HJT</option>
-                      <option value="sumatera">Sumatera</option>
-                      <option value="kalimantan">Kalimantan</option>
-                      <option value="jawa-bali">Jawa-Bali</option>
-                      <option value="intim">Intim</option>
+                      {availableReferensiHJT.map((wilayah, idx) => (
+                        <option key={idx} value={wilayah}>{wilayah}</option>
+                      ))}
                     </select>
                     <div
                       style={{
@@ -925,61 +919,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     marginBottom: "20px",
                   }}
                 >
-                  {/* HJT Wilayah Selection */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      HJT Wilayah*
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        name="hjtWilayah"
-                        value={formData.hjtWilayah}
-                        onChange={handleInputChange}
-                        required
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "2px solid #B0BEC5",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          outline: "none",
-                          backgroundColor: "white",
-                          boxSizing: "border-box",
-                          appearance: "none",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <option value="">Pilih HJT Wilayah</option>
-                        {availableHjtWilayah.map((wilayah, index) => (
-                          <option key={index} value={wilayah}>
-                            {wilayah}
-                          </option>
-                        ))}
-                      </select>
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "12px",
-                          color: "#666",
-                        }}
-                      >
-                        ▼
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Nama Layanan */}
                   <div style={{ marginBottom: "16px" }}>
                     <label
@@ -999,7 +938,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                         value={formData.namaLayanan}
                         onChange={handleInputChange}
                         required
-                        disabled={loadingLayanan || !formData.hjtWilayah}
+                        disabled={loadingLayanan || !formData.referensiHJT}
                         style={{
                           width: "100%",
                           padding: "10px 12px",
@@ -1007,17 +946,17 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                           borderRadius: "8px",
                           fontSize: "14px",
                           outline: "none",
-                          backgroundColor: (loadingLayanan || !formData.hjtWilayah) ? "#F9FAFB" : "white",
+                          backgroundColor: (loadingLayanan || !formData.referensiHJT) ? "#F9FAFB" : "white",
                           boxSizing: "border-box",
                           appearance: "none",
-                          cursor: (loadingLayanan || !formData.hjtWilayah) ? "not-allowed" : "pointer",
+                          cursor: (loadingLayanan || !formData.referensiHJT) ? "not-allowed" : "pointer",
                         }}
                       >
                         <option value="">
                           {loadingLayanan 
                             ? "Memuat layanan..." 
-                            : !formData.hjtWilayah 
-                              ? "Pilih HJT Wilayah terlebih dahulu" 
+                            : !formData.referensiHJT 
+                              ? "Pilih Referensi HJT terlebih dahulu" 
                               : "Pilih Nama Layanan"}
                         </option>
                         {availableNamaLayanan.map((namaLayanan, index) => (
@@ -1135,59 +1074,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                         boxSizing: "border-box",
                       }}
                     />
-                  </div>
-
-                  {/* Satuan */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Satuan*
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        name="satuan"
-                        value={formData.satuan}
-                        onChange={handleInputChange}
-                        required
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "2px solid #B0BEC5",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          outline: "none",
-                          backgroundColor: "white",
-                          boxSizing: "border-box",
-                          appearance: "none",
-                        }}
-                      >
-                        <option value="">Pilih satuan</option>
-                        <option value="Mbps">Mbps</option>
-                        <option value="Units">Units</option>
-                        <option value="Lot">Lot</option>
-                        <option value="IP">IP</option>
-                      </select>
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "12px",
-                          color: "#666",
-                        }}
-                      >
-                        ▼
-                      </div>
-                    </div>
                   </div>
 
                   {/* QTY */}
