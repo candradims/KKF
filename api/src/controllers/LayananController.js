@@ -79,12 +79,6 @@ export class LayananController {
         tarif_akses: tarif_akses || 0.0,
         tarif: tarif || 0.0,
       });
-
-      res.status(201).json({
-        success: true,
-        message: "Layanan berhasil dibuat",
-        data: newLayanan[0],
-      });
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -136,11 +130,6 @@ export class LayananController {
           message: "Layanan tidak ditemukan",
         });
       }
-
-      res.status(200).json({
-        success: true,
-        message: "Layanan berhasil dihapus",
-      });
     } catch (error) {
       res.status(500).json({
         success: false,
