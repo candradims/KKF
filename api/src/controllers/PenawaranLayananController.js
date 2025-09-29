@@ -1,5 +1,6 @@
 import { PenawaranLayananModel } from "../models/PenawaranLayananModel.js";
 import { PenawaranModel } from "../models/PenawaranModel.js";
+import { LayananModel } from "../models/LayananModel.js";
 
 export class PenawaranLayananController {
   // Ambil layanan penawaran berdasarkan ID penawaran
@@ -53,9 +54,10 @@ export class PenawaranLayananController {
   static async addLayananToPenawaran(req, res) {
     try {
       const { idPenawaran } = req.params;
-      const layananData = { ...req.body, id_penawaran: idPenawaran };
+      const { id_layanan } = req.body;
 
-      // Cek apakah penawaran ada dan user memiliki izin
+      console.log("🔍 Received id_layanan:", id_layanan);
+
       const existingPenawaran = await PenawaranModel.getPenawaranById(
         idPenawaran
       );
@@ -66,7 +68,6 @@ export class PenawaranLayananController {
         });
       }
 
-      // Sales hanya bisa menambahkan ke penawaran mereka sendiri
       if (
         req.user.role_user === "sales" &&
         existingPenawaran.id_user !== req.user.id_user
@@ -78,6 +79,41 @@ export class PenawaranLayananController {
         });
       }
 
+      const layanan = await LayananModel.getLayananById(id_layanan);
+      if (!layanan) {
+        return res.status(404).json({
+          success: false,
+          message: "Layanan tidak ditemukan di database",
+        });
+      }
+
+      console.log("🔍 FULL layanan object from database:", JSON.stringify(layanan, null, 2));
+    console.log("🔍 layanan.id_layanan:", layanan.id_layanan);
+    console.log("🔍 layanan.nama_layanan:", layanan.nama_layanan);
+    console.log("🔍 layanan.jenis_layanan:", layanan.jenis_layanan);
+    console.log("🔍 layanan.satuan:", layanan.satuan);
+    console.log("🔍 layanan.backbone:", layanan.backbone, "- Type:", typeof layanan.backbone);
+    console.log("🔍 layanan.port:", layanan.port, "- Type:", typeof layanan.port);
+    console.log("🔍 layanan.tarif_akses:", layanan.tarif_akses, "- Type:", typeof layanan.tarif_akses);
+    console.log("🔍 layanan.tarif:", layanan.tarif, "- Type:", typeof layanan.tarif);
+
+      const layananData = {
+        id_penawaran: idPenawaran,
+        id_layanan: layanan.id_layanan,
+        nama_layanan: layanan.nama_layanan,
+        detail_layanan: layanan.jenis_layanan,
+        kapasitas: req.body.kapasitas,
+        qty: req.body.qty,
+        akses_existing: req.body.akses_existing,
+        satuan: layanan.satuan,
+        backbone: layanan.backbone,
+        port: layanan.port,
+        tarif_akses: layanan.tarif_akses,
+        tarif: layanan.tarif,
+      };
+
+      console.log("📦 Data yang akan disimpan ke penawaran_layanan:", layananData);
+
       const newPenawaranLayanan =
         await PenawaranLayananModel.createPenawaranLayanan(layananData);
 
@@ -87,6 +123,7 @@ export class PenawaranLayananController {
         data: newPenawaranLayanan[0],
       });
     } catch (error) {
+      console.error("❌ Error in addLayananToPenawaran:", error);
       res.status(500).json({
         success: false,
         message: "Gagal menambahkan layanan ke penawaran",
