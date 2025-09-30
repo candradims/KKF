@@ -683,13 +683,32 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       );
       setSelectedLayanan(selectedLayananData);
       
+      // Auto-populate fields from selected layanan data
+      const autoSatuan = selectedLayananData ? selectedLayananData.satuan : '';
+      const autoBackbone = selectedLayananData ? selectedLayananData.backbone : '';
+      const autoPort = selectedLayananData ? selectedLayananData.port : '';
+      const autoTarifAkses = selectedLayananData ? selectedLayananData.tarif_akses : '';
+      const autoTarif = selectedLayananData ? selectedLayananData.tarif : '';
+      
       setFormData((prev) => ({
         ...prev,
-        detailLayanan: value
+        detailLayanan: value,
+        satuan: autoSatuan, // Auto-populate satuan from database
+        backbone: autoBackbone, // Auto-populate backbone from database
+        port: autoPort, // Auto-populate port from database
+        tarifAkses: autoTarifAkses, // Auto-populate tarif akses from database
+        tarif: autoTarif // Auto-populate tarif from database
       }));
       
       console.log('📊 Edit: Detail Layanan selected:', value);
       console.log('✅ Edit: Selected layanan data:', selectedLayananData);
+      console.log('🔄 Edit: Auto-populated fields:', {
+        satuan: autoSatuan,
+        backbone: autoBackbone,
+        port: autoPort,
+        tarifAkses: autoTarifAkses,
+        tarif: autoTarif
+      });
     } 
     // Handle other form fields
     else {
@@ -921,6 +940,11 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       ...formData,
       // Add selected layanan data for backend reference
       selectedLayananId: selectedLayanan?.id_layanan,
+      // Send auto-populated data from formData
+      backbone: formData.backbone,
+      port: formData.port,
+      tarif_akses: formData.tarifAkses, // Note: frontend uses tarifAkses, backend expects tarif_akses
+      tarif: formData.tarif,
       piliLayanan: `${formData.namaLayanan} - ${formData.detailLayanan}`, // For display/backward compatibility
       // Include pengeluaran items data
       pengeluaranItems: pengeluaranItems.filter(item => 

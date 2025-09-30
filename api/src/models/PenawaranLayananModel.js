@@ -43,13 +43,14 @@ export class PenawaranLayananModel {
         id_layanan: penawaranLayananData.id_layanan,
         nama_layanan: penawaranLayananData.nama_layanan,
         detail_layanan: penawaranLayananData.detail_layanan,
+        hjt_wilayah: penawaranLayananData.hjt_wilayah, // Include HJT Wilayah
         kapasitas: penawaranLayananData.kapasitas,
         qty: penawaranLayananData.qty,
         akses_existing: penawaranLayananData.akses_existing,
         satuan: penawaranLayananData.satuan,
         backbone: penawaranLayananData.backbone,
         port: penawaranLayananData.port,
-        tarif_akses: penawaranLayananData.tarif_akses, 
+        tarif_akses: penawaranLayananData.tarif_akses,
         tarif: penawaranLayananData.tarif,
       };
 
@@ -134,7 +135,9 @@ export class PenawaranLayananModel {
       const { idPenawaran } = req.params;
       const { id_layanan } = req.body;
 
-      const existingPenawaran = await PenawaranModel.getPenawaranById(idPenawaran);
+      const existingPenawaran = await PenawaranModel.getPenawaranById(
+        idPenawaran
+      );
       if (!existingPenawaran) {
         return res.status(404).json({
           success: false,
@@ -148,7 +151,8 @@ export class PenawaranLayananModel {
       ) {
         return res.status(403).json({
           success: false,
-          message: "Akses ditolak. Anda hanya dapat memodifikasi penawaran milik Anda sendiri.",
+          message:
+            "Akses ditolak. Anda hanya dapat memodifikasi penawaran milik Anda sendiri.",
         });
       }
 
@@ -172,7 +176,8 @@ export class PenawaranLayananModel {
         tarif: layanan.tarif,
       };
 
-      const newPenawaranLayanan = await PenawaranLayananModel.createPenawaranLayanan(layananData);
+      const newPenawaranLayanan =
+        await PenawaranLayananModel.createPenawaranLayanan(layananData);
 
       res.status(201).json({
         success: true,

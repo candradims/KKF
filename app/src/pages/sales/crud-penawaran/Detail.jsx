@@ -67,11 +67,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
             kapasitas: item.kapasitas || '-',
             satuan: item.satuan || '-',
             qty: item.qty || '-',
-            backbone: '-',
-            port: '-',
-            tarifAkses: '-',
+            backbone: item.backbone || '-',
+            port: item.port || '-',
+            tarifAkses: item.tarif_akses || '-',
             aksesExisting: item.akses_existing || '-',
-            tarifBaru: '-', // Kolom tarif baru setelah Akses Existing
+            tarifBaru: item.tarif || '-', // Kolom tarif baru setelah Akses Existing
             tarifAksesNTahun: '-', // Kolom tarif akses (n tahun) sebelum Tarif (n tahun)
             akhirTahun: '-', // Ini akan menjadi Tarif (n tahun)
             hargaDasar: '-',

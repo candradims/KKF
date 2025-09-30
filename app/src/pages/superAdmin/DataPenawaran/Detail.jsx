@@ -75,11 +75,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               kapasitas: item.kapasitas || '-',
               satuan: item.satuan || '-',
               qty: item.qty || '-',
-              backbone: '-', // Static for now
-              port: '-', // Static for now
-              tarifAkses: '-', // Static for now
+              backbone: item.backbone || '-', // From database
+              port: item.port || '-', // From database
+              tarifAkses: item.tarif_akses || '-', // From database
               aksesExisting: item.akses_existing || '-',
-              tarifBaru: '-', // New tarif column
+              tarifBaru: item.tarif || '-', // From database
               tarifAksesNTahun: '-', // Kolom tarif akses (n tahun) sebelum Tarif (n tahun)
               tarif: '-', // Static for now
               hargaDasar: '-', // Static for now

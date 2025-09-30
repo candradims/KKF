@@ -169,6 +169,10 @@ export class PenawaranController {
           qty: parseInt(req.body.qty) || 1,
           akses_existing: req.body.aksesExisting || null,
           satuan: req.body.satuan,
+          backbone: req.body.backbone, // Store backbone from auto-populate
+          port: req.body.port, // Store port from auto-populate
+          tarif_akses: req.body.tarif_akses, // Store tarif akses from auto-populate
+          tarif: req.body.tarif, // Store tarif from auto-populate
         };
 
         console.log("🔧 Layanan data to save:", layananData);
@@ -367,10 +371,15 @@ export class PenawaranController {
           id_layanan: updateData.selectedLayananId,
           nama_layanan: updateData.namaLayanan, // Store nama layanan
           detail_layanan: updateData.detailLayanan, // Store detail layanan
+          hjt_wilayah: updateData.hjtWilayah, // Store HJT Wilayah
           kapasitas: updateData.kapasitas,
           qty: parseInt(updateData.qty) || 1,
           akses_existing: updateData.aksesExisting || null,
           satuan: updateData.satuan,
+          backbone: updateData.backbone || null, // Store backbone
+          port: updateData.port || null, // Store port
+          tarif_akses: updateData.tarif_akses || null, // Store tarif akses
+          tarif: updateData.tarif || null, // Store tarif
         };
 
         console.log("🔧 Layanan data to update:", layananData);

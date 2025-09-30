@@ -335,10 +335,33 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
         layanan.jenis_layanan === value
       );
       setSelectedLayanan(selectedLayananData);
+      
+      // Auto-populate fields from selected layanan data
+      const autoSatuan = selectedLayananData ? selectedLayananData.satuan : '';
+      const autoBackbone = selectedLayananData ? selectedLayananData.backbone : '';
+      const autoPort = selectedLayananData ? selectedLayananData.port : '';
+      const autoTarifAkses = selectedLayananData ? selectedLayananData.tarif_akses : '';
+      const autoTarif = selectedLayananData ? selectedLayananData.tarif : '';
+      
       setFormData((prev) => ({
         ...prev,
-        detailLayanan: value
+        detailLayanan: value,
+        satuan: autoSatuan, // Auto-populate satuan from database
+        backbone: autoBackbone, // Auto-populate backbone from database
+        port: autoPort, // Auto-populate port from database
+        tarifAkses: autoTarifAkses, // Auto-populate tarif akses from database
+        tarif: autoTarif // Auto-populate tarif from database
       }));
+      
+      console.log('📊 Detail Layanan selected:', value);
+      console.log('✅ Selected layanan data:', selectedLayananData);
+      console.log('🔄 Auto-populated fields:', {
+        satuan: autoSatuan,
+        backbone: autoBackbone,
+        port: autoPort,
+        tarifAkses: autoTarifAkses,
+        tarif: autoTarif
+      });
       return;
     }
 
@@ -447,11 +470,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       ...formData,
       // Add selected layanan data for backend reference
       selectedLayananId: selectedLayanan?.id_layanan,
-      satuan: selectedLayanan.satuan,
-      backbone: selectedLayanan.backbone,
-      port: selectedLayanan.port,
-      tarif_akses: selectedLayanan.tarif_akses,
-      tarif: selectedLayanan.tarif,
+      // Send auto-populated data from formData (not selectedLayanan)
+      satuan: formData.satuan,
+      backbone: formData.backbone,
+      port: formData.port,
+      tarif_akses: formData.tarifAkses, // Note: frontend uses tarifAkses, backend expects tarif_akses
+      tarif: formData.tarif,
       piliLayanan: `${formData.namaLayanan} - ${formData.detailLayanan}`,
       pengeluaranItems: showAdditionalSection ? pengeluaranItems : [],
       total_pengeluaran_lain_lain: showAdditionalSection ? getTotalPengeluaran() : 0

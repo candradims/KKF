@@ -67,13 +67,13 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
             kapasitas: item.kapasitas || '-',
             satuan: item.satuan || '-',
             qty: item.qty || '-',
-            backbone: '-',
-            port: '-',
-            tarifAkses: '-',
+            backbone: item.backbone || '-', // Data dari database
+            port: item.port || '-', // Data dari database
+            tarifAkses: item.tarif_akses || '-', // Data dari database
             aksesExisting: item.akses_existing || '-',
-            tarifBaru: '-',
-            tarifAksesNTahun: '-', // Kolom tarif akses (n tahun) sebelum Tarif (n tahun)
-            tarif: '-',
+            tarifBaru: item.tarif || '-', // Data tarif dari database
+            tarifAksesNTahun: item.tarif_akses_n_tahun || '-', // Kolom tarif akses (n tahun)
+            tarif: item.tarif_n_tahun || '-', // Data tarif (n tahun) dari database
             hargaDasar: '-',
             hargaFinal: '-'
           }));
