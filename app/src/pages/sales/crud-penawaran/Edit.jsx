@@ -357,7 +357,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     
     const initialData = {
       sales: dataSource.rawData?.sales || dataSource.sales || dataSource.namaSales || "",
-      tanggal: dataSource.tanggal || "",
+      tanggal: (dataSource.rawData?.tanggal_dibuat || dataSource.tanggal) ? new Date(dataSource.rawData?.tanggal_dibuat || dataSource.tanggal).toISOString().split('T')[0] : "",
       pelanggan: dataSource.namaPelanggan || dataSource.pelanggan || "",
       nomorKontrak: dataSource.nomorKontrak || "",
       kontrakTahunKe: dataSource.kontrakKe || dataSource.kontrakTahunKe || "",
@@ -618,9 +618,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Handle referensi HJT selection and filter nama layanan
-    if (name === 'referensiHJT') {
-      // Filter layanan based on selected referensi HJT
+    // Handle HJT Wilayah selection and filter nama layanan
+    if (name === 'hjtWilayah') {
+      // Filter layanan based on selected HJT wilayah
       const filtered = layananData.filter(layanan => layanan.wilayah_hjt === value);
       setFilteredLayananData(filtered);
       
@@ -884,7 +884,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
 
     // Validasi form - hanya field penawaran yang wajib
-    const requiredFields = ['sales', 'tanggal', 'pelanggan', 'nomorKontrak', 'kontrakTahunKe', 'durasiKontrak', 'referensiHJT', 'namaLayanan', 'detailLayanan', 'kapasitas', 'satuan', 'qty', 'aksesExisting'];
+    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak', 'hjtWilayah', 'namaLayanan', 'detailLayanan', 'kapasitas', 'satuan', 'qty'];
     const missingFields = requiredFields.filter(field => !formData[field]);
     
     if (missingFields.length > 0) {
@@ -1196,14 +1196,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Sales*
+                    Sales
                   </label>
                   <input
                     type="text"
                     name="sales"
                     value={formData.sales}
                     onChange={handleInputChange}
-                    disabled={isSaving}
+                    disabled={true}
                     placeholder="Masukkan Nama"
                     required
                     style={{
@@ -1213,9 +1213,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       borderRadius: "8px",
                       fontSize: "14px",
                       outline: "none",
-                      backgroundColor: isSaving ? "#f5f5f5" : "white",
+                      backgroundColor: "#f5f5f5",
                       boxSizing: "border-box",
-                      cursor: isSaving ? "not-allowed" : "text",
+                      cursor: "not-allowed",
                       transition: "all 0.2s ease-in-out",
                     }}
                   />
@@ -1241,14 +1241,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Tanggal*
+                    Tanggal
                   </label>
                   <input
                     type="date"
                     name="tanggal"
                     value={formData.tanggal}
                     onChange={handleInputChange}
-                    disabled={isSaving}
+                    disabled={true}
                     required
                     style={{
                       width: "100%",
@@ -1257,9 +1257,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       borderRadius: "8px",
                       fontSize: "14px",
                       outline: "none",
-                      backgroundColor: isSaving ? "#f5f5f5" : "white",
+                      backgroundColor: "#f5f5f5",
                       boxSizing: "border-box",
-                      cursor: isSaving ? "not-allowed" : "text",
+                      cursor: "not-allowed",
                       transition: "all 0.2s ease-in-out",
                     }}
                   />
@@ -1276,7 +1276,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Pelanggan*
+                    Pelanggan
                   </label>
                   <input
                     type="text"
@@ -1312,7 +1312,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Nomor Kontrak / BAKB*
+                    Nomor Kontrak / BAKB
                   </label>
                   <input
                     type="text"
@@ -1348,7 +1348,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Kontrak Tahun ke-*
+                    Kontrak Tahun ke-
                   </label>
                   <input
                     type="text"
@@ -1384,14 +1384,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Referensi HJT*
+                    Referensi HJT
                   </label>
                   <div style={{ position: "relative" }}>
                     <select
                       name="referensiHJT"
                       value={formData.referensiHJT}
                       onChange={handleInputChange}
-                      disabled={isSaving || loadingLayanan}
+                      disabled={isSaving}
                       required
                       style={{
                         width: "100%",
@@ -1400,21 +1400,18 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         borderRadius: "8px",
                         fontSize: "14px",
                         outline: "none",
-                        backgroundColor: (isSaving || loadingLayanan) ? "#f5f5f5" : "white",
+                        backgroundColor: isSaving ? "#f5f5f5" : "white",
                         boxSizing: "border-box",
                         appearance: "none",
-                        cursor: (isSaving || loadingLayanan) ? "not-allowed" : "pointer",
+                        cursor: isSaving ? "not-allowed" : "pointer",
                         transition: "all 0.2s ease-in-out",
                       }}
                     >
-                      <option value="">
-                        {loadingLayanan ? "Memuat referensi HJT..." : "Pilih HJT"}
-                      </option>
-                      {(availableReferensiHJT || []).map((wilayah, index) => (
-                        <option key={index} value={wilayah}>
-                          {wilayah}
-                        </option>
-                      ))}
+                      <option value="">Pilih HJT</option>
+                      <option value="sumatera">Sumatera</option>
+                      <option value="kalimantan">Kalimantan</option>
+                      <option value="jawa-bali">Jawa-Bali</option>
+                      <option value="intim">Intim</option>
                     </select>
                     <div
                       style={{
@@ -1427,7 +1424,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         color: "#666",
                       }}
                     >
-                      ▼
                     </div>
                   </div>
                 </div>
@@ -1443,7 +1439,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Durasi Kontrak (in thn)*
+                    Durasi Kontrak (in thn)
                   </label>
                   <div style={{ position: "relative" }}>
                     <select
@@ -1495,6 +1491,60 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     marginBottom: "20px",
                   }}
                 >
+                  {/* HJT Wilayah Selection */}
+                  <div style={{ marginBottom: "16px" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        color: "#374151",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      HJT Wilayah*
+                    </label>
+                    <div style={{ position: "relative" }}>
+                      <select
+                        name="hjtWilayah"
+                        value={formData.hjtWilayah}
+                        onChange={handleInputChange}
+                        required
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          border: "2px solid #B0BEC5",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          outline: "none",
+                          backgroundColor: "white",
+                          boxSizing: "border-box",
+                          appearance: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <option value="">Pilih HJT Wilayah</option>
+                        {(availableHjtWilayah || []).map((wilayah, index) => (
+                          <option key={index} value={wilayah}>
+                            {wilayah}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        style={{
+                          position: "absolute",
+                          right: "12px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          pointerEvents: "none",
+                          fontSize: "12px",
+                          color: "#666",
+                        }}
+                      >
+                        ▼
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Nama Layanan */}
                   <div style={{ marginBottom: "16px" }}>
@@ -1507,7 +1557,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Nama Layanan*
+                      Nama Layanan
                     </label>
                     <div style={{ position: "relative" }}>
                       <select
@@ -1515,7 +1565,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         value={formData.namaLayanan}
                         onChange={handleInputChange}
                         required
-                        disabled={loadingLayanan || !formData.referensiHJT}
+                        disabled={loadingLayanan || !formData.hjtWilayah}
                         style={{
                           width: "100%",
                           padding: "10px 12px",
@@ -1523,10 +1573,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           borderRadius: "8px",
                           fontSize: "14px",
                           outline: "none",
-                          backgroundColor: (loadingLayanan || !formData.referensiHJT) ? "#F9FAFB" : "white",
+                          backgroundColor: (loadingLayanan || !formData.hjtWilayah) ? "#F9FAFB" : "white",
                           boxSizing: "border-box",
                           appearance: "none",
-                          cursor: (loadingLayanan || !formData.referensiHJT) ? "not-allowed" : "pointer",
+                          cursor: (loadingLayanan || !formData.hjtWilayah) ? "not-allowed" : "pointer",
                         }}
                       >
                         <option value="">
@@ -1553,7 +1603,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           color: "#666",
                         }}
                       >
-                        ▼
                       </div>
                     </div>
                   </div>
@@ -1569,7 +1618,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Detail Layanan*
+                      Detail Layanan
                     </label>
                     <div style={{ position: "relative" }}>
                       <select
@@ -1577,7 +1626,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         value={formData.detailLayanan}
                         onChange={handleInputChange}
                         required
-                        disabled={loadingLayanan || !formData.namaLayanan}
+                        disabled={true}
                         style={{
                           width: "100%",
                           padding: "10px 12px",
@@ -1585,10 +1634,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           borderRadius: "8px",
                           fontSize: "14px",
                           outline: "none",
-                          backgroundColor: (loadingLayanan || !formData.namaLayanan) ? "#F9FAFB" : "white",
+                          backgroundColor: "#f5f5f5",
                           boxSizing: "border-box",
                           appearance: "none",
-                          cursor: (loadingLayanan || !formData.namaLayanan) ? "not-allowed" : "pointer",
+                          cursor: "not-allowed",
                         }}
                       >
                         <option value="">
@@ -1615,7 +1664,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           color: "#666",
                         }}
                       >
-                        ▼
                       </div>
                     </div>
                   </div>
@@ -1631,7 +1679,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Kapasitas*
+                      Kapasitas
                     </label>
                     <input
                       type="text"
@@ -1653,7 +1701,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     />
                   </div>
 
-                  {/* Satuan (Auto-populated, Read-only) */}
+                  {/* Satuan */}
                   <div style={{ marginBottom: "16px" }}>
                     <label
                       style={{
@@ -1666,24 +1714,44 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     >
                       Satuan*
                     </label>
-                    <input
-                      type="text"
-                      name="satuan"
-                      value={formData.satuan || "Otomatis terisi dari detail layanan"}
-                      readOnly
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        border: "2px solid #B0BEC5",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        outline: "none",
-                        backgroundColor: "#F9FAFB",
-                        boxSizing: "border-box",
-                        cursor: "not-allowed",
-                        color: formData.satuan ? "#374151" : "#9CA3AF",
-                      }}
-                    />
+                    <div style={{ position: "relative" }}>
+                      <select
+                        name="satuan"
+                        value={formData.satuan}
+                        onChange={handleInputChange}
+                        required
+                        style={{
+                          width: "100%",
+                          padding: "10px 12px",
+                          border: "2px solid #B0BEC5",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          outline: "none",
+                          backgroundColor: "white",
+                          boxSizing: "border-box",
+                          appearance: "none",
+                        }}
+                      >
+                        <option value="">Pilih satuan</option>
+                        <option value="Mbps">Mbps</option>
+                        <option value="Units">Units</option>
+                        <option value="Lot">Lot</option>
+                        <option value="IP">IP</option>
+                      </select>
+                      <div
+                        style={{
+                          position: "absolute",
+                          right: "12px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          pointerEvents: "none",
+                          fontSize: "12px",
+                          color: "#666",
+                        }}
+                      >
+                        ▼
+                      </div>
+                    </div>
                   </div>
 
                   {/* QTY */}
@@ -1697,7 +1765,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      QTY*
+                      QTY
                     </label>
                     <input
                       type="number"
@@ -1730,7 +1798,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Akses Existing*
+                      Akses Existing
                     </label>
                     <div style={{ position: "relative" }}>
                       <select
