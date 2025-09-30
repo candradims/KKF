@@ -900,92 +900,215 @@ const Index = () => {
                   <tbody>
                     {currentData.map((item, index) => (
                       <tr key={item.id} style={{
-                        borderBottom: `1px solid ${colors.gray200}`,
-                        transition: 'all 0.2s ease'
+                        background: index % 2 === 0 
+                          ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
+                          : colors.white,
+                        transition: 'all 0.3s ease'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = colors.gray50;
+                        e.currentTarget.style.background = `linear-gradient(135deg, ${colors.light}30 0%, ${colors.secondary}05 100%)`;
+                        e.currentTarget.style.transform = 'scale(1.005)';
+                        e.currentTarget.style.boxShadow = `0 8px 25px ${colors.primary}08`;
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.background = index % 2 === 0 
+                          ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
+                          : colors.white;
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = 'none';
                       }}
                       >
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
+                          textAlign: 'center',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          fontWeight: '600',
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {startIndex + index + 1}
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            margin: '0 auto',
+                            boxShadow: `0 2px 8px ${colors.secondary}30`
+                          }}>
+                            {startIndex + index + 1}
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {formatTanggal(item.tanggal)}
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px'
+                          }}>
+                            <span style={{ fontWeight: '600' }}>{formatTanggal(item.tanggal)}</span>
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '600'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {item.namaPelanggan}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px'
+                          }}>
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                              borderRadius: '10px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontSize: '16px',
+                              fontWeight: '700',
+                              boxShadow: `0 4px 12px ${colors.success}25`
+                            }}>
+                              {item.namaPelanggan.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: '600', marginBottom: '2px' }}>
+                                {item.namaPelanggan}
+                              </div>
+                              <div style={{ 
+                                fontSize: '12px', 
+                                color: colors.gray500 
+                              }}>
+                                Pelanggan
+                              </div>
+                            </div>
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {item.namaSales}
+                          <div style={{
+                            background: `${colors.gray100}`,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontFamily: "'Open Sans', sans-serif !important",
+                            border: `1px solid ${colors.primary}`,
+                            display: 'inline-block'
+                          }}>
+                            {item.namaSales}
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {item.nomorKontrak}
+                          <div style={{
+                            background: `${colors.gray100}`,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontFamily: "'Open Sans', sans-serif !important",
+                            border: `1px solid ${colors.primary}`,
+                            display: 'inline-block'
+                          }}>
+                            {item.nomorKontrak}
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {item.kontrakKe}
+                          <div style={{
+                            background: `${colors.gray100}`,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontFamily: "'Open Sans', sans-serif !important",
+                            border: `1px solid ${colors.primary}`,
+                            display: 'inline-block'
+                          }}>
+                            {item.kontrakKe}
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {item.referensi}
+                          <div style={{
+                            background: `${colors.gray100}`,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontFamily: "'Open Sans', sans-serif !important",
+                            border: `1px solid ${colors.primary}`,
+                            display: 'inline-block'
+                          }}>
+                            {item.referensi}
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {item.discount}
+                          <div style={{
+                            background: `${colors.gray100}`,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontFamily: "'Open Sans', sans-serif !important",
+                            border: `1px solid ${colors.primary}`,
+                            display: 'inline-block'
+                          }}>
+                            {convertDiscountToPercentage(item.discount)}
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700,
-                          fontWeight: '500'
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
-                          {item.durasi}
+                          <div style={{
+                            background: `${colors.gray100}`,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontFamily: "'Open Sans', sans-serif !important",
+                            border: `1px solid ${colors.primary}`,
+                            display: 'inline-block'
+                          }}>
+                            {item.durasi}
+                          </div>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
+                          padding: '20px 16px',
                           fontSize: '14px',
-                          color: colors.gray700
+                          color: colors.primary,
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
                           <button
                             onClick={() => handleStatusClick(item)}
@@ -1010,8 +1133,9 @@ const Index = () => {
                           </button>
                         </td>
                         <td style={{
-                          padding: '16px 20px',
-                          textAlign: 'center'
+                          padding: '20px 16px',
+                          textAlign: 'center',
+                          borderBottom: `2px solid ${colors.gray200}`,
                         }}>
                           <button
                             onClick={() => handleDetailData(item)}
