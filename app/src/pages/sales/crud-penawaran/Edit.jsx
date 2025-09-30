@@ -1197,14 +1197,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Sales*
+                    Sales
                   </label>
                   <input
                     type="text"
                     name="sales"
                     value={formData.sales}
                     onChange={handleInputChange}
-                    disabled={isSaving}
+                    disabled={true}
                     placeholder="Masukkan Nama"
                     required
                     style={{
@@ -1214,9 +1214,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       borderRadius: "8px",
                       fontSize: "14px",
                       outline: "none",
-                      backgroundColor: isSaving ? "#f5f5f5" : "white",
+                      backgroundColor: "#f5f5f5",
                       boxSizing: "border-box",
-                      cursor: isSaving ? "not-allowed" : "text",
+                      cursor: "not-allowed",
                       transition: "all 0.2s ease-in-out",
                     }}
                   />
@@ -1242,14 +1242,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Tanggal*
+                    Tanggal
                   </label>
                   <input
                     type="date"
                     name="tanggal"
                     value={formData.tanggal}
                     onChange={handleInputChange}
-                    disabled={isSaving}
+                    disabled={true}
                     required
                     style={{
                       width: "100%",
@@ -1258,9 +1258,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       borderRadius: "8px",
                       fontSize: "14px",
                       outline: "none",
-                      backgroundColor: isSaving ? "#f5f5f5" : "white",
+                      backgroundColor: "#f5f5f5",
                       boxSizing: "border-box",
-                      cursor: isSaving ? "not-allowed" : "text",
+                      cursor: "not-allowed",
                       transition: "all 0.2s ease-in-out",
                     }}
                   />
@@ -1277,7 +1277,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Pelanggan*
+                    Pelanggan
                   </label>
                   <input
                     type="text"
@@ -1313,7 +1313,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Nomor Kontrak / BAKB*
+                    Nomor Kontrak / BAKB
                   </label>
                   <input
                     type="text"
@@ -1349,7 +1349,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Kontrak Tahun ke-*
+                    Kontrak Tahun ke-
                   </label>
                   <input
                     type="text"
@@ -1385,14 +1385,14 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Referensi HJT*
+                    Referensi HJT
                   </label>
                   <div style={{ position: "relative" }}>
                     <select
                       name="referensiHJT"
                       value={formData.referensiHJT}
                       onChange={handleInputChange}
-                      disabled={isSaving}
+                      disabled={true}
                       required
                       style={{
                         width: "100%",
@@ -1401,10 +1401,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         borderRadius: "8px",
                         fontSize: "14px",
                         outline: "none",
-                        backgroundColor: isSaving ? "#f5f5f5" : "white",
+                        backgroundColor: "#f5f5f5",
                         boxSizing: "border-box",
                         appearance: "none",
-                        cursor: isSaving ? "not-allowed" : "pointer",
+                        cursor: "not-allowed",
                         transition: "all 0.2s ease-in-out",
                       }}
                     >
@@ -1424,7 +1424,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         color: "#666",
                       }}
                     >
-                      ▼
                     </div>
                   </div>
                 </div>
@@ -1440,7 +1439,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       marginBottom: "6px",
                     }}
                   >
-                    Durasi Kontrak (in thn)*
+                    Durasi Kontrak (in thn)
                   </label>
                   <div style={{ position: "relative" }}>
                     <select
@@ -1504,7 +1503,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Nama Layanan*
+                      Nama Layanan
                     </label>
                     <div style={{ position: "relative" }}>
                       <select
@@ -1512,7 +1511,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         value={formData.namaLayanan}
                         onChange={handleInputChange}
                         required
-                        disabled={loadingLayanan || !formData.referensiHJT}
+                        disabled={true}
                         style={{
                           width: "100%",
                           padding: "10px 12px",
@@ -1520,10 +1519,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           borderRadius: "8px",
                           fontSize: "14px",
                           outline: "none",
-                          backgroundColor: (loadingLayanan || !formData.referensiHJT) ? "#F9FAFB" : "white",
+                          backgroundColor: "#f5f5f5",
                           boxSizing: "border-box",
                           appearance: "none",
-                          cursor: (loadingLayanan || !formData.referensiHJT) ? "not-allowed" : "pointer",
+                          cursor: "not-allowed",
                         }}
                       >
                         <option value="">
@@ -1550,7 +1549,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           color: "#666",
                         }}
                       >
-                        ▼
                       </div>
                     </div>
                   </div>
@@ -1566,7 +1564,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Detail Layanan*
+                      Detail Layanan
                     </label>
                     <div style={{ position: "relative" }}>
                       <select
@@ -1574,7 +1572,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         value={formData.detailLayanan}
                         onChange={handleInputChange}
                         required
-                        disabled={loadingLayanan || !formData.namaLayanan}
+                        disabled={true}
                         style={{
                           width: "100%",
                           padding: "10px 12px",
@@ -1582,10 +1580,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           borderRadius: "8px",
                           fontSize: "14px",
                           outline: "none",
-                          backgroundColor: (loadingLayanan || !formData.namaLayanan) ? "#F9FAFB" : "white",
+                          backgroundColor: "#f5f5f5",
                           boxSizing: "border-box",
                           appearance: "none",
-                          cursor: (loadingLayanan || !formData.namaLayanan) ? "not-allowed" : "pointer",
+                          cursor: "not-allowed",
                         }}
                       >
                         <option value="">
@@ -1612,7 +1610,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           color: "#666",
                         }}
                       >
-                        ▼
                       </div>
                     </div>
                   </div>
@@ -1628,7 +1625,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Kapasitas*
+                      Kapasitas
                     </label>
                     <input
                       type="text"
@@ -1650,59 +1647,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     />
                   </div>
 
-                  {/* Satuan */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Satuan*
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        name="satuan"
-                        value={formData.satuan}
-                        onChange={handleInputChange}
-                        required
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "2px solid #B0BEC5",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          outline: "none",
-                          backgroundColor: "white",
-                          boxSizing: "border-box",
-                          appearance: "none",
-                        }}
-                      >
-                        <option value="">Pilih satuan</option>
-                        <option value="Mbps">Mbps</option>
-                        <option value="Units">Units</option>
-                        <option value="Lot">Lot</option>
-                        <option value="IP">IP</option>
-                      </select>
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "12px",
-                          color: "#666",
-                        }}
-                      >
-                        ▼
-                      </div>
-                    </div>
-                  </div>
-
                   {/* QTY */}
                   <div style={{ marginBottom: "16px" }}>
                     <label
@@ -1714,7 +1658,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      QTY*
+                      QTY
                     </label>
                     <input
                       type="number"
@@ -1747,7 +1691,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         marginBottom: "6px",
                       }}
                     >
-                      Akses Existing*
+                      Akses Existing
                     </label>
                     <div style={{ position: "relative" }}>
                       <select
