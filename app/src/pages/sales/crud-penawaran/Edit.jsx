@@ -1614,7 +1614,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     </div>
                   </div>
 
-                  {/* Kapasitas */}
+                  {/* Kapasitas  field*/}
                   <div style={{ marginBottom: "16px" }}>
                     <label
                       style={{
