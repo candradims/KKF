@@ -74,17 +74,26 @@ export class PenawaranLayananModel {
     }
   }
 
-  // Perbarui layanan penawaran
+ // Perbarui layanan penawaran
   static async updatePenawaranLayanan(id, penawaranLayananData) {
     try {
-      const { data, error } = await db.update(
-        "data_penawaran_layanan",
-        penawaranLayananData,
-        { id: id }
-      );
-      if (error) throw error;
+      console.log('🔧 Updating penawaran layanan with ID:', id);
+      console.log('📝 Update data:', penawaranLayananData);
+      
+      const { data, error } = await supabase
+        .from("data_penawaran_layanan")
+        .update(penawaranLayananData)
+        .eq("id_penawaran_layanan", id);
+
+      if (error) {
+        console.error('❌ Database error in updatePenawaranLayanan:', error);
+        throw error;
+      }
+      
+      console.log('✅ Penawaran layanan updated successfully:', data);
       return data;
     } catch (error) {
+      console.error('❌ Error in updatePenawaranLayanan:', error);
       throw new Error(`Gagal memperbarui layanan penawaran: ${error.message}`);
     }
   }
