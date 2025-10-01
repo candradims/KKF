@@ -1866,7 +1866,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                                 fontWeight: '500',
                                 flexShrink: 0
                               }}>
-                                Item*
+                                Item
                               </label>
                               <input
                                 type="text"
@@ -1901,7 +1901,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                                 fontWeight: '500',
                                 flexShrink: 0
                               }}>
-                                Keterangan*
+                                Keterangan
                               </label>
                               <input
                                 type="text"
@@ -1936,7 +1936,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                                 fontWeight: '500',
                                 flexShrink: 0
                               }}>
-                                Harga Satuan*
+                                Harga Satuan
                               </label>
                               <input
                                 type="number"
@@ -1971,7 +1971,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                                 fontWeight: '500',
                                 flexShrink: 0
                               }}>
-                                Jumlah*
+                                Jumlah
                               </label>
                               <input
                                 type="number"
