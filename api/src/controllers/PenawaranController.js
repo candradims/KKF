@@ -295,11 +295,10 @@ export class PenawaranController {
         });
       }
 
-      console.log("🔄 Update penawaran ID:", penawaranId);
-      console.log("📝 Update data received:", updateData);
-      console.log("👤 User info:", req.user);
+      console.log('🔄 Update penawaran ID:', penawaranId);
+      console.log('📝 Update data received:', updateData);
+      console.log('👤 User info:', req.user);
 
-      // Cek apakah penawaran ada dan user memiliki izin
       const existingPenawaran = await PenawaranModel.getPenawaranById(
         penawaranId
       );
@@ -311,9 +310,8 @@ export class PenawaranController {
         });
       }
 
-      console.log("📋 Existing penawaran:", existingPenawaran);
+      console.log('📋 Existing penawaran:', existingPenawaran);
 
-      // Sales hanya dapat memperbarui penawaran mereka sendiri
       if (
         req.user.role_user === "sales" &&
         existingPenawaran.id_user !== req.user.id_user
@@ -325,10 +323,8 @@ export class PenawaranController {
         });
       }
 
-      // Ensure id_user is preserved from the existing record
       updateData.id_user = existingPenawaran.id_user;
 
-      // Make sure required fields are present
       const requiredFields = ["pelanggan", "nomorKontrak", "durasiKontrak"];
       const missingFields = [];
 
@@ -337,7 +333,6 @@ export class PenawaranController {
           !updateData[field] &&
           !updateData[PenawaranController.getDbFieldName(field)]
         ) {
-          // Check if the field exists in updateData or as DB field name
           missingFields.push(field);
         }
       });
@@ -354,57 +349,59 @@ export class PenawaranController {
         updateData
       );
 
-      console.log("✅ Penawaran updated successfully:", updatedPenawaran);
+      console.log('✅ Penawaran updated successfully:', updatedPenawaran);
 
-      // Update layanan data in data_penawaran_layanan if present
-      if (updateData.selectedLayananId) {
-        console.log("🔧 Updating layanan data for penawaran:", penawaranId);
+      const hasLayananData = updateData.namaLayanan && updateData.detailLayanan;
+      
+      if (hasLayananData) {
+        console.log('🔧 Updating layanan data for penawaran:', penawaranId);
 
-        // Check if layanan data already exists for this penawaran
         const existingLayanan =
           await PenawaranLayananModel.getPenawaranLayananByPenawaranId(
             penawaranId
           );
 
+        let id_layanan = updateData.selectedLayananId;
+        
+        if (!id_layanan && existingLayanan && existingLayanan.length > 0) {
+          id_layanan = existingLayanan[0].id_layanan;
+        }
+
         const layananData = {
           id_penawaran: penawaranId,
-          id_layanan: updateData.selectedLayananId,
-          nama_layanan: updateData.namaLayanan, // Store nama layanan
-          detail_layanan: updateData.detailLayanan, // Store detail layanan
-          hjt_wilayah: updateData.hjtWilayah, // Store HJT Wilayah
+          id_layanan: id_layanan,
+          nama_layanan: updateData.namaLayanan,
+          detail_layanan: updateData.detailLayanan,
           kapasitas: updateData.kapasitas,
           qty: parseInt(updateData.qty) || 1,
           akses_existing: updateData.aksesExisting || null,
           satuan: updateData.satuan,
-          backbone: updateData.backbone || null, // Store backbone
-          port: updateData.port || null, // Store port
-          tarif_akses: updateData.tarif_akses || null, // Store tarif akses
-          tarif: updateData.tarif || null, // Store tarif
+          backbone: updateData.backbone || null,
+          port: updateData.port || null,
+          tarif_akses: updateData.tarif_akses || null,
+          tarif: updateData.tarif || null,
         };
 
-        console.log("🔧 Layanan data to update:", layananData);
+        console.log('🔧 Layanan data to update:', layananData);
 
         try {
           if (existingLayanan && existingLayanan.length > 0) {
-            // Update existing layanan record
             const updateResult =
               await PenawaranLayananModel.updatePenawaranLayanan(
-                existingLayanan[0].id,
+                existingLayanan[0].id_penawaran_layanan,
                 layananData
               );
-            console.log("✅ Layanan data updated successfully:", updateResult);
+            console.log('✅ Layanan data updated successfully:', updateResult);
           } else {
-            // Create new layanan record
             const createResult =
               await PenawaranLayananModel.createPenawaranLayanan(layananData);
-            console.log("✅ Layanan data created successfully:", createResult);
+            console.log('✅ Layanan data created successfully:', createResult);
           }
         } catch (layananError) {
-          console.error("⚠️ Error updating layanan data:", layananError);
-          // Don't fail the whole request if layanan update fails, just log it
+          console.error('⚠️ Error updating layanan data:', layananError);
         }
       } else {
-        console.log("ℹ️ No layanan data provided for update");
+        console.log('ℹ️ No layanan data provided for update');
       }
 
       res.status(200).json({
@@ -413,11 +410,10 @@ export class PenawaranController {
         data: updatedPenawaran[0] || updatedPenawaran,
       });
     } catch (error) {
-      console.error("❌ Error in updatePenawaran:", error);
-      console.error("❌ Stack trace:", error.stack);
-      console.error("❌ Error details:", JSON.stringify(error, null, 2));
+      console.error('❌ Error in updatePenawaran:', error);
+      console.error('❌ Stack trace:', error.stack);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
 
-      // Log database error details if available
       if (error.code) {
         console.error(`❌ Database error code: ${error.code}`);
       }
@@ -425,7 +421,6 @@ export class PenawaranController {
         console.error(`❌ Error details: ${error.details}`);
       }
 
-      // Provide more specific error messages
       if (error.message.includes("not found")) {
         return res.status(404).json({
           success: false,
