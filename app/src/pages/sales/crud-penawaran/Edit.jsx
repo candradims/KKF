@@ -175,13 +175,7 @@ const layananOptions = [
 ];
 
 const Edit = ({ isOpen, onClose, onSave, editData }) => {
-  // Early error check for missing props
-  if (!editData) {
-    console.error("❌ Edit: Missing editData prop");
-    return null;
-  }
-
-  try {
+  // Hooks must be called unconditionally; do not early-return before hooks
   console.log("🔧 Edit component mounted with:", { isOpen, editData });
   
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -2399,49 +2393,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       </style>
     </div>
   );
-  } catch (error) {
-    console.error("❌ Critical error in Edit component:", error);
-    return (
-      <div style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000
-      }}>
-        <div style={{
-          backgroundColor: "white",
-          padding: "20px",
-          borderRadius: "8px",
-          maxWidth: "500px",
-          textAlign: "center"
-        }}>
-          <h3 style={{ color: "red", marginBottom: "10px" }}>Critical Error</h3>
-          <p style={{ marginBottom: "20px" }}>Component failed to initialize: {error.message}</p>
-          <button 
-            onClick={() => {
-              if (onClose) onClose();
-            }}
-            style={{
-              backgroundColor: "#dc3545",
-              color: "white",
-              border: "none",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
-};
+  };
 
 export default Edit;
