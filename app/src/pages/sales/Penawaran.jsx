@@ -240,32 +240,27 @@ const Penawaran = () => {
       
       // Map the updated data to match API format
       const apiData = {
-        tanggal: formatDate(updatedData.tanggal),
-        pelanggan: updatedData.pelanggan,
-        nomorKontrak: updatedData.nomorKontrak,
-        kontrakTahunKe: updatedData.kontrakTahunKe,
-        referensiHJT: updatedData.referensiHJT,
-        durasiKontrak: updatedData.durasiKontrak,
-        item: updatedData.item,
-        keterangan: updatedData.keterangan,
-        harga: updatedData.harga,
-        jumlah: updatedData.jumlah,
-        discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0',
-        total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0,
-        // Add layanan data for tabel perhitungan
-        selectedLayananId: updatedData.selectedLayananId,
-        hjtWilayah: updatedData.hjtWilayah,
-        namaLayanan: updatedData.namaLayanan, 
-        detailLayanan: updatedData.detailLayanan,
-        kapasitas: updatedData.kapasitas,
-        satuan: updatedData.satuan,
-        qty: updatedData.qty,
-        backbone: updatedData.backbone,
-        port: updatedData.port,
-        tarifAkses: updatedData.tarifAkses,
-        aksesExisting: updatedData.aksesExisting,
-        tarif: updatedData.tarif
-      };
+      tanggal: formatDate(updatedData.tanggal),
+      pelanggan: updatedData.pelanggan,
+      nomorKontrak: updatedData.nomorKontrak,
+      kontrakTahunKe: updatedData.kontrakTahunKe,
+      referensiHJT: updatedData.referensiHJT,
+      durasiKontrak: updatedData.durasiKontrak,
+      discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0',
+      total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0,
+      selectedLayananId: updatedData.selectedLayananId,
+      hjtWilayah: updatedData.hjtWilayah,
+      namaLayanan: updatedData.namaLayanan, 
+      detailLayanan: updatedData.detailLayanan,
+      kapasitas: updatedData.kapasitas,
+      satuan: updatedData.satuan,
+      qty: updatedData.qty,
+      backbone: updatedData.backbone,
+      port: updatedData.port,
+      tarifAkses: updatedData.tarifAkses,
+      aksesExisting: updatedData.aksesExisting,
+      tarif: updatedData.tarif
+    };
 
       // Ensure numeric ID
       const numericId = parseInt(penawaranId, 10);
