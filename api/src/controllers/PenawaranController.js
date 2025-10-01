@@ -171,7 +171,7 @@ export class PenawaranController {
           satuan: req.body.satuan,
           backbone: req.body.backbone, // Store backbone from auto-populate
           port: req.body.port, // Store port from auto-populate
-          tarif_akses: req.body.tarif_akses, // Store tarif akses from auto-populate
+          tarif_akses: req.body.tarifAkses, // Store tarif akses from auto-populate (corrected field name)
           tarif: req.body.tarif, // Store tarif from auto-populate
         };
 
@@ -295,9 +295,9 @@ export class PenawaranController {
         });
       }
 
-      console.log('🔄 Update penawaran ID:', penawaranId);
-      console.log('📝 Update data received:', updateData);
-      console.log('👤 User info:', req.user);
+      console.log("🔄 Update penawaran ID:", penawaranId);
+      console.log("📝 Update data received:", updateData);
+      console.log("👤 User info:", req.user);
 
       const existingPenawaran = await PenawaranModel.getPenawaranById(
         penawaranId
@@ -310,7 +310,7 @@ export class PenawaranController {
         });
       }
 
-      console.log('📋 Existing penawaran:', existingPenawaran);
+      console.log("📋 Existing penawaran:", existingPenawaran);
 
       if (
         req.user.role_user === "sales" &&
@@ -349,12 +349,12 @@ export class PenawaranController {
         updateData
       );
 
-      console.log('✅ Penawaran updated successfully:', updatedPenawaran);
+      console.log("✅ Penawaran updated successfully:", updatedPenawaran);
 
       const hasLayananData = updateData.namaLayanan && updateData.detailLayanan;
-      
+
       if (hasLayananData) {
-        console.log('🔧 Updating layanan data for penawaran:', penawaranId);
+        console.log("🔧 Updating layanan data for penawaran:", penawaranId);
 
         const existingLayanan =
           await PenawaranLayananModel.getPenawaranLayananByPenawaranId(
@@ -362,7 +362,7 @@ export class PenawaranController {
           );
 
         let id_layanan = updateData.selectedLayananId;
-        
+
         if (!id_layanan && existingLayanan && existingLayanan.length > 0) {
           id_layanan = existingLayanan[0].id_layanan;
         }
@@ -378,11 +378,11 @@ export class PenawaranController {
           satuan: updateData.satuan,
           backbone: updateData.backbone || null,
           port: updateData.port || null,
-          tarif_akses: updateData.tarif_akses || null,
+          tarif_akses: updateData.tarifAkses || null,
           tarif: updateData.tarif || null,
         };
 
-        console.log('🔧 Layanan data to update:', layananData);
+        console.log("🔧 Layanan data to update:", layananData);
 
         try {
           if (existingLayanan && existingLayanan.length > 0) {
@@ -391,17 +391,17 @@ export class PenawaranController {
                 existingLayanan[0].id_penawaran_layanan,
                 layananData
               );
-            console.log('✅ Layanan data updated successfully:', updateResult);
+            console.log("✅ Layanan data updated successfully:", updateResult);
           } else {
             const createResult =
               await PenawaranLayananModel.createPenawaranLayanan(layananData);
-            console.log('✅ Layanan data created successfully:', createResult);
+            console.log("✅ Layanan data created successfully:", createResult);
           }
         } catch (layananError) {
-          console.error('⚠️ Error updating layanan data:', layananError);
+          console.error("⚠️ Error updating layanan data:", layananError);
         }
       } else {
-        console.log('ℹ️ No layanan data provided for update');
+        console.log("ℹ️ No layanan data provided for update");
       }
 
       res.status(200).json({
@@ -410,9 +410,9 @@ export class PenawaranController {
         data: updatedPenawaran[0] || updatedPenawaran,
       });
     } catch (error) {
-      console.error('❌ Error in updatePenawaran:', error);
-      console.error('❌ Stack trace:', error.stack);
-      console.error('❌ Error details:', JSON.stringify(error, null, 2));
+      console.error("❌ Error in updatePenawaran:", error);
+      console.error("❌ Stack trace:", error.stack);
+      console.error("❌ Error details:", JSON.stringify(error, null, 2));
 
       if (error.code) {
         console.error(`❌ Database error code: ${error.code}`);

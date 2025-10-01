@@ -396,6 +396,24 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     dataSource.akses_existing || 
                     dataSource.rawData?.akses_existing ||
                     dataSource.rawData?.aksesExisting || "",
+      // Add missing fields for auto-populate
+      backbone: layananData?.backbone ||
+                layananData?.data_layanan?.backbone ||
+                dataSource.backbone || 
+                dataSource.rawData?.backbone || "",
+      port: layananData?.port ||
+            layananData?.data_layanan?.port ||
+            dataSource.port || 
+            dataSource.rawData?.port || "",
+      tarifAkses: layananData?.tarif_akses ||
+                  layananData?.data_layanan?.tarif_akses ||
+                  dataSource.tarifAkses || 
+                  dataSource.tarif_akses ||
+                  dataSource.rawData?.tarif_akses || "",
+      tarif: layananData?.tarif ||
+             layananData?.data_layanan?.tarif ||
+             dataSource.tarif || 
+             dataSource.rawData?.tarif || "",
       discount: dataSource.discount || dataSource.rawData?.discount || dataSource.rawData?.diskon || "",
     };
 
@@ -1385,7 +1403,6 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       name="referensiHJT"
                       value={formData.referensiHJT}
                       onChange={handleInputChange}
-                      disabled={true}
                       required
                       style={{
                         width: "100%",
@@ -1394,10 +1411,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         borderRadius: "8px",
                         fontSize: "14px",
                         outline: "none",
-                        backgroundColor: "#f5f5f5",
+                        backgroundColor: "white",
                         boxSizing: "border-box",
                         appearance: "none",
-                        cursor: "not-allowed",
+                        cursor: "pointer",
                         transition: "all 0.2s ease-in-out",
                       }}
                     >
@@ -1417,6 +1434,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         color: "#666",
                       }}
                     >
+                      ▼
                     </div>
                   </div>
                 </div>
@@ -1504,7 +1522,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         value={formData.namaLayanan}
                         onChange={handleInputChange}
                         required
-                        disabled={true}
+                        disabled={loadingLayanan || !formData.referensiHJT}
                         style={{
                           width: "100%",
                           padding: "10px 12px",
@@ -1512,10 +1530,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           borderRadius: "8px",
                           fontSize: "14px",
                           outline: "none",
-                          backgroundColor: "#f5f5f5",
+                          backgroundColor: (loadingLayanan || !formData.referensiHJT) ? "#f5f5f5" : "white",
                           boxSizing: "border-box",
                           appearance: "none",
-                          cursor: "not-allowed",
+                          cursor: (loadingLayanan || !formData.referensiHJT) ? "not-allowed" : "pointer",
                         }}
                       >
                         <option value="">
@@ -1542,6 +1560,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           color: "#666",
                         }}
                       >
+                        ▼
                       </div>
                     </div>
                   </div>
@@ -1565,7 +1584,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         value={formData.detailLayanan}
                         onChange={handleInputChange}
                         required
-                        disabled={true}
+                        disabled={loadingLayanan || !formData.namaLayanan}
                         style={{
                           width: "100%",
                           padding: "10px 12px",
@@ -1573,10 +1592,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           borderRadius: "8px",
                           fontSize: "14px",
                           outline: "none",
-                          backgroundColor: "#f5f5f5",
+                          backgroundColor: (loadingLayanan || !formData.namaLayanan) ? "#f5f5f5" : "white",
                           boxSizing: "border-box",
                           appearance: "none",
-                          cursor: "not-allowed",
+                          cursor: (loadingLayanan || !formData.namaLayanan) ? "not-allowed" : "pointer",
                         }}
                       >
                         <option value="">
@@ -1603,6 +1622,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                           color: "#666",
                         }}
                       >
+                        ▼
                       </div>
                     </div>
                   </div>
