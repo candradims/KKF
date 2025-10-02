@@ -212,19 +212,33 @@ export class PenawaranController {
               originalTarifAkses,
               originalTarif,
               durasiKontrak: req.body.durasiKontrak,
+              aksesExisting: req.body.aksesExisting,
             });
 
             // Calculate discounted prices based on contract duration
-            tarifAksesTerbaru = calculateDiscountedTarif(
-              originalTarifAkses,
-              req.body.durasiKontrak
-            );
+            // If akses existing is "ya", set tarif akses terbaru to null
+            if (req.body.aksesExisting === "ya") {
+              tarifAksesTerbaru = null;
+              console.log(
+                "🔒 Akses existing = 'ya', setting tarif akses terbaru to null"
+              );
+            } else {
+              tarifAksesTerbaru = calculateDiscountedTarif(
+                originalTarifAkses,
+                req.body.durasiKontrak
+              );
+              console.log(
+                "💰 Akses existing = 'tidak', calculated tarif akses terbaru:",
+                tarifAksesTerbaru
+              );
+            }
+
             tarifTerbaru = calculateDiscountedTarif(
               originalTarif,
               req.body.durasiKontrak
             );
 
-            console.log("💰 Calculated discounted tarif:", {
+            console.log("💰 Final calculated tarif:", {
               tarifAksesTerbaru,
               tarifTerbaru,
             });
@@ -455,19 +469,33 @@ export class PenawaranController {
                 originalTarifAkses,
                 originalTarif,
                 durasiKontrak: updateData.durasiKontrak,
+                aksesExisting: updateData.aksesExisting,
               });
 
               // Calculate discounted prices based on contract duration
-              tarifAksesTerbaru = calculateDiscountedTarif(
-                originalTarifAkses,
-                updateData.durasiKontrak
-              );
+              // If akses existing is "ya", set tarif akses terbaru to null
+              if (updateData.aksesExisting === "ya") {
+                tarifAksesTerbaru = null;
+                console.log(
+                  "🔒 Akses existing = 'ya', setting tarif akses terbaru to null"
+                );
+              } else {
+                tarifAksesTerbaru = calculateDiscountedTarif(
+                  originalTarifAkses,
+                  updateData.durasiKontrak
+                );
+                console.log(
+                  "💰 Akses existing = 'tidak', calculated tarif akses terbaru:",
+                  tarifAksesTerbaru
+                );
+              }
+
               tarifTerbaru = calculateDiscountedTarif(
                 originalTarif,
                 updateData.durasiKontrak
               );
 
-              console.log("💰 Calculated discounted tarif for update:", {
+              console.log("💰 Final calculated tarif for update:", {
                 tarifAksesTerbaru,
                 tarifTerbaru,
               });
