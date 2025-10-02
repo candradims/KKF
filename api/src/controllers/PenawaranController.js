@@ -2,6 +2,39 @@ import { PenawaranModel } from "../models/PenawaranModel.js";
 import { PenawaranLayananModel } from "../models/PenawaranLayananModel.js";
 import { PengeluaranModel } from "../models/PengeluaranModel.js";
 import { HasilPenawaranModel } from "../models/HasilPenawaranModel.js";
+import { LayananModel } from "../models/LayananModel.js";
+
+// Helper function to calculate discounted tarif based on contract duration
+const calculateDiscountedTarif = (originalTarif, durasiKontrak) => {
+  if (!originalTarif || !durasiKontrak) return originalTarif;
+
+  const tarif = parseFloat(originalTarif);
+  const durasi = parseInt(durasiKontrak);
+
+  let discountPercentage = 0;
+  switch (durasi) {
+    case 1:
+      discountPercentage = 0; // No discount for 1 year
+      break;
+    case 2:
+      discountPercentage = 28.0; // 28% discount for 2 years
+      break;
+    case 3:
+      discountPercentage = 42.4; // 42.4% discount for 3 years
+      break;
+    case 4:
+      discountPercentage = 48.2; // 48.2% discount for 4 years
+      break;
+    case 5:
+      discountPercentage = 50.2; // 50.2% discount for 5 years
+      break;
+    default:
+      discountPercentage = 0; // No discount for other durations
+  }
+
+  const discountedTarif = tarif * (1 - discountPercentage / 100);
+  return Math.round(discountedTarif); // Round to nearest integer
+};
 
 export class PenawaranController {
   // Ambil semua penawaran
@@ -160,31 +193,69 @@ export class PenawaranController {
       if (penawaranId && req.body.selectedLayananId) {
         console.log("🔧 Saving layanan data for penawaran:", penawaranId);
 
-        const layananData = {
-          id_penawaran: penawaranId,
-          id_layanan: req.body.selectedLayananId,
-          nama_layanan: req.body.namaLayanan, // Store nama layanan
-          detail_layanan: req.body.detailLayanan, // Store detail layanan
-          kapasitas: req.body.kapasitas,
-          qty: parseInt(req.body.qty) || 1,
-          akses_existing: req.body.aksesExisting || null,
-          satuan: req.body.satuan,
-          backbone: req.body.backbone, // Store backbone from auto-populate
-          port: req.body.port, // Store port from auto-populate
-          tarif_akses: req.body.tarifAkses, // Store tarif akses from auto-populate (corrected field name)
-          tarif: req.body.tarif, // Store tarif from auto-populate
-        };
-
-        console.log("🔧 Layanan data to save:", layananData);
-
         try {
+          // Fetch original tarif data from data_layanan table
+          const layananDetail = await LayananModel.getLayananById(
+            req.body.selectedLayananId
+          );
+          console.log("📊 Fetched layanan detail:", layananDetail);
+
+          let tarifAksesTerbaru = req.body.tarifAkses;
+          let tarifTerbaru = req.body.tarif;
+
+          // If we have layanan detail and durasi kontrak, calculate discounted prices
+          if (layananDetail && req.body.durasiKontrak) {
+            const originalTarifAkses = layananDetail.tarif_akses;
+            const originalTarif = layananDetail.tarif;
+
+            console.log("💰 Original tarif data:", {
+              originalTarifAkses,
+              originalTarif,
+              durasiKontrak: req.body.durasiKontrak,
+            });
+
+            // Calculate discounted prices based on contract duration
+            tarifAksesTerbaru = calculateDiscountedTarif(
+              originalTarifAkses,
+              req.body.durasiKontrak
+            );
+            tarifTerbaru = calculateDiscountedTarif(
+              originalTarif,
+              req.body.durasiKontrak
+            );
+
+            console.log("💰 Calculated discounted tarif:", {
+              tarifAksesTerbaru,
+              tarifTerbaru,
+            });
+          }
+
+          const layananData = {
+            id_penawaran: penawaranId,
+            id_layanan: req.body.selectedLayananId,
+            nama_layanan: req.body.namaLayanan, // Store nama layanan
+            detail_layanan: req.body.detailLayanan, // Store detail layanan
+            kapasitas: req.body.kapasitas,
+            qty: parseInt(req.body.qty) || 1,
+            akses_existing: req.body.aksesExisting || null,
+            satuan: req.body.satuan,
+            backbone: req.body.backbone, // Store backbone from auto-populate
+            port: req.body.port, // Store port from auto-populate
+            tarif_akses: req.body.tarifAkses, // Store original tarif akses from auto-populate
+            tarif: req.body.tarif, // Store original tarif from auto-populate
+            tarif_akses_terbaru: tarifAksesTerbaru, // Store discounted tarif akses
+            tarif_terbaru: tarifTerbaru, // Store discounted tarif
+          };
+
+          console.log("🔧 Layanan data to save:", layananData);
+
           const layananResult =
             await PenawaranLayananModel.createPenawaranLayanan(layananData);
           console.log("✅ Layanan data saved successfully:", layananResult);
         } catch (layananError) {
-          console.error("⚠️ Error saving layanan data:", layananError);
+          console.error("⚠️ Error processing layanan data:", layananError);
           console.error("⚠️ Layanan error stack:", layananError.stack);
-          // Don't fail the whole request if layanan save fails, just log it
+          // Don't fail the whole request if layanan processing fails, just log it
         }
       } else {
         console.log("ℹ️ No layanan data provided or missing penawaran ID");
@@ -367,6 +438,49 @@ export class PenawaranController {
           id_layanan = existingLayanan[0].id_layanan;
         }
 
+        let tarifAksesTerbaru = updateData.tarifAkses;
+        let tarifTerbaru = updateData.tarif;
+
+        try {
+          // Fetch original tarif data from data_layanan table if we have layanan ID
+          if (id_layanan && updateData.durasiKontrak) {
+            const layananDetail = await LayananModel.getLayananById(id_layanan);
+            console.log("📊 Fetched layanan detail for update:", layananDetail);
+
+            if (layananDetail) {
+              const originalTarifAkses = layananDetail.tarif_akses;
+              const originalTarif = layananDetail.tarif;
+
+              console.log("💰 Original tarif data for update:", {
+                originalTarifAkses,
+                originalTarif,
+                durasiKontrak: updateData.durasiKontrak,
+              });
+
+              // Calculate discounted prices based on contract duration
+              tarifAksesTerbaru = calculateDiscountedTarif(
+                originalTarifAkses,
+                updateData.durasiKontrak
+              );
+              tarifTerbaru = calculateDiscountedTarif(
+                originalTarif,
+                updateData.durasiKontrak
+              );
+
+              console.log("💰 Calculated discounted tarif for update:", {
+                tarifAksesTerbaru,
+                tarifTerbaru,
+              });
+            }
+          }
+        } catch (fetchError) {
+          console.error(
+            "⚠️ Error fetching layanan detail for tarif calculation:",
+            fetchError
+          );
+          // Continue with original values if fetch fails
+        }
+
         const layananData = {
           id_penawaran: penawaranId,
           id_layanan: id_layanan,
@@ -380,6 +494,8 @@ export class PenawaranController {
           port: updateData.port || null,
           tarif_akses: updateData.tarifAkses || null,
           tarif: updateData.tarif || null,
+          tarif_akses_terbaru: tarifAksesTerbaru,
+          tarif_terbaru: tarifTerbaru,
         };
 
         console.log("🔧 Layanan data to update:", layananData);

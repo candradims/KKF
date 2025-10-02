@@ -80,8 +80,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               tarifAkses: item.tarif_akses || '-', // From database
               aksesExisting: item.akses_existing || '-',
               tarifBaru: item.tarif || '-', // From database
-              tarifAksesNTahun: '-', // Kolom tarif akses (n tahun) sebelum Tarif (n tahun)
-              tarif: '-', // Static for now
+              tarifAksesNTahun: item.tarif_akses_terbaru ? `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}` : '-', // Kolom tarif akses (n tahun) dengan diskon
+              tarif: item.tarif_terbaru ? `Rp ${parseInt(item.tarif_terbaru).toLocaleString('id-ID')}` : '-', // Tarif (n tahun) dengan diskon
               hargaDasar: '-', // Static for now
               hargaFinal: '-' // Static for now
             };

@@ -72,7 +72,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
             tarifAkses: item.tarif_akses || '-', // Data dari database
             aksesExisting: item.akses_existing || '-',
             tarifBaru: item.tarif || '-', // Data tarif dari database
-            tarifAksesNTahun: item.tarif_akses_n_tahun || '-', // Kolom tarif akses (n tahun)
+            tarifAksesNTahun: item.tarif_akses_terbaru ? `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}` : '-', // Kolom tarif akses (n tahun) dengan diskon
             tarif: item.tarif_n_tahun || '-', // Data tarif (n tahun) dari database
             hargaDasar: '-',
             hargaFinal: '-'
