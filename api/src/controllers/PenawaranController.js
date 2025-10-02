@@ -23,17 +23,17 @@ const calculateDiscountedTarif = (originalTarif, durasiKontrak) => {
       discountPercentage = 42.4; // 42.4% discount for 3 years
       break;
     case 4:
-      discountPercentage = 48.2; // 48.2% discount for 4 years
+      discountPercentage = 48.16; // 48.16% discount for 4 years (precise calculation)
       break;
     case 5:
-      discountPercentage = 50.2; // 50.2% discount for 5 years
+      discountPercentage = 50.23; // 50.23% discount for 5 years (precise calculation)
       break;
     default:
       discountPercentage = 0; // No discount for other durations
   }
 
   const discountedTarif = tarif * (1 - discountPercentage / 100);
-  return Math.round(discountedTarif); // Round to nearest integer
+  return Math.floor(discountedTarif); // Use Math.floor instead of Math.round for consistent results
 };
 
 export class PenawaranController {
