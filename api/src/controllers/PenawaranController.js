@@ -179,106 +179,142 @@ export class PenawaranController {
 
       console.log("📋 Extracted penawaran ID:", penawaranId);
 
-      // Save layanan data to data_penawaran_layanan if present
-      console.log("🔍 Checking layanan data conditions:");
-      console.log("  - penawaranId:", penawaranId);
-      console.log("  - selectedLayananId:", req.body.selectedLayananId);
-      console.log("  - namaLayanan:", req.body.namaLayanan);
-      console.log("  - detailLayanan:", req.body.detailLayanan);
-      console.log("  - kapasitas:", req.body.kapasitas);
-      console.log("  - satuan:", req.body.satuan);
-      console.log("  - qty:", req.body.qty);
-      console.log("  - aksesExisting:", req.body.aksesExisting);
+      // Skip single layanan processing - now handled by multiple layanan items only
+      console.log(
+        "ℹ️ Single layanan processing skipped - using multiple layanan items instead"
+      );
 
-      if (penawaranId && req.body.selectedLayananId) {
-        console.log("🔧 Saving layanan data for penawaran:", penawaranId);
+      // Handle multiple layanan items if provided
+      if (
+        penawaranId &&
+        req.body.layananItems &&
+        Array.isArray(req.body.layananItems) &&
+        req.body.layananItems.length > 0
+      ) {
+        console.log(
+          "🔧 Processing multiple layanan items:",
+          req.body.layananItems.length
+        );
 
         try {
-          // Fetch original tarif data from data_layanan table
-          const layananDetail = await LayananModel.getLayananById(
-            req.body.selectedLayananId
-          );
-          console.log("📊 Fetched layanan detail:", layananDetail);
+          for (let i = 0; i < req.body.layananItems.length; i++) {
+            const item = req.body.layananItems[i];
+            console.log(`🔧 Processing layanan item ${i + 1}:`, item);
 
-          let tarifAksesTerbaru = req.body.tarifAkses;
-          let tarifTerbaru = req.body.tarif;
+            // Skip if essential fields are missing
+            if (
+              !item.namaLayanan ||
+              !item.detailLayanan ||
+              !item.kapasitas ||
+              !item.qty
+            ) {
+              console.log(
+                `⚠️ Skipping layanan item ${i + 1} - missing essential fields`
+              );
+              continue;
+            }
 
-          // If we have layanan detail and durasi kontrak, calculate discounted prices
-          if (layananDetail && req.body.durasiKontrak) {
-            const originalTarifAkses = layananDetail.tarif_akses;
-            const originalTarif = layananDetail.tarif;
+            // Find layanan in database by matching namaLayanan and detailLayanan
+            const layananDetail = await LayananModel.getLayananByNameAndDetail(
+              item.namaLayanan,
+              item.detailLayanan,
+              req.body.referensiHJT
+            );
 
-            console.log("💰 Original tarif data:", {
-              originalTarifAkses,
-              originalTarif,
-              durasiKontrak: req.body.durasiKontrak,
-              aksesExisting: req.body.aksesExisting,
-            });
+            if (!layananDetail) {
+              console.log(`⚠️ Layanan not found for item ${i + 1}:`, {
+                namaLayanan: item.namaLayanan,
+                detailLayanan: item.detailLayanan,
+                referensiHJT: req.body.referensiHJT,
+              });
+              continue;
+            }
+
+            console.log(
+              `📊 Found layanan detail for item ${i + 1}:`,
+              layananDetail
+            );
+
+            let tarifAksesTerbaru = layananDetail.tarif_akses;
+            let tarifTerbaru = layananDetail.tarif;
 
             // Calculate discounted prices based on contract duration
-            // If akses existing is "ya", set tarif akses terbaru to null
-            if (req.body.aksesExisting === "ya") {
-              tarifAksesTerbaru = null;
-              console.log(
-                "🔒 Akses existing = 'ya', setting tarif akses terbaru to null"
-              );
-            } else {
-              tarifAksesTerbaru = calculateDiscountedTarif(
-                originalTarifAkses,
+            if (req.body.durasiKontrak) {
+              // If akses existing is "ya", set tarif akses terbaru to null
+              if (item.aksesExisting === "ya") {
+                tarifAksesTerbaru = null;
+                console.log(
+                  `🔒 Item ${
+                    i + 1
+                  }: Akses existing = 'ya', setting tarif akses terbaru to null`
+                );
+              } else {
+                tarifAksesTerbaru = calculateDiscountedTarif(
+                  layananDetail.tarif_akses,
+                  req.body.durasiKontrak
+                );
+                console.log(
+                  `💰 Item ${i + 1}: Calculated tarif akses terbaru:`,
+                  tarifAksesTerbaru
+                );
+              }
+
+              tarifTerbaru = calculateDiscountedTarif(
+                layananDetail.tarif,
                 req.body.durasiKontrak
               );
               console.log(
-                "💰 Akses existing = 'tidak', calculated tarif akses terbaru:",
-                tarifAksesTerbaru
+                `💰 Item ${i + 1}: Calculated tarif terbaru:`,
+                tarifTerbaru
               );
             }
 
-            tarifTerbaru = calculateDiscountedTarif(
-              originalTarif,
-              req.body.durasiKontrak
+            const layananData = {
+              id_penawaran: penawaranId,
+              id_layanan: layananDetail.id_layanan,
+              nama_layanan: item.namaLayanan,
+              detail_layanan: item.detailLayanan,
+              kapasitas: item.kapasitas,
+              qty: parseInt(item.qty) || 1,
+              akses_existing: item.aksesExisting || null,
+              satuan: layananDetail.satuan,
+              backbone: layananDetail.backbone,
+              port: layananDetail.port,
+              tarif_akses: layananDetail.tarif_akses,
+              tarif: layananDetail.tarif,
+              tarif_akses_terbaru: tarifAksesTerbaru,
+              tarif_terbaru: tarifTerbaru,
+            };
+
+            console.log(
+              `🔧 Layanan data to save for item ${i + 1}:`,
+              layananData
             );
 
-            console.log("💰 Final calculated tarif:", {
-              tarifAksesTerbaru,
-              tarifTerbaru,
-            });
+            const layananResult =
+              await PenawaranLayananModel.createPenawaranLayanan(layananData);
+            console.log(
+              `✅ Layanan item ${i + 1} saved successfully:`,
+              layananResult
+            );
           }
 
-          const layananData = {
-            id_penawaran: penawaranId,
-            id_layanan: req.body.selectedLayananId,
-            nama_layanan: req.body.namaLayanan, // Store nama layanan
-            detail_layanan: req.body.detailLayanan, // Store detail layanan
-            kapasitas: req.body.kapasitas,
-            qty: parseInt(req.body.qty) || 1,
-            akses_existing: req.body.aksesExisting || null,
-            satuan: req.body.satuan,
-            backbone: req.body.backbone, // Store backbone from auto-populate
-            port: req.body.port, // Store port from auto-populate
-            tarif_akses: req.body.tarifAkses, // Store original tarif akses from auto-populate
-            tarif: req.body.tarif, // Store original tarif from auto-populate
-            tarif_akses_terbaru: tarifAksesTerbaru, // Store discounted tarif akses
-            tarif_terbaru: tarifTerbaru, // Store discounted tarif
-          };
-
-          console.log("🔧 Layanan data to save:", layananData);
-
-          const layananResult =
-            await PenawaranLayananModel.createPenawaranLayanan(layananData);
-          console.log("✅ Layanan data saved successfully:", layananResult);
-        } catch (layananError) {
-          console.error("⚠️ Error processing layanan data:", layananError);
-          console.error("⚠️ Layanan error stack:", layananError.stack);
+          console.log("✅ All multiple layanan items processed successfully");
+        } catch (layananItemsError) {
+          console.error(
+            "⚠️ Error processing multiple layanan items:",
+            layananItemsError
+          );
+          console.error(
+            "⚠️ LayananItems error stack:",
+            layananItemsError.stack
+          );
           // Don't fail the whole request if layanan processing fails, just log it
         }
       } else {
-        console.log("ℹ️ No layanan data provided or missing penawaran ID");
-        if (!penawaranId) {
-          console.log("❌ Missing penawaran ID");
-        }
-        if (!req.body.selectedLayananId) {
-          console.log("❌ Missing selectedLayananId");
-        }
+        console.log(
+          "ℹ️ No multiple layanan items provided or missing penawaran ID"
+        );
       }
 
       // Jika ada data pengeluaran lain-lain, simpan juga

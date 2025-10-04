@@ -157,4 +157,49 @@ export class LayananModel {
       );
     }
   }
+
+  // Ambil layanan berdasarkan nama layanan, detail layanan, dan wilayah
+  static async getLayananByNameAndDetail(
+    namaLayanan,
+    detailLayanan,
+    wilayahHJT
+  ) {
+    try {
+      console.log("🔍 Fetching layanan with criteria:", {
+        namaLayanan,
+        detailLayanan,
+        wilayahHJT,
+      });
+
+      const { data, error } = await supabase
+        .from("data_layanan")
+        .select("*")
+        .eq("nama_layanan", namaLayanan)
+        .eq("jenis_layanan", detailLayanan)
+        .eq("wilayah_hjt", wilayahHJT)
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("❌ Supabase error in getLayananByNameAndDetail:", error);
+        throw error;
+      }
+
+      if (!data) {
+        console.log("❌ Layanan not found with criteria:", {
+          namaLayanan,
+          detailLayanan,
+          wilayahHJT,
+        });
+        return null;
+      }
+
+      console.log("✅ Layanan found:", data);
+      return data;
+    } catch (error) {
+      console.error("❌ Error in getLayananByNameAndDetail:", error);
+      throw new Error(
+        `Gagal mengambil layanan berdasarkan nama dan detail: ${error.message}`
+      );
+    }
+  }
 }
