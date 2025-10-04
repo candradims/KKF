@@ -54,6 +54,7 @@ export class PenawaranLayananModel {
         tarif: penawaranLayananData.tarif,
         tarif_akses_terbaru: penawaranLayananData.tarif_akses_terbaru,
         tarif_terbaru: penawaranLayananData.tarif_terbaru,
+        harga_dasar_icon: penawaranLayananData.harga_dasar_icon, // Save calculated harga dasar
       };
 
       console.log("🔧 Data to insert:", dataToInsert);

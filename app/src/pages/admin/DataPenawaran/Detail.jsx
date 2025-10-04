@@ -60,23 +60,29 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
         
         // Load penawaran layanan data for table
         if (result.data.data_penawaran_layanan && result.data.data_penawaran_layanan.length > 0) {
-          const layananTableData = result.data.data_penawaran_layanan.map((item, index) => ({
-            id: item.id_penawaran_layanan || index + 1,
-            jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-',
-            keterangan: item.detail_layanan || '-',
-            kapasitas: item.kapasitas || '-',
-            satuan: item.satuan || '-',
-            qty: item.qty || '-',
-            backbone: item.backbone || '-', // Data dari database
-            port: item.port || '-', // Data dari database
-            tarifAkses: item.tarif_akses || '-', // Data dari database
-            aksesExisting: item.akses_existing || '-',
-            tarifBaru: item.tarif || '-', // Data tarif dari database
-            tarifAksesNTahun: (item.akses_existing === 'ya' || !item.tarif_akses_terbaru) ? '-' : `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}`, // Kolom tarif akses (n tahun) dengan diskon, null jika akses existing = ya
-            tarif: item.tarif_n_tahun || '-', // Data tarif (n tahun) dari database
-            hargaDasar: '-',
-            hargaFinal: '-'
-          }));
+          const layananTableData = result.data.data_penawaran_layanan.map((item, index) => {
+            // Get Harga Dasar from database (already calculated and saved)
+            const hargaDasarValue = parseFloat(item.harga_dasar_icon) || 0;
+            console.log(`� Harga Dasar from database for ${item.nama_layanan}:`, hargaDasarValue);
+
+            return {
+              id: item.id_penawaran_layanan || index + 1,
+              jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-',
+              keterangan: item.detail_layanan || '-',
+              kapasitas: item.kapasitas || '-',
+              satuan: item.satuan || '-',
+              qty: item.qty || '-',
+              backbone: item.backbone || '-', // Data dari database
+              port: item.port || '-', // Data dari database
+              tarifAkses: item.tarif_akses || '-', // Data dari database
+              aksesExisting: item.akses_existing || '-',
+              tarifBaru: item.tarif || '-', // Data tarif dari database
+              tarifAksesNTahun: (item.akses_existing === 'ya' || !item.tarif_akses_terbaru) ? '-' : `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}`, // Kolom tarif akses (n tahun) dengan diskon, null jika akses existing = ya
+              tarif: item.tarif_n_tahun || '-', // Data tarif (n tahun) dari database
+              hargaDasar: hargaDasarValue > 0 ? `Rp ${hargaDasarValue.toLocaleString('id-ID')}` : '-',
+              hargaFinal: '-' // Not calculated from harga dasar as requested
+            };
+          });
           setTabelPerhitungan(layananTableData);
           console.log("✅ Table data loaded:", layananTableData);
         } else {

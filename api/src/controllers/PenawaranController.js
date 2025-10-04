@@ -269,6 +269,60 @@ export class PenawaranController {
               );
             }
 
+            // Calculate Harga Dasar: ((Backbone + Port + Tarif (n tahun)) × Kapasitas + Tarif Akses (n tahun)) × QTY
+            const calculateHargaDasar = () => {
+              try {
+                const backbone = parseFloat(layananDetail.backbone) || 0;
+                const port = parseFloat(layananDetail.port) || 0;
+                const tarifNTahun = parseFloat(tarifTerbaru) || 0;
+                const kapasitas = parseFloat(item.kapasitas) || 0;
+                const tarifAksesNTahun =
+                  item.aksesExisting === "ya"
+                    ? 0
+                    : parseFloat(tarifAksesTerbaru) || 0;
+                const qty = parseInt(item.qty) || 0;
+
+                console.log(
+                  `💰 Calculating Harga Dasar for ${item.namaLayanan}:`,
+                  {
+                    backbone,
+                    port,
+                    tarifNTahun,
+                    kapasitas,
+                    tarifAksesNTahun,
+                    qty,
+                    aksesExisting: item.aksesExisting,
+                  }
+                );
+
+                // Formula: ((Backbone + Port + Tarif (n tahun)) × Kapasitas + Tarif Akses (n tahun)) × QTY
+                const step1 = backbone + port + tarifNTahun;
+                const step2 = step1 * kapasitas;
+                const step3 = step2 + tarifAksesNTahun;
+                const hargaDasar = step3 * qty;
+
+                console.log(
+                  `🧮 Harga Dasar calculation steps for ${item.namaLayanan}:`,
+                  {
+                    step1_BackbonePortTarif: step1,
+                    step2_TimesKapasitas: step2,
+                    step3_PlusTarifAkses: step3,
+                    final_HargaDasar: hargaDasar,
+                  }
+                );
+
+                return hargaDasar;
+              } catch (error) {
+                console.error(
+                  `❌ Error calculating Harga Dasar for ${item.namaLayanan}:`,
+                  error
+                );
+                return 0;
+              }
+            };
+
+            const hargaDasarValue = calculateHargaDasar();
+
             const layananData = {
               id_penawaran: penawaranId,
               id_layanan: layananDetail.id_layanan,
@@ -284,6 +338,7 @@ export class PenawaranController {
               tarif: layananDetail.tarif,
               tarif_akses_terbaru: tarifAksesTerbaru,
               tarif_terbaru: tarifTerbaru,
+              harga_dasar_icon: hargaDasarValue, // Save calculated harga dasar to database
             };
 
             console.log(

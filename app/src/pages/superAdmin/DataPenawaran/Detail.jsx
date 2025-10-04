@@ -68,6 +68,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
           console.log("📊 Found layanan data, processing...");
           const layananTableData = result.data.data_penawaran_layanan.map((item, index) => {
             console.log(`🔧 Processing item ${index}:`, item);
+            
+            // Get Harga Dasar from database (already calculated and saved)
+            const hargaDasarValue = parseFloat(item.harga_dasar_icon) || 0;
+            console.log(`� Harga Dasar from database for ${item.nama_layanan}:`, hargaDasarValue);
+
             return {
               id: item.id_penawaran_layanan || index + 1,
               jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-', // Use nama_layanan column first, fallback to relation
@@ -82,8 +87,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               tarifBaru: item.tarif || '-', // From database
               tarifAksesNTahun: (item.akses_existing === 'ya' || !item.tarif_akses_terbaru) ? '-' : `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}`, // Kolom tarif akses (n tahun) dengan diskon, null jika akses existing = ya
               tarif: item.tarif_terbaru ? `Rp ${parseInt(item.tarif_terbaru).toLocaleString('id-ID')}` : '-', // Tarif (n tahun) dengan diskon
-              hargaDasar: '-', // Static for now
-              hargaFinal: '-' // Static for now
+              hargaDasar: hargaDasarValue > 0 ? `Rp ${hargaDasarValue.toLocaleString('id-ID')}` : '-',
+              hargaFinal: '-' // Not calculated from harga dasar as requested
             };
           });
           setTabelPerhitungan(layananTableData);
