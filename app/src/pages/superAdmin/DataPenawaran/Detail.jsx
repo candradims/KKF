@@ -88,7 +88,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               tarifAksesNTahun: (item.akses_existing === 'ya' || !item.tarif_akses_terbaru) ? '-' : `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}`, // Kolom tarif akses (n tahun) dengan diskon, null jika akses existing = ya
               tarif: item.tarif_terbaru ? `Rp ${parseInt(item.tarif_terbaru).toLocaleString('id-ID')}` : '-', // Tarif (n tahun) dengan diskon
               hargaDasar: hargaDasarValue > 0 ? `Rp ${hargaDasarValue.toLocaleString('id-ID')}` : '-',
-              hargaFinal: '-' // Not calculated from harga dasar as requested
+              hargaFinal: '-', // Not calculated from harga dasar as requested
+              marginPercent: item.margin_percent || '-' // Margin per layanan item
             };
           });
           setTabelPerhitungan(layananTableData);
@@ -506,56 +507,6 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                   />
                 </div>
               )}
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
-                  Disc thdp Backbone
-                </label>
-                <input
-                  type="text"
-                  value="0,00%"
-                  readOnly
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <label style={{
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  minWidth: '200px',
-                  textAlign: 'left'
-                }}>
-                  Disc thdp Port (max 60%)
-                </label>
-                <input
-                  type="text"
-                  value="0,00%"
-                  readOnly
-                  style={{
-                    flex: 1,
-                    padding: '8px 12px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    backgroundColor: '#F9FAFB'
-                  }}
-                />
-              </div>
             </div>
           </div>
 
@@ -597,6 +548,9 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                     </th>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
                       Harga Final
+                    </th>
+                    <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                      Margin %
                     </th>
                   </tr>
                   <tr style={{ backgroundColor: '#F3F4F6' }}>
@@ -661,6 +615,9 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>{row.tarif}</td>
                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>{row.hargaDasar}</td>
                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>{row.hargaFinal}</td>
+                      <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
+                        {row.marginPercent ? `${row.marginPercent}%` : '-'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

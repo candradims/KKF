@@ -80,7 +80,8 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
               tarifAksesNTahun: (item.akses_existing === 'ya' || !item.tarif_akses_terbaru) ? '-' : `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}`, // Kolom tarif akses (n tahun) dengan diskon, null jika akses existing = ya
               akhirTahun: item.tarif_terbaru ? `Rp ${parseInt(item.tarif_terbaru).toLocaleString('id-ID')}` : '-', // Tarif (n tahun) dengan diskon
               hargaDasar: hargaDasarValue > 0 ? `Rp ${hargaDasarValue.toLocaleString('id-ID')}` : '-',
-              hargaFinal: '-' // Not calculated from harga dasar as requested
+              hargaFinal: '-', // Not calculated from harga dasar as requested
+              marginPercent: item.margin_percent || '-' // Margin per layanan item
             };
           });
           setTabelPerhitungan(layananTableData);
@@ -673,6 +674,9 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
                       Harga Final
                     </th>
+                    <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                      Margin %
+                    </th>
                   </tr>
                   <tr style={{ backgroundColor: '#F3F4F6' }}>
                     <th style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '10px', fontWeight: '600' }}>Backbone</th>
@@ -731,6 +735,9 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>{row.akhirTahun}</td>
                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>{row.hargaDasar}</td>
                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'right' }}>{row.hargaFinal}</td>
+                      <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px', textAlign: 'center' }}>
+                        {row.marginPercent ? `${row.marginPercent}%` : '-'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -217,6 +217,10 @@ const Penawaran = () => {
       }
 
       console.log('🔄 Updating penawaran data:', updatedData);
+      console.log('💰 Margin data check:', {
+        marginPercent: updatedData.marginPercent,
+        marginType: typeof updatedData.marginPercent
+      });
       
       const penawaranId = selectedEditData.id_penawaran || selectedEditData.id;
       
@@ -263,7 +267,8 @@ const Penawaran = () => {
         port: updatedData.port,
         tarifAkses: updatedData.tarifAkses,
         aksesExisting: updatedData.aksesExisting,
-        tarif: updatedData.tarif
+        tarif: updatedData.tarif,
+        marginPercent: updatedData.marginPercent
       };
 
       const numericId = parseInt(penawaranId, 10);

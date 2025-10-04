@@ -231,6 +231,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     satuan: "",
     qty: "",
     aksesExisting: "",
+    marginPercent: "",
     discount: "",
     // Remove single pengeluaran fields as we now use pengeluaranItems array
     // item: "",
@@ -396,6 +397,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     dataSource.akses_existing || 
                     dataSource.rawData?.akses_existing ||
                     dataSource.rawData?.aksesExisting || "",
+      marginPercent: (dataSource.rawData?.data_penawaran_layanan && dataSource.rawData.data_penawaran_layanan.length > 0) 
+                    ? dataSource.rawData.data_penawaran_layanan[0].margin_percent 
+                    : dataSource.marginPercent || 
+                      dataSource.margin_percent || "",
       // Add missing fields for auto-populate
       backbone: layananData?.backbone ||
                 layananData?.data_layanan?.backbone ||
@@ -424,6 +429,11 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     console.log("  - detailLayanan:", initialData.detailLayanan);
     console.log("  - satuan:", initialData.satuan);
     console.log("  - aksesExisting:", initialData.aksesExisting);
+    console.log("  - marginPercent:", initialData.marginPercent);
+    console.log("🔧 Edit: Margin data sources:");
+    console.log("  - rawData data_penawaran_layanan[0]:", dataSource.rawData?.data_penawaran_layanan?.[0]);
+    console.log("  - dataSource marginPercent:", dataSource.marginPercent);
+    console.log("  - dataSource margin_percent:", dataSource.margin_percent);
     
     setFormData(initialData);
     setOriginalData(initialData);
@@ -902,7 +912,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
 
     // Validasi form - hanya field penawaran yang wajib
-    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak', 'referensiHJT', 'namaLayanan', 'detailLayanan', 'kapasitas', 'satuan', 'qty'];
+    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak', 'referensiHJT', 'namaLayanan', 'detailLayanan', 'kapasitas', 'satuan', 'qty', 'marginPercent'];
     const missingFields = requiredFields.filter(field => !formData[field]);
     
     if (missingFields.length > 0) {
@@ -915,7 +925,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         'detailLayanan': 'Detail Layanan',
         'kapasitas': 'Kapasitas',
         'satuan': 'Satuan',
-        'qty': 'QTY'
+        'qty': 'QTY',
+        'marginPercent': 'Margin %'
       };
       const translatedFields = missingFields.map(field => fieldNames[field] || field);
       alert(`Harap isi field yang wajib: ${translatedFields.join(', ')}`);
@@ -937,6 +948,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
 
     console.log('📝 Updating penawaran data:', formData);
+    console.log('📝 Margin percent check:', { 
+      marginPercent: formData.marginPercent, 
+      type: typeof formData.marginPercent 
+    });
     console.log('📝 Pengeluaran items:', pengeluaranItems);
     console.log('📝 Show additional section:', showAdditionalSection);
     console.log('✅ Edit: Selected layanan data:', selectedLayanan);
@@ -1740,6 +1755,58 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         }}
                       >
                         ▼
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Margin % */}
+                  <div style={{ marginBottom: "16px" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        color: "#374151",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      Margin %*
+                    </label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type="number"
+                        name="marginPercent"
+                        value={formData.marginPercent}
+                        onChange={handleInputChange}
+                        placeholder="Masukkan margin dalam persen"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        required
+                        style={{
+                          width: "100%",
+                          padding: "10px 35px 10px 12px",
+                          border: "2px solid #B0BEC5",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          outline: "none",
+                          backgroundColor: "white",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          right: "12px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          pointerEvents: "none",
+                          fontSize: "14px",
+                          color: "#666",
+                          fontWeight: "500",
+                        }}
+                      >
+                        %
                       </div>
                     </div>
                   </div>

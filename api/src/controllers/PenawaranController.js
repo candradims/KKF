@@ -339,7 +339,16 @@ export class PenawaranController {
               tarif_akses_terbaru: tarifAksesTerbaru,
               tarif_terbaru: tarifTerbaru,
               harga_dasar_icon: hargaDasarValue, // Save calculated harga dasar to database
+              margin_percent: item.marginPercent
+                ? parseFloat(item.marginPercent)
+                : null, // Save margin per layanan item
             };
+
+            console.log(
+              `💰 Saving margin ${item.marginPercent}% for layanan item ${
+                i + 1
+              }: ${item.namaLayanan}`
+            );
 
             console.log(
               `🔧 Layanan data to save for item ${i + 1}:`,
@@ -615,8 +624,14 @@ export class PenawaranController {
           tarif: updateData.tarif || null,
           tarif_akses_terbaru: tarifAksesTerbaru,
           tarif_terbaru: tarifTerbaru,
+          margin_percent: updateData.marginPercent
+            ? parseFloat(updateData.marginPercent)
+            : null, // Save margin per layanan item
         };
 
+        console.log(
+          `💰 Updating margin ${updateData.marginPercent}% for layanan: ${updateData.namaLayanan}`
+        );
         console.log("🔧 Layanan data to update:", layananData);
 
         try {
@@ -638,6 +653,11 @@ export class PenawaranController {
       } else {
         console.log("ℹ️ No layanan data provided for update");
       }
+
+      // Margin is now saved per layanan item in data_penawaran_layanan.margin_percent
+      console.log(
+        "ℹ️ Margin data migrated to data_penawaran_layanan.margin_percent"
+      );
 
       res.status(200).json({
         success: true,
@@ -989,11 +1009,48 @@ export class PenawaranController {
       const profitDariHjtExclPPN =
         grandTotalDiscLain2HargaFinalSebelumPPN -
         grandTotalDiscLain2HargaDasarIcon;
-      const marginDariHjt =
-        grandTotalDiscLain2HargaFinalSebelumPPN > 0
-          ? (profitDariHjtExclPPN / grandTotalDiscLain2HargaFinalSebelumPPN) *
-            100
-          : 0;
+
+      // Get margin from existing hasil_penawaran if available, otherwise calculate
+      let marginDariHjt = 0;
+      try {
+        const existingHasil =
+          await HasilPenawaranModel.getHasilPenawaranByPenawaranId(id);
+        if (
+          existingHasil &&
+          existingHasil.margin_dari_hjt &&
+          existingHasil.margin_dari_hjt > 0
+        ) {
+          marginDariHjt = parseFloat(existingHasil.margin_dari_hjt);
+          console.log(
+            "📊 Using existing margin from hasil_penawaran:",
+            marginDariHjt
+          );
+        } else {
+          // Fallback to calculated margin if no input margin found
+          marginDariHjt =
+            grandTotalDiscLain2HargaFinalSebelumPPN > 0
+              ? (profitDariHjtExclPPN /
+                  grandTotalDiscLain2HargaFinalSebelumPPN) *
+                100
+              : 0;
+          console.log("📊 Using calculated margin (fallback):", marginDariHjt);
+        }
+      } catch (marginError) {
+        console.log(
+          "⚠️ Error getting existing margin, using calculated:",
+          marginError
+        );
+        // Fallback to calculated margin
+        marginDariHjt =
+          grandTotalDiscLain2HargaFinalSebelumPPN > 0
+            ? (profitDariHjtExclPPN / grandTotalDiscLain2HargaFinalSebelumPPN) *
+              100
+            : 0;
+        console.log(
+          "📊 Using calculated margin (error fallback):",
+          marginDariHjt
+        );
+      }
 
       // Siapkan data hasil
       const hasilData = {

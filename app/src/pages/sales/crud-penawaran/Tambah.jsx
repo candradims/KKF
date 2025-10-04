@@ -210,6 +210,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     kapasitas: "",
     qty: "",
     aksesExisting: "",
+    marginPercent: "",
     discount: "",
   });
 
@@ -220,7 +221,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       detailLayanan: "",
       kapasitas: "",
       qty: "",
-      aksesExisting: ""
+      aksesExisting: "",
+      marginPercent: ""
     }
   ]);
 
@@ -240,7 +242,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
         detailLayanan: formData.detailLayanan,
         kapasitas: formData.kapasitas,
         qty: formData.qty,
-        aksesExisting: formData.aksesExisting
+        aksesExisting: formData.aksesExisting,
+        marginPercent: formData.marginPercent
       };
       
       // Only update if there's actually a change to avoid infinite loop
@@ -248,7 +251,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
         setLayananItems(updatedItems);
       }
     }
-  }, [formData.namaLayanan, formData.detailLayanan, formData.kapasitas, formData.qty, formData.aksesExisting]);
+  }, [formData.namaLayanan, formData.detailLayanan, formData.kapasitas, formData.qty, formData.aksesExisting, formData.marginPercent]);
 
   // Auto-fill sales field dengan nama user yang login
   useEffect(() => {
@@ -301,7 +304,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
         detailLayanan: "",
         kapasitas: "",
         qty: "",
-        aksesExisting: ""
+        aksesExisting: "",
+        marginPercent: ""
       }]);
       
       // Reset pengeluaran items
@@ -509,7 +513,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       detailLayanan: firstLayanan.detailLayanan || "",
       kapasitas: firstLayanan.kapasitas || "",
       qty: firstLayanan.qty || "",
-      aksesExisting: firstLayanan.aksesExisting || ""
+      aksesExisting: firstLayanan.aksesExisting || "",
+      marginPercent: firstLayanan.marginPercent || ""
     }));
 
     setLayananItems([...layananItems, {
@@ -517,7 +522,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       detailLayanan: "",
       kapasitas: "",
       qty: "",
-      aksesExisting: ""
+      aksesExisting: "",
+      marginPercent: ""
     }]);
   };
 
@@ -535,7 +541,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
           detailLayanan: newFirstItem.detailLayanan,
           kapasitas: newFirstItem.kapasitas,
           qty: newFirstItem.qty,
-          aksesExisting: newFirstItem.aksesExisting
+          aksesExisting: newFirstItem.aksesExisting,
+          marginPercent: newFirstItem.marginPercent
         }));
       }
     }
@@ -582,6 +589,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       if (!item.kapasitas) missingLayananFields.push('Kapasitas');
       if (!item.qty) missingLayananFields.push('QTY');
       if (!item.aksesExisting) missingLayananFields.push('Akses Existing');
+      if (!item.marginPercent) missingLayananFields.push('Margin %');
       // Note: durasiKontrak is a global field, not per-layanan-item field
       
       if (missingLayananFields.length > 0) {
@@ -642,6 +650,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
 
     console.log('🚀 Submitting form data:', formData);
     console.log('📦 Layanan items:', layananItems);
+    console.log('📦 Layanan items with margin check:', layananItems.map((item, index) => ({ 
+      index, 
+      namaLayanan: item.namaLayanan, 
+      marginPercent: item.marginPercent,
+      marginType: typeof item.marginPercent 
+    })));
     console.log('📦 Pengeluaran items:', pengeluaranItems);
     console.log('📦 Show additional section:', showAdditionalSection);
     console.log('✅ Selected layanan data:', selectedLayanan);
@@ -691,6 +705,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       satuan: "",
       qty: "",
       aksesExisting: "",
+      marginPercent: "",
       discount: "",
       backbone: "",
       port: "",
@@ -704,7 +719,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       detailLayanan: "",
       kapasitas: "",
       qty: "",
-      aksesExisting: ""
+      aksesExisting: "",
+      marginPercent: ""
     }]);
     
     // Reset pengeluaran items
@@ -1450,6 +1466,57 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                             }}
                           >
                             ▼
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Margin % */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#374151",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          Margin %*
+                        </label>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="number"
+                            value={item.marginPercent}
+                            onChange={(e) => handleLayananItemChange(index, 'marginPercent', e.target.value)}
+                            placeholder="Masukkan margin dalam persen"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            required
+                            style={{
+                              width: "100%",
+                              padding: "10px 35px 10px 12px",
+                              border: "2px solid #B0BEC5",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              outline: "none",
+                              backgroundColor: "white",
+                              boxSizing: "border-box",
+                            }}
+                          />
+                          <div
+                            style={{
+                              position: "absolute",
+                              right: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              pointerEvents: "none",
+                              fontSize: "14px",
+                              color: "#666",
+                              fontWeight: "500",
+                            }}
+                          >
+                            %
                           </div>
                         </div>
                       </div>
