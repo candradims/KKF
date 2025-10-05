@@ -80,7 +80,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               tarifAksesNTahun: (item.akses_existing === 'ya' || !item.tarif_akses_terbaru) ? '-' : `Rp ${parseInt(item.tarif_akses_terbaru).toLocaleString('id-ID')}`, // Kolom tarif akses (n tahun) dengan diskon, null jika akses existing = ya
               tarif: item.tarif_n_tahun || '-', // Data tarif (n tahun) dari database
               hargaDasar: hargaDasarValue > 0 ? `Rp ${hargaDasarValue.toLocaleString('id-ID')}` : '-',
-              hargaFinal: '-', // Not calculated from harga dasar as requested
+              hargaFinal: (() => {
+                const hargaFinalValue = parseFloat(item.harga_final_sebelum_ppn) || 0;
+                console.log(`💰 Harga Final from database for ${item.nama_layanan}:`, hargaFinalValue);
+                return hargaFinalValue > 0 ? `Rp ${hargaFinalValue.toLocaleString('id-ID')}` : '-';
+              })(), // Display calculated harga final from database
               marginPercent: item.margin_percent || '-' // Margin per layanan item
             };
           });

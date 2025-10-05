@@ -55,6 +55,7 @@ export class PenawaranLayananModel {
         tarif_akses_terbaru: penawaranLayananData.tarif_akses_terbaru,
         tarif_terbaru: penawaranLayananData.tarif_terbaru,
         harga_dasar_icon: penawaranLayananData.harga_dasar_icon, // Save calculated harga dasar
+        harga_final_sebelum_ppn: penawaranLayananData.harga_final_sebelum_ppn, // Save calculated harga final
         margin_percent: penawaranLayananData.margin_percent, // Save margin percent per layanan
       };
 

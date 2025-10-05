@@ -323,6 +323,47 @@ export class PenawaranController {
 
             const hargaDasarValue = calculateHargaDasar();
 
+            // Calculate Harga Final: Harga Dasar + (Harga Dasar × Margin%)
+            const calculateHargaFinal = () => {
+              try {
+                const hargaDasar = hargaDasarValue || 0;
+                const marginPercent = parseFloat(item.marginPercent) || 0;
+
+                console.log(
+                  `💰 Calculating Harga Final for ${item.namaLayanan}:`,
+                  {
+                    hargaDasar,
+                    marginPercent: `${marginPercent}%`,
+                  }
+                );
+
+                // Formula: Harga Final = Harga Dasar + (Harga Dasar × Margin%)
+                const marginAmount = hargaDasar * (marginPercent / 100);
+                const hargaFinal = hargaDasar + marginAmount;
+
+                console.log(
+                  `🧮 Harga Final calculation for ${item.namaLayanan}:`,
+                  {
+                    hargaDasar,
+                    marginPercent: `${marginPercent}%`,
+                    marginAmount,
+                    hargaFinal,
+                    formula: `${hargaDasar} + (${hargaDasar} × ${marginPercent}%) = ${hargaFinal}`,
+                  }
+                );
+
+                return hargaFinal;
+              } catch (error) {
+                console.error(
+                  `❌ Error calculating Harga Final for ${item.namaLayanan}:`,
+                  error
+                );
+                return hargaDasarValue || 0;
+              }
+            };
+
+            const hargaFinalValue = calculateHargaFinal();
+
             const layananData = {
               id_penawaran: penawaranId,
               id_layanan: layananDetail.id_layanan,
@@ -339,6 +380,7 @@ export class PenawaranController {
               tarif_akses_terbaru: tarifAksesTerbaru,
               tarif_terbaru: tarifTerbaru,
               harga_dasar_icon: hargaDasarValue, // Save calculated harga dasar to database
+              harga_final_sebelum_ppn: hargaFinalValue, // Save calculated harga final
               margin_percent: item.marginPercent
                 ? parseFloat(item.marginPercent)
                 : null, // Save margin per layanan item
@@ -663,6 +705,47 @@ export class PenawaranController {
 
         const hargaDasarValue = calculateHargaDasar();
 
+        // Calculate Harga Final: Harga Dasar + (Harga Dasar × Margin%)
+        const calculateHargaFinal = () => {
+          try {
+            const hargaDasar = hargaDasarValue || 0;
+            const marginPercent = parseFloat(updateData.marginPercent) || 0;
+
+            console.log(
+              `💰 Calculating Harga Final for ${updateData.namaLayanan} (UPDATE):`,
+              {
+                hargaDasar,
+                marginPercent: `${marginPercent}%`,
+              }
+            );
+
+            // Formula: Harga Final = Harga Dasar + (Harga Dasar × Margin%)
+            const marginAmount = hargaDasar * (marginPercent / 100);
+            const hargaFinal = hargaDasar + marginAmount;
+
+            console.log(
+              `🧮 Harga Final calculation for ${updateData.namaLayanan} (UPDATE):`,
+              {
+                hargaDasar,
+                marginPercent: `${marginPercent}%`,
+                marginAmount,
+                hargaFinal,
+                formula: `${hargaDasar} + (${hargaDasar} × ${marginPercent}%) = ${hargaFinal}`,
+              }
+            );
+
+            return hargaFinal;
+          } catch (error) {
+            console.error(
+              `❌ Error calculating Harga Final for ${updateData.namaLayanan} (UPDATE):`,
+              error
+            );
+            return hargaDasarValue || 0;
+          }
+        };
+
+        const hargaFinalValue = calculateHargaFinal();
+
         const layananData = {
           id_penawaran: penawaranId,
           id_layanan: id_layanan,
@@ -679,6 +762,7 @@ export class PenawaranController {
           tarif_akses_terbaru: tarifAksesTerbaru,
           tarif_terbaru: tarifTerbaru,
           harga_dasar_icon: hargaDasarValue, // Add calculated harga dasar with correct column name
+          harga_final_sebelum_ppn: hargaFinalValue, // Save calculated harga final
           margin_percent: updateData.marginPercent
             ? parseFloat(updateData.marginPercent)
             : null, // Save margin per layanan item
