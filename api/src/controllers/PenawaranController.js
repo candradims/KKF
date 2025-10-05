@@ -609,6 +609,60 @@ export class PenawaranController {
           // Continue with original values if fetch fails
         }
 
+        // Calculate Harga Dasar: ((Backbone + Port + Tarif (n tahun)) × Kapasitas + Tarif Akses (n tahun)) × QTY
+        const calculateHargaDasar = () => {
+          try {
+            const backbone = parseFloat(updateData.backbone) || 0;
+            const port = parseFloat(updateData.port) || 0;
+            const tarifNTahun = parseFloat(tarifTerbaru) || 0;
+            const kapasitas = parseFloat(updateData.kapasitas) || 0;
+            const tarifAksesNTahun =
+              updateData.aksesExisting === "ya"
+                ? 0
+                : parseFloat(tarifAksesTerbaru) || 0;
+            const qty = parseInt(updateData.qty) || 0;
+
+            console.log(
+              `💰 Calculating Harga Dasar for ${updateData.namaLayanan} (UPDATE):`,
+              {
+                backbone,
+                port,
+                tarifNTahun,
+                kapasitas,
+                tarifAksesNTahun,
+                qty,
+                aksesExisting: updateData.aksesExisting,
+              }
+            );
+
+            // Formula: ((Backbone + Port + Tarif (n tahun)) × Kapasitas + Tarif Akses (n tahun)) × QTY
+            const step1 = backbone + port + tarifNTahun;
+            const step2 = step1 * kapasitas;
+            const step3 = step2 + tarifAksesNTahun;
+            const hargaDasar = step3 * qty;
+
+            console.log(
+              `🧮 Harga Dasar calculation steps for ${updateData.namaLayanan} (UPDATE):`,
+              {
+                step1_BackbonePortTarif: step1,
+                step2_TimesKapasitas: step2,
+                step3_PlusTarifAkses: step3,
+                final_HargaDasar: hargaDasar,
+              }
+            );
+
+            return hargaDasar;
+          } catch (error) {
+            console.error(
+              `❌ Error calculating Harga Dasar for ${updateData.namaLayanan} (UPDATE):`,
+              error
+            );
+            return 0;
+          }
+        };
+
+        const hargaDasarValue = calculateHargaDasar();
+
         const layananData = {
           id_penawaran: penawaranId,
           id_layanan: id_layanan,
@@ -624,6 +678,7 @@ export class PenawaranController {
           tarif: updateData.tarif || null,
           tarif_akses_terbaru: tarifAksesTerbaru,
           tarif_terbaru: tarifTerbaru,
+          harga_dasar_icon: hargaDasarValue, // Add calculated harga dasar with correct column name
           margin_percent: updateData.marginPercent
             ? parseFloat(updateData.marginPercent)
             : null, // Save margin per layanan item
