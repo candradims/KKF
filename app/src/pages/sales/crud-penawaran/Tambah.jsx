@@ -21,7 +21,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showLayananConfirmModal, setShowLayananConfirmModal] = useState(false);
   const [showAdditionalSection, setShowAdditionalSection] = useState(false);
   const [layananData, setLayananData] = useState([]);
   const [filteredLayananData, setFilteredLayananData] = useState([]);
@@ -32,8 +31,9 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const [selectedLayanan, setSelectedLayanan] = useState(null);
   const [availableReferensiHJT, setAvailableReferensiHJT] = useState([]);
   const [focusedField, setFocusedField] = useState('');
+  const [showPengeluaranButton, setShowPengeluaranButton] = useState(true);
 
-  // Color palette
+  // Color palette from the second example
   const colors = {
     primary: '#035b71',
     secondary: '#00bfca',
@@ -176,8 +176,8 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       setAvailableDetailLayanan([]);
       setShowAdditionalSection(false);
       setShowConfirmModal(false);
-      setShowLayananConfirmModal(false);
       setIsSaving(false);
+      setShowPengeluaranButton(true);
       
       loadLayananData();
     } else {
@@ -332,12 +332,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     setLayananItems(updatedItems);
   };
 
-  const handleShowLayananConfirmModal = () => {
-    setShowLayananConfirmModal(true);
-  };
-
-  const handleLayananConfirmYes = () => {
-    setShowLayananConfirmModal(false);
+  const addLayananItem = () => {
     const newItem = {
       namaLayanan: "",
       detailLayanan: "",
@@ -347,10 +342,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       marginPercent: ""
     };
     setLayananItems([...layananItems, newItem]);
-  };
-
-  const handleLayananConfirmNo = () => {
-    setShowLayananConfirmModal(false);
   };
 
   const removeLayananItem = (index) => {
@@ -511,10 +502,10 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     setFilteredLayananData([]);
     setShowAdditionalSection(false);
     setShowConfirmModal(false);
-    setShowLayananConfirmModal(false);
     setShowSuccessModal(false);
     setLoadingLayanan(false);
     setIsSaving(false);
+    setShowPengeluaranButton(true);
     
     console.log('✅ Form state reset complete');
   };
@@ -537,15 +528,15 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const handleConfirmYes = () => {
     setShowConfirmModal(false);
     setShowAdditionalSection(true);
+    setShowPengeluaranButton(false); // Sembunyikan tombol setelah dikonfirmasi Ya
   };
 
   const handleConfirmNo = () => {
     setShowConfirmModal(false);
-    setShowAdditionalSection(false);
-    setPengeluaranItems([{ item: "", keterangan: "", hasrat: "", jumlah: "" }]);
+    // Tetap tampilkan tombol jika diklik Tidak
   };
 
-  if (!isOpen && !showSuccessModal && !showConfirmModal && !showLayananConfirmModal) return null;
+  if (!isOpen && !showSuccessModal && !showConfirmModal) return null;
 
   return (
     <>
@@ -988,7 +979,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   </div>
                 </motion.div>
 
-                {/* Multiple Layanan Items - MODIFIED SECTION */}
+                {/* Multiple Layanan Items */}
                 <div style={{ marginBottom: "32px" }}>
                   {/* Header Section untuk Layanan */}
                   <motion.div
@@ -998,7 +989,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       backgroundColor: "rgba(0, 191, 202, 0.08)",
                       borderRadius: "20px",
                       padding: "28px",
-                      marginBottom: "28px",
+                      marginBottom: "68px",
                       border: `2px solid rgba(0, 192, 202, 0.25)`,
                       position: 'relative',
                       overflow: 'hidden',
@@ -1480,7 +1471,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                             }}
                             whileTap={{ scale: 0.95 }}
                             type="button"
-                            onClick={handleShowLayananConfirmModal}
+                            onClick={addLayananItem}
                             disabled={isSaving}
                             style={{
                               background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.secondary} 100%)`,
@@ -1527,36 +1518,38 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                 </div>
 
                 {/* Add Pengeluaran Button */}
-                <motion.div 
-                  whileHover={{ scale: 1.02 }}
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginBottom: "24px",
-                  }}
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.9 }}
-                    type="button"
-                    onClick={handleShowConfirmModal}
+                {showPengeluaranButton && (
+                  <motion.div 
+                    whileHover={{ scale: 1.02 }}
                     style={{
-                      width: "50px",
-                      height: "50px",
-                      backgroundColor: colors.secondary,
-                      border: "none",
-                      borderRadius: "50%",
-                      cursor: "pointer",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                      boxShadow: `0 6px 20px rgba(0, 191, 202, 0.4)`,
+                      justifyContent: "flex-end",
+                      marginBottom: "24px",
                     }}
                   >
-                    <Plus style={{ width: "24px", height: "24px" }} />
-                  </motion.button>
-                </motion.div>
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      whileTap={{ scale: 0.9 }}
+                      type="button"
+                      onClick={handleShowConfirmModal}
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        backgroundColor: colors.secondary,
+                        border: "none",
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                        boxShadow: `0 6px 20px rgba(0, 191, 202, 0.4)`,
+                      }}
+                    >
+                      <Plus style={{ width: "24px", height: "24px" }} />
+                    </motion.button>
+                  </motion.div>
+                )}
 
                 {/* Section dengan background biru muda untuk informasi tambahan */}
                 {showAdditionalSection && (
@@ -1587,7 +1580,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     }} />
 
                     <div style={{ position: 'relative', zIndex: 1 }}>
-                      {/* Header Section dengan icon - MODIFIED TO CENTER */}
+                      {/* Header Section dengan icon */}
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -2105,127 +2098,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     </motion.button>
                   </div>
                 </motion.form>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Confirmation Modal untuk Layanan */}
-        <AnimatePresence>
-          {showLayananConfirmModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(3, 91, 113, 0.3)',
-                backdropFilter: 'blur(2px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 1001,
-                padding: '20px'
-              }}
-            >
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
-                transition={{ 
-                  duration: 0.5, 
-                  ease: [0.4, 0, 0.2, 1],
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 20
-                }}
-                style={{
-                  background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
-                  borderRadius: '24px',
-                  padding: '32px',
-                  textAlign: 'center',
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                  position: 'relative',
-                  width: '100%',
-                  maxWidth: '400px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)'
-                }}
-              >
-                <motion.h3
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  style={{
-                    margin: '0 0 16px 0',
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    color: colors.primary
-                  }}
-                >
-                  Konfirmasi
-                </motion.h3>
-                <motion.p
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  style={{
-                    margin: '0 0 28px 0',
-                    fontSize: '15px',
-                    color: colors.accent1,
-                    lineHeight: '1.5',
-                    opacity: 0.9
-                  }}
-                >
-                  Apakah anda ingin menambahkan layanan lain?
-                </motion.p>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '12px',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleLayananConfirmNo}
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      padding: '12px 28px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
-                    }}
-                  >
-                    Tidak
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleLayananConfirmYes}
-                    style={{
-                      background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      padding: '12px 28px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      boxShadow: `0 4px 15px rgba(0, 191, 202, 0.3)`,
-                    }}
-                  >
-                    Iya
-                  </motion.button>
-                </div>
               </motion.div>
             </motion.div>
           )}
