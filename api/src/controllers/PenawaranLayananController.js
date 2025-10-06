@@ -3,6 +3,64 @@ import { PenawaranModel } from "../models/PenawaranModel.js";
 import { LayananModel } from "../models/LayananModel.js";
 
 export class PenawaranLayananController {
+  // Buat layanan penawaran baru (general create method)
+  static async createPenawaranLayanan(req, res) {
+    try {
+      const layananData = req.body;
+
+      // Validasi input
+      if (!layananData.id_penawaran) {
+        return res.status(400).json({
+          success: false,
+          message: "ID penawaran wajib diisi",
+        });
+      }
+
+      // Cek apakah penawaran ada dan user memiliki izin
+      const existingPenawaran = await PenawaranModel.getPenawaranById(
+        layananData.id_penawaran
+      );
+      if (!existingPenawaran) {
+        return res.status(404).json({
+          success: false,
+          message: "Penawaran tidak ditemukan",
+        });
+      }
+
+      // Sales hanya bisa menambah layanan ke penawaran mereka sendiri
+      if (
+        req.user.role_user === "sales" &&
+        existingPenawaran.id_user !== req.user.id_user
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Akses ditolak. Anda hanya dapat menambah layanan ke penawaran milik Anda sendiri.",
+        });
+      }
+
+      console.log("🏷️ Creating layanan with data:", layananData);
+
+      const newPenawaranLayanan =
+        await PenawaranLayananModel.createPenawaranLayanan(layananData);
+
+      console.log("✅ Layanan created successfully:", newPenawaranLayanan);
+
+      res.status(201).json({
+        success: true,
+        message: "Layanan penawaran berhasil ditambahkan",
+        data: newPenawaranLayanan,
+      });
+    } catch (error) {
+      console.error("❌ Error creating layanan:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal menambahkan layanan penawaran",
+        error: error.message,
+      });
+    }
+  }
+
   // Ambil layanan penawaran berdasarkan ID penawaran
   static async getPenawaranLayananByPenawaranId(req, res) {
     try {
@@ -87,15 +145,38 @@ export class PenawaranLayananController {
         });
       }
 
-      console.log("🔍 FULL layanan object from database:", JSON.stringify(layanan, null, 2));
-    console.log("🔍 layanan.id_layanan:", layanan.id_layanan);
-    console.log("🔍 layanan.nama_layanan:", layanan.nama_layanan);
-    console.log("🔍 layanan.jenis_layanan:", layanan.jenis_layanan);
-    console.log("🔍 layanan.satuan:", layanan.satuan);
-    console.log("🔍 layanan.backbone:", layanan.backbone, "- Type:", typeof layanan.backbone);
-    console.log("🔍 layanan.port:", layanan.port, "- Type:", typeof layanan.port);
-    console.log("🔍 layanan.tarif_akses:", layanan.tarif_akses, "- Type:", typeof layanan.tarif_akses);
-    console.log("🔍 layanan.tarif:", layanan.tarif, "- Type:", typeof layanan.tarif);
+      console.log(
+        "🔍 FULL layanan object from database:",
+        JSON.stringify(layanan, null, 2)
+      );
+      console.log("🔍 layanan.id_layanan:", layanan.id_layanan);
+      console.log("🔍 layanan.nama_layanan:", layanan.nama_layanan);
+      console.log("🔍 layanan.jenis_layanan:", layanan.jenis_layanan);
+      console.log("🔍 layanan.satuan:", layanan.satuan);
+      console.log(
+        "🔍 layanan.backbone:",
+        layanan.backbone,
+        "- Type:",
+        typeof layanan.backbone
+      );
+      console.log(
+        "🔍 layanan.port:",
+        layanan.port,
+        "- Type:",
+        typeof layanan.port
+      );
+      console.log(
+        "🔍 layanan.tarif_akses:",
+        layanan.tarif_akses,
+        "- Type:",
+        typeof layanan.tarif_akses
+      );
+      console.log(
+        "🔍 layanan.tarif:",
+        layanan.tarif,
+        "- Type:",
+        typeof layanan.tarif
+      );
 
       const layananData = {
         id_penawaran: idPenawaran,
@@ -112,7 +193,10 @@ export class PenawaranLayananController {
         tarif: layanan.tarif,
       };
 
-      console.log("📦 Data yang akan disimpan ke penawaran_layanan:", layananData);
+      console.log(
+        "📦 Data yang akan disimpan ke penawaran_layanan:",
+        layananData
+      );
 
       const newPenawaranLayanan =
         await PenawaranLayananModel.createPenawaranLayanan(layananData);

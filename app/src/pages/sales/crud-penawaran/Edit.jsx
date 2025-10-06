@@ -182,6 +182,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showAdditionalSection, setShowAdditionalSection] = useState(false);
   const [originalData, setOriginalData] = useState({});
+  const [originalLayananItems, setOriginalLayananItems] = useState([]);
   const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
   const [existingPengeluaran, setExistingPengeluaran] = useState([]);
   const [componentError, setComponentError] = useState(null);
@@ -206,15 +207,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const [loadingLayanan, setLoadingLayanan] = useState(false);
   const [selectedLayanan, setSelectedLayanan] = useState(null);
   
-  // Multiple pengeluaran data
-  const [pengeluaranItems, setPengeluaranItems] = useState([{
-    id: null, // null for new items, will have id for existing items
-    item: "",
-    keterangan: "",
-    hasrat: "",
-    jumlah: "",
-    isExisting: false
-  }]);
+  // Multiple pengeluaran data - start with empty array
+  const [pengeluaranItems, setPengeluaranItems] = useState([]);
   
   const [formData, setFormData] = useState({
     sales: "",
@@ -239,6 +233,39 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     // hasrat: "",
     // jumlah: "",
   });
+
+  // State for multiple layanan items
+  const [layananItems, setLayananItems] = useState([
+    {
+      namaLayanan: "",
+      detailLayanan: "",
+      kapasitas: "",
+      qty: "",
+      aksesExisting: "",
+      marginPercent: ""
+    }
+  ]);
+
+  // Sync layananItems with formData for backward compatibility
+  useEffect(() => {
+    // Update first layanan item when formData changes
+    if (layananItems.length > 0) {
+      const updatedItems = [...layananItems];
+      updatedItems[0] = {
+        ...updatedItems[0],
+        namaLayanan: formData.namaLayanan,
+        detailLayanan: formData.detailLayanan,
+        kapasitas: formData.kapasitas,
+        qty: formData.qty,
+        aksesExisting: formData.aksesExisting,
+        marginPercent: formData.marginPercent
+      };
+      
+      if (JSON.stringify(updatedItems[0]) !== JSON.stringify(layananItems[0])) {
+        setLayananItems(updatedItems);
+      }
+    }
+  }, [formData.namaLayanan, formData.detailLayanan, formData.kapasitas, formData.qty, formData.aksesExisting, formData.marginPercent]);
 
   // Helper functions to update dropdown filters
   const updateHjtWilayahFilter = () => {
@@ -438,6 +465,47 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     setFormData(initialData);
     setOriginalData(initialData);
 
+    // Initialize multiple layanan items from data_penawaran_layanan
+    if (dataSource.rawData?.data_penawaran_layanan && dataSource.rawData.data_penawaran_layanan.length > 0) {
+      console.log("🔧 Edit: Found data_penawaran_layanan:", dataSource.rawData.data_penawaran_layanan);
+      
+      const layananItemsFromDB = dataSource.rawData.data_penawaran_layanan.map((item, index) => {
+        console.log(`🔧 Edit: Processing layanan item ${index + 1}:`, item);
+        return {
+          namaLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || "",
+          detailLayanan: item.detail_layanan || "",
+          kapasitas: item.kapasitas || "",
+          qty: item.qty || "",
+          aksesExisting: item.akses_existing || "",
+          marginPercent: item.margin_percent || ""
+        };
+      });
+      
+      setLayananItems(layananItemsFromDB);
+      setOriginalLayananItems(JSON.parse(JSON.stringify(layananItemsFromDB))); // Deep copy for comparison
+      console.log("🔧 Edit: Initialized layanan items from database:", layananItemsFromDB);
+      console.log("🔧 Edit: LayananItems count:", layananItemsFromDB.length);
+      console.log("🔧 Edit: Original layanan items saved for comparison");
+    } else {
+      console.log("🔧 Edit: No data_penawaran_layanan found, using fallback");
+      console.log("🔧 Edit: dataSource.rawData:", dataSource.rawData);
+      
+      // Fallback to single item from formData for backward compatibility
+      const fallbackItem = {
+        namaLayanan: initialData.namaLayanan,
+        detailLayanan: initialData.detailLayanan,
+        kapasitas: initialData.kapasitas,
+        qty: initialData.qty,
+        aksesExisting: initialData.aksesExisting,
+        marginPercent: initialData.marginPercent
+      };
+      
+      setLayananItems([fallbackItem]);
+      setOriginalLayananItems([JSON.parse(JSON.stringify(fallbackItem))]); // Deep copy for comparison
+      console.log("🔧 Edit: Initialized layanan items from form data (fallback):", fallbackItem);
+      console.log("🔧 Edit: Original layanan items saved for comparison (fallback)");
+    }
+
     // Load layanan data first
     loadLayananData().then(() => {
       console.log("🔧 Edit: Layanan data loaded successfully");
@@ -629,17 +697,26 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
           console.log('Pengeluaran data loaded:', pengeluaranItems);
         } else {
           setExistingPengeluaran(null);
-          console.log('No pengeluaran data found for this penawaran');
+          // Reset pengeluaran items to empty array when no existing data
+          setPengeluaranItems([]);
+          setShowAdditionalSection(false);
+          console.log('No pengeluaran data found for this penawaran - reset to empty');
         }
       } else {
         console.error('Failed to load pengeluaran data. Status:', response.status);
         const errorText = await response.text();
         console.error('Error response:', errorText);
         setExistingPengeluaran(null);
+        // Reset pengeluaran items to empty array on error
+        setPengeluaranItems([]);
+        setShowAdditionalSection(false);
       }
     } catch (error) {
       console.error('Error loading pengeluaran data:', error);
       setExistingPengeluaran(null);
+      // Reset pengeluaran items to empty array on error
+      setPengeluaranItems([]);
+      setShowAdditionalSection(false);
     } finally {
       setLoadingPengeluaran(false);
     }
@@ -820,6 +897,93 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
   };
 
+  // Helper functions for multiple layanan items
+  const handleLayananItemChange = (index, field, value) => {
+    try {
+      const updatedItems = [...layananItems];
+      updatedItems[index] = {
+        ...updatedItems[index],
+        [field]: value
+      };
+      setLayananItems(updatedItems);
+      
+      // Update formData if it's the first item (for backward compatibility)
+      if (index === 0) {
+        setFormData(prev => ({
+          ...prev,
+          [field]: value
+        }));
+      }
+      
+      console.log(`🔧 Updated layanan item ${index + 1}, field: ${field}, value: ${value}`);
+    } catch (error) {
+      console.error("❌ Error in handleLayananItemChange:", error);
+    }
+  };
+
+  const addLayananItem = () => {
+    try {
+      setLayananItems(prev => [...prev, {
+        namaLayanan: "",
+        detailLayanan: "",
+        kapasitas: "",
+        qty: "",
+        aksesExisting: "",
+        marginPercent: ""
+      }]);
+      console.log('➕ Added new layanan item');
+    } catch (error) {
+      console.error("❌ Error in addLayananItem:", error);
+    }
+  };
+
+  const removeLayananItem = (index) => {
+    try {
+      if (layananItems.length > 1) {
+        const updatedItems = layananItems.filter((_, i) => i !== index);
+        setLayananItems(updatedItems);
+        
+        // Update formData if we removed the first item
+        if (index === 0 && updatedItems.length > 0) {
+          const newFirstItem = updatedItems[0];
+          setFormData(prev => ({
+            ...prev,
+            namaLayanan: newFirstItem.namaLayanan,
+            detailLayanan: newFirstItem.detailLayanan,
+            kapasitas: newFirstItem.kapasitas,
+            qty: newFirstItem.qty,
+            aksesExisting: newFirstItem.aksesExisting,
+            marginPercent: newFirstItem.marginPercent
+          }));
+        }
+        
+        console.log('🗑️ Removed layanan item at index:', index);
+      }
+    } catch (error) {
+      console.error("❌ Error in removeLayananItem:", error);
+    }
+  };
+
+  // Get available nama layanan options for specific layanan item
+  const getAvailableNamaLayanan = (index) => {
+    return availableNamaLayanan;
+  };
+
+  // Get detail layanan options for specific layanan item  
+  const getDetailLayananOptionsForItem = (index) => {
+    const item = layananItems[index];
+    if (!formData.referensiHJT || !item.namaLayanan) {
+      return [];
+    }
+    
+    const filtered = layananData.filter(layanan =>
+      layanan.wilayah_hjt === formData.referensiHJT && 
+      layanan.nama_layanan === item.namaLayanan
+    );
+    
+    return [...new Set(filtered.map(item => item.jenis_layanan))].filter(Boolean);
+  };
+
   // Function to check if form data has changed
   const hasDataChanged = () => {
     try {
@@ -833,15 +997,70 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       // Check if pengeluaran items have changed
       const pengeluaranChanged = checkPengeluaranChanges();
       
+      // Check if layanan items have changed
+      const layananChanged = checkLayananChanges();
+      
       console.log('🔍 Change detection:', {
         formChanged,
         pengeluaranChanged,
-        hasAnyChanges: formChanged || pengeluaranChanged
+        layananChanged,
+        hasAnyChanges: formChanged || pengeluaranChanged || layananChanged
       });
       
-      return formChanged || pengeluaranChanged;
+      return formChanged || pengeluaranChanged || layananChanged;
     } catch (error) {
       console.error("❌ Error in hasDataChanged:", error);
+      return false; // Default to no changes if error occurs
+    }
+  };
+
+  // Function to check if layanan items have changed
+  const checkLayananChanges = () => {
+    try {
+      // Check if layananItems array has changed from initial state
+      const currentLayanan = layananItems || [];
+      const originalLayanan = originalLayananItems || [];
+      
+      console.log('🏷️ Checking layanan changes:', {
+        currentCount: currentLayanan.length,
+        originalCount: originalLayanan.length,
+        currentItems: currentLayanan,
+        originalItems: originalLayanan
+      });
+      
+      // If the number of items changed, it's a change
+      if (currentLayanan.length !== originalLayanan.length) {
+        console.log('🏷️ Layanan count changed:', currentLayanan.length, 'vs', originalLayanan.length);
+        return true;
+      }
+      
+      // If no layanan items and none originally, no change
+      if (currentLayanan.length === 0 && originalLayanan.length === 0) {
+        return false;
+      }
+      
+      // Compare each layanan item
+      for (let i = 0; i < currentLayanan.length; i++) {
+        const current = currentLayanan[i] || {};
+        const original = originalLayanan[i] || {};
+        
+        // Compare key fields that could change
+        const fieldsToCompare = [
+          'namaLayanan', 'detailLayanan', 'kapasitas', 'satuan', 'qty',
+          'backbone', 'port', 'tarifAkses', 'aksesExisting', 'tarif', 'marginPercent'
+        ];
+        
+        for (const field of fieldsToCompare) {
+          if (String(current[field] || '') !== String(original[field] || '')) {
+            console.log(`🏷️ Layanan item ${i} field ${field} changed:`, current[field], 'vs', original[field]);
+            return true;
+          }
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("❌ Error in checkLayananChanges:", error);
       return false; // Default to no changes if error occurs
     }
   };
@@ -911,25 +1130,60 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       return; // Don't proceed if no changes
     }
 
-    // Validasi form - hanya field penawaran yang wajib
-    const requiredFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak', 'referensiHJT', 'namaLayanan', 'detailLayanan', 'kapasitas', 'satuan', 'qty', 'marginPercent'];
-    const missingFields = requiredFields.filter(field => !formData[field]);
+    // Validasi form - field penawaran utama yang wajib
+    const requiredMainFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak', 'referensiHJT'];
+    const missingMainFields = requiredMainFields.filter(field => !formData[field]);
     
-    if (missingFields.length > 0) {
+    if (missingMainFields.length > 0) {
       const fieldNames = {
         'pelanggan': 'Pelanggan',
         'nomorKontrak': 'Nomor Kontrak',
         'durasiKontrak': 'Durasi Kontrak',
         'referensiHJT': 'Referensi HJT',
-        'namaLayanan': 'Nama Layanan',
-        'detailLayanan': 'Detail Layanan',
-        'kapasitas': 'Kapasitas',
-        'satuan': 'Satuan',
-        'qty': 'QTY',
-        'marginPercent': 'Margin %'
       };
-      const translatedFields = missingFields.map(field => fieldNames[field] || field);
+      const translatedFields = missingMainFields.map(field => fieldNames[field] || field);
       alert(`Harap isi field yang wajib: ${translatedFields.join(', ')}`);
+      return;
+    }
+
+    // Validasi layanan items - minimal harus ada 1 item yang lengkap
+    const validLayananItems = layananItems.filter(item => 
+      item.namaLayanan && item.detailLayanan && item.kapasitas && item.qty && item.marginPercent
+    );
+    
+    console.log('🔍 ============ LAYANAN VALIDATION DEBUG ============');
+    console.log('🔍 Current layananItems state:', layananItems);
+    console.log('🔍 Total layanan items:', layananItems.length);
+    console.log('🔍 Valid layanan items:', validLayananItems.length);
+    console.log('🔍 Valid layanan items data:', validLayananItems);
+    
+    // Debug each item individually
+    layananItems.forEach((item, index) => {
+      console.log(`🔍 Item ${index + 1} validation:`, {
+        namaLayanan: !!item.namaLayanan,
+        detailLayanan: !!item.detailLayanan,
+        kapasitas: !!item.kapasitas,
+        qty: !!item.qty,
+        marginPercent: !!item.marginPercent,
+        data: item
+      });
+    });
+    console.log('🔍 ================================================');
+    
+    if (validLayananItems.length === 0) {
+      alert('Harap isi minimal 1 layanan dengan lengkap (Nama Layanan, Detail Layanan, Kapasitas, QTY, dan Margin %)');
+      return;
+    }
+
+    // Validasi setiap layanan item - jika ada field yang diisi, harus lengkap semua
+    const hasIncompleteLayanan = layananItems.some(item => {
+      const hasAnyField = item.namaLayanan || item.detailLayanan || item.kapasitas || item.qty || item.marginPercent;
+      const hasAllFields = item.namaLayanan && item.detailLayanan && item.kapasitas && item.qty && item.marginPercent;
+      return hasAnyField && !hasAllFields;
+    });
+
+    if (hasIncompleteLayanan) {
+      alert('Jika mengisi layanan, harap lengkapi semua field (Nama Layanan, Detail Layanan, Kapasitas, QTY, Margin %) untuk setiap layanan.');
       return;
     }
 
@@ -948,6 +1202,8 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
 
     console.log('📝 Updating penawaran data:', formData);
+    console.log('📝 Layanan items data:', layananItems);
+    console.log('📝 Valid layanan items:', validLayananItems);
     console.log('📝 Margin percent check:', { 
       marginPercent: formData.marginPercent, 
       type: typeof formData.marginPercent 
@@ -958,6 +1214,23 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
 
     setIsSaving(true);
     
+    // Prepare layanan items data for backend
+    const processedLayananItems = layananItems
+      .filter(item => item.namaLayanan && item.detailLayanan && item.kapasitas && item.qty && item.marginPercent)
+      .map((item, index) => {
+        console.log(`🔧 Processing layanan item ${index + 1} for backend:`, item);
+        return {
+          namaLayanan: item.namaLayanan.trim(),
+          detailLayanan: item.detailLayanan.trim(),
+          kapasitas: item.kapasitas.toString().trim(),
+          qty: item.qty.toString().trim(),
+          aksesExisting: item.aksesExisting.trim(),
+          marginPercent: item.marginPercent.toString().trim()
+        };
+      });
+
+    console.log('🔧 Processed layanan items for backend:', processedLayananItems);
+
     // Include pengeluaran info for the parent component
     // Do not include the full editData object to avoid carrying extra data
     const updateData = {
@@ -972,16 +1245,37 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       tarif_akses: formData.tarifAkses, // Note: frontend uses tarifAkses, backend expects tarif_akses
       tarif: formData.tarif,
       piliLayanan: `${formData.namaLayanan} - ${formData.detailLayanan}`, // For display/backward compatibility
-      // Include pengeluaran items data
-      pengeluaranItems: pengeluaranItems.filter(item => 
-        item.item && item.keterangan && item.hasrat && item.jumlah
-      ),
+      // Add multiple layanan items data
+      layananItems: processedLayananItems,
+      // Include pengeluaran items data only if additional section is shown or has existing data
+      pengeluaranItems: (showAdditionalSection || (existingPengeluaran && existingPengeluaran.length > 0)) 
+        ? pengeluaranItems.filter(item => 
+            item.item && item.keterangan && item.hasrat && item.jumlah
+          )
+        : [],
       // Include total pengeluaran lain-lain
-      total_pengeluaran_lain_lain: getTotalPengeluaran(),
+      total_pengeluaran_lain_lain: (showAdditionalSection || (existingPengeluaran && existingPengeluaran.length > 0)) 
+        ? getTotalPengeluaran() 
+        : 0,
       _hasExistingPengeluaran: !!(existingPengeluaran && existingPengeluaran.length > 0),
+      _showAdditionalSection: showAdditionalSection, // Add this flag to help backend understand user intent
     };
     
     console.log('📤 Sending update data:', updateData);
+    console.log('📊 Update data breakdown:');
+    console.log('  - ID:', updateData.id_penawaran);
+    console.log('  - LayananItems count:', updateData.layananItems?.length || 0);
+    console.log('  - LayananItems details:', updateData.layananItems);
+    console.log('  - Pelanggan:', updateData.pelanggan);
+    console.log('  - Referensi HJT:', updateData.referensiHJT);
+    console.log('  - Durasi Kontrak:', updateData.durasiKontrak);
+    console.log('💰 Pengeluaran flags and data:');
+    console.log('  - showAdditionalSection:', showAdditionalSection);
+    console.log('  - existingPengeluaran length:', existingPengeluaran?.length || 0);
+    console.log('  - pengeluaranItems sent:', updateData.pengeluaranItems);
+    console.log('  - _hasExistingPengeluaran:', updateData._hasExistingPengeluaran);
+    console.log('  - _showAdditionalSection:', updateData._showAdditionalSection);
+    console.log('  - total_pengeluaran_lain_lain:', updateData.total_pengeluaran_lain_lain);
     
     onSave(updateData);
 
@@ -1016,15 +1310,18 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     setAvailableDetailLayanan([]);
     setFilteredLayananData([]);
     
-    // Reset pengeluaran items
-    setPengeluaranItems([{
-      id: null,
-      item: "",
-      keterangan: "",
-      hasrat: "",
-      jumlah: "",
-      isExisting: false
+    // Reset layanan items
+    setLayananItems([{
+      namaLayanan: "",
+      detailLayanan: "",
+      kapasitas: "",
+      qty: "",
+      aksesExisting: "",
+      marginPercent: ""
     }]);
+    
+    // Reset pengeluaran items to empty array
+    setPengeluaranItems([]);
     setExistingPengeluaran([]);
     setShowAdditionalSection(false);
     onClose();
@@ -1072,16 +1369,9 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
   const handleConfirmNo = () => {
     setShowConfirmModal(false);
     setShowAdditionalSection(false);
-    // Reset pengeluaran items when user chooses No
-    setPengeluaranItems([{
-      id: null,
-      item: "",
-      keterangan: "",
-      hasrat: "",
-      jumlah: "",
-      isExisting: false
-    }]);
-    console.log('❌ Additional section disabled and pengeluaran reset');
+    // Reset pengeluaran items to empty array when user chooses No
+    setPengeluaranItems([]);
+    console.log('❌ Additional section disabled and pengeluaran reset to empty');
   };
 
   if (!isOpen && !showSuccessModal) return null;
@@ -1508,309 +1798,380 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                   </div>
                 </div>
 
-                {/* Second Section with Light Blue Background */}
-                <div
-                  style={{
-                    backgroundColor: "#F0F9FF",
-                    padding: "20px",
-                    borderRadius: "8px",
-                    marginBottom: "20px",
-                  }}
-                >
-                  
-                  {/* Nama Layanan */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
+                {/* Multiple Layanan Items Section */}
+                <div style={{ marginBottom: "20px" }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '16px'
+                  }}>
+                    <h3 style={{
+                      margin: 0,
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#374151'
+                    }}>
+                      Data Layanan
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={addLayananItem}
                       style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
+                        backgroundColor: '#10B981',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '8px 16px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
                       }}
                     >
-                      Nama Layanan
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        name="namaLayanan"
-                        value={formData.namaLayanan}
-                        onChange={handleInputChange}
-                        required
-                        disabled={loadingLayanan || !formData.referensiHJT}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "2px solid #B0BEC5",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          outline: "none",
-                          backgroundColor: (loadingLayanan || !formData.referensiHJT) ? "#f5f5f5" : "white",
-                          boxSizing: "border-box",
-                          appearance: "none",
-                          cursor: (loadingLayanan || !formData.referensiHJT) ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        <option value="">
-                          {loadingLayanan 
-                            ? "Memuat layanan..." 
-                            : !formData.referensiHJT 
-                              ? "Pilih Referensi HJT terlebih dahulu" 
-                              : "Pilih Nama Layanan"}
-                        </option>
-                        {(availableNamaLayanan || []).map((namaLayanan, index) => (
-                          <option key={index} value={namaLayanan}>
-                            {namaLayanan}
-                          </option>
-                        ))}
-                      </select>
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "12px",
-                          color: "#666",
-                        }}
-                      >
-                        ▼
-                      </div>
-                    </div>
+                      <Plus style={{ width: '14px', height: '14px' }} />
+                      Tambah Layanan
+                    </button>
                   </div>
 
-                  {/* Detail Layanan */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
+                  {layananItems.map((item, index) => (
+                    <div
+                      key={index}
                       style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Detail Layanan
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        name="detailLayanan"
-                        value={formData.detailLayanan}
-                        onChange={handleInputChange}
-                        required
-                        disabled={loadingLayanan || !formData.namaLayanan}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "2px solid #B0BEC5",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          outline: "none",
-                          backgroundColor: (loadingLayanan || !formData.namaLayanan) ? "#f5f5f5" : "white",
-                          boxSizing: "border-box",
-                          appearance: "none",
-                          cursor: (loadingLayanan || !formData.namaLayanan) ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        <option value="">
-                          {loadingLayanan 
-                            ? "Memuat detail layanan..." 
-                            : !formData.namaLayanan 
-                              ? "Pilih Nama Layanan terlebih dahulu" 
-                              : "Pilih Detail Layanan"}
-                        </option>
-                        {(availableDetailLayanan || []).map((detailLayanan, index) => (
-                          <option key={index} value={detailLayanan}>
-                            {detailLayanan}
-                          </option>
-                        ))}
-                      </select>
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "12px",
-                          color: "#666",
-                        }}
-                      >
-                        ▼
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Kapasitas  field*/}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Kapasitas
-                    </label>
-                    <input
-                      type="text"
-                      name="kapasitas"
-                      value={formData.kapasitas}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan kapasitas"
-                      required
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        border: "2px solid #B0BEC5",
+                        backgroundColor: "#F0F9FF",
+                        padding: "20px",
                         borderRadius: "8px",
-                        fontSize: "14px",
-                        outline: "none",
-                        backgroundColor: "white",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
-
-                  {/* QTY */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
+                        marginBottom: "16px",
+                        border: '2px solid #E0F2FE',
+                        position: 'relative'
                       }}
                     >
-                      QTY
-                    </label>
-                    <input
-                      type="number"
-                      name="qty"
-                      value={formData.qty}
-                      onChange={handleInputChange}
-                      placeholder="Masukkan quantity"
-                      required
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        border: "2px solid #B0BEC5",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        outline: "none",
-                        backgroundColor: "white",
-                        boxSizing: "border-box",
-                      }}
-                    />
-                  </div>
+                      {/* Header dengan nomor layanan dan tombol hapus */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '16px',
+                        borderBottom: '1px solid #BAE6FD',
+                        paddingBottom: '8px'
+                      }}>
+                        <span style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#0F172A'
+                        }}>
+                          Layanan #{index + 1}
+                        </span>
+                        {layananItems.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeLayananItem(index)}
+                            style={{
+                              backgroundColor: '#EF4444',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '4px 8px',
+                              fontSize: '11px',
+                              fontWeight: '500',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Hapus
+                          </button>
+                        )}
+                      </div>
 
-                  {/* Akses Existing */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Akses Existing
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <select
-                        name="aksesExisting"
-                        value={formData.aksesExisting}
-                        onChange={handleInputChange}
-                        required
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          border: "2px solid #B0BEC5",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          outline: "none",
-                          backgroundColor: "white",
-                          boxSizing: "border-box",
-                          appearance: "none",
-                        }}
-                      >
-                        <option value="">Pilih akses existing</option>
-                        <option value="ya">Ya</option>
-                        <option value="tidak">Tidak</option>
-                      </select>
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "12px",
-                          color: "#666",
-                        }}
-                      >
-                        ▼
+                      {/* Nama Layanan */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#374151",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          Nama Layanan*
+                        </label>
+                        <div style={{ position: "relative" }}>
+                          <select
+                            value={item.namaLayanan}
+                            onChange={(e) => handleLayananItemChange(index, 'namaLayanan', e.target.value)}
+                            required
+                            disabled={loadingLayanan || !formData.referensiHJT}
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px",
+                              border: "2px solid #B0BEC5",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              outline: "none",
+                              backgroundColor: (loadingLayanan || !formData.referensiHJT) ? "#F9FAFB" : "white",
+                              boxSizing: "border-box",
+                              appearance: "none",
+                              cursor: (loadingLayanan || !formData.referensiHJT) ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            <option value="">
+                              {loadingLayanan 
+                                ? "Memuat layanan..." 
+                                : !formData.referensiHJT 
+                                  ? "Pilih Referensi HJT terlebih dahulu" 
+                                  : "Pilih Nama Layanan"}
+                            </option>
+                            {getAvailableNamaLayanan(index).map((namaLayanan, namaIndex) => (
+                              <option key={namaIndex} value={namaLayanan}>
+                                {namaLayanan}
+                              </option>
+                            ))}
+                          </select>
+                          <div
+                            style={{
+                              position: "absolute",
+                              right: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              pointerEvents: "none",
+                              fontSize: "12px",
+                              color: "#666",
+                            }}
+                          >
+                            ▼
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Detail Layanan */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#374151",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          Detail Layanan*
+                        </label>
+                        <div style={{ position: "relative" }}>
+                          <select
+                            value={item.detailLayanan}
+                            onChange={(e) => handleLayananItemChange(index, 'detailLayanan', e.target.value)}
+                            required
+                            disabled={loadingLayanan || !item.namaLayanan}
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px",
+                              border: "2px solid #B0BEC5",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              outline: "none",
+                              backgroundColor: (loadingLayanan || !item.namaLayanan) ? "#F9FAFB" : "white",
+                              boxSizing: "border-box",
+                              appearance: "none",
+                              cursor: (loadingLayanan || !item.namaLayanan) ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            <option value="">
+                              {loadingLayanan 
+                                ? "Memuat detail layanan..." 
+                                : !item.namaLayanan 
+                                  ? "Pilih Nama Layanan terlebih dahulu" 
+                                  : "Pilih Detail Layanan"}
+                            </option>
+                            {getDetailLayananOptionsForItem(index).map((detailLayanan, detailIndex) => (
+                              <option key={detailIndex} value={detailLayanan}>
+                                {detailLayanan}
+                              </option>
+                            ))}
+                          </select>
+                          <div
+                            style={{
+                              position: "absolute",
+                              right: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              pointerEvents: "none",
+                              fontSize: "12px",
+                              color: "#666",
+                            }}
+                          >
+                            ▼
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Kapasitas */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#374151",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          Kapasitas*
+                        </label>
+                        <input
+                          type="text"
+                          value={item.kapasitas}
+                          onChange={(e) => handleLayananItemChange(index, 'kapasitas', e.target.value)}
+                          placeholder="Masukkan kapasitas"
+                          required
+                          style={{
+                            width: "100%",
+                            padding: "10px 12px",
+                            border: "2px solid #B0BEC5",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            outline: "none",
+                            backgroundColor: "white",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                      </div>
+
+                      {/* QTY */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#374151",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          QTY*
+                        </label>
+                        <input
+                          type="number"
+                          value={item.qty}
+                          onChange={(e) => handleLayananItemChange(index, 'qty', e.target.value)}
+                          placeholder="Masukkan quantity"
+                          required
+                          style={{
+                            width: "100%",
+                            padding: "10px 12px",
+                            border: "2px solid #B0BEC5",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            outline: "none",
+                            backgroundColor: "white",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                      </div>
+
+                      {/* Akses Existing */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#374151",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          Akses Existing*
+                        </label>
+                        <div style={{ position: "relative" }}>
+                          <select
+                            value={item.aksesExisting}
+                            onChange={(e) => handleLayananItemChange(index, 'aksesExisting', e.target.value)}
+                            required
+                            style={{
+                              width: "100%",
+                              padding: "10px 12px",
+                              border: "2px solid #B0BEC5",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              outline: "none",
+                              backgroundColor: "white",
+                              boxSizing: "border-box",
+                              appearance: "none",
+                            }}
+                          >
+                            <option value="">Pilih akses existing</option>
+                            <option value="ya">Ya</option>
+                            <option value="tidak">Tidak</option>
+                          </select>
+                          <div
+                            style={{
+                              position: "absolute",
+                              right: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              pointerEvents: "none",
+                              fontSize: "12px",
+                              color: "#666",
+                            }}
+                          >
+                            ▼
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Margin % */}
+                      <div style={{ marginBottom: "16px" }}>
+                        <label
+                          style={{
+                            display: "block",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            color: "#374151",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          Margin %*
+                        </label>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="number"
+                            value={item.marginPercent}
+                            onChange={(e) => handleLayananItemChange(index, 'marginPercent', e.target.value)}
+                            placeholder="Masukkan margin dalam persen"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            required
+                            style={{
+                              width: "100%",
+                              padding: "10px 35px 10px 12px",
+                              border: "2px solid #B0BEC5",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              outline: "none",
+                              backgroundColor: "white",
+                              boxSizing: "border-box",
+                            }}
+                          />
+                          <div
+                            style={{
+                              position: "absolute",
+                              right: "12px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              pointerEvents: "none",
+                              fontSize: "14px",
+                              color: "#666",
+                              fontWeight: "500",
+                            }}
+                          >
+                            %
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Margin % */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      Margin %*
-                    </label>
-                    <div style={{ position: "relative" }}>
-                      <input
-                        type="number"
-                        name="marginPercent"
-                        value={formData.marginPercent}
-                        onChange={handleInputChange}
-                        placeholder="Masukkan margin dalam persen"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        required
-                        style={{
-                          width: "100%",
-                          padding: "10px 35px 10px 12px",
-                          border: "2px solid #B0BEC5",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          outline: "none",
-                          backgroundColor: "white",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          pointerEvents: "none",
-                          fontSize: "14px",
-                          color: "#666",
-                          fontWeight: "500",
-                        }}
-                      >
-                        %
-                      </div>
-                    </div>
-                  </div>
-
+                  ))}
                 </div>
 
                 {/* Add Button */}
@@ -2158,7 +2519,21 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     </p>
                     <button
                       type="button"
-                      onClick={() => setShowAdditionalSection(true)}
+                      onClick={() => {
+                        setShowAdditionalSection(true);
+                        // Add empty pengeluaran item if none exist
+                        if (pengeluaranItems.length === 0) {
+                          setPengeluaranItems([{
+                            id: null,
+                            item: "",
+                            keterangan: "",
+                            hasrat: "",
+                            jumlah: "",
+                            isExisting: false
+                          }]);
+                        }
+                        console.log('➕ Added pengeluaran section with empty item if needed');
+                      }}
                       style={{
                         fontSize: '12px',
                         fontWeight: '500',
@@ -2215,7 +2590,17 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                     Batal
                   </button>
                   <button
-                    onClick={handleSubmit}
+                    onClick={(e) => {
+                      console.log('🔄 Simpan button clicked');
+                      console.log('🔄 Button state:', {
+                        isSaving,
+                        hasDataChanged: hasDataChanged(),
+                        disabled: isSaving || !hasDataChanged()
+                      });
+                      if (!isSaving && hasDataChanged()) {
+                        handleSubmit(e);
+                      }
+                    }}
                     disabled={isSaving || !hasDataChanged()}
                     style={{
                       padding: "12px 24px",

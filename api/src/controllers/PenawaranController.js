@@ -522,9 +522,33 @@ export class PenawaranController {
         });
       }
 
+      console.log("🔄 =============== UPDATE PENAWARAN DEBUG ===============");
       console.log("🔄 Update penawaran ID:", penawaranId);
-      console.log("📝 Update data received:", updateData);
+      console.log("📝 Raw request body keys:", Object.keys(updateData));
+      console.log(
+        "📝 Update data received:",
+        JSON.stringify(updateData, null, 2)
+      );
+      console.log("📊 Update data analysis:");
+      console.log("  1. Has layananItems:", !!updateData.layananItems);
+      console.log("  2. LayananItems type:", typeof updateData.layananItems);
+      console.log(
+        "  3. LayananItems is array:",
+        Array.isArray(updateData.layananItems)
+      );
+      console.log(
+        "  4. LayananItems length:",
+        updateData.layananItems?.length || 0
+      );
+      console.log("  5. LayananItems content:", updateData.layananItems);
+      console.log(
+        "  6. Has single layanan:",
+        !!(updateData.namaLayanan && updateData.detailLayanan)
+      );
+      console.log("  7. referensiHJT:", updateData.referensiHJT);
+      console.log("  8. hjtWilayah:", updateData.hjtWilayah);
       console.log("👤 User info:", req.user);
+      console.log("🔄 ====================================================");
 
       const existingPenawaran = await PenawaranModel.getPenawaranById(
         penawaranId
@@ -578,10 +602,313 @@ export class PenawaranController {
 
       console.log("✅ Penawaran updated successfully:", updatedPenawaran);
 
-      const hasLayananData = updateData.namaLayanan && updateData.detailLayanan;
+      // Handle multiple layanan items update
+      if (
+        updateData.layananItems &&
+        Array.isArray(updateData.layananItems) &&
+        updateData.layananItems.length > 0
+      ) {
+        console.log(
+          "✅ Multiple layanan items detected - proceeding with update"
+        );
+        console.log(
+          "🔧 Processing multiple layanan items update:",
+          updateData.layananItems.length
+        );
 
-      if (hasLayananData) {
-        console.log("🔧 Updating layanan data for penawaran:", penawaranId);
+        try {
+          // First, delete existing layanan items for this penawaran
+          const existingLayanan =
+            await PenawaranLayananModel.getPenawaranLayananByPenawaranId(
+              penawaranId
+            );
+
+          if (existingLayanan && existingLayanan.length > 0) {
+            console.log(
+              "🗑️ Deleting existing layanan items:",
+              existingLayanan.length
+            );
+            for (const existing of existingLayanan) {
+              await PenawaranLayananModel.deletePenawaranLayanan(
+                existing.id_penawaran_layanan
+              );
+            }
+          }
+
+          // Then create new layanan items
+          for (let i = 0; i < updateData.layananItems.length; i++) {
+            const item = updateData.layananItems[i];
+            console.log(`🔧 Processing layanan item ${i + 1}:`, item);
+
+            if (!item.namaLayanan || !item.detailLayanan) {
+              console.log(`⚠️ Skipping incomplete layanan item ${i + 1}`);
+              continue;
+            }
+
+            // Find layanan from database to get pricing data
+            let layananResult = null;
+            try {
+              console.log(`🔍 Searching layanan for item ${i + 1}:`, {
+                namaLayanan: item.namaLayanan,
+                detailLayanan: item.detailLayanan,
+                wilayahHJT: updateData.referensiHJT || updateData.hjtWilayah,
+              });
+
+              layananResult = await LayananModel.getLayananByNameAndDetail(
+                item.namaLayanan,
+                item.detailLayanan,
+                updateData.referensiHJT || updateData.hjtWilayah
+              );
+
+              if (!layananResult) {
+                console.log(`❌ Layanan not found for item ${i + 1}`);
+                console.log(
+                  `❌ Search criteria: ${item.namaLayanan} - ${
+                    item.detailLayanan
+                  } - ${updateData.referensiHJT || updateData.hjtWilayah}`
+                );
+                throw new Error(
+                  `Layanan tidak ditemukan untuk: ${item.namaLayanan} - ${
+                    item.detailLayanan
+                  } di wilayah ${
+                    updateData.referensiHJT || updateData.hjtWilayah
+                  }`
+                );
+              }
+
+              console.log(
+                `✅ Found layanan for item ${i + 1}:`,
+                layananResult.id_layanan
+              );
+              console.log(`✅ Layanan details:`, layananResult);
+            } catch (fetchError) {
+              console.error(
+                `❌ Error fetching layanan data for item ${i + 1}:`,
+                fetchError
+              );
+              throw new Error(
+                `Gagal mengambil data layanan untuk item ${i + 1}: ${
+                  fetchError.message
+                }`
+              );
+            }
+
+            // Calculate discounted tarif based on contract duration
+            let tarifAksesTerbaru = null;
+            let tarifTerbaru = null;
+
+            const originalTarifAkses = layananResult.tarif_akses;
+            const originalTarif = layananResult.tarif;
+
+            console.log(`💰 Original tarif data for item ${i + 1}:`, {
+              originalTarifAkses,
+              originalTarif,
+              durasiKontrak: updateData.durasiKontrak,
+              aksesExisting: item.aksesExisting,
+            });
+
+            // If akses existing is "ya", set tarif akses terbaru to null
+            if (item.aksesExisting === "ya") {
+              tarifAksesTerbaru = null;
+              console.log(
+                `🔒 Item ${
+                  i + 1
+                }: Akses existing = 'ya', setting tarif akses terbaru to null`
+              );
+            } else {
+              tarifAksesTerbaru = calculateDiscountedTarif(
+                originalTarifAkses,
+                updateData.durasiKontrak
+              );
+              console.log(
+                `💰 Item ${i + 1}: Calculated tarif akses terbaru:`,
+                tarifAksesTerbaru
+              );
+            }
+
+            tarifTerbaru = calculateDiscountedTarif(
+              originalTarif,
+              updateData.durasiKontrak
+            );
+
+            console.log(`💰 Final calculated tarif for item ${i + 1}:`, {
+              tarifAksesTerbaru,
+              tarifTerbaru,
+            });
+
+            // Calculate Harga Dasar for this item
+            const calculateHargaDasar = () => {
+              try {
+                const backbone = parseFloat(layananResult.backbone) || 0;
+                const port = parseFloat(layananResult.port) || 0;
+                const tarifNTahun = parseFloat(tarifTerbaru) || 0;
+                const kapasitas = parseFloat(item.kapasitas) || 0;
+                const tarifAksesNTahun =
+                  item.aksesExisting === "ya"
+                    ? 0
+                    : parseFloat(tarifAksesTerbaru) || 0;
+                const qty = parseInt(item.qty) || 0;
+
+                console.log(
+                  `💰 Calculating Harga Dasar for item ${i + 1} (${
+                    item.namaLayanan
+                  }):`,
+                  {
+                    backbone,
+                    port,
+                    tarifNTahun,
+                    kapasitas,
+                    tarifAksesNTahun,
+                    qty,
+                    aksesExisting: item.aksesExisting,
+                  }
+                );
+
+                // Formula: ((Backbone + Port + Tarif (n tahun)) × Kapasitas + Tarif Akses (n tahun)) × QTY
+                const step1 = backbone + port + tarifNTahun;
+                const step2 = step1 * kapasitas;
+                const step3 = step2 + tarifAksesNTahun;
+                const hargaDasar = step3 * qty;
+
+                console.log(
+                  `🧮 Harga Dasar calculation steps for item ${i + 1}:`,
+                  {
+                    step1_BackbonePortTarif: step1,
+                    step2_TimesKapasitas: step2,
+                    step3_PlusTarifAkses: step3,
+                    final_HargaDasar: hargaDasar,
+                  }
+                );
+
+                return hargaDasar;
+              } catch (error) {
+                console.error(
+                  `❌ Error calculating Harga Dasar for item ${i + 1}:`,
+                  error
+                );
+                return 0;
+              }
+            };
+
+            const hargaDasarValue = calculateHargaDasar();
+
+            // Calculate Harga Final for this item
+            const calculateHargaFinal = () => {
+              try {
+                const hargaDasar = hargaDasarValue || 0;
+                const marginPercent = parseFloat(item.marginPercent) || 0;
+
+                console.log(
+                  `  Calculating Harga Final for item ${i + 1} (${
+                    item.namaLayanan
+                  }):`,
+                  {
+                    hargaDasar,
+                    marginPercent: `${marginPercent}%`,
+                  }
+                );
+
+                // Formula: Harga Final = Harga Dasar + (Harga Dasar × Margin%)
+                const marginAmount = hargaDasar * (marginPercent / 100);
+                const hargaFinal = hargaDasar + marginAmount;
+
+                console.log(`🧮 Harga Final calculation for item ${i + 1}:`, {
+                  hargaDasar,
+                  marginPercent: `${marginPercent}%`,
+                  marginAmount,
+                  hargaFinal,
+                  formula: `${hargaDasar} + (${hargaDasar} × ${marginPercent}%) = ${hargaFinal}`,
+                });
+
+                return hargaFinal;
+              } catch (error) {
+                console.error(
+                  `❌ Error calculating Harga Final for item ${i + 1}:`,
+                  error
+                );
+                return hargaDasarValue || 0;
+              }
+            };
+
+            const hargaFinalValue = calculateHargaFinal();
+
+            const layananData = {
+              id_penawaran: penawaranId,
+              id_layanan: layananResult.id_layanan,
+              nama_layanan: item.namaLayanan,
+              detail_layanan: item.detailLayanan,
+              kapasitas: item.kapasitas,
+              qty: parseInt(item.qty) || 1,
+              akses_existing: item.aksesExisting || null,
+              satuan: layananResult.satuan,
+              backbone: layananResult.backbone || null,
+              port: layananResult.port || null,
+              tarif_akses: layananResult.tarif_akses || null,
+              tarif: layananResult.tarif || null,
+              tarif_akses_terbaru: tarifAksesTerbaru,
+              tarif_terbaru: tarifTerbaru,
+              harga_dasar_icon: hargaDasarValue,
+              harga_final_sebelum_ppn: hargaFinalValue,
+              margin_percent: item.marginPercent
+                ? parseFloat(item.marginPercent)
+                : null,
+            };
+
+            console.log(
+              `💰 Creating layanan item ${i + 1} with margin ${
+                item.marginPercent
+              }%:`,
+              layananData
+            );
+
+            try {
+              console.log(
+                `💾 About to create layanan item ${i + 1} in database:`,
+                layananData
+              );
+              const createResult =
+                await PenawaranLayananModel.createPenawaranLayanan(layananData);
+              console.log(
+                `✅ Layanan item ${i + 1} created successfully:`,
+                createResult
+              );
+            } catch (layananError) {
+              console.error(
+                `❌ Error creating layanan item ${i + 1}:`,
+                layananError
+              );
+              console.error(`❌ Failed layanan data:`, layananData);
+              console.error(`❌ Error details:`, layananError.stack);
+              throw new Error(
+                `Gagal membuat layanan item ${i + 1}: ${layananError.message}`
+              );
+            }
+          }
+
+          console.log("✅ All multiple layanan items updated successfully");
+        } catch (layananItemsError) {
+          console.error(
+            "❌ Error processing multiple layanan items:",
+            layananItemsError
+          );
+          console.error(
+            "❌ LayananItems error stack:",
+            layananItemsError.stack
+          );
+          console.error(
+            "❌ Failed layanan items data:",
+            updateData.layananItems
+          );
+          throw new Error(
+            `Gagal memproses multiple layanan items: ${layananItemsError.message}`
+          );
+        }
+      }
+      // Fallback to single layanan update for backward compatibility
+      else if (updateData.namaLayanan && updateData.detailLayanan) {
+        console.log(
+          "🔧 Processing single layanan update (backward compatibility)"
+        );
 
         const existingLayanan =
           await PenawaranLayananModel.getPenawaranLayananByPenawaranId(

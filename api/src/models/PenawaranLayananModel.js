@@ -61,13 +61,13 @@ export class PenawaranLayananModel {
 
       console.log("🔧 Data to insert:", dataToInsert);
 
-      const { data, error } = await db.insert(
-        "data_penawaran_layanan",
-        dataToInsert
-      );
+      const { data, error } = await supabase
+        .from("data_penawaran_layanan")
+        .insert(dataToInsert)
+        .select();
 
       if (error) {
-        console.error("❌ Database error:", error);
+        console.error("❌ Supabase error in createPenawaranLayanan:", error);
         throw error;
       }
 
@@ -106,12 +106,23 @@ export class PenawaranLayananModel {
   // Hapus layanan penawaran
   static async deletePenawaranLayanan(id) {
     try {
-      const { data, error } = await db.delete("data_penawaran_layanan", {
-        id: id,
-      });
-      if (error) throw error;
+      console.log("🗑️ Deleting penawaran layanan with ID:", id);
+
+      const { data, error } = await supabase
+        .from("data_penawaran_layanan")
+        .delete()
+        .eq("id_penawaran_layanan", id)
+        .select();
+
+      if (error) {
+        console.error("❌ Supabase error in deletePenawaranLayanan:", error);
+        throw error;
+      }
+
+      console.log("✅ PenawaranLayanan deleted successfully:", data);
       return data;
     } catch (error) {
+      console.error("❌ Error in deletePenawaranLayanan:", error);
       throw new Error(`Gagal menghapus layanan penawaran: ${error.message}`);
     }
   }

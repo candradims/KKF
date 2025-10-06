@@ -247,6 +247,7 @@ const Penawaran = () => {
         }
       };
       
+      // Handle multiple layanan items or single layanan
       const apiData = {
         tanggal: formatDate(updatedData.tanggal),
         pelanggan: updatedData.pelanggan,
@@ -268,12 +269,30 @@ const Penawaran = () => {
         tarifAkses: updatedData.tarifAkses,
         aksesExisting: updatedData.aksesExisting,
         tarif: updatedData.tarif,
-        marginPercent: updatedData.marginPercent
+        marginPercent: updatedData.marginPercent,
+        // Add multiple layanan items if available
+        layananItems: updatedData.layananItems || []
       };
+
+      console.log('🔄 Multiple layanan items check:', {
+        hasLayananItems: Array.isArray(updatedData.layananItems),
+        layananItemsCount: updatedData.layananItems?.length || 0,
+        layananItems: updatedData.layananItems
+      });
 
       const numericId = parseInt(penawaranId, 10);
       
       console.log('📤 Sending API data for ID:', numericId, apiData);
+      
+      // Additional debugging for layanan items
+      if (apiData.layananItems && apiData.layananItems.length > 0) {
+        console.log('🏷️ API data contains layanan items:', apiData.layananItems.map(item => ({
+          namaLayanan: item.namaLayanan,
+          marginPercent: item.marginPercent,
+          hargaDasar: item.hargaDasar,
+          hargaFinal: item.hargaFinal
+        })));
+      }
 
       const cleanApiData = JSON.parse(JSON.stringify(apiData));
       
@@ -281,6 +300,115 @@ const Penawaran = () => {
       console.log('📬 API Response:', result);
       
       if (result.success) {
+        // Handle multiple layanan items if available
+        const layananItems = updatedData.layananItems || [];
+        console.log('🏷️ Checking multiple layanan items:', layananItems);
+        
+        if (layananItems.length > 0) {
+          console.log('🏷️ Handling multiple layanan update for penawaran ID:', selectedEditData.id);
+          
+          try {
+            // Get existing layanan data
+            const getExistingLayananResult = await fetch(`http://localhost:3000/api/penawaran-layanan/penawaran/${selectedEditData.id}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-User-ID': userData.id_user.toString(),
+                'X-User-Role': userData.role_user,
+                'X-User-Email': userData.email_user
+              }
+            });
+            
+            if (getExistingLayananResult.ok) {
+              const existingLayananData = await getExistingLayananResult.json();
+              console.log('📋 Found existing layanan data:', existingLayananData);
+              
+              if (existingLayananData.success && existingLayananData.data && existingLayananData.data.length > 0) {
+                console.log(`🗑️ Deleting ${existingLayananData.data.length} existing layanan items`);
+                
+                const deleteLayananPromises = existingLayananData.data.map(async (existingItem) => {
+                  const deleteResult = await fetch(`http://localhost:3000/api/penawaran-layanan/${existingItem.id_penawaran_layanan}`, {
+                    method: 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-User-ID': userData.id_user.toString(),
+                      'X-User-Role': userData.role_user,
+                      'X-User-Email': userData.email_user
+                    }
+                  });
+                  console.log(`🗑️ Delete layanan result for item ${existingItem.id_penawaran_layanan}:`, deleteResult.ok);
+                  return deleteResult.ok;
+                });
+                
+                await Promise.all(deleteLayananPromises);
+                console.log(`✅ Successfully deleted existing layanan items`);
+              }
+            }
+            
+            // Create new layanan items
+            const layananPromises = layananItems.map(async (item, index) => {
+              const layananData = {
+                id_penawaran: selectedEditData.id,
+                nama_layanan: item.namaLayanan,
+                detail_layanan: item.detailLayanan,
+                kapasitas: item.kapasitas,
+                satuan: item.satuan,
+                qty: parseInt(item.qty) || 0,
+                backbone: item.backbone,
+                port: item.port,
+                tarif_akses: parseFloat(item.tarifAkses) || 0,
+                akses_existing: parseFloat(item.aksesExisting) || 0,
+                tarif: parseFloat(item.tarif) || 0,
+                margin_percent: parseFloat(item.marginPercent) || 0,
+                harga_dasar: parseFloat(item.hargaDasar) || 0,
+                harga_final_sebelum_ppn: parseFloat(item.hargaFinal) || 0
+              };
+              
+              console.log(`🏷️ Creating layanan item ${index + 1}:`, layananData);
+              
+              const layananResult = await fetch('http://localhost:3000/api/penawaran-layanan', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-User-ID': userData.id_user.toString(),
+                  'X-User-Role': userData.role_user,
+                  'X-User-Email': userData.email_user
+                },
+                body: JSON.stringify(layananData)
+              });
+              
+              const layananResponse = await layananResult.json();
+              console.log(`📋 Layanan item ${index + 1} create response:`, layananResponse);
+              
+              return {
+                success: layananResult.ok && layananResponse.success,
+                response: layananResponse,
+                item: item,
+                index: index + 1
+              };
+            });
+            
+            const layananResults = await Promise.all(layananPromises);
+            
+            const successLayananCount = layananResults.filter(r => r.success).length;
+            const failedLayananCount = layananResults.filter(r => !r.success).length;
+            
+            console.log(`✅ Layanan results: ${successLayananCount} successful, ${failedLayananCount} failed`);
+            
+            if (failedLayananCount > 0) {
+              const failedLayananItems = layananResults.filter(r => !r.success);
+              console.error('❌ Failed layanan items:', failedLayananItems);
+              // Alert removed - notification disabled
+            } else {
+              console.log('✅ All layanan items created successfully');
+            }
+            
+          } catch (layananError) {
+            console.error('❌ Error handling multiple layanan:', layananError);
+          }
+        }
+        
+        // Handle pengeluaran items
         const pengeluaranItems = updatedData.pengeluaranItems || [];
         console.log('💰 Checking multiple pengeluaran items:', pengeluaranItems);
         
