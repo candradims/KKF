@@ -6,6 +6,173 @@ import { motion, AnimatePresence } from "framer-motion";
 const layananOptions = [
   "IP VPN (1 sd 10 Mbps)",
   "IP VPN (11 sd 50 Mbps)",
+  "IP VPN (51 sd 100 Mbps)",
+  "IP VPN (101 sd 500 Mbps)",
+  "IP VPN (501 sd 1000 Mbps)",
+  "IP VPN Premium (2 Mbps)",
+  "IP VPN Premium (3 Mbps)",
+  "IP VPN Premium (4 Mbps)",
+  "IP VPN Premium (5 Mbps)",
+  "IP VPN Premium (6 Mbps)",
+  "IP VPN Premium (7 Mbps)",
+  "IP VPN Premium (8 Mbps)",
+  "IP VPN Premium (9 Mbps)",
+  "IP VPN Premium (10 Mbps)",
+  "IP VPN Premium (15 Mbps)",
+  "IP VPN Premium (20 Mbps)",
+  "IP VPN Premium (40 Mbps)",
+  "Metronet (1 sd 10 Mbps)",
+  "Metronet (11 sd 50 Mbps)",
+  "Metronet (51 sd 100 Mbps)",
+  "Metronet (101 sd 500 Mbps)",
+  "Metronet (501 sd 1000 Mbps)",
+  "Inet Corp IX&IIX (1 sd 10 Mbps)",
+  "Inet Corp IX&IIX (11 sd 50 Mbps)",
+  "Inet Corp IX&IIX (51 sd 100 Mbps)",
+  "Inet Corp IX&IIX (101 sd 500 Mbps)",
+  "Inet Corp IX&IIX (501 sd 1 Gbps)",
+  "Inet Corp IX&IIX (1.01 sd 5 Gbps)",
+  "Inet Corp IX&IIX (5.01 sd 10 Gbps)",
+  "Inet Corp IIX (1 sd 10 Mbps)",
+  "Inet Corp IIX (11 sd 50 Mbps)",
+  "Inet Corp IIX (51 sd 100 Mbps)",
+  "Inet Corp IIX (101 sd 500 Mbps)",
+  "Inet Corp IIX (501 sd 1 Gbps)",
+  "Inet Corp IIX (1.01 sd 5 Gbps)",
+  "Inet Corp IIX (5.01 sd 10 Gbps)",
+  "Inet Corp IX (1 sd 10 Mbps)",
+  "Inet Corp IX (11 sd 50 Mbps)",
+  "Inet Corp IX (51 sd 100 Mbps)",
+  "Inet Corp IX (101 sd 500 Mbps)",
+  "Inet Corp IX (501 sd 1.000 Mbps)",
+  "Inet Corp IX (1.01 sd 5 Gbps)",
+  "Inet Corp IX (5.01 sd 10 Gbps)",
+  "IP Transit (1 sd 10 Mbps)",
+  "IP Transit (11 sd 50 Mbps)",
+  "IP Transit (51 sd 100 Mbps)",
+  "IP Transit (101 sd 500 Mbps)",
+  "IP Transit (501 sd 1 Gbps)",
+  "IP Transit (1.01 sd 5 Gbps)",
+  "IP Transit (5.01 sd 10 Gbps)",
+  "IP Transit IIX (1 sd 10 Mbps)",
+  "IP Transit IIX (11 sd 50 Mbps)",
+  "IP Transit IIX (51 sd 100 Mbps)",
+  "IP Transit IIX (101 sd 500 Mbps)",
+  "IP Transit IIX (501 sd 1Gbps)",
+  "IP Transit IIX (1.01 sd 5 Gbps)",
+  "IP Transit IIX (5.01 sd 10 Gbps)",
+  "IP Transit IX (1 sd 10 Mbps)",
+  "IP Transit IX Only (11 sd 50 Mbps)",
+  "IP Transit IX (51 sd 100 Mbps)",
+  "IP Transit IX (101 sd 500 Mbps)",
+  "IP Transit IX (501 sd 1 Gbps)",
+  "IP Transit IX (1.01 sd 5 Gbps)",
+  "IP Transit IX (5.01 sd 10 Gbps)",
+  "i-WIN Indoor",
+  "i-WIN Outdoor",
+  "MSR Bronze",
+  "MSR Silver (12 Bulan)",
+  "MSR Gold (12 Bulan)",
+  "MSR Platinum (12 Bulan)",
+  "APK I-See (Basic)",
+  "APK I-See (Flex)",
+  "APK I-See (Ultimate)",
+  "Non Analytic CCTV (Basic)",
+  "Analytic CCTV (Basic)",
+  "Outdoor PTZ (Basic)",
+  "Thermal Outdoor (Basic)",
+  "Non Analytic CCTV (Flex)",
+  "Analytic CCTV (Flex)",
+  "Outdoor PTZ (Flex)",
+  "Thermal Outdoor (Flex)",
+  "Non Analytic CCTV (Ultimate)",
+  "Analytic CCTV (Ultimate)",
+  "Outdoor PTZ (Ultimate)",
+  "Thermal Outdoor (Ultimate)",
+  "Biaya Installasi CCTV",
+  "Penambahan IPv4 Publik",
+  "Lain-lain",
+  "IBBC CIR4-BW10 On-Net FTTH",
+  "IBBC CIR4-BW15 On-Net FTTH",
+  "IBBC CIR4-BW20 On-Net FTTH",
+  "IBBC CIR4-BW25 On-Net FTTH",
+  "IBBC CIR4-BW30 On-Net FTTH",
+  "IBBC CIR4-BW35 On-Net FTTH",
+  "IBBC CIR4-BW50 On-Net FTTH",
+  "IBBC CIR4-BW75 On-Net FTTH",
+  "IBBC CIR4-BW100 On-Net FTTH",
+  "IBBC CIR4-BW150 On-Net FTTH",
+  "IBBC CIR4-BW200 On-Net FTTH",
+  "IBBC CIR4-BW500 On-Net FTTH",
+  "IBBC CIR4-BW1000 On-Net FTTH",
+  "IBBC CIR8-BW10 On-Net FTTH",
+  "IBBC CIR8-BW15 On-Net FTTH",
+  "IBBC CIR8-BW20 On-Net FTTH",
+  "IBBC CIR8-BW25 On-Net FTTH",
+  "IBBC CIR8-BW30 On-Net FTTH",
+  "IBBC CIR8-BW35 On-Net FTTH",
+  "IBBC CIR10-BW50 On-Net FTTH",
+  "IBBC CIR10-BW75 On-Net FTTH",
+  "IBBC CIR16-BW100 On-Net FTTH",
+  "IBBC CIR16-BW150 On-Net FTTH",
+  "IBBC CIR16-BW200 On-Net FTTH",
+  "IBBC CIR20-BW500 On-Net FTTH",
+  "IBBC CIR20-BW1000 On-Net FTTH",
+  "IBBC CIR4-BW10 Off-Net non-FTTH",
+  "IBBC CIR4-BW15 Off-Net non-FTTH",
+  "IBBC CIR4-BW20 Off-Net non-FTTH",
+  "IBBC CIR4-BW25 Off-Net non-FTTH",
+  "IBBC CIR4-BW30 Off-Net non-FTTH",
+  "IBBC CIR4-BW35 Off-Net non-FTTH",
+  "IBBC CIR4-BW50 Off-Net non-FTTH",
+  "IBBC CIR4-BW75 Off-Net non-FTTH",
+  "IBBC CIR4-BW100 Off-Net non-FTTH",
+  "IBBC CIR4-BW150 Off-Net non-FTTH",
+  "IBBC CIR4-BW200 Off-Net non-FTTH",
+  "IBBC CIR4-BW500 Off-Net non-FTTH",
+  "IBBC CIR4-BW1000 Off-Net non-FTTH",
+  "IBBC CIR8-BW10 Off-Net non-FTTH",
+  "IBBC CIR8-BW15 Off-Net non-FTTH",
+  "IBBC CIR8-BW20 Off-Net non-FTTH",
+  "IBBC CIR8-BW25 Off-Net non-FTTH",
+  "IBBC CIR8-BW30 Off-Net non-FTTH",
+  "IBBC CIR8-BW35 Off-Net non-FTTH",
+  "IBBC CIR10-BW50 Off-Net non-FTTH",
+  "IBBC CIR10-BW75 Off-Net non-FTTH",
+  "IBBC CIR16-BW100 Off-Net non-FTTH",
+  "IBBC CIR16-BW150 Off-Net non-FTTH",
+  "IBBC CIR16-BW200 Off-Net non-FTTH",
+  "IBBC CIR20-BW500 Off-Net non-FTTH",
+  "IBBC CIR20-BW1000 Off-Net non-FTTH",
+  "IBBC CIR4-BW10 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW15 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW20 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW25 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW30 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW35 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW50 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW75 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW100 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW150 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW200 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW500 On-Net FTTH IP Publik",
+  "IBBC CIR4-BW1000 On-Net FTTH IP Publik",
+  "IBBC CIR8-BW10 On-Net FTTH IP Publik",
+  "IBBC CIR8-BW15 On-Net FTTH IP Publik",
+  "IBBC CIR8-BW20 On-Net FTTH IP Publik",
+  "IBBC CIR8-BW25 On-Net FTTH IP Publik",
+  "IBBC CIR8-BW30 On-Net FTTH IP Publik",
+  "IBBC CIR8-BW35 On-Net FTTH IP Publik",
+  "IBBC CIR10-BW50 On-Net FTTH IP Publik",
+  "IBBC CIR10-BW75 On-Net FTTH IP Publik",
+  "IBBC CIR16-BW100 On-Net FTTH IP Publik",
+  "IBBC CIR16-BW150 On-Net FTTH IP Publik",
+  "IBBC CIR16-BW200 On-Net FTTH IP Publik",
+  "IBBC CIR20-BW500 On-Net FTTH IP Publik",
+  "IBBC CIR20-BW1000 On-Net FTTH IP Publik",
+  "Cloud 1corevCPU 2GB Mem Cap 50GB",
+  "Cloud 4corevCPU 16GB Mem Cap 200GB",
+  "Cloud 12corevCPU 96Gb Mem Cap 1TB",
 ];
 
 // Helper untuk format tanggal yyyy-mm-dd
@@ -371,7 +538,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     return [...new Set(filtered.map(item => item.jenis_layanan))].filter(Boolean);
   };
 
-  const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     
     const requiredFields = [
@@ -441,23 +608,37 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
 
     setIsSaving(true);
     
-    const dataToSend = {
-      ...formData,
-      layananItems: layananItems,
-      selectedLayananId: selectedLayanan?.id_layanan,
-      satuan: formData.satuan,
-      backbone: formData.backbone,
-      port: formData.port,
-      tarif_akses: formData.tarifAkses,
-      tarif: formData.tarif,
-      piliLayanan: layananItems.map(item => `${item.namaLayanan} - ${item.detailLayanan}`).join('; '),
-      pengeluaranItems: showAdditionalSection ? pengeluaranItems : [],
-      total_pengeluaran_lain_lain: showAdditionalSection ? getTotalPengeluaran() : 0
-    };
-    
-    onSave(dataToSend);
+    try {
+      const dataToSend = {
+        ...formData,
+        layananItems: layananItems,
+        selectedLayananId: selectedLayanan?.id_layanan,
+        satuan: formData.satuan,
+        backbone: formData.backbone,
+        port: formData.port,
+        tarif_akses: formData.tarifAkses,
+        tarif: formData.tarif,
+        piliLayanan: layananItems.map(item => `${item.namaLayanan} - ${item.detailLayanan}`).join('; '),
+        pengeluaranItems: showAdditionalSection ? pengeluaranItems : [],
+        total_pengeluaran_lain_lain: showAdditionalSection ? getTotalPengeluaran() : 0
+      };
+      
+      console.log('🔄 Memanggil onSave...');
+      const saveResult = await onSave(dataToSend);
+      console.log('📝 Hasil dari onSave:', saveResult);
+      
+      if (saveResult === true) {
+        console.log('✅ Data berhasil disimpan, menampilkan success modal');
+        setShowSuccessModal(true);
+      } else {
+        console.error('❌ Gagal menyimpan data');
+        setIsSaving(false);
+      }
+    } catch (error) {
+      console.error('❌ Error saat menyimpan:', error);
+      setIsSaving(false);
+    }
   };
-
   // Reset form state completely
   const resetFormState = () => {
     console.log('🔄 Resetting form state...');
