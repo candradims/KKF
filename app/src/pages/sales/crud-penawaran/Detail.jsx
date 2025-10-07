@@ -396,9 +396,24 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
     const totalBulanHargaDasar = hasilPenawaranData?.total_per_bulan_harga_dasar_icon || totalHargaDasar;
     const totalBulanHargaFinal = hasilPenawaranData?.total_per_bulan_harga_final_sebelum_ppn || totalHargaFinal;
     
-    // Calculate 12 month totals
-    const grandTotal12BulanHargaDasar = totalBulanHargaDasar * 12;
-    const grandTotal12BulanHargaFinal = totalBulanHargaFinal * 12;
+    // Use Grand Total 12 Bulan from database if available, otherwise calculate as fallback
+    const grandTotal12BulanHargaDasar = hasilPenawaranData?.grand_total_12_bulan_harga_dasar_icon || (totalBulanHargaDasar * 12);
+    const grandTotal12BulanHargaFinal = hasilPenawaranData?.grand_total_12_bulan_harga_final_sebelum_ppn || (totalBulanHargaFinal * 12);
+    
+    console.log('📊 Grand Total 12 Bulan values:', {
+      fromDatabase: {
+        hargaDasar: hasilPenawaranData?.grand_total_12_bulan_harga_dasar_icon,
+        hargaFinal: hasilPenawaranData?.grand_total_12_bulan_harga_final_sebelum_ppn
+      },
+      calculated: {
+        hargaDasar: totalBulanHargaDasar * 12,
+        hargaFinal: totalBulanHargaFinal * 12
+      },
+      used: {
+        grandTotal12BulanHargaDasar,
+        grandTotal12BulanHargaFinal
+      }
+    });
     
     // Calculate discount amount
     const discountPercent = parseFloat(detailData?.discount || 0);
