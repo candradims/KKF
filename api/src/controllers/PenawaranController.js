@@ -1613,10 +1613,27 @@ export class PenawaranController {
         }
       }
 
-      // Hitung total 12 bulan
-      const grandTotal12BulanHargaDasarIcon = totalPerBulanHargaDasarIcon * 12;
+      // Hitung Grand Total 12 Bulan berdasarkan durasi kontrak
+      // Formula: Grand Total 12 Bulan = Total/Bulan × (Durasi Kontrak (tahun) × 12)
+      const durasiKontrak = existingPenawaran.durasi_kontrak || 1; // Default 1 tahun jika tidak ada
+      console.log(
+        "📊 Calculating Grand Total 12 Bulan with durasi kontrak:",
+        durasiKontrak,
+        "tahun"
+      );
+
+      const grandTotal12BulanHargaDasarIcon =
+        totalPerBulanHargaDasarIcon * (durasiKontrak * 12);
       const grandTotal12BulanHargaFinalSebelumPPN =
-        totalPerBulanHargaFinalSebelumPPN * 12;
+        totalPerBulanHargaFinalSebelumPPN * (durasiKontrak * 12);
+
+      console.log("💰 Grand Total 12 Bulan calculated:", {
+        totalPerBulanHargaDasarIcon,
+        totalPerBulanHargaFinalSebelumPPN,
+        durasiKontrak,
+        grandTotal12BulanHargaDasarIcon,
+        grandTotal12BulanHargaFinalSebelumPPN,
+      });
 
       // Hitung total pengeluaran
       const totalPengeluaranLainLain = pengeluaranList.reduce((total, item) => {
@@ -1685,15 +1702,18 @@ export class PenawaranController {
         );
       }
 
-      // Siapkan data hasil - hanya simpan 2 kolom yang diperlukan
+      // Siapkan data hasil - simpan Total/Bulan dan Grand Total 12 Bulan
       const hasilData = {
         total_per_bulan_harga_dasar_icon: totalPerBulanHargaDasarIcon,
         total_per_bulan_harga_final_sebelum_ppn:
           totalPerBulanHargaFinalSebelumPPN,
+        grand_total_12_bulan_harga_dasar_icon: grandTotal12BulanHargaDasarIcon,
+        grand_total_12_bulan_harga_final_sebelum_ppn:
+          grandTotal12BulanHargaFinalSebelumPPN,
       };
 
       console.log(
-        "💾 Saving only Total/Bulan data to hasil_penawaran:",
+        "💾 Saving Total/Bulan and Grand Total 12 Bulan to hasil_penawaran:",
         hasilData
       );
 
