@@ -30,6 +30,7 @@ router.get(
 router.post("/", salesOnly, PenawaranController.createPenawaran);
 router.put("/:id", adminOrSales, PenawaranController.updatePenawaran);
 router.delete("/:id", adminOrSales, PenawaranController.deletePenawaran);
+router.get("/:id/hasil", adminOrSales, PenawaranController.getHasilPenawaran);
 router.post(
   "/:id/calculate",
   adminOrSales,

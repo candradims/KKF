@@ -1404,6 +1404,59 @@ export class PenawaranController {
     }
   }
 
+  // Ambil hasil penawaran yang sudah dihitung
+  static async getHasilPenawaran(req, res) {
+    try {
+      const { id } = req.params;
+
+      // Cek apakah penawaran ada dan user memiliki izin
+      const existingPenawaran = await PenawaranModel.getPenawaranById(id);
+      if (!existingPenawaran) {
+        return res.status(404).json({
+          success: false,
+          message: "Penawaran tidak ditemukan",
+        });
+      }
+
+      // Sales hanya dapat melihat penawaran mereka sendiri
+      if (
+        req.user.role_user === "sales" &&
+        existingPenawaran.id_user !== req.user.id_user
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Akses ditolak. Anda hanya dapat melihat penawaran milik Anda sendiri.",
+        });
+      }
+
+      // Ambil hasil penawaran yang sudah dihitung
+      const hasilPenawaran =
+        await HasilPenawaranModel.getHasilPenawaranByPenawaranId(id);
+
+      if (!hasilPenawaran) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Hasil penawaran belum dihitung. Silakan hitung terlebih dahulu.",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Hasil penawaran berhasil diambil",
+        data: hasilPenawaran,
+      });
+    } catch (error) {
+      console.error("❌ Error in getHasilPenawaran:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal mengambil hasil penawaran",
+        error: error.message,
+      });
+    }
+  }
+
   // Hitung hasil penawaran
   static async calculateResult(req, res) {
     try {

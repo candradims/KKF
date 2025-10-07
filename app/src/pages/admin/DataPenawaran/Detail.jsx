@@ -31,6 +31,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
 
   const [pengeluaranLain, setPengeluaranLain] = useState([]);
   const [fullDetailData, setFullDetailData] = useState(null);
+  const [hasilPenawaranData, setHasilPenawaranData] = useState(null);
 
   // Fetch full detail data including catatan
   const loadFullDetailData = async () => {
@@ -109,18 +110,127 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
     }, 0);
   };
 
-  const totals = {
-    totalBulan: '11.500.000',
-    totalBulan2: '22.500.000',
-    grandTotal12Bulan: '50.700.000',
-    grandTotal12Bulan2: '95.500.000',
-    discount: '-',
-    totalPengeluaranLain: `Rp ${calculateTotalPengeluaranLain().toLocaleString('id-ID')}`,
-    grandTotalDisc: '50.700.000',
-    grandTotalDisc2: '95.500.000',
-    profitDariHJT: '25.100.000',
-    marginDariHJT: '50.20%'
+  // Function to load hasil penawaran data
+  const loadHasilPenawaranData = async () => {
+    const penawaranId = detailData?.id_penawaran || detailData?.id || detailData?.rawData?.id_penawaran;
+    
+    if (!penawaranId) {
+      console.log('❌ No penawaran ID found for hasil penawaran');
+      return;
+    }
+    
+    try {
+      console.log('📊 Loading hasil penawaran for ID:', penawaranId);
+      
+      const userData = getUserData();
+      if (!userData) {
+        console.error('❌ No user data found for hasil penawaran');
+        return;
+      }
+      
+      const headers = getAuthHeaders();
+      
+      // Try to get existing hasil penawaran first
+      let response = await fetch(`http://localhost:3001/api/penawaran/${penawaranId}/hasil`, {
+        method: 'GET',
+        headers: headers
+      });
+      
+      // If no existing hasil found, calculate it
+      if (!response.ok && response.status === 404) {
+        console.log('🔢 No existing hasil found, calculating...');
+        response = await fetch(`http://localhost:3001/api/penawaran/${penawaranId}/calculate`, {
+          method: 'POST',
+          headers: headers
+        });
+      }
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Hasil penawaran data loaded:', result);
+        if (result.success && result.data) {
+          setHasilPenawaranData(result.data);
+        }
+      } else {
+        console.error('❌ Failed to load hasil penawaran:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error loading hasil penawaran:', error);
+    }
   };
+
+  // Calculate totals dynamically from real data
+  const calculateTotals = () => {
+    // Ensure tabelPerhitungan is available and is an array
+    if (!tabelPerhitungan || !Array.isArray(tabelPerhitungan)) {
+      console.log('⚠️ tabelPerhitungan not available yet, using fallback values');
+      return {
+        totalBulan: '0',
+        totalBulan2: '0',
+        grandTotal12Bulan: '0',
+        grandTotal12Bulan2: '0',
+        discount: '-',
+        totalPengeluaranLain: `Rp ${calculateTotalPengeluaranLain().toLocaleString('id-ID')}`,
+        grandTotalDisc: '0',
+        grandTotalDisc2: '0',
+        profitDariHJT: '0',
+        marginDariHJT: '0.00%'
+      };
+    }
+
+    // Calculate Total/Bulan from tabelPerhitungan data
+    const totalHargaDasar = tabelPerhitungan.reduce((total, item) => {
+      // Remove "Rp" and other non-digit characters, then parse
+      const hargaDasarStr = item.hargaDasar || '';
+      const hargaDasarValue = parseFloat(hargaDasarStr.replace(/[^\d]/g, '') || 0);
+      return total + hargaDasarValue;
+    }, 0);
+    
+    const totalHargaFinal = tabelPerhitungan.reduce((total, item) => {
+      // Remove "Rp" and other non-digit characters, then parse
+      const hargaFinalStr = item.hargaFinal || '';
+      const hargaFinalValue = parseFloat(hargaFinalStr.replace(/[^\d]/g, '') || 0);
+      return total + hargaFinalValue;
+    }, 0);
+    
+    // Use hasil penawaran data if available, otherwise use calculated values
+    const totalBulanHargaDasar = hasilPenawaranData?.total_per_bulan_harga_dasar_icon || totalHargaDasar;
+    const totalBulanHargaFinal = hasilPenawaranData?.total_per_bulan_harga_final_sebelum_ppn || totalHargaFinal;
+    
+    // Calculate 12 month totals
+    const grandTotal12BulanHargaDasar = totalBulanHargaDasar * 12;
+    const grandTotal12BulanHargaFinal = totalBulanHargaFinal * 12;
+    
+    // Calculate discount amount
+    const discountPercent = parseFloat(detailData?.discount || 0);
+    const discountAmount = (grandTotal12BulanHargaFinal * discountPercent) / 100;
+    
+    // Calculate total pengeluaran
+    const totalPengeluaranLain = calculateTotalPengeluaranLain();
+    
+    // Calculate grand total after discount and pengeluaran
+    const grandTotalDiscHargaDasar = grandTotal12BulanHargaDasar - discountAmount - totalPengeluaranLain;
+    const grandTotalDiscHargaFinal = grandTotal12BulanHargaFinal - discountAmount - totalPengeluaranLain;
+    
+    // Calculate profit and margin
+    const profitDariHJT = grandTotalDiscHargaFinal - grandTotalDiscHargaDasar;
+    const marginDariHJT = grandTotalDiscHargaDasar > 0 ? (profitDariHJT / grandTotalDiscHargaDasar) * 100 : 0;
+    
+    return {
+      totalBulan: totalBulanHargaDasar.toLocaleString('id-ID'),
+      totalBulan2: totalBulanHargaFinal.toLocaleString('id-ID'),
+      grandTotal12Bulan: grandTotal12BulanHargaDasar.toLocaleString('id-ID'),
+      grandTotal12Bulan2: grandTotal12BulanHargaFinal.toLocaleString('id-ID'),
+      discount: discountPercent > 0 ? `${discountPercent}%` : '-',
+      totalPengeluaranLain: `Rp ${totalPengeluaranLain.toLocaleString('id-ID')}`,
+      grandTotalDisc: grandTotalDiscHargaDasar.toLocaleString('id-ID'),
+      grandTotalDisc2: grandTotalDiscHargaFinal.toLocaleString('id-ID'),
+      profitDariHJT: profitDariHJT.toLocaleString('id-ID'),
+      marginDariHJT: `${marginDariHJT.toFixed(2)}%`
+    };
+  };
+  
+  const totals = calculateTotals();
 
   const loadPengeluaranData = async () => {
     if (!detailData?.id) return;
@@ -169,6 +279,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   useEffect(() => {
     loadPengeluaranData();
     loadFullDetailData(); // Load full detail data when component opens
+    loadHasilPenawaranData(); // Load hasil penawaran data
   }, [detailData?.id_penawaran]); // Use id_penawaran instead of id
 
   if (!isOpen) return null;
