@@ -491,7 +491,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              zIndex: 1000,
+              zIndex: 1001,
               padding: '20px'
             }}
           >
