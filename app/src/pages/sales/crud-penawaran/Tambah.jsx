@@ -993,7 +993,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       border: `2px solid rgba(0, 192, 202, 0.25)`,
                       position: 'relative',
                       overflow: 'hidden',
-                      top: '40px'
+                      top: '190px'
                     }}
                   >
                     {/* Decorative corner accent */}
@@ -1371,7 +1371,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                                         fontSize: '14px'
                                       }}
                                     >
-                                      <option value="">Pilih akses existing</option>
+                                      <option value="" disabled hidden>Pilih akses existing</option>
                                       <option value="ya">Ya</option>
                                       <option value="tidak">Tidak</option>
                                     </select>
@@ -1631,7 +1631,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                           </p>
                         </div>
 
-                        {/* Total Display - MODIFIED POSITION */}
+                        {/* Total Display */}
                         {pengeluaranItems.some(item => item.hasrat && item.jumlah) && (
                           <motion.div 
                             initial={{ opacity: 0, scale: 0.8 }}
