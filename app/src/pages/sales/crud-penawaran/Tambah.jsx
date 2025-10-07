@@ -528,7 +528,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
   const handleConfirmYes = () => {
     setShowConfirmModal(false);
     setShowAdditionalSection(true);
-    setShowPengeluaranButton(false); // Sembunyikan tombol setelah dikonfirmasi Ya
+    setShowPengeluaranButton(false);
   };
 
   const handleConfirmNo = () => {
@@ -993,7 +993,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       border: `2px solid rgba(0, 192, 202, 0.25)`,
                       position: 'relative',
                       overflow: 'hidden',
-                      top: '190px'
+                      top: '40px'
                     }}
                   >
                     {/* Decorative corner accent */}
@@ -1567,6 +1567,35 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       overflow: 'hidden'
                     }}
                   >
+                    {/* Tombol Close Untuk pengeluaran */}
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => {
+                        setShowAdditionalSection(false);
+                        setShowPengeluaranButton(true);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '16px',
+                        right: '16px',
+                        background: 'rgba(3, 91, 113, 0.1)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        zIndex: 10
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.2)'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'}
+                    >
+                      <X size={16} color={colors.primary} />
+                    </motion.button>
                     {/* Decorative corner accent */}
                     <div style={{
                       position: 'absolute',
