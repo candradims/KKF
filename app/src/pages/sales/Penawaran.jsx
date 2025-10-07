@@ -530,6 +530,31 @@ const Penawaran = () => {
         alert('Data penawaran berhasil diperbarui');
         await fetchPenawaranData();
         triggerDetailRefresh();
+        
+        // Recalculate Total/Bulan after successful update
+        try {
+          console.log('🔄 Recalculating Total/Bulan after update...');
+          const recalculateResponse = await fetch(`http://localhost:3000/api/penawaran/${numericId}/calculate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-User-ID': userData.id_user.toString(),
+              'X-User-Role': userData.role_user,
+              'X-User-Email': userData.email_user
+            }
+          });
+          
+          if (recalculateResponse.ok) {
+            const recalculateResult = await recalculateResponse.json();
+            console.log('✅ Total/Bulan recalculated successfully:', recalculateResult);
+          } else {
+            console.warn('⚠️ Failed to recalculate Total/Bulan, but update was successful');
+          }
+        } catch (recalcError) {
+          console.error('❌ Error recalculating Total/Bulan:', recalcError);
+          console.warn('⚠️ Total/Bulan recalculation failed, but update was successful');
+        }
+        
         setShowEditModal(false);
         setSelectedEditData(null);
       } else {

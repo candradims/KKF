@@ -1489,15 +1489,105 @@ export class PenawaranController {
       const pengeluaranList =
         await PengeluaranModel.getPengeluaranByPenawaranId(id);
 
-      // Hitung total
+      // Accept Total/Bulan values from frontend if provided
       let totalPerBulanHargaDasarIcon = 0;
       let totalPerBulanHargaFinalSebelumPPN = 0;
+      
+      // Check if frontend sends calculated totals
+      if (req.body.totalPerBulanHargaDasar && req.body.totalPerBulanHargaFinal) {
+        totalPerBulanHargaDasarIcon = parseFloat(req.body.totalPerBulanHargaDasar) || 0;
+        totalPerBulanHargaFinalSebelumPPN = parseFloat(req.body.totalPerBulanHargaFinal) || 0;
+        console.log("✅ Using Total/Bulan values from frontend:", {
+          totalPerBulanHargaDasarIcon,
+          totalPerBulanHargaFinalSebelumPPN
+        });
+      } else {
+        // Fallback: Calculate from layanan data
+        console.log("🔄 Calculating Total/Bulan from layanan data:", layananList.length, "items");
 
-      layananList.forEach((layanan) => {
-        totalPerBulanHargaDasarIcon += layanan.harga_dasar_icon || 0;
-        totalPerBulanHargaFinalSebelumPPN +=
-          layanan.harga_final_sebelum_ppn || 0;
-      });
+        for (const layanan of layananList) {
+          let hargaDasar = layanan.harga_dasar_icon;
+          let hargaFinal = layanan.harga_final_sebelum_ppn;
+          
+          // If harga values are missing or 0, calculate them
+          if (!hargaDasar || !hargaFinal) {
+            console.log(`🔄 Calculating missing harga for layanan: ${layanan.nama_layanan}`);
+            
+            try {
+              // Get layanan detail for calculation
+              const layananDetail = await LayananModel.getLayananById(layanan.id_layanan);
+              if (!layananDetail) {
+                console.warn(`⚠️ Layanan detail not found for ID: ${layanan.id_layanan}`);
+                continue;
+              }
+              
+              // Calculate discounted tarif based on contract duration
+              let tarifAksesTerbaru = layananDetail.tarif_akses;
+              let tarifTerbaru = layananDetail.tarif;
+              
+              if (existingPenawaran.durasi_kontrak) {
+                if (layanan.akses_existing === "ya") {
+                  tarifAksesTerbaru = null;
+                } else {
+                  tarifAksesTerbaru = calculateDiscountedTarif(
+                    layananDetail.tarif_akses,
+                    existingPenawaran.durasi_kontrak
+                  );
+                }
+                
+                tarifTerbaru = calculateDiscountedTarif(
+                  layananDetail.tarif,
+                  existingPenawaran.durasi_kontrak
+                );
+              }
+              
+              // Calculate Harga Dasar
+              const backbone = parseFloat(layananDetail.backbone) || 0;
+              const port = parseFloat(layananDetail.port) || 0;
+              const tarifNTahun = parseFloat(tarifTerbaru) || 0;
+              const kapasitas = parseFloat(layanan.kapasitas) || 0;
+              const tarifAksesNTahun = layanan.akses_existing === "ya" ? 0 : parseFloat(tarifAksesTerbaru) || 0;
+              const qty = parseInt(layanan.qty) || 0;
+              
+              const step1 = backbone + port + tarifNTahun;
+              const step2 = step1 * kapasitas;
+              const step3 = step2 + tarifAksesNTahun;
+              hargaDasar = step3 * qty;
+              
+              // Calculate Harga Final
+              const marginPercent = parseFloat(layanan.margin_percent) || 0;
+              const marginAmount = hargaDasar * (marginPercent / 100);
+              hargaFinal = hargaDasar + marginAmount;
+              
+              console.log(`💰 Calculated for ${layanan.nama_layanan}:`, {
+                hargaDasar,
+                hargaFinal,
+                marginPercent: `${marginPercent}%`
+              });
+              
+              // Update the layanan record with calculated values
+              const layananId = layanan.id_penawaran_layanan || layanan.id;
+              if (layananId) {
+                await PenawaranLayananModel.updatePenawaranLayanan(layananId, {
+                  harga_dasar_icon: hargaDasar,
+                  harga_final_sebelum_ppn: hargaFinal
+                });
+                console.log(`✅ Updated harga values for layanan ID: ${layananId}`);
+              } else {
+                console.warn(`⚠️ Could not find ID to update layanan: ${layanan.nama_layanan}`);
+              }
+              
+            } catch (calcError) {
+              console.error(`❌ Error calculating harga for ${layanan.nama_layanan}:`, calcError);
+              hargaDasar = 0;
+              hargaFinal = 0;
+            }
+          }
+          
+          totalPerBulanHargaDasarIcon += hargaDasar || 0;
+          totalPerBulanHargaFinalSebelumPPN += hargaFinal || 0;
+        }
+      }
 
       // Hitung total 12 bulan
       const grandTotal12BulanHargaDasarIcon = totalPerBulanHargaDasarIcon * 12;
@@ -1571,23 +1661,13 @@ export class PenawaranController {
         );
       }
 
-      // Siapkan data hasil
+      // Siapkan data hasil - hanya simpan 2 kolom yang diperlukan
       const hasilData = {
         total_per_bulan_harga_dasar_icon: totalPerBulanHargaDasarIcon,
-        total_per_bulan_harga_final_sebelum_ppn:
-          totalPerBulanHargaFinalSebelumPPN,
-        grand_total_12_bulan_harga_dasar_icon: grandTotal12BulanHargaDasarIcon,
-        grand_total_12_bulan_harga_final_sebelum_ppn:
-          grandTotal12BulanHargaFinalSebelumPPN,
-        discount: discountAmount,
-        total_pengeluaran_lain_lain: totalPengeluaranLainLain,
-        grand_total_disc_lain2_harga_dasar_icon:
-          grandTotalDiscLain2HargaDasarIcon,
-        grand_total_disc_lain2_harga_final_sebelum_ppn:
-          grandTotalDiscLain2HargaFinalSebelumPPN,
-        profit_dari_hjt_excl_ppn: profitDariHjtExclPPN,
-        margin_dari_hjt: marginDariHjt,
+        total_per_bulan_harga_final_sebelum_ppn: totalPerBulanHargaFinalSebelumPPN
       };
+      
+      console.log("💾 Saving only Total/Bulan data to hasil_penawaran:", hasilData);
 
       // Simpan atau perbarui hasil
       const result = await HasilPenawaranModel.createOrUpdateHasilPenawaran(
@@ -1595,10 +1675,24 @@ export class PenawaranController {
         hasilData
       );
 
+      // Data lengkap untuk response frontend (tidak disimpan ke database)
+      const responseData = {
+        total_per_bulan_harga_dasar_icon: totalPerBulanHargaDasarIcon,
+        total_per_bulan_harga_final_sebelum_ppn: totalPerBulanHargaFinalSebelumPPN,
+        grand_total_12_bulan_harga_dasar_icon: grandTotal12BulanHargaDasarIcon,
+        grand_total_12_bulan_harga_final_sebelum_ppn: grandTotal12BulanHargaFinalSebelumPPN,
+        discount: discountAmount,
+        total_pengeluaran_lain_lain: totalPengeluaranLainLain,
+        grand_total_disc_lain2_harga_dasar_icon: grandTotalDiscLain2HargaDasarIcon,
+        grand_total_disc_lain2_harga_final_sebelum_ppn: grandTotalDiscLain2HargaFinalSebelumPPN,
+        profit_dari_hjt_excl_ppn: profitDariHjtExclPPN,
+        margin_dari_hjt: marginDariHjt,
+      };
+
       res.status(200).json({
         success: true,
         message: "Hasil penawaran berhasil dihitung",
-        data: hasilData,
+        data: responseData,
       });
     } catch (error) {
       res.status(500).json({

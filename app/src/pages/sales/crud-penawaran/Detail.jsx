@@ -122,7 +122,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
       
       const headers = getAuthHeaders();
       // Try to get existing hasil penawaran first
-      let response = await fetch(`http://localhost:3001/api/penawaran/${penawaranId}/hasil`, {
+      let response = await fetch(`http://localhost:3000/api/penawaran/${penawaranId}/hasil`, {
         method: 'GET',
         headers: headers
       });
@@ -130,9 +130,35 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
       // If no existing hasil found, calculate it
       if (!response.ok && response.status === 404) {
         console.log('🔢 No existing hasil found, calculating...');
-        response = await fetch(`http://localhost:3001/api/penawaran/${penawaranId}/calculate`, {
+        
+        // Calculate Total/Bulan from current tabelPerhitungan data
+        const totalHargaDasar = tabelPerhitungan.reduce((total, item) => {
+          const hargaDasarStr = item.hargaDasar || '';
+          const hargaDasarValue = parseFloat(hargaDasarStr.replace(/[^\d]/g, '') || 0);
+          return total + hargaDasarValue;
+        }, 0);
+        
+        const totalHargaFinal = tabelPerhitungan.reduce((total, item) => {
+          const hargaFinalStr = item.hargaFinal || '';
+          const hargaFinalValue = parseFloat(hargaFinalStr.replace(/[^\d]/g, '') || 0);
+          return total + hargaFinalValue;
+        }, 0);
+        
+        console.log('📊 Sending Total/Bulan to backend:', {
+          totalHargaDasar,
+          totalHargaFinal
+        });
+        
+        response = await fetch(`http://localhost:3000/api/penawaran/${penawaranId}/calculate`, {
           method: 'POST',
-          headers: headers
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            totalPerBulanHargaDasar: totalHargaDasar,
+            totalPerBulanHargaFinal: totalHargaFinal
+          })
         });
       }
       
@@ -271,6 +297,15 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
       console.log('🔄 Data updated, totals will be recalculated');
     }
   }, [tabelPerhitungan, hasilPenawaranData]);
+
+  // Reload hasil penawaran data when refreshTrigger changes (after update)
+  useEffect(() => {
+    if (isOpen && detailData && refreshTrigger > 0) {
+      console.log('🔄 Refresh trigger activated, reloading hasil penawaran data...');
+      loadHasilPenawaranData();
+      loadFullDetailData(); // Also reload full detail data to get updated layanan
+    }
+  }, [refreshTrigger]);
 
   // Refresh data when refreshTrigger changes
   useEffect(() => {

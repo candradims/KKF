@@ -146,7 +146,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       const headers = getAuthHeaders();
       
       // Try to get existing hasil penawaran first
-      let response = await fetch(`http://localhost:3001/api/penawaran/${penawaranId}/hasil`, {
+      let response = await fetch(`http://localhost:3000/api/penawaran/${penawaranId}/hasil`, {
         method: 'GET',
         headers: headers
       });
@@ -154,7 +154,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       // If no existing hasil found, calculate it
       if (!response.ok && response.status === 404) {
         console.log('🔢 No existing hasil found, calculating...');
-        response = await fetch(`http://localhost:3001/api/penawaran/${penawaranId}/calculate`, {
+        response = await fetch(`http://localhost:3000/api/penawaran/${penawaranId}/calculate`, {
           method: 'POST',
           headers: headers
         });
