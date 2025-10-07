@@ -1642,8 +1642,7 @@ export class PenawaranController {
 
       // Hitung diskon
       const discount = existingPenawaran.diskon || 0;
-      const discountAmount =
-        (grandTotal12BulanHargaFinalSebelumPPN * discount) / 100;
+      const discountAmount = (grandTotal12BulanHargaDasarIcon * discount) / 100;
 
       // Hitung grand total dengan diskon dan pengeluaran
       const grandTotalDiscLain2HargaDasarIcon =
@@ -1702,7 +1701,7 @@ export class PenawaranController {
         );
       }
 
-      // Siapkan data hasil - simpan Total/Bulan dan Grand Total 12 Bulan
+      // Siapkan data hasil - simpan Total/Bulan, Grand Total 12 Bulan, dan Discount
       const hasilData = {
         total_per_bulan_harga_dasar_icon: totalPerBulanHargaDasarIcon,
         total_per_bulan_harga_final_sebelum_ppn:
@@ -1710,10 +1709,18 @@ export class PenawaranController {
         grand_total_12_bulan_harga_dasar_icon: grandTotal12BulanHargaDasarIcon,
         grand_total_12_bulan_harga_final_sebelum_ppn:
           grandTotal12BulanHargaFinalSebelumPPN,
+        discount: discountAmount,
       };
 
+      console.log("💰 Discount calculation:", {
+        discountPercent: discount,
+        grandTotal12BulanHargaDasar: grandTotal12BulanHargaDasarIcon,
+        discountAmount: discountAmount,
+        formula: `${discount}% × ${grandTotal12BulanHargaDasarIcon} = ${discountAmount}`,
+      });
+
       console.log(
-        "💾 Saving Total/Bulan and Grand Total 12 Bulan to hasil_penawaran:",
+        "💾 Saving Total/Bulan, Grand Total 12 Bulan, and Discount to hasil_penawaran:",
         hasilData
       );
 

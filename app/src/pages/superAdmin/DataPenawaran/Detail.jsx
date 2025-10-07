@@ -152,23 +152,40 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       });
       
       // If no existing hasil found, calculate it
+      let needsRecalculation = false;
       if (!response.ok && response.status === 404) {
         console.log('🔢 No existing hasil found, calculating...');
+        needsRecalculation = true;
+      } else if (response.ok) {
+        // Check if existing data has discount calculated
+        const tempResult = await response.json();
+        if (tempResult.success && tempResult.data) {
+          setHasilPenawaranData(tempResult.data);
+          // Force recalculation if discount is missing or 0
+          if (!tempResult.data.discount || tempResult.data.discount === 0) {
+            console.log('🔢 Discount missing or 0, forcing recalculation...');
+            needsRecalculation = true;
+          }
+        }
+      }
+      
+      if (needsRecalculation) {
         response = await fetch(`http://localhost:3000/api/penawaran/${penawaranId}/calculate`, {
           method: 'POST',
           headers: headers
         });
-      }
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Hasil penawaran data loaded:', result);
-        if (result.success && result.data) {
-          setHasilPenawaranData(result.data);
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ Hasil penawaran recalculated and loaded:', result);
+          if (result.success && result.data) {
+            setHasilPenawaranData(result.data);
+          }
+        } else {
+          console.error('❌ Failed to recalculate hasil penawaran:', response.status);
         }
-      } else {
-        console.error('❌ Failed to load hasil penawaran:', response.status);
       }
+
     } catch (error) {
       console.error('❌ Error loading hasil penawaran:', error);
     }
@@ -231,9 +248,16 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       }
     });
     
-    // Calculate discount amount
+    // Use discount amount from database if available, otherwise calculate
     const discountPercent = parseFloat(detailData?.discount || 0);
-    const discountAmount = (grandTotal12BulanHargaFinal * discountPercent) / 100;
+    const discountAmountFromDB = hasilPenawaranData?.discount;
+    const discountAmount = discountAmountFromDB || (grandTotal12BulanHargaDasar * discountPercent) / 100;
+    
+    console.log('[SuperAdmin Detail] Discount calculation:');
+    console.log('  - Discount percent:', discountPercent);
+    console.log('  - Grand Total 12 Bulan Harga Dasar:', grandTotal12BulanHargaDasar);
+    console.log('  - Discount from database:', discountAmountFromDB);
+    console.log('  - Final discount amount:', discountAmount);
     
     // Calculate total pengeluaran
     const totalPengeluaranLain = calculateTotalPengeluaranLain();
@@ -252,6 +276,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
       grandTotal12Bulan: grandTotal12BulanHargaDasar.toLocaleString('id-ID'),
       grandTotal12Bulan2: grandTotal12BulanHargaFinal.toLocaleString('id-ID'),
       discount: discountPercent > 0 ? `${discountPercent}%` : '-',
+      discountAmount: discountAmount > 0 ? `Rp ${discountAmount.toLocaleString('id-ID')}` : '-',
       totalPengeluaranLain: `Rp ${totalPengeluaranLain.toLocaleString('id-ID')}`,
       grandTotalDisc: grandTotalDiscHargaDasar.toLocaleString('id-ID'),
       grandTotalDisc2: grandTotalDiscHargaFinal.toLocaleString('id-ID'),
@@ -787,10 +812,10 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                     </tr>
                     <tr>
                       <td style={{ padding: '8px 12px', fontSize: '12px', fontWeight: '600', borderBottom: '1px solid #E5E7EB' }}>
-                        Discount
+                        Discount ({totals.discount})
                       </td>
                       <td style={{ padding: '8px 12px', fontSize: '12px', textAlign: 'right', borderBottom: '1px solid #E5E7EB', borderLeft: '1px solid #E5E7EB' }}>
-                        {totals.discount}
+                        {totals.discountAmount}
                       </td>
                       <td style={{ padding: '8px 12px', fontSize: '12px', textAlign: 'right', borderBottom: '1px solid #E5E7EB', borderLeft: '1px solid #E5E7EB' }}></td>
                     </tr>
