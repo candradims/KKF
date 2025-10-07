@@ -7,6 +7,8 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [pengeluaranData, setPengeluaranData] = useState([]);
   const [loadingPengeluaran, setLoadingPengeluaran] = useState(false);
+  const [layananData, setLayananData] = useState([]);
+  const [loadingLayanan, setLoadingLayanan] = useState(false);
   const [formData, setFormData] = useState({
     sales: '',
     tanggal: '',
@@ -17,11 +19,12 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     durasiKontrak: '',
     discount: '',
     piliLayanan: '',
+    namaLayanan: '',
     keterangan: '',
     kapasitas: '',
     qty: '',
     aksesExisting: '',
-    hargaFinalSebelumPPN: ''
+    marginPercent: ''
   });
 
   // Pre-fill form with existing data when deleting
@@ -37,15 +40,17 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
         durasiKontrak: deleteData.durasi || deleteData.durasiKontrak || '',
         discount: deleteData.discount || '',
         piliLayanan: deleteData.piliLayanan || '',
+        namaLayanan: deleteData.namaLayanan || deleteData.piliLayanan || '',
         keterangan: deleteData.keterangan || '',
         kapasitas: deleteData.kapasitas || '',
         qty: deleteData.qty || '',
         aksesExisting: deleteData.aksesExisting || '',
-        hargaFinalSebelumPPN: deleteData.hargaFinalSebelumPPN || ''
+        marginPercent: deleteData.marginPercent || deleteData.margin || ''
       });
 
-      // Load pengeluaran data
+      // Load pengeluaran data and layanan data
       loadPengeluaranData();
+      loadLayananData();
     }
   }, [deleteData]);
 
@@ -91,6 +96,76 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
       setPengeluaranData([]);
     } finally {
       setLoadingPengeluaran(false);
+    }
+  };
+
+  const loadLayananData = async () => {
+    console.log('📋 Loading layanan data from deleteData:', deleteData);
+    console.log('📋 deleteData.rawData:', deleteData?.rawData);
+    console.log('📋 deleteData.rawData.data_penawaran_layanan:', deleteData?.rawData?.data_penawaran_layanan);
+    
+    setLoadingLayanan(true);
+    
+    try {
+      // Check if we have complete layanan data or need to load from API
+      const needsFullData = !deleteData?.rawData?.data_penawaran_layanan || 
+                           deleteData.rawData.data_penawaran_layanan.length === 0;
+      
+      if (needsFullData && (deleteData?.id || deleteData?.id_penawaran)) {
+        console.log('🔄 Hapus: Loading full penawaran data from API...');
+        await loadFullPenawaranData(deleteData.id || deleteData.id_penawaran);
+      } else if (deleteData?.rawData?.data_penawaran_layanan && deleteData.rawData.data_penawaran_layanan.length > 0) {
+        console.log('✅ Found layanan data in rawData:', deleteData.rawData.data_penawaran_layanan);
+        setLayananData(deleteData.rawData.data_penawaran_layanan);
+      } else {
+        console.log('📝 No layanan data found');
+        setLayananData([]);
+      }
+    } catch (error) {
+      console.error('❌ Error loading layanan data:', error);
+      setLayananData([]);
+    } finally {
+      setLoadingLayanan(false);
+    }
+  };
+
+  // Function to load full penawaran data with layanan details (same as Edit.jsx)
+  const loadFullPenawaranData = async (penawaranId) => {
+    try {
+      console.log("🔄 Hapus: Loading full data for ID:", penawaranId);
+      
+      const userData = getUserData();
+      if (!userData) {
+        throw new Error('No user data found');
+      }
+      
+      const response = await fetch(`http://localhost:3000/api/penawaran/${penawaranId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': userData.id_user.toString(),
+          'X-User-Role': userData.role_user,
+          'X-User-Email': userData.email_user
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log("✅ Hapus: Full penawaran data loaded:", result.data);
+      
+      if (result.success && result.data && result.data.data_penawaran_layanan) {
+        console.log("✅ Hapus: Setting layanan data:", result.data.data_penawaran_layanan);
+        setLayananData(result.data.data_penawaran_layanan);
+      } else {
+        console.log("📝 Hapus: No layanan data in API response");
+        setLayananData([]);
+      }
+    } catch (error) {
+      console.error("❌ Hapus: Error loading full penawaran data:", error);
+      setLayananData([]);
     }
   };
 
@@ -159,6 +234,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
     setPengeluaranData([]);
+    setLayananData([]);
     setFormData({
       sales: '',
       tanggal: '',
@@ -169,11 +245,12 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
       durasiKontrak: '',
       discount: '',
       piliLayanan: '',
+      namaLayanan: '',
       keterangan: '',
       kapasitas: '',
       qty: '',
       aksesExisting: '',
-      hargaFinalSebelumPPN: ''
+      marginPercent: ''
     });
     onClose();
   };
@@ -606,225 +683,241 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
               </button>
             </div>
 
-            {/* Second Section with Light Blue Background */}
-            <div style={{
-              backgroundColor: '#F0F9FF',
-              padding: '20px',
-              borderRadius: '8px',
-              marginBottom: '20px'
-            }}>
-              {/* Pilih Layanan */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
+            {/* Layanan Section with Light Blue Background */}
+            {loadingLayanan ? (
+              <div style={{
+                backgroundColor: '#F0F9FF',
+                padding: '20px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                textAlign: 'center',
+                color: '#0369A1'
+              }}>
+                Memuat data layanan...
+              </div>
+            ) : layananData.length > 0 ? (
+              <div style={{
+                backgroundColor: '#F0F9FF',
+                padding: '20px',
+                borderRadius: '8px',
+                marginBottom: '20px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '16px'
                 }}>
-                  Pilih Layanan*
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    name="piliLayanan"
-                    value={formData.piliLayanan}
-                    disabled
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '2px solid #E5E7EB',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      outline: 'none',
-                      backgroundColor: 'white',
-                      boxSizing: 'border-box',
-                      appearance: 'none',
-                      color: '#6B7280'
-                    }}
-                  >
-                    <option value="">Pilih Layanan</option>
-                    <option value="IP VPN">IP VPN</option>
-                    <option value="Metronet">Metronet</option>
-                    <option value="Inet Corp">Inet Corp</option>
-                    <option value="IP Transit">IP Transit</option>
-                  </select>
-                  <div style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    pointerEvents: 'none',
-                    fontSize: '12px',
-                    color: '#9CA3AF'
-                  }}>▼</div>
+                  <h4 style={{
+                    margin: 0,
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#0369A1'
+                  }}>
+                    📋 Data Layanan yang akan Dihapus
+                  </h4>
+                  <span style={{
+                    fontSize: '11px',
+                    color: '#DC2626',
+                    fontStyle: 'italic',
+                    fontWeight: '500'
+                  }}>
+                    ⚠️ {layananData.length} layanan akan terhapus
+                  </span>
                 </div>
-              </div>
 
-              {/* Detail Layanan */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Detail Layanan*
-                </label>
-                <input
-                  type="text"
-                  name="keterangan"
-                  value={formData.keterangan}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
+                {layananData.map((layanan, index) => (
+                  <div key={layanan.id_penawaran_layanan || index} style={{
                     backgroundColor: 'white',
-                    boxSizing: 'border-box',
-                    color: '#6B7280'
-                  }}
-                />
-              </div>
-
-              {/* Kapasitas */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Kapasitas*
-                </label>
-                <input
-                  type="text"
-                  name="kapasitas"
-                  value={formData.kapasitas}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
+                    border: '1px solid #B3E5FC',
                     borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: 'white',
-                    boxSizing: 'border-box',
-                    color: '#6B7280'
-                  }}
-                />
-              </div>
+                    padding: '16px',
+                    marginBottom: index < layananData.length - 1 ? '16px' : '0'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '12px'
+                    }}>
+                      <h5 style={{
+                        margin: 0,
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: '#0369A1'
+                      }}>
+                        Layanan #{index + 1}
+                      </h5>
+                      <span style={{
+                        fontSize: '10px',
+                        color: '#DC2626',
+                        backgroundColor: '#FEE2E2',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontWeight: '500'
+                      }}>
+                        Akan Dihapus
+                      </span>
+                    </div>
 
-              {/* Qty */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Qty*
-                </label>
-                <input
-                  type="text"
-                  name="qty"
-                  value={formData.qty}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: 'white',
-                    boxSizing: 'border-box',
-                    color: '#6B7280'
-                  }}
-                />
-              </div>
+                    {/* Nama Layanan */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#374151',
+                        marginBottom: '4px'
+                      }}>
+                        Nama Layanan*
+                      </label>
+                      <div style={{
+                        padding: '8px 12px',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        backgroundColor: '#F9FAFB',
+                        color: '#6B7280'
+                      }}>
+                        {layanan.nama_layanan || '-'}
+                      </div>
+                    </div>
 
-              {/* Akses Existing */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Akses Existing*
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    name="aksesExisting"
-                    value={formData.aksesExisting}
-                    disabled
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '2px solid #E5E7EB',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      outline: 'none',
-                      backgroundColor: 'white',
-                      boxSizing: 'border-box',
-                      appearance: 'none',
-                      color: '#6B7280'
-                    }}
-                  >
-                    <option value="">Pilih akses</option>
-                    <option value="ya">Ya</option>
-                    <option value="tidak">Tidak</option>
-                  </select>
-                  <div style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    pointerEvents: 'none',
-                    fontSize: '12px',
-                    color: '#9CA3AF'
-                  }}>▼</div>
-                </div>
-              </div>
+                    {/* Detail Layanan */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#374151',
+                        marginBottom: '4px'
+                      }}>
+                        Detail Layanan*
+                      </label>
+                      <div style={{
+                        padding: '8px 12px',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        backgroundColor: '#F9FAFB',
+                        color: '#6B7280'
+                      }}>
+                        {layanan.detail_layanan || '-'}
+                      </div>
+                    </div>
 
-              {/* Harga Final (Sebelum PPN) */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Harga Final (Sebelum PPN)*
-                </label>
-                <input
-                  type="text"
-                  name="hargaFinalSebelumPPN"
-                  value={formData.hargaFinalSebelumPPN}
-                  readOnly
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: 'white',
-                    boxSizing: 'border-box',
-                    color: '#6B7280'
-                  }}
-                />
+                    {/* Row for Kapasitas and QTY */}
+                    <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '4px'
+                        }}>
+                          Kapasitas*
+                        </label>
+                        <div style={{
+                          padding: '8px 12px',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          backgroundColor: '#F9FAFB',
+                          color: '#6B7280'
+                        }}>
+                          {layanan.kapasitas || '-'}
+                        </div>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '4px'
+                        }}>
+                          QTY*
+                        </label>
+                        <div style={{
+                          padding: '8px 12px',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          backgroundColor: '#F9FAFB',
+                          color: '#6B7280'
+                        }}>
+                          {layanan.qty || '-'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row for Akses Existing and Margin % */}
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '4px'
+                        }}>
+                          Akses Existing*
+                        </label>
+                        <div style={{
+                          padding: '8px 12px',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          backgroundColor: '#F9FAFB',
+                          color: '#6B7280'
+                        }}>
+                          {layanan.akses_existing ? (layanan.akses_existing.charAt(0).toUpperCase() + layanan.akses_existing.slice(1)) : '-'}
+                        </div>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '4px'
+                        }}>
+                          Margin %*
+                        </label>
+                        <div style={{
+                          padding: '8px 12px',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          backgroundColor: '#F9FAFB',
+                          color: '#6B7280'
+                        }}>
+                          {layanan.margin_percent ? `${layanan.margin_percent}%` : '-'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div style={{
+                backgroundColor: '#FEF2F2',
+                padding: '20px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                textAlign: 'center',
+                border: '1px solid #FECACA'
+              }}>
+                <p style={{
+                  margin: 0,
+                  color: '#991B1B',
+                  fontSize: '14px'
+                }}>
+                  ⚠️ Tidak ada data layanan ditemukan
+                </p>
+              </div>
+            )}
 
             {/* Pengeluaran Lain-lain History Section */}
             {pengeluaranData.length > 0 && (
