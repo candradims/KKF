@@ -526,8 +526,6 @@ const Penawaran = () => {
             console.error('❌ Error deleting existing pengeluaran:', deleteError);
           }
         }
-        
-        alert('Data penawaran berhasil diperbarui');
         await fetchPenawaranData();
         triggerDetailRefresh();
         
