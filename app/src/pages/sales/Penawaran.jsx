@@ -678,23 +678,17 @@ const Penawaran = () => {
             const successCount = pengeluaranResults.filter(r => r.success).length;
             const failedCount = pengeluaranResults.filter(r => !r.success).length;
             
-            console.log(`✅ Pengeluaran results: ${successCount} successful, ${failedCount} failed`);
             
             if (failedCount > 0) {
               const failedItems = pengeluaranResults.filter(r => !r.success);
               console.error('❌ Failed pengeluaran items:', failedItems);
-              alert(`Data penawaran berhasil disimpan. ${successCount} pengeluaran berhasil disimpan, ${failedCount} gagal disimpan.`);
             } else {
               console.log('✅ All pengeluaran items created successfully');
-              alert('Data penawaran dan semua pengeluaran berhasil disimpan');
             }
             
           } catch (pengeluaranError) {
             console.error('❌ Error handling multiple pengeluaran:', pengeluaranError);
-            alert('Data penawaran berhasil disimpan, tetapi ada kesalahan saat menyimpan pengeluaran.');
           }
-        } else {
-          alert('Data penawaran berhasil disimpan');
         }
         
         await fetchPenawaranData();
