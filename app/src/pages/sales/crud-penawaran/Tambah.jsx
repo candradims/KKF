@@ -969,7 +969,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       onBlur={() => setFocusedField('')}
                       style={selectStyle('durasiKontrak')}
                     >
-                      <option value="">Durasi Kontrak</option>
+                      <option value="" disabled hidden>Durasi Kontrak</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
