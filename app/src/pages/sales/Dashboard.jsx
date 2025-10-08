@@ -30,6 +30,8 @@ const Dashboard = () => {
   const [loadingRevenue, setLoadingRevenue] = useState(true);
   const [regionalRevenueData, setRegionalRevenueData] = useState([]);
   const [loadingRegionalRevenue, setLoadingRegionalRevenue] = useState(true);
+  const [marginTrendData, setMarginTrendData] = useState([]);
+  const [loadingMarginData, setLoadingMarginData] = useState(true);
 
   // Function to load penawaran data
   const loadPenawaranData = async () => {
@@ -598,6 +600,143 @@ const Dashboard = () => {
     }
   };
 
+  // Function to load margin trend data from margin_dari_hjt
+  const loadMarginTrendData = async () => {
+    try {
+      setLoadingMarginData(true);
+      console.log('🔍 [MARGIN] Loading margin trend data...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response.success && response.data && Array.isArray(response.data)) {
+        console.log(`📊 [MARGIN] Processing ${response.data.length} penawaran for margin data`);
+
+        // Initialize monthly margin accumulator
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const monthlyMargin = {};
+        monthNames.forEach(month => {
+          monthlyMargin[month] = 0;
+        });
+
+        let totalAllMargin = 0;
+        let processedCount = 0;
+
+        // Process each penawaran
+        for (const penawaran of response.data) {
+          try {
+            console.log(`🔍 [MARGIN] Processing penawaran ${penawaran.id_penawaran}...`);
+            
+            const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            
+            if (hasilResponse.success && hasilResponse.data) {
+              const margin = parseFloat(hasilResponse.data.margin_dari_hjt) || 0;
+              
+              if (margin > 0) {
+                console.log(`💰 [MARGIN] Found margin: ${margin.toFixed(2)}% for penawaran ${penawaran.id_penawaran}`);
+                
+                // Get month from penawaran date
+                let monthName = null;
+                
+                if (penawaran.tanggal_penawaran) {
+                  try {
+                    // Try different date formats
+                    let date;
+                    if (penawaran.tanggal_penawaran.includes('T')) {
+                      // ISO format: 2025-10-08T00:00:00.000Z
+                      date = new Date(penawaran.tanggal_penawaran);
+                    } else if (penawaran.tanggal_penawaran.includes('-')) {
+                      // Format: 2025-10-08 or 08-10-2025
+                      const parts = penawaran.tanggal_penawaran.split('-');
+                      if (parts[0].length === 4) {
+                        // YYYY-MM-DD
+                        date = new Date(penawaran.tanggal_penawaran);
+                      } else {
+                        // DD-MM-YYYY
+                        date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                      }
+                    } else if (penawaran.tanggal_penawaran.includes('/')) {
+                      // Format: DD/MM/YYYY or MM/DD/YYYY
+                      const parts = penawaran.tanggal_penawaran.split('/');
+                      // Assume DD/MM/YYYY format
+                      date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    } else {
+                      date = new Date(penawaran.tanggal_penawaran);
+                    }
+                    
+                    if (!isNaN(date.getTime())) {
+                      monthName = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                      console.log(`📅 [MARGIN] Date: ${penawaran.tanggal_penawaran} -> Parsed: ${date.toDateString()} -> Month: ${monthName}`);
+                    } else {
+                      console.log(`⚠️ [MARGIN] Invalid date: ${penawaran.tanggal_penawaran}`);
+                    }
+                  } catch (dateError) {
+                    console.log(`⚠️ [MARGIN] Date parsing error for ${penawaran.tanggal_penawaran}:`, dateError);
+                  }
+                }
+                
+                // If we couldn't parse the date, use current month
+                if (!monthName || !monthNames.includes(monthName)) {
+                  const currentDate = new Date();
+                  monthName = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                  console.log(`⚠️ [MARGIN] Using current month: ${monthName}`);
+                }
+                
+                // Add margin to the correct month (sum all margins for that month)
+                monthlyMargin[monthName] += margin;
+                console.log(`✅ [MARGIN] Added ${margin.toFixed(2)}% to ${monthName}, total now: ${monthlyMargin[monthName].toFixed(2)}%`);
+                
+                totalAllMargin += margin;
+                processedCount++;
+              } else {
+                console.log(`❌ [MARGIN] No valid margin found for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`❌ [MARGIN] Failed to fetch hasil for penawaran ${penawaran.id_penawaran}`);
+            }
+          } catch (error) {
+            console.error(`❌ [MARGIN] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        // Convert to chart data format - show total margin per month, not average
+        const chartData = monthNames.map(month => ({
+          month,
+          margin: Math.round(monthlyMargin[month] * 100) / 100 // Round to 2 decimal places
+        }));
+
+        console.log('📊 [MARGIN] Final margin summary:');
+        console.log('  - Total margin across all penawaran:', totalAllMargin.toFixed(2));
+        console.log('  - Penawaran processed:', processedCount);
+        console.log('  - Monthly totals:', monthlyMargin);
+        console.log('  - Chart data:', chartData);
+        
+        setMarginTrendData(chartData);
+      } else {
+        console.log('❌ [MARGIN] No valid penawaran data received');
+        setMarginTrendData([]);
+      }
+    } catch (error) {
+      console.error('❌ [MARGIN] Error loading margin data:', error);
+      // Initialize with empty data if error
+      setMarginTrendData([
+        { month: 'JAN', margin: 0 },
+        { month: 'FEB', margin: 0 },
+        { month: 'MAR', margin: 0 },
+        { month: 'APR', margin: 0 },
+        { month: 'MAY', margin: 0 },
+        { month: 'JUN', margin: 0 },
+        { month: 'JUL', margin: 0 },
+        { month: 'AUG', margin: 0 },
+        { month: 'SEP', margin: 0 },
+        { month: 'OCT', margin: 0 },
+        { month: 'NOV', margin: 0 },
+        { month: 'DEC', margin: 0 }
+      ]);
+    } finally {
+      setLoadingMarginData(false);
+    }
+  };
+
   // Load data on component mount
   useEffect(() => {
     loadPenawaranData();
@@ -605,6 +744,7 @@ const Dashboard = () => {
     setTimeout(() => {
       loadFinalRevenueData(); // Use FINAL version with proper API
       loadRegionalRevenueData(); // Load regional revenue data
+      loadMarginTrendData(); // Load margin trend data
     }, 1000);
     
     // Auto-refresh every 5 minutes
@@ -640,21 +780,7 @@ const Dashboard = () => {
     { name: 'Target Saya', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) }
   ];
 
-  // Data untuk line chart Margin Trend
-  const marginTrendData = [
-    { month: 'JAN', margin1: 45.2, margin2: 35.8 },
-    { month: 'FEB', margin1: 48.1, margin2: 40.3 },
-    { month: 'MAR', margin1: 52.7, margin2: 45.1 },
-    { month: 'APR', margin1: 57.3, margin2: 50.6 },
-    { month: 'MAY', margin1: 55.9, margin2: 48.2 },
-    { month: 'JUN', margin1: 53.4, margin2: 46.7 },
-    { month: 'JUL', margin1: 56.8, margin2: 49.5 },
-    { month: 'AUG', margin1: 60.2, margin2: 52.3 },
-    { month: 'SEP', margin1: 58.7, margin2: 50.9 },
-    { month: 'OCT', margin1: 62.1, margin2: 55.4 },
-    { month: 'NOV', margin1: 65.3, margin2: 58.7 },
-    { month: 'DEC', margin1: 68.5, margin2: 60.2 }
-  ];
+
 
   // Data untuk pie chart regional - now using real data from profit calculations
   const regionalData = regionalRevenueData.length > 0 ? regionalRevenueData : [
@@ -1305,6 +1431,18 @@ const Dashboard = () => {
               </select>
             </div>
             <div style={{ height: '320px' }}>
+              {loadingMarginData ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%',
+                  fontSize: '16px',
+                  color: '#6b7280'
+                }}>
+                  Loading margin data...
+                </div>
+              ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={marginTrendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -1318,26 +1456,29 @@ const Dashboard = () => {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#666' }}
-                    domain={[0, 100]}
+                    domain={[0, 'dataMax + 10']}
                     tickFormatter={(value) => `${value}%`}
                   />
-                  <Tooltip content={renderCustomTooltip} />
+                  <Tooltip 
+                    formatter={(value, name) => [`${value}%`, 'Margin Rate']}
+                    labelFormatter={(label) => `Bulan: ${label}`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                    }}
+                  />
                   <Line 
                     type="monotone" 
-                    dataKey="margin1" 
+                    dataKey="margin" 
                     stroke={colors.primary} 
                     strokeWidth={3}
                     dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="margin2" 
-                    stroke={colors.secondary} 
-                    strokeWidth={3}
-                    dot={{ fill: colors.secondary, strokeWidth: 2, r: 4 }}
-                  />
                 </LineChart>
               </ResponsiveContainer>
+              )}
             </div>
             <div style={{
               marginTop: '16px',
@@ -1349,7 +1490,28 @@ const Dashboard = () => {
                 fontSize: '24px',
                 fontWeight: 'bold',
                 color: colors.primary
-              }}>57%</div>
+              }}>
+                {(() => {
+                  // Get current month margin or latest month with data
+                  const currentDate = new Date();
+                  const currentMonthShort = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                  
+                  // First try to get current month's data
+                  let currentMarginData = marginTrendData.find(item => item.month === currentMonthShort);
+                  
+                  // If current month has no data, get the latest month with data
+                  if (!currentMarginData || currentMarginData.margin === 0) {
+                    // Get all months with data in reverse order (latest first)
+                    const monthsWithData = marginTrendData
+                      .filter(item => item.margin > 0)
+                      .reverse();
+                    currentMarginData = monthsWithData[0];
+                  }
+                  
+                  const margin = currentMarginData ? currentMarginData.margin : 0;
+                  return `${margin.toFixed(1)}%`;
+                })()}
+              </div>
               <div style={{
                 fontSize: '14px',
                 color: '#6b7280'
