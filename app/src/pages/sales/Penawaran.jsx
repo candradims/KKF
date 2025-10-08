@@ -620,7 +620,6 @@ const Penawaran = () => {
       console.log('📬 Delete API Response:', result);
       
       if (result.success) {
-        alert('Data penawaran berhasil dihapus');
         await fetchPenawaranData();
         setShowHapusModal(false);
         setSelectedDeleteData(null);
