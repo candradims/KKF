@@ -1647,12 +1647,11 @@ export class PenawaranController {
       // Hitung grand total dengan diskon dan pengeluaran
       const grandTotalDiscLain2HargaDasarIcon =
         grandTotal12BulanHargaDasarIcon -
-        discountAmount -
+        discountAmount +
         totalPengeluaranLainLain;
+      // Kolom kanan langsung menggunakan Grand Total 12 Bulan Harga Final (tanpa pengurangan)
       const grandTotalDiscLain2HargaFinalSebelumPPN =
-        grandTotal12BulanHargaFinalSebelumPPN -
-        discountAmount -
-        totalPengeluaranLainLain;
+        grandTotal12BulanHargaFinalSebelumPPN;
 
       // Hitung profit dan margin
       const profitDariHjtExclPPN =
@@ -1701,7 +1700,7 @@ export class PenawaranController {
         );
       }
 
-      // Siapkan data hasil - simpan Total/Bulan, Grand Total 12 Bulan, dan Discount
+      // Siapkan data hasil - simpan Total/Bulan, Grand Total 12 Bulan, Discount, dan Grand Total - Disc/Lain2
       const hasilData = {
         total_per_bulan_harga_dasar_icon: totalPerBulanHargaDasarIcon,
         total_per_bulan_harga_final_sebelum_ppn:
@@ -1710,6 +1709,10 @@ export class PenawaranController {
         grand_total_12_bulan_harga_final_sebelum_ppn:
           grandTotal12BulanHargaFinalSebelumPPN,
         discount: discountAmount,
+        grand_total_disc_lain2_harga_dasar_icon:
+          grandTotalDiscLain2HargaDasarIcon,
+        grand_total_disc_lain2_harga_final_sebelum_ppn:
+          grandTotalDiscLain2HargaFinalSebelumPPN,
       };
 
       console.log("💰 Discount calculation:", {
@@ -1719,8 +1722,19 @@ export class PenawaranController {
         formula: `${discount}% × ${grandTotal12BulanHargaDasarIcon} = ${discountAmount}`,
       });
 
+      console.log("🏁 Grand Total - Disc/Lain2 calculation:", {
+        grandTotal12BulanHargaDasar: grandTotal12BulanHargaDasarIcon,
+        grandTotal12BulanHargaFinal: grandTotal12BulanHargaFinalSebelumPPN,
+        discountAmount: discountAmount,
+        totalPengeluaranLainLain: totalPengeluaranLainLain,
+        grandTotalDiscLain2HargaDasar: grandTotalDiscLain2HargaDasarIcon,
+        grandTotalDiscLain2HargaFinal: grandTotalDiscLain2HargaFinalSebelumPPN,
+        formulaHargaDasar: `${grandTotal12BulanHargaDasarIcon} - ${discountAmount} + ${totalPengeluaranLainLain} = ${grandTotalDiscLain2HargaDasarIcon}`,
+        formulaHargaFinal: `Direct from Grand Total 12 Bulan: ${grandTotal12BulanHargaFinalSebelumPPN}`,
+      });
+
       console.log(
-        "💾 Saving Total/Bulan, Grand Total 12 Bulan, and Discount to hasil_penawaran:",
+        "💾 Saving Total/Bulan, Grand Total 12 Bulan, Discount, and Grand Total - Disc/Lain2 to hasil_penawaran:",
         hasilData
       );
 

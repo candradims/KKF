@@ -137,9 +137,11 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
         const tempResult = await response.json();
         if (tempResult.success && tempResult.data) {
           setHasilPenawaranData(tempResult.data);
-          // Force recalculation if discount is missing or 0
-          if (!tempResult.data.discount || tempResult.data.discount === 0) {
-            console.log('🔢 Discount missing or 0, forcing recalculation...');
+          // Force recalculation if discount or Grand Total - Disc/Lain2 is missing or 0
+          if (!tempResult.data.discount || tempResult.data.discount === 0 ||
+              !tempResult.data.grand_total_disc_lain2_harga_dasar_icon || 
+              !tempResult.data.grand_total_disc_lain2_harga_final_sebelum_ppn) {
+            console.log('🔢 Discount or Grand Total - Disc/Lain2 missing, forcing recalculation...');
             needsRecalculation = true;
           }
         }
@@ -445,9 +447,19 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
     // Calculate total pengeluaran
     const totalPengeluaranLain = calculateTotalPengeluaranLain();
     
-    // Calculate grand total after discount and pengeluaran
-    const grandTotalDiscHargaDasar = grandTotal12BulanHargaDasar - discountAmount - totalPengeluaranLain;
-    const grandTotalDiscHargaFinal = grandTotal12BulanHargaFinal - discountAmount - totalPengeluaranLain;
+    // Use Grand Total - Disc/Lain2 from database if available, otherwise calculate
+    const grandTotalDiscHargaDasarFromDB = hasilPenawaranData?.grand_total_disc_lain2_harga_dasar_icon;
+    const grandTotalDiscHargaFinalFromDB = hasilPenawaranData?.grand_total_disc_lain2_harga_final_sebelum_ppn;
+    
+    const grandTotalDiscHargaDasar = grandTotalDiscHargaDasarFromDB || (grandTotal12BulanHargaDasar - discountAmount + totalPengeluaranLain);
+    // Kolom kanan langsung menggunakan Grand Total 12 Bulan Harga Final (tanpa pengurangan)
+    const grandTotalDiscHargaFinal = grandTotalDiscHargaFinalFromDB || grandTotal12BulanHargaFinal;
+    
+    console.log('[Sales Detail] Grand Total - Disc/Lain2 calculation:');
+    console.log('  - Grand Total Disc Harga Dasar from database:', grandTotalDiscHargaDasarFromDB);
+    console.log('  - Grand Total Disc Harga Final from database:', grandTotalDiscHargaFinalFromDB);
+    console.log('  - Final Grand Total Disc Harga Dasar (calculated):', grandTotalDiscHargaDasar);
+    console.log('  - Final Grand Total Disc Harga Final (direct from GT 12 Bulan):', grandTotalDiscHargaFinal);
     
     // Calculate profit and margin
     const profitDariHJT = grandTotalDiscHargaFinal - grandTotalDiscHargaDasar;
