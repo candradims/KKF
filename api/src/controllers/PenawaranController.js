@@ -1653,52 +1653,10 @@ export class PenawaranController {
       const grandTotalDiscLain2HargaFinalSebelumPPN =
         grandTotal12BulanHargaFinalSebelumPPN;
 
-      // Hitung profit dan margin
+      // Hitung profit
       const profitDariHjtExclPPN =
         grandTotalDiscLain2HargaFinalSebelumPPN -
         grandTotalDiscLain2HargaDasarIcon;
-
-      // Get margin from existing hasil_penawaran if available, otherwise calculate
-      let marginDariHjt = 0;
-      try {
-        const existingHasil =
-          await HasilPenawaranModel.getHasilPenawaranByPenawaranId(id);
-        if (
-          existingHasil &&
-          existingHasil.margin_dari_hjt &&
-          existingHasil.margin_dari_hjt > 0
-        ) {
-          marginDariHjt = parseFloat(existingHasil.margin_dari_hjt);
-          console.log(
-            "📊 Using existing margin from hasil_penawaran:",
-            marginDariHjt
-          );
-        } else {
-          // Fallback to calculated margin if no input margin found
-          marginDariHjt =
-            grandTotalDiscLain2HargaFinalSebelumPPN > 0
-              ? (profitDariHjtExclPPN /
-                  grandTotalDiscLain2HargaFinalSebelumPPN) *
-                100
-              : 0;
-          console.log("📊 Using calculated margin (fallback):", marginDariHjt);
-        }
-      } catch (marginError) {
-        console.log(
-          "⚠️ Error getting existing margin, using calculated:",
-          marginError
-        );
-        // Fallback to calculated margin
-        marginDariHjt =
-          grandTotalDiscLain2HargaFinalSebelumPPN > 0
-            ? (profitDariHjtExclPPN / grandTotalDiscLain2HargaFinalSebelumPPN) *
-              100
-            : 0;
-        console.log(
-          "📊 Using calculated margin (error fallback):",
-          marginDariHjt
-        );
-      }
 
       // Siapkan data hasil - simpan Total/Bulan, Grand Total 12 Bulan, Discount, Grand Total - Disc/Lain2, dan Profit
       const hasilData = {
@@ -1741,8 +1699,24 @@ export class PenawaranController {
         formula: `${grandTotalDiscLain2HargaFinalSebelumPPN} - ${grandTotalDiscLain2HargaDasarIcon} = ${profitDariHjtExclPPN}`,
       });
 
+      // Calculate Margin dari HJT
+      const marginDariHjt =
+        grandTotalDiscLain2HargaDasarIcon > 0
+          ? (profitDariHjtExclPPN / grandTotalDiscLain2HargaDasarIcon) * 100
+          : 0;
+
+      console.log("📊 Margin dari HJT calculation:", {
+        profitDariHjtExclPPN: profitDariHjtExclPPN,
+        grandTotalDiscLain2HargaDasar: grandTotalDiscLain2HargaDasarIcon,
+        marginDariHjt: marginDariHjt,
+        formula: `(${profitDariHjtExclPPN} / ${grandTotalDiscLain2HargaDasarIcon}) × 100 = ${marginDariHjt}%`,
+      });
+
+      // Add margin to hasilData for database storage
+      hasilData.margin_dari_hjt = marginDariHjt;
+
       console.log(
-        "💾 Saving Total/Bulan, Grand Total 12 Bulan, Discount, Grand Total - Disc/Lain2, and Profit to hasil_penawaran:",
+        "💾 Saving Total/Bulan, Grand Total 12 Bulan, Discount, Grand Total - Disc/Lain2, Profit, and Margin to hasil_penawaran:",
         hasilData
       );
 

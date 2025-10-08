@@ -271,7 +271,14 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
     console.log('  - Calculated profit (fallback):', grandTotalDiscHargaFinal - grandTotalDiscHargaDasar);
     console.log('  - Final profit used:', profitDariHJT);
     
-    const marginDariHJT = grandTotalDiscHargaDasar > 0 ? (profitDariHJT / grandTotalDiscHargaDasar) * 100 : 0;
+    // Use Margin dari HJT from database if available, otherwise calculate
+    const marginFromDB = hasilPenawaranData?.margin_dari_hjt;
+    const marginDariHJT = marginFromDB || (grandTotalDiscHargaDasar > 0 ? (profitDariHJT / grandTotalDiscHargaDasar) * 100 : 0);
+    
+    console.log('[Admin Detail] Margin dari HJT calculation:');
+    console.log('  - Margin from database:', marginFromDB);
+    console.log('  - Final margin used:', marginDariHJT);
+    console.log('  - Formula (if calculated):', `(${profitDariHJT} / ${grandTotalDiscHargaDasar}) × 100 = ${marginDariHJT}%`);
     
     return {
       totalBulan: totalBulanHargaDasar.toLocaleString('id-ID'),
