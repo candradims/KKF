@@ -461,9 +461,15 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
     console.log('  - Final Grand Total Disc Harga Dasar (calculated):', grandTotalDiscHargaDasar);
     console.log('  - Final Grand Total Disc Harga Final (direct from GT 12 Bulan):', grandTotalDiscHargaFinal);
     
-    // Calculate profit and margin
-    const profitDariHJT = grandTotalDiscHargaFinal - grandTotalDiscHargaDasar;
+    // Use Profit dari HJT from database if available, otherwise calculate
+    const profitDariHJTFromDB = hasilPenawaranData?.profit_dari_hjt_excl_ppn;
+    const profitDariHJT = profitDariHJTFromDB || (grandTotalDiscHargaFinal - grandTotalDiscHargaDasar);
     const marginDariHJT = grandTotalDiscHargaDasar > 0 ? (profitDariHJT / grandTotalDiscHargaDasar) * 100 : 0;
+    
+    console.log('[Sales Detail] Profit dari HJT calculation:');
+    console.log('  - Profit from database:', profitDariHJTFromDB);
+    console.log('  - Final profit:', profitDariHJT);
+    console.log('  - Formula (if calculated):', `${grandTotalDiscHargaFinal} - ${grandTotalDiscHargaDasar} = ${profitDariHJT}`);
     
     return {
       totalBulan: totalBulanHargaDasar.toLocaleString('id-ID'),

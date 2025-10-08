@@ -1700,7 +1700,7 @@ export class PenawaranController {
         );
       }
 
-      // Siapkan data hasil - simpan Total/Bulan, Grand Total 12 Bulan, Discount, dan Grand Total - Disc/Lain2
+      // Siapkan data hasil - simpan Total/Bulan, Grand Total 12 Bulan, Discount, Grand Total - Disc/Lain2, dan Profit
       const hasilData = {
         total_per_bulan_harga_dasar_icon: totalPerBulanHargaDasarIcon,
         total_per_bulan_harga_final_sebelum_ppn:
@@ -1713,6 +1713,7 @@ export class PenawaranController {
           grandTotalDiscLain2HargaDasarIcon,
         grand_total_disc_lain2_harga_final_sebelum_ppn:
           grandTotalDiscLain2HargaFinalSebelumPPN,
+        profit_dari_hjt_excl_ppn: profitDariHjtExclPPN,
       };
 
       console.log("💰 Discount calculation:", {
@@ -1733,8 +1734,15 @@ export class PenawaranController {
         formulaHargaFinal: `Direct from Grand Total 12 Bulan: ${grandTotal12BulanHargaFinalSebelumPPN}`,
       });
 
+      console.log("💵 Profit dari HJT (excl.PPN) calculation:", {
+        grandTotalDiscLain2HargaFinal: grandTotalDiscLain2HargaFinalSebelumPPN,
+        grandTotalDiscLain2HargaDasar: grandTotalDiscLain2HargaDasarIcon,
+        profitDariHjtExclPPN: profitDariHjtExclPPN,
+        formula: `${grandTotalDiscLain2HargaFinalSebelumPPN} - ${grandTotalDiscLain2HargaDasarIcon} = ${profitDariHjtExclPPN}`,
+      });
+
       console.log(
-        "💾 Saving Total/Bulan, Grand Total 12 Bulan, Discount, and Grand Total - Disc/Lain2 to hasil_penawaran:",
+        "💾 Saving Total/Bulan, Grand Total 12 Bulan, Discount, Grand Total - Disc/Lain2, and Profit to hasil_penawaran:",
         hasilData
       );
 
