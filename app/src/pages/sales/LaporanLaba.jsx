@@ -14,6 +14,8 @@ import { penawaranAPI } from '../../utils/api';
 const LaporanLaba = () => {
   const [totalProfitData, setTotalProfitData] = useState([]);
   const [loadingRevenue, setLoadingRevenue] = useState(true);
+  const [marginTrendData, setMarginTrendData] = useState([]);
+  const [loadingMarginData, setLoadingMarginData] = useState(true);
 
   // Function to load real revenue data from profit_dari_hjt_excl_ppn
   const loadRevenueData = async () => {
@@ -152,26 +154,148 @@ const LaporanLaba = () => {
     }
   };
 
+  // Function to load real margin data from margin_dari_hjt
+  const loadMarginData = async () => {
+    try {
+      setLoadingMarginData(true);
+      console.log('🔍 [LAPORAN LABA MARGIN] Loading margin trend data...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response.success && response.data && Array.isArray(response.data)) {
+        console.log(`📊 [LAPORAN LABA MARGIN] Processing ${response.data.length} penawaran for margin data`);
+
+        // Initialize monthly margin accumulator
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const monthlyMargin = {};
+        monthNames.forEach(month => {
+          monthlyMargin[month] = 0;
+        });
+
+        let totalAllMargin = 0;
+        let processedCount = 0;
+
+        // Process each penawaran
+        for (const penawaran of response.data) {
+          try {
+            console.log(`🔍 [LAPORAN LABA MARGIN] Processing penawaran ${penawaran.id_penawaran}...`);
+            
+            const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            
+            if (hasilResponse.success && hasilResponse.data) {
+              const margin = parseFloat(hasilResponse.data.margin_dari_hjt) || 0;
+              
+              if (margin > 0) {
+                console.log(`💰 [LAPORAN LABA MARGIN] Found margin: ${margin.toFixed(2)}% for penawaran ${penawaran.id_penawaran}`);
+                
+                // Get month from penawaran date
+                let monthName = null;
+                
+                if (penawaran.tanggal_penawaran) {
+                  try {
+                    // Try different date formats
+                    let date;
+                    if (penawaran.tanggal_penawaran.includes('T')) {
+                      // ISO format: 2025-10-08T00:00:00.000Z
+                      date = new Date(penawaran.tanggal_penawaran);
+                    } else if (penawaran.tanggal_penawaran.includes('-')) {
+                      // Format: 2025-10-08 or 08-10-2025
+                      const parts = penawaran.tanggal_penawaran.split('-');
+                      if (parts[0].length === 4) {
+                        // YYYY-MM-DD
+                        date = new Date(penawaran.tanggal_penawaran);
+                      } else {
+                        // DD-MM-YYYY
+                        date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                      }
+                    } else if (penawaran.tanggal_penawaran.includes('/')) {
+                      // Format: DD/MM/YYYY or MM/DD/YYYY
+                      const parts = penawaran.tanggal_penawaran.split('/');
+                      // Assume DD/MM/YYYY format
+                      date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    } else {
+                      date = new Date(penawaran.tanggal_penawaran);
+                    }
+                    
+                    if (!isNaN(date.getTime())) {
+                      monthName = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                      console.log(`📅 [LAPORAN LABA MARGIN] Date: ${penawaran.tanggal_penawaran} -> Parsed: ${date.toDateString()} -> Month: ${monthName}`);
+                    } else {
+                      console.log(`⚠️ [LAPORAN LABA MARGIN] Invalid date: ${penawaran.tanggal_penawaran}`);
+                    }
+                  } catch (dateError) {
+                    console.log(`⚠️ [LAPORAN LABA MARGIN] Date parsing error for ${penawaran.tanggal_penawaran}:`, dateError);
+                  }
+                }
+                
+                // If we couldn't parse the date, use current month
+                if (!monthName || !monthNames.includes(monthName)) {
+                  const currentDate = new Date();
+                  monthName = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                  console.log(`⚠️ [LAPORAN LABA MARGIN] Using current month: ${monthName}`);
+                }
+                
+                // Add margin to the correct month (sum all margins for that month)
+                monthlyMargin[monthName] += margin;
+                console.log(`✅ [LAPORAN LABA MARGIN] Added ${margin.toFixed(2)}% to ${monthName}, total now: ${monthlyMargin[monthName].toFixed(2)}%`);
+                
+                totalAllMargin += margin;
+                processedCount++;
+              } else {
+                console.log(`❌ [LAPORAN LABA MARGIN] No valid margin found for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`❌ [LAPORAN LABA MARGIN] Failed to fetch hasil for penawaran ${penawaran.id_penawaran}`);
+            }
+          } catch (error) {
+            console.error(`❌ [LAPORAN LABA MARGIN] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        // Convert to chart data format - show total margin per month
+        const chartData = monthNames.map(month => ({
+          month,
+          margin: Math.round(monthlyMargin[month] * 100) / 100 // Round to 2 decimal places
+        }));
+
+        console.log('📊 [LAPORAN LABA MARGIN] Final margin summary:');
+        console.log('  - Total margin across all penawaran:', totalAllMargin.toFixed(2));
+        console.log('  - Penawaran processed:', processedCount);
+        console.log('  - Monthly totals:', monthlyMargin);
+        console.log('  - Chart data:', chartData);
+        
+        setMarginTrendData(chartData);
+      } else {
+        console.log('❌ [LAPORAN LABA MARGIN] No valid penawaran data received');
+        setMarginTrendData([]);
+      }
+    } catch (error) {
+      console.error('❌ [LAPORAN LABA MARGIN] Error loading margin data:', error);
+      // Initialize with empty data if error
+      setMarginTrendData([
+        { month: 'JAN', margin: 0 },
+        { month: 'FEB', margin: 0 },
+        { month: 'MAR', margin: 0 },
+        { month: 'APR', margin: 0 },
+        { month: 'MAY', margin: 0 },
+        { month: 'JUN', margin: 0 },
+        { month: 'JUL', margin: 0 },
+        { month: 'AUG', margin: 0 },
+        { month: 'SEP', margin: 0 },
+        { month: 'OCT', margin: 0 },
+        { month: 'NOV', margin: 0 },
+        { month: 'DEC', margin: 0 }
+      ]);
+    } finally {
+      setLoadingMarginData(false);
+    }
+  };
+
   // Load data on component mount
   useEffect(() => {
     loadRevenueData();
+    loadMarginData();
   }, []);
-
-  // Data untuk line chart Margin Trend
-  const marginTrendData = [
-    { month: 'JAN', margin1: 45.2, margin2: 35.8 },
-    { month: 'FEB', margin1: 48.1, margin2: 40.3 },
-    { month: 'MAR', margin1: 52.7, margin2: 45.1 },
-    { month: 'APR', margin1: 57.3, margin2: 50.6 },
-    { month: 'MAY', margin1: 55.9, margin2: 48.2 },
-    { month: 'JUN', margin1: 53.4, margin2: 46.7 },
-    { month: 'JUL', margin1: 56.8, margin2: 49.5 },
-    { month: 'AUG', margin1: 60.2, margin2: 52.3 },
-    { month: 'SEP', margin1: 58.7, margin2: 50.9 },
-    { month: 'OCT', margin1: 62.1, margin2: 55.4 },
-    { month: 'NOV', margin1: 65.3, margin2: 58.7 },
-    { month: 'DEC', margin1: 68.5, margin2: 60.2 }
-  ];
 
   const renderCustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -417,39 +541,52 @@ const LaporanLaba = () => {
             </select>
           </div>
           <div style={{ height: '320px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={marginTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="month" 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: '#666' }}
-                />
-                <YAxis 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: '#666' }}
-                  domain={[0, 100]}
-                  tickFormatter={(value) => `${value}%`}
-                />
-                <Tooltip content={renderCustomTooltip} />
-                <Line 
-                  type="monotone" 
-                  dataKey="margin1" 
-                  stroke="#00AEEF" 
-                  strokeWidth={3}
-                  dot={{ fill: '#00AEEF', strokeWidth: 2, r: 4 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="margin2" 
-                  stroke="#2D396B" 
-                  strokeWidth={3}
-                  dot={{ fill: '#2D396B', strokeWidth: 2, r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {loadingMarginData ? (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+                color: '#6b7280'
+              }}>
+                Loading margin data...
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={marginTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#666' }}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#666' }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip 
+                    formatter={(value, name) => [`${value.toFixed(1)}%`, 'Total Margin']}
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="margin" 
+                    stroke="#00AEEF" 
+                    strokeWidth={3}
+                    dot={{ fill: '#00AEEF', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: '#2D396B' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
           <div style={{
             marginTop: '16px',
@@ -462,7 +599,26 @@ const LaporanLaba = () => {
               fontWeight: 'bold',
               color: '#00AEEF'
             }}>
-              57%
+              {(() => {
+                // Get current month margin or latest month with data
+                const currentDate = new Date();
+                const currentMonthShort = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                
+                // First try to get current month's data
+                let currentMarginData = marginTrendData.find(item => item.month === currentMonthShort);
+                
+                // If current month has no data, get the latest month with data
+                if (!currentMarginData || currentMarginData.margin === 0) {
+                  // Get all months with data in reverse order (latest first)
+                  const monthsWithData = marginTrendData
+                    .filter(item => item.margin > 0)
+                    .reverse();
+                  currentMarginData = monthsWithData[0];
+                }
+                
+                const margin = currentMarginData ? currentMarginData.margin : 0;
+                return `${margin.toFixed(1)}%`;
+              })()}
             </div>
             <div style={{
               fontSize: '14px',
