@@ -26,6 +26,8 @@ const Dashboard = () => {
     ditolak: 0
   });
   const [loadingData, setLoadingData] = useState(true);
+  const [totalRevenueData, setTotalRevenueData] = useState([]);
+  const [loadingRevenue, setLoadingRevenue] = useState(true);
 
   // Function to load penawaran data
   const loadPenawaranData = async () => {
@@ -99,19 +101,386 @@ const Dashboard = () => {
     }
   };
 
+  // Function to load revenue data from profit_dari_hjt_excl_ppn
+  const loadRevenueData = async () => {
+    try {
+      setLoadingRevenue(true);
+      console.log('🔄 Starting revenue data calculation...');
+
+      // Get user data for filtering (sales only see their own data)
+      const userData = getUserData();
+      console.log('👤 User data:', userData);
+      
+      if (!userData) {
+        console.error('❌ User data not found for revenue calculation');
+        setTotalRevenueData([]);
+        return;
+      }
+
+      // Fetch all penawaran data for this sales person
+      console.log('📡 Fetching penawaran data...');
+      const response = await penawaranAPI.getAll();
+      console.log('📊 Penawaran API response:', response);
+      
+      if (response && response.success && response.data) {
+        const penawaranList = response.data;
+        console.log('� Found', penawaranList.length, 'penawaran records');
+
+        // Group revenue by month and calculate from profit_dari_hjt_excl_ppn
+        const monthlyRevenue = {};
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        
+        // Initialize all months with 0
+        monthNames.forEach(month => {
+          monthlyRevenue[month] = 0;
+        });
+
+        let totalProfit = 0;
+        let processedCount = 0;
+
+        // Process each penawaran to get profit data
+        for (const penawaran of penawaranList) {
+          console.log(`🔍 Processing penawaran ID: ${penawaran.id_penawaran}`);
+          
+          try {
+            // Try to calculate result first to ensure profit is calculated and stored
+            console.log(`🧮 Calculating result for penawaran ${penawaran.id_penawaran}`);
+            const calculateResponse = await fetch(`http://localhost:3000/api/penawaran/${penawaran.id_penawaran}/calculate-result`, {
+              method: 'POST',
+              headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (calculateResponse.ok) {
+              console.log(`✅ Result calculated for penawaran ${penawaran.id_penawaran}`);
+            }
+
+            // Now get hasil penawaran data which contains profit_dari_hjt_excl_ppn
+            console.log(`📊 Fetching hasil for penawaran ${penawaran.id_penawaran}`);
+            const hasilResponse = await fetch(`http://localhost:3000/api/penawaran/${penawaran.id_penawaran}/hasil`, {
+              headers: getAuthHeaders()
+            });
+            
+            console.log(`📈 Hasil response status for ${penawaran.id_penawaran}:`, hasilResponse.status);
+            
+            if (hasilResponse.ok) {
+              const hasilData = await hasilResponse.json();
+              console.log(`💾 Hasil data for ${penawaran.id_penawaran}:`, hasilData);
+              
+              if (hasilData.success && hasilData.data) {
+                const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
+                console.log(`💰 Extracted profit for ${penawaran.id_penawaran}: ${profit}`);
+                
+                if (profit > 0) {
+                  totalProfit += profit;
+                  processedCount++;
+                  
+                  // Extract month from tanggal_dibuat
+                  if (penawaran.tanggal_dibuat) {
+                    const date = new Date(penawaran.tanggal_dibuat);
+                    const monthIndex = date.getMonth();
+                    const monthName = monthNames[monthIndex];
+                    
+                    monthlyRevenue[monthName] += profit;
+                    
+                    console.log(`� Added profit ${profit.toLocaleString('id-ID')} to ${monthName} (${date.toDateString()}) for penawaran ${penawaran.id_penawaran}`);
+                  } else {
+                    console.log(`⚠️ No tanggal_dibuat for penawaran ${penawaran.id_penawaran}`);
+                  }
+                } else {
+                  console.log(`ℹ️ Zero profit for penawaran ${penawaran.id_penawaran}`);
+                }
+              } else {
+                console.log(`⚠️ No valid hasil data for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`❌ Failed to fetch hasil for penawaran ${penawaran.id_penawaran}: ${hasilResponse.status}`);
+            }
+          } catch (error) {
+            console.error(`❌ Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        // Convert to chart data format
+        const chartData = monthNames.map(month => ({
+          month,
+          value: Math.round(monthlyRevenue[month])
+        }));
+
+        console.log('📈 Final revenue summary:');
+        console.log('  - Total profit across all penawaran:', totalProfit);
+        console.log('  - Penawaran processed:', processedCount);
+        console.log('  - Monthly breakdown:', monthlyRevenue);
+        console.log('  - Chart data:', chartData);
+        
+        setTotalRevenueData(chartData);
+      } else {
+        console.log('❌ No valid penawaran data received');
+        setTotalRevenueData([]);
+      }
+    } catch (error) {
+      console.error('❌ Error loading revenue data:', error);
+      // Initialize with empty data if error
+      setTotalRevenueData([
+        { month: 'JAN', value: 0 },
+        { month: 'FEB', value: 0 },
+        { month: 'MAR', value: 0 },
+        { month: 'APR', value: 0 },
+        { month: 'MAY', value: 0 },
+        { month: 'JUN', value: 0 },
+        { month: 'JUL', value: 0 },
+        { month: 'AUG', value: 0 },
+        { month: 'SEP', value: 0 },
+        { month: 'OCT', value: 0 },
+        { month: 'NOV', value: 0 },
+        { month: 'DEC', value: 0 }
+      ]);
+    } finally {
+      setLoadingRevenue(false);
+    }
+  };
+
+  // NEW: Real revenue data function based on actual profit values
+  const loadRealRevenueData = async () => {
+    try {
+      setLoadingRevenue(true);
+      console.log('🔄 [REAL] Loading revenue from actual profit data...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response && response.success && response.data) {
+        const penawaranList = response.data;
+        console.log('📋 [REAL] Processing', penawaranList.length, 'penawaran');
+
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const monthlyRevenue = {};
+        
+        monthNames.forEach(month => {
+          monthlyRevenue[month] = 0;
+        });
+
+        let totalActualProfit = 0;
+
+        // Get real profit data from each penawaran
+        for (const penawaran of penawaranList) {
+          try {
+            console.log(`💰 [REAL] Fetching profit for penawaran ${penawaran.id_penawaran}`);
+            
+            const hasilResponse = await fetch(`http://localhost:3000/api/penawaran/${penawaran.id_penawaran}/hasil`, {
+              headers: getAuthHeaders()
+            });
+            
+            if (hasilResponse.ok) {
+              const hasilData = await hasilResponse.json();
+              
+              if (hasilData.success && hasilData.data) {
+                const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
+                
+                if (profit > 0) {
+                  console.log(`✅ [REAL] Found profit: ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
+                  totalActualProfit += profit;
+                  
+                  // Add to appropriate month
+                  if (penawaran.tanggal_dibuat) {
+                    const date = new Date(penawaran.tanggal_dibuat);
+                    const monthIndex = date.getMonth();
+                    const monthName = monthNames[monthIndex];
+                    monthlyRevenue[monthName] += profit;
+                  } else {
+                    // Current month if no date
+                    const currentMonth = monthNames[new Date().getMonth()];
+                    monthlyRevenue[currentMonth] += profit;
+                  }
+                } else {
+                  console.log(`⚠️ [REAL] Zero profit for penawaran ${penawaran.id_penawaran}`);
+                }
+              }
+            }
+          } catch (error) {
+            console.error(`❌ [REAL] Error processing ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        const chartData = monthNames.map(month => ({
+          month,
+          value: Math.round(monthlyRevenue[month])
+        }));
+
+        console.log('📊 [REAL] FINAL RESULTS:');
+        console.log(`💰 Total Actual Profit: ${totalActualProfit.toLocaleString('id-ID')}`);
+        console.log('📅 Monthly distribution:', monthlyRevenue);
+        console.log('📈 Chart data:', chartData);
+
+        setTotalRevenueData(chartData);
+      }
+    } catch (error) {
+      console.error('❌ [REAL] Error loading real revenue data:', error);
+      setTotalRevenueData([]);
+    } finally {
+      setLoadingRevenue(false);
+    }
+  };
+
+  // Alternative simpler function to load revenue data
+  const loadRevenueDataSimple = async () => {
+    try {
+      setLoadingRevenue(true);
+      console.log('🔄 [Simple] Loading revenue data...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response && response.success && response.data) {
+        const penawaranList = response.data;
+        console.log('📊 [Simple] Processing', penawaranList.length, 'penawaran');
+        console.log('📋 [Simple] Penawaran list:', penawaranList);
+
+        let totalRevenue = 0;
+        const monthlyData = {};
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        
+        monthNames.forEach(month => {
+          monthlyData[month] = 0;
+        });
+
+        // For now, let's use a simple calculation based on sample data
+        // This will be replaced with real profit data once we confirm the API works
+        for (const penawaran of penawaranList) {
+          if (penawaran.tanggal_dibuat) {
+            const date = new Date(penawaran.tanggal_dibuat);
+            const monthIndex = date.getMonth();
+            const monthName = monthNames[monthIndex];
+            
+            // Temporary: Add 5000000 per penawaran for testing
+            // In production, this should be the actual profit value
+            const tempProfit = 5000000;
+            monthlyData[monthName] += tempProfit;
+            totalRevenue += tempProfit;
+            
+            console.log(`📅 [Simple] Added temp profit ${tempProfit} to ${monthName} for penawaran ${penawaran.id_penawaran}`);
+          }
+        }
+
+        const chartData = monthNames.map(month => ({
+          month,
+          value: monthlyData[month]
+        }));
+
+        console.log('📈 [Simple] Total revenue:', totalRevenue);
+        console.log('📊 [Simple] Chart data:', chartData);
+        
+        setTotalRevenueData(chartData);
+      }
+    } catch (error) {
+      console.error('❌ [Simple] Error loading revenue data:', error);
+      setTotalRevenueData([]);
+    } finally {
+      setLoadingRevenue(false);
+    }
+  };
+
+  // FINAL: Simple revenue data using proper API
+  const loadFinalRevenueData = async () => {
+    try {
+      setLoadingRevenue(true);
+      console.log('🔄 [FINAL] Loading revenue using proper API...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response && response.success && response.data) {
+        const penawaranList = response.data;
+        console.log('📋 [FINAL] Found', penawaranList.length, 'penawaran');
+
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const monthlyRevenue = {};
+        
+        monthNames.forEach(month => {
+          monthlyRevenue[month] = 0;
+        });
+
+        let totalRevenue = 0;
+
+        // Process each penawaran to get profit
+        for (const penawaran of penawaranList) {
+          try {
+            console.log(`💰 [FINAL] Processing penawaran ${penawaran.id_penawaran}`);
+            
+            // Use the proper API function
+            const hasilData = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            
+            if (hasilData && hasilData.success && hasilData.data) {
+              const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
+              
+              if (profit > 0) {
+                console.log(`✅ [FINAL] Profit found: ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
+                totalRevenue += profit;
+                
+                // Add to appropriate month
+                if (penawaran.tanggal_dibuat) {
+                  const date = new Date(penawaran.tanggal_dibuat);
+                  const monthIndex = date.getMonth();
+                  const monthName = monthNames[monthIndex];
+                  monthlyRevenue[monthName] += profit;
+                  console.log(`📅 [FINAL] Added ${profit.toLocaleString('id-ID')} to ${monthName}`);
+                } else {
+                  // Add to current month if no date
+                  const currentMonth = monthNames[new Date().getMonth()];
+                  monthlyRevenue[currentMonth] += profit;
+                  console.log(`📅 [FINAL] Added ${profit.toLocaleString('id-ID')} to current month (${currentMonth})`);
+                }
+              } else {
+                console.log(`⚠️ [FINAL] Zero profit for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`⚠️ [FINAL] No hasil data for penawaran ${penawaran.id_penawaran}`);
+            }
+          } catch (error) {
+            console.error(`❌ [FINAL] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        const chartData = monthNames.map(month => ({
+          month,
+          value: Math.round(monthlyRevenue[month])
+        }));
+
+        console.log('📊 [FINAL] === REVENUE CALCULATION COMPLETE ===');
+        console.log(`💰 Total Revenue: Rp ${totalRevenue.toLocaleString('id-ID')}`);
+        console.log('📅 Monthly breakdown:', monthlyRevenue);
+        console.log('📈 Chart data:', chartData);
+
+        setTotalRevenueData(chartData);
+      } else {
+        console.log('❌ [FINAL] Failed to get penawaran data');
+        setTotalRevenueData([]);
+      }
+    } catch (error) {
+      console.error('❌ [FINAL] Error loading revenue data:', error);
+      setTotalRevenueData([]);
+    } finally {
+      setLoadingRevenue(false);
+    }
+  };
+
   // Load data on component mount
   useEffect(() => {
     loadPenawaranData();
+    // Delay revenue loading to ensure penawaran data is loaded first
+    setTimeout(() => {
+      loadFinalRevenueData(); // Use FINAL version with proper API
+    }, 1000);
     
     // Auto-refresh every 5 minutes
     const interval = setInterval(() => {
       loadPenawaranData();
+      setTimeout(() => {
+        loadFinalRevenueData(); // Use FINAL version with proper API
+      }, 1000);
     }, 5 * 60 * 1000); // 5 minutes
-    
-    return () => clearInterval(interval);
-  }, []);
 
-  const colors = {
+    return () => clearInterval(interval);
+  }, []);  const colors = {
     primary: '#035b71',
     secondary: '#00bfca',
     tertiary: '#00a2b9',
@@ -132,21 +501,6 @@ const Dashboard = () => {
   // Using Ganjar's data as example
   const mySalesData = [
     { name: 'Target Saya', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) }
-  ];
-  // Data untuk line chart Total Revenue
-  const totalRevenueData = [
-    { month: 'JAN', value: 15000 },
-    { month: 'FEB', value: 18000 },
-    { month: 'MAR', value: 22000 },
-    { month: 'APR', value: 25200 },
-    { month: 'MAY', value: 28000 },
-    { month: 'JUN', value: 24000 },
-    { month: 'JUL', value: 26000 },
-    { month: 'AUG', value: 30000 },
-    { month: 'SEP', value: 32000 },
-    { month: 'OCT', value: 29000 },
-    { month: 'NOV', value: 35000 },
-    { month: 'DEC', value: 38000 }
   ];
 
   // Data untuk line chart Margin Trend
@@ -451,7 +805,18 @@ const Dashboard = () => {
                 <div style={{
                   fontSize: '24px',
                   fontWeight: 'bold'
-                }}>Rp 52.000.000,-</div>
+                }}>
+                  {loadingRevenue ? 'Loading...' : 
+                    (() => {
+                      const total = totalRevenueData.reduce((sum, item) => sum + (item.value || 0), 0);
+                      console.log('💰 Total Revenue Display Calculation:', {
+                        revenueData: totalRevenueData,
+                        total: total
+                      });
+                      return `Rp ${total.toLocaleString('id-ID')},-`;
+                    })()
+                  }
+                </div>
               </div>
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',

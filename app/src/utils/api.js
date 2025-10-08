@@ -158,6 +158,15 @@ export const penawaranAPI = {
   // Get by status
   getByStatus: (status) =>
     apiRequest(API_CONFIG.ENDPOINTS.PENAWARAN.BY_STATUS(status)),
+
+  // Get hasil penawaran
+  getHasil: (id) => apiRequest(`${API_CONFIG.ENDPOINTS.PENAWARAN.BASE}/${id}/hasil`),
+
+  // Calculate result
+  calculateResult: (id) =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.PENAWARAN.BASE}/${id}/calculate-result`, {
+      method: "POST",
+    }),
 };
 
 // Specific API functions for Pengeluaran
