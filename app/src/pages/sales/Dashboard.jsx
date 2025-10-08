@@ -28,6 +28,8 @@ const Dashboard = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [totalRevenueData, setTotalRevenueData] = useState([]);
   const [loadingRevenue, setLoadingRevenue] = useState(true);
+  const [regionalRevenueData, setRegionalRevenueData] = useState([]);
+  const [loadingRegionalRevenue, setLoadingRegionalRevenue] = useState(true);
 
   // Function to load penawaran data
   const loadPenawaranData = async () => {
@@ -463,12 +465,146 @@ const Dashboard = () => {
     }
   };
 
+  // Function to load regional revenue data based on HJT wilayah
+  const loadRegionalRevenueData = async () => {
+    try {
+      setLoadingRegionalRevenue(true);
+      console.log('🗺️ [REGIONAL] Loading regional revenue data by HJT wilayah...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response && response.success && response.data) {
+        const penawaranList = response.data;
+        console.log('📋 [REGIONAL] Processing', penawaranList.length, 'penawaran for regional analysis');
+        console.log('📋 [REGIONAL] Full penawaran list:', penawaranList);
+
+        // Initialize HJT wilayah profit counters (including new KALIMANTAN)
+        const hjtProfits = {
+          'HJT JAWA-BALI': 0,
+          'HJT SUMATRA': 0,
+          'HJT JABODETABEK': 0,
+          'HJT INTIM': 0,
+          'HJT KALIMANTAN': 0
+        };
+
+        let totalProfit = 0;
+
+        // Process each penawaran to get profit by HJT wilayah
+        for (const penawaran of penawaranList) {
+          try {
+            console.log(`🌍 [REGIONAL] Processing penawaran ${penawaran.id_penawaran}`);
+            console.log('📊 [REGIONAL] Penawaran data structure:', penawaran);
+            console.log('📍 [REGIONAL] Available fields:', Object.keys(penawaran));
+            console.log('📍 [REGIONAL] Checking wilayah fields:');
+            console.log('  - wilayah_hjt:', penawaran.wilayah_hjt);
+            console.log('  - referensiHJT:', penawaran.referensiHJT);
+            console.log('  - hjtWilayah:', penawaran.hjtWilayah);
+            console.log('  - wilayah:', penawaran.wilayah);
+            
+            // Get profit data
+            const hasilData = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            
+            if (hasilData && hasilData.success && hasilData.data) {
+              const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
+              
+              if (profit > 0) {
+                // Determine the correct HJT wilayah field
+                let wilayahHjt = penawaran.wilayah_hjt || penawaran.referensiHJT || penawaran.hjtWilayah || penawaran.wilayah;
+                
+                console.log(`💰 [REGIONAL] Profit found: ${profit.toLocaleString('id-ID')} for raw wilayah: "${wilayahHjt}"`);
+                
+                // Map and normalize wilayah names
+                let mappedWilayah = null;
+                if (wilayahHjt) {
+                  const wilayahLower = wilayahHjt.toString().toLowerCase();
+                  
+                  if (wilayahLower.includes('sumatra') || wilayahLower.includes('sumatera')) {
+                    mappedWilayah = 'HJT SUMATRA';
+                  } else if (wilayahLower.includes('jawa') && wilayahLower.includes('bali')) {
+                    mappedWilayah = 'HJT JAWA-BALI';
+                  } else if (wilayahLower.includes('jabodetabek') || wilayahLower.includes('jakarta')) {
+                    mappedWilayah = 'HJT JABODETABEK';
+                  } else if (wilayahLower.includes('kalimantan') || wilayahLower.includes('borneo')) {
+                    mappedWilayah = 'HJT KALIMANTAN';
+                  } else if (wilayahLower.includes('intim') || wilayahLower.includes('timur')) {
+                    mappedWilayah = 'HJT INTIM';
+                  } else {
+                    console.log(`🔍 [REGIONAL] Trying exact match for: "${wilayahHjt}"`);
+                    // Try exact match
+                    if (hjtProfits.hasOwnProperty(wilayahHjt)) {
+                      mappedWilayah = wilayahHjt;
+                    }
+                  }
+                }
+                
+                if (mappedWilayah && hjtProfits.hasOwnProperty(mappedWilayah)) {
+                  hjtProfits[mappedWilayah] += profit;
+                  totalProfit += profit;
+                  console.log(`✅ [REGIONAL] Added ${profit.toLocaleString('id-ID')} to ${mappedWilayah} (mapped from "${wilayahHjt}")`);
+                } else {
+                  console.log(`⚠️ [REGIONAL] Could not map wilayah "${wilayahHjt}" to any HJT region, adding to HJT INTIM as default`);
+                  hjtProfits['HJT INTIM'] += profit;
+                  totalProfit += profit;
+                }
+              } else {
+                console.log(`ℹ️ [REGIONAL] Zero profit for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`⚠️ [REGIONAL] No profit data for penawaran ${penawaran.id_penawaran}`);
+            }
+          } catch (error) {
+            console.error(`❌ [REGIONAL] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        // Calculate percentages and prepare chart data
+        const colors = {
+          'HJT JAWA-BALI': '#035b71',      // primary
+          'HJT SUMATRA': '#00bfca',        // secondary  
+          'HJT JABODETABEK': '#008bb0',    // accent1
+          'HJT INTIM': '#00a2b9',          // tertiary
+          'HJT KALIMANTAN': '#0090a8'      // accent2
+        };
+
+        const chartData = Object.entries(hjtProfits).map(([wilayah, profit]) => {
+          const percentage = totalProfit > 0 ? ((profit / totalProfit) * 100) : 0;
+          return {
+            name: wilayah,
+            value: Math.round(percentage * 10) / 10, // Round to 1 decimal place
+            profit: profit,
+            color: colors[wilayah]
+          };
+        }).filter(item => item.profit > 0); // Only include regions with profit
+
+        console.log('🗺️ [REGIONAL] === REGIONAL REVENUE ANALYSIS COMPLETE ===');
+        console.log(`💰 Total Profit: Rp ${totalProfit.toLocaleString('id-ID')}`);
+        console.log('📊 Profit by HJT:');
+        Object.entries(hjtProfits).forEach(([wilayah, profit]) => {
+          const percentage = totalProfit > 0 ? ((profit / totalProfit) * 100) : 0;
+          console.log(`  ${wilayah}: Rp ${profit.toLocaleString('id-ID')} (${percentage.toFixed(1)}%)`);
+        });
+        console.log('📈 Chart data:', chartData);
+
+        setRegionalRevenueData(chartData);
+      } else {
+        console.log('❌ [REGIONAL] Failed to get penawaran data');
+        setRegionalRevenueData([]);
+      }
+    } catch (error) {
+      console.error('❌ [REGIONAL] Error loading regional revenue data:', error);
+      setRegionalRevenueData([]);
+    } finally {
+      setLoadingRegionalRevenue(false);
+    }
+  };
+
   // Load data on component mount
   useEffect(() => {
     loadPenawaranData();
     // Delay revenue loading to ensure penawaran data is loaded first
     setTimeout(() => {
       loadFinalRevenueData(); // Use FINAL version with proper API
+      loadRegionalRevenueData(); // Load regional revenue data
     }, 1000);
     
     // Auto-refresh every 5 minutes
@@ -476,6 +612,7 @@ const Dashboard = () => {
       loadPenawaranData();
       setTimeout(() => {
         loadFinalRevenueData(); // Use FINAL version with proper API
+        loadRegionalRevenueData(); // Load regional revenue data
       }, 1000);
     }, 5 * 60 * 1000); // 5 minutes
 
@@ -519,12 +656,13 @@ const Dashboard = () => {
     { month: 'DEC', margin1: 68.5, margin2: 60.2 }
   ];
 
-  // Data untuk pie chart regional
-  const regionalData = [
-    { name: 'HJT JAWA-BALI', value: 37, color: colors.primary },
-    { name: 'HJT SUMATRA', value: 28, color: colors.secondary },
-    { name: 'HJT JABODETABEK', value: 24, color: colors.accent1 },
-    { name: 'HJT INTIM', value: 11, color: colors.tertiary }
+  // Data untuk pie chart regional - now using real data from profit calculations
+  const regionalData = regionalRevenueData.length > 0 ? regionalRevenueData : [
+    { name: 'HJT JAWA-BALI', value: 0, color: colors.primary },
+    { name: 'HJT SUMATRA', value: 0, color: colors.secondary },
+    { name: 'HJT JABODETABEK', value: 0, color: colors.accent1 },
+    { name: 'HJT INTIM', value: 0, color: colors.tertiary },
+    { name: 'HJT KALIMANTAN', value: 0, color: colors.accent2 }
   ];
 
   // Data untuk pie chart status penawaran - now using dynamic data
@@ -534,7 +672,7 @@ const Dashboard = () => {
     { name: 'Ditolak', value: statusCounts.ditolak, color: '#EF4444' }
   ];
 
-  const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary];
+  const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary, colors.accent2];
   const STATUS_COLORS = ['#fce40bff', '#3fba8c', '#EF4444'];
 
   const renderCustomTooltip = ({ active, payload, label }) => {
@@ -989,56 +1127,93 @@ const Dashboard = () => {
               fontWeight: '600',
               color: '#1f2937',
               marginBottom: '16px'
-            }}>Total Revenue</h3>
+            }}>Total Revenue by HJT</h3>
             <div style={{ height: '192px', marginBottom: '16px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={regionalData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {regionalData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {regionalData.map((item, index) => (
-                <div key={index} style={{
+              {loadingRegionalRevenue ? (
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  fontSize: '14px'
+                  justifyContent: 'center',
+                  height: '100%',
+                  fontSize: '14px',
+                  color: '#6b7280'
                 }}>
-                  <div style={{
+                  Loading regional data...
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={regionalData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {regionalData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => [`${value}%`, 'Percentage']}
+                      labelFormatter={(label) => `${label}`}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {loadingRegionalRevenue ? (
+                <div style={{
+                  fontSize: '14px',
+                  color: '#6b7280',
+                  textAlign: 'center',
+                  padding: '16px'
+                }}>
+                  Loading HJT revenue breakdown...
+                </div>
+              ) : (
+                regionalData.map((item, index) => (
+                  <div key={index} style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    justifyContent: 'space-between',
+                    fontSize: '14px'
                   }}>
-                    <div 
-                      style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        backgroundColor: COLORS[index]
-                      }}
-                    ></div>
-                    <span style={{ color: '#6b7280' }}>{item.name}</span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <div 
+                        style={{
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          backgroundColor: item.color || COLORS[index % COLORS.length]
+                        }}
+                      ></div>
+                      <span style={{ color: '#6b7280' }}>{item.name}</span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        fontWeight: '600',
+                        color: '#1f2937'
+                      }}>{item.value}%</div>
+                      {item.profit && (
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#6b7280'
+                        }}>
+                          Rp {item.profit.toLocaleString('id-ID')}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <span style={{
-                    fontWeight: '600',
-                    color: '#1f2937'
-                  }}>{item.value}%</span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
