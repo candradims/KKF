@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Calculator, Check } from 'lucide-react';
+import { X, AlertTriangle, Check, User, FileText, BarChart3, Settings, Package, DollarSign, Calculator, ClipboardList } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getUserData, getAuthHeaders } from '../../../utils/api';
 
 const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
@@ -27,12 +28,26 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     marginPercent: ''
   });
 
+  // Color palette
+  const colors = {
+    primary: '#035b71',
+    secondary: '#00bfca',
+    tertiary: '#00a2b9',
+    accent1: '#008bb0',
+    accent2: '#0090a8',
+    success: '#3fba8c',
+    danger: '#ef4444',
+    dangerLight: '#f87171',
+  };
+
   // Pre-fill form with existing data when deleting
   useEffect(() => {
     if (deleteData) {
+      const tanggalFromDB = deleteData.rawData?.tanggal_dibuat || deleteData.tanggal;
+      const formattedTanggal = tanggalFromDB ? new Date(tanggalFromDB).toISOString().split('T')[0] : '';
       setFormData({
         sales: deleteData.rawData?.sales || deleteData.sales || deleteData.namaSales || '',
-        tanggal: deleteData.tanggal || '',
+        tanggal: formattedTanggal,
         pelanggan: deleteData.namaPelanggan || deleteData.pelanggan || '',
         nomorKontrak: deleteData.nomorKontrak || '',
         kontrakTahunKe: deleteData.kontrakKe || deleteData.kontrakTahunKe || '',
@@ -59,7 +74,6 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
 
     setLoadingPengeluaran(true);
     try {
-      // Get auth data using utility function
       const userData = getUserData();
       if (!userData) {
         console.log('❌ No user data for loading pengeluaran');
@@ -69,10 +83,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
 
       console.log('📋 Loading pengeluaran data for penawaran ID:', deleteData.id_penawaran);
 
-      // Get auth headers using utility function
       const headers = getAuthHeaders();
-      console.log('📋 Using headers:', headers);
-
       const response = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${deleteData.id_penawaran}`, {
         method: 'GET',
         headers: headers,
@@ -101,13 +112,10 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
 
   const loadLayananData = async () => {
     console.log('📋 Loading layanan data from deleteData:', deleteData);
-    console.log('📋 deleteData.rawData:', deleteData?.rawData);
-    console.log('📋 deleteData.rawData.data_penawaran_layanan:', deleteData?.rawData?.data_penawaran_layanan);
     
     setLoadingLayanan(true);
     
     try {
-      // Check if we have complete layanan data or need to load from API
       const needsFullData = !deleteData?.rawData?.data_penawaran_layanan || 
                            deleteData.rawData.data_penawaran_layanan.length === 0;
       
@@ -129,7 +137,6 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     }
   };
 
-  // Function to load full penawaran data with layanan details (same as Edit.jsx)
   const loadFullPenawaranData = async (penawaranId) => {
     try {
       console.log("🔄 Hapus: Loading full data for ID:", penawaranId);
@@ -173,7 +180,6 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     setIsDeleting(true);
     
     try {
-      // First check if there's associated pengeluaran data
       const userData = getUserData();
       if (!userData) {
         console.log('❌ No user data for deletion');
@@ -198,7 +204,6 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
             if (pengeluaranData.data && pengeluaranData.data.length > 0) {
               console.log('🗑️ Found pengeluaran data to delete:', pengeluaranData.data);
               
-              // Delete each pengeluaran record
               for (const pengeluaran of pengeluaranData.data) {
                 console.log('🗑️ Deleting pengeluaran ID:', pengeluaran.id_pengeluaran);
                 
@@ -218,10 +223,8 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
         }
       }
       
-      // Now delete the penawaran (this calls the parent's onConfirm)
       onConfirm(deleteData);
       
-      // Immediately transition to success modal
       setShowSuccessModal(true);
       setIsDeleting(false);
     } catch (error) {
@@ -259,1042 +262,1449 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     onClose();
   };
 
+  // Input style function
+  const inputStyle = {
+    padding: '16px 16px 16px 48px',
+    borderRadius: '12px',
+    border: `2px solid rgba(3, 91, 113, 0.38)`,
+    fontSize: '14px',
+    backgroundColor: '#f0f4f5',
+    color: colors.primary,
+    width: '100%',
+    outline: 'none',
+    cursor: 'not-allowed',
+    fontFamily: "'Open Sans', sans-serif !important"
+  };
+
+  const iconContainerStyle = {
+    position: 'absolute',
+    left: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: colors.primary,
+    zIndex: 1
+  };
+
   if (!isOpen && !showSuccessModal) return null;
 
   return (
-    <div>
-      {/* Main Modal */}
-      {isOpen && !showSuccessModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000,
-          padding: '20px',
-          transition: 'opacity 0.2s ease-in-out'
-        }}>
-      <div style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: '12px',
-        width: '500px',
-        maxHeight: '90vh',
-        overflow: 'auto',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
-        position: 'relative',
-        transform: isDeleting ? 'scale(0.95)' : 'scale(1)',
-        transition: 'transform 0.2s ease-in-out'
-      }}>
-        {/* Close Button */}
-        <button
-          onClick={handleCancel}
-          disabled={isDeleting}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            background: 'none',
-            border: 'none',
-            cursor: isDeleting ? 'not-allowed' : 'pointer',
-            padding: '4px',
-            color: '#374151',
-            zIndex: 10,
-            opacity: isDeleting ? 0.5 : 1
-          }}
-        >
-          <X style={{ width: '24px', height: '24px' }} />
-        </button>
+    <>
+      <style>
+        {`
+          input::placeholder {
+            color: ${colors.accent1};
+            opacity: 0.6;
+            fontFamily: "'Open Sans', sans-serif !important";
+          }
+          select:invalid {
+            color: ${colors.accent1};
+            opacity: 0.6;
+            fontFamily: "'Open Sans', sans-serif !important";
+          }
+          select option {
+            color: ${colors.primary};
+            background-color: #e7f3f5ff;
+            fontFamily: "'Open Sans', sans-serif !important";
+          }
+        `}
+      </style>
 
-        {/* Header */}
-        <div style={{
-          padding: '30px 30px 20px 30px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{
-            margin: 0,
-            fontSize: '24px',
-            fontWeight: '600',
-            color: '#DC2626'
-          }}>
-            Hapus Data Penawaran
-          </h2>
-        </div>
-
-        {/* Warning Message */}
-        <div style={{
-          padding: '0 30px',
-          marginBottom: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FECACA',
-            borderRadius: '8px',
-            padding: '16px',
-            textAlign: 'center'
-          }}>
-            <p style={{
-              margin: 0,
-              color: '#991B1B',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}>
-              ⚠️ Apakah Anda yakin ingin menghapus data penawaran berikut?
-            </p>
-            <p style={{
-              margin: '8px 0 0 0',
-              color: '#7F1D1D',
-              fontSize: '12px'
-            }}>
-              Data penawaran dan semua pengeluaran terkait akan terhapus permanen!
-            </p>
-          </div>
-        </div>
-
-        {/* Form */}
-        <div style={{ padding: '0 30px 30px 30px' }}>
-          {/* Sales Field (Top Right) */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            marginBottom: '20px' 
-          }}>
-            <div style={{ width: '200px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Sales*
-              </label>
-              <input
-                type="text"
-                name="sales"
-                value={formData.sales}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: '#F9FAFB',
-                  boxSizing: 'border-box',
-                  color: '#6B7280'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Main Form Fields */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Tanggal */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Tanggal*
-              </label>
-              <input
-                type="date"
-                name="tanggal"
-                value={formData.tanggal}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: '#F9FAFB',
-                  boxSizing: 'border-box',
-                  color: '#6B7280'
-                }}
-              />
-            </div>
-
-            {/* Pelanggan */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Pelanggan*
-              </label>
-              <input
-                type="text"
-                name="pelanggan"
-                value={formData.pelanggan}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: '#F9FAFB',
-                  boxSizing: 'border-box',
-                  color: '#6B7280'
-                }}
-              />
-            </div>
-
-            {/* Nomor Kontrak / BAKB */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Nomor Kontrak / BAKB*
-              </label>
-              <input
-                type="text"
-                name="nomorKontrak"
-                value={formData.nomorKontrak}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: '#F9FAFB',
-                  boxSizing: 'border-box',
-                  color: '#6B7280'
-                }}
-              />
-            </div>
-
-            {/* Kontrak Tahun Ke */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Kontrak Tahun ke-*
-              </label>
-              <input
-                type="text"
-                name="kontrakTahunKe"
-                value={formData.kontrakTahunKe}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  backgroundColor: '#F9FAFB',
-                  boxSizing: 'border-box',
-                  color: '#6B7280'
-                }}
-              />
-            </div>
-
-            {/* Referensi HJT */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Referensi HJT*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  name="referensiHJT"
-                  value={formData.referensiHJT}
-                  disabled
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: '#F9FAFB',
-                    boxSizing: 'border-box',
-                    appearance: 'none',
-                    color: '#6B7280'
-                  }}
-                >
-                  <option value="">Pilih HJT</option>
-                  <option value="sumatera">Sumatera</option>
-                  <option value="kalimantan">Kalimantan</option>
-                  <option value="jawa-bali">Jawa-Bali</option>
-                  <option value="intim">Intim</option>
-                </select>
-                <div style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  fontSize: '12px',
-                  color: '#9CA3AF'
-                }}>▼</div>
-              </div>
-            </div>
-
-            {/* Discount */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Discount*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  name="discount"
-                  value={formData.discount}
-                  disabled
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: '#F9FAFB',
-                    boxSizing: 'border-box',
-                    appearance: 'none',
-                    color: '#6B7280'
-                  }}
-                >
-                  <option value="">Pilih Discount</option>
-                  <option value="0%">0%</option>
-                  <option value="MB Niaga">MB Niaga</option>
-                  <option value="GM SBU">GM SBU</option>
-                </select>
-                <div style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  fontSize: '12px',
-                  color: '#9CA3AF'
-                }}>▼</div>
-              </div>
-            </div>
-
-            {/* Durasi Kontrak */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                Durasi Kontrak (in thn)*
-              </label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  name="durasiKontrak"
-                  value={formData.durasiKontrak}
-                  disabled
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: '#F9FAFB',
-                    boxSizing: 'border-box',
-                    appearance: 'none',
-                    color: '#6B7280'
-                  }}
-                >
-                  <option value="">Durasi Kontrak</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                </select>
-                <div style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  fontSize: '12px',
-                  color: '#9CA3AF'
-                }}>▼</div>
-              </div>
-            </div>
-
-            {/* Add Button (Disabled) */}
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'flex-end',
-              marginBottom: '20px'
-            }}>
-              <button
-                type="button"
-                disabled
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  backgroundColor: '#E5E7EB',
-                  border: 'none',
-                  borderRadius: '50%',
-                  cursor: 'not-allowed',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#9CA3AF',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}
-              >
-                <Plus style={{ width: '20px', height: '20px' }} />
-              </button>
-            </div>
-
-            {/* Layanan Section with Light Blue Background */}
-            {loadingLayanan ? (
-              <div style={{
-                backgroundColor: '#F0F9FF',
-                padding: '20px',
-                borderRadius: '8px',
-                marginBottom: '20px',
-                textAlign: 'center',
-                color: '#0369A1'
-              }}>
-                Memuat data layanan...
-              </div>
-            ) : layananData.length > 0 ? (
-              <div style={{
-                backgroundColor: '#F0F9FF',
-                padding: '20px',
-                borderRadius: '8px',
-                marginBottom: '20px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '16px'
-                }}>
-                  <h4 style={{
-                    margin: 0,
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#0369A1'
-                  }}>
-                    📋 Data Layanan yang akan Dihapus
-                  </h4>
-                  <span style={{
-                    fontSize: '11px',
-                    color: '#DC2626',
-                    fontStyle: 'italic',
-                    fontWeight: '500'
-                  }}>
-                    ⚠️ {layananData.length} layanan akan terhapus
-                  </span>
-                </div>
-
-                {layananData.map((layanan, index) => (
-                  <div key={layanan.id_penawaran_layanan || index} style={{
-                    backgroundColor: 'white',
-                    border: '1px solid #B3E5FC',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    marginBottom: index < layananData.length - 1 ? '16px' : '0'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '12px'
-                    }}>
-                      <h5 style={{
-                        margin: 0,
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        color: '#0369A1'
-                      }}>
-                        Layanan #{index + 1}
-                      </h5>
-                      <span style={{
-                        fontSize: '10px',
-                        color: '#DC2626',
-                        backgroundColor: '#FEE2E2',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        fontWeight: '500'
-                      }}>
-                        Akan Dihapus
-                      </span>
-                    </div>
-
-                    {/* Nama Layanan */}
-                    <div style={{ marginBottom: '12px' }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: '#374151',
-                        marginBottom: '4px'
-                      }}>
-                        Nama Layanan*
-                      </label>
-                      <div style={{
-                        padding: '8px 12px',
-                        border: '1px solid #E5E7EB',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        backgroundColor: '#F9FAFB',
-                        color: '#6B7280'
-                      }}>
-                        {layanan.nama_layanan || '-'}
-                      </div>
-                    </div>
-
-                    {/* Detail Layanan */}
-                    <div style={{ marginBottom: '12px' }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: '#374151',
-                        marginBottom: '4px'
-                      }}>
-                        Detail Layanan*
-                      </label>
-                      <div style={{
-                        padding: '8px 12px',
-                        border: '1px solid #E5E7EB',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        backgroundColor: '#F9FAFB',
-                        color: '#6B7280'
-                      }}>
-                        {layanan.detail_layanan || '-'}
-                      </div>
-                    </div>
-
-                    {/* Row for Kapasitas and QTY */}
-                    <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-                      <div style={{ flex: 1 }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#374151',
-                          marginBottom: '4px'
-                        }}>
-                          Kapasitas*
-                        </label>
-                        <div style={{
-                          padding: '8px 12px',
-                          border: '1px solid #E5E7EB',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          backgroundColor: '#F9FAFB',
-                          color: '#6B7280'
-                        }}>
-                          {layanan.kapasitas || '-'}
-                        </div>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#374151',
-                          marginBottom: '4px'
-                        }}>
-                          QTY*
-                        </label>
-                        <div style={{
-                          padding: '8px 12px',
-                          border: '1px solid #E5E7EB',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          backgroundColor: '#F9FAFB',
-                          color: '#6B7280'
-                        }}>
-                          {layanan.qty || '-'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Row for Akses Existing and Margin % */}
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      <div style={{ flex: 1 }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#374151',
-                          marginBottom: '4px'
-                        }}>
-                          Akses Existing*
-                        </label>
-                        <div style={{
-                          padding: '8px 12px',
-                          border: '1px solid #E5E7EB',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          backgroundColor: '#F9FAFB',
-                          color: '#6B7280'
-                        }}>
-                          {layanan.akses_existing ? (layanan.akses_existing.charAt(0).toUpperCase() + layanan.akses_existing.slice(1)) : '-'}
-                        </div>
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          color: '#374151',
-                          marginBottom: '4px'
-                        }}>
-                          Margin %*
-                        </label>
-                        <div style={{
-                          padding: '8px 12px',
-                          border: '1px solid #E5E7EB',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          backgroundColor: '#F9FAFB',
-                          color: '#6B7280'
-                        }}>
-                          {layanan.margin_percent ? `${layanan.margin_percent}%` : '-'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{
-                backgroundColor: '#FEF2F2',
-                padding: '20px',
-                borderRadius: '8px',
-                marginBottom: '20px',
-                textAlign: 'center',
-                border: '1px solid #FECACA'
-              }}>
-                <p style={{
-                  margin: 0,
-                  color: '#991B1B',
-                  fontSize: '14px'
-                }}>
-                  ⚠️ Tidak ada data layanan ditemukan
-                </p>
-              </div>
-            )}
-
-            {/* Pengeluaran Lain-lain History Section */}
-            {pengeluaranData.length > 0 && (
-              <div style={{
-                backgroundColor: '#e3f2fd',
-                borderRadius: '6px',
-                padding: '16px',
-                marginBottom: '20px',
-                border: '1px solid #bbdefb'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '16px'
-                }}>
-                  <h4 style={{
-                    margin: 0,
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#1565C0'
-                  }}>
-                    📋 History Pengeluaran Lain-lain
-                  </h4>
-                  <span style={{
-                    fontSize: '11px',
-                    color: '#DC2626',
-                    fontStyle: 'italic',
-                    fontWeight: '500'
-                  }}>
-                    ⚠️ {pengeluaranData.length} item akan terhapus
-                  </span>
-                </div>
-                
-                {loadingPengeluaran ? (
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    color: '#1565C0',
-                    fontSize: '14px'
-                  }}>
-                    Memuat data pengeluaran...
-                  </div>
-                ) : (
-                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    {pengeluaranData.map((item, index) => (
-                      <div key={item.id_pengeluaran || index} style={{
-                        backgroundColor: 'white',
-                        border: '1px solid #bbdefb',
-                        borderRadius: '6px',
-                        padding: '12px',
-                        marginBottom: index < pengeluaranData.length - 1 ? '12px' : '0'
-                      }}>
-                        {/* Item */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '12px',
-                          minHeight: '32px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
-                          }}>
-                            Item*
-                          </label>
-                          <div style={{
-                            flex: 1,
-                            padding: '8px 12px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            backgroundColor: '#f9f9f9',
-                            color: '#666'
-                          }}>
-                            {item.item || '-'}
-                          </div>
-                        </div>
-
-                        {/* Keterangan */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '12px',
-                          minHeight: '32px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
-                          }}>
-                            Keterangan*
-                          </label>
-                          <div style={{
-                            flex: 1,
-                            padding: '8px 12px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            backgroundColor: '#f9f9f9',
-                            color: '#666'
-                          }}>
-                            {item.keterangan || 'Tidak ada keterangan'}
-                          </div>
-                        </div>
-
-                        {/* Hasrat */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '12px',
-                          minHeight: '32px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
-                          }}>
-                            Hasrat*
-                          </label>
-                          <div style={{
-                            flex: 1,
-                            padding: '8px 12px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            backgroundColor: '#f9f9f9',
-                            color: '#666'
-                          }}>
-                            Rp {(item.harga_satuan || 0).toLocaleString('id-ID')}
-                          </div>
-                        </div>
-
-                        {/* Jumlah */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: '12px',
-                          minHeight: '32px'
-                        }}>
-                          <label style={{
-                            width: '140px',
-                            fontSize: '12px',
-                            color: '#333',
-                            fontWeight: '500',
-                            flexShrink: 0
-                          }}>
-                            Jumlah*
-                          </label>
-                          <div style={{
-                            flex: 1,
-                            padding: '8px 12px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            backgroundColor: '#f9f9f9',
-                            color: '#666'
-                          }}>
-                            {item.jumlah || 0}
-                          </div>
-                        </div>
-                        
-                        {/* Display total */}
-                        <div style={{
-                          padding: '8px 12px',
-                          backgroundColor: '#ffebee',
-                          border: '1px solid #ef9a9a',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          color: '#c62828'
-                        }}>
-                          <strong>Total: Rp {(item.total_harga || 0).toLocaleString('id-ID')}</strong>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Total Keseluruhan */}
-                    <div style={{
-                      marginTop: '16px',
-                      padding: '12px',
-                      backgroundColor: '#ffcdd2',
-                      borderRadius: '6px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      fontWeight: '600',
-                      border: '2px solid #ef5350'
-                    }}>
-                      <span style={{ color: '#c62828', fontSize: '14px' }}>
-                        Total Keseluruhan Pengeluaran yang akan Dihapus:
-                      </span>
-                      <span style={{ color: '#b71c1c', fontSize: '16px' }}>
-                        Rp {pengeluaranData.reduce((total, item) => total + (item.total_harga || 0), 0).toLocaleString('id-ID')}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '12px',
-              marginTop: '20px'
-            }}>
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={isDeleting}
-                style={{
-                  padding: '12px 24px',
-                  backgroundColor: isDeleting ? '#ccc' : '#6B7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '25px',
-                  cursor: isDeleting ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  minWidth: '100px',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                onMouseOver={(e) => {
-                  if (!isDeleting) e.target.style.backgroundColor = '#5B6470';
-                }}
-                onMouseOut={(e) => {
-                  if (!isDeleting) e.target.style.backgroundColor = '#6B7280';
-                }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={isDeleting}
-                style={{
-                  padding: '12px 24px',
-                  backgroundColor: isDeleting ? '#ccc' : '#DC2626',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '25px',
-                  cursor: isDeleting ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  minWidth: '100px',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                onMouseOver={(e) => {
-                  if (!isDeleting) e.target.style.backgroundColor = '#B91C1C';
-                }}
-                onMouseOut={(e) => {
-                  if (!isDeleting) e.target.style.backgroundColor = '#DC2626';
-                }}
-              >
-                {isDeleting ? 'Menghapus...' : 'Hapus'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      </div>
-        )}
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1001,
-          padding: '20px',
-          animation: 'fadeIn 0.3s ease-in-out'
-        }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: '12px',
-            padding: '24px',
-            textAlign: 'center',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-            maxWidth: '300px',
-            width: '90%',
-            animation: 'slideUp 0.3s ease-out'
-          }}>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              backgroundColor: '#00AEEF',
-              borderRadius: '50%',
+      <AnimatePresence>
+        {isOpen && !showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 16px auto'
-            }}>
-              <Check style={{ 
-                width: '30px', 
-                height: '30px', 
-                color: 'white'
-              }} />
-            </div>
-
-            <h3 style={{
-              margin: '0 0 8px 0',
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#333'
-            }}>
-              Selamat!
-            </h3>
-
-            <p style={{
-              margin: '0 0 20px 0',
-              fontSize: '14px',
-              color: '#666',
-              lineHeight: '1.4'
-            }}>
-              Data Penawaran Berhasil Dihapus
-            </p>
-
-            <button
-              onClick={handleCloseSuccessModal}
+              zIndex: 1000,
+              padding: '20px',
+              fontFamily: "'Open Sans', sans-serif !important"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ 
+                scale: 1, 
+                opacity: 1, 
+                y: 0,
+                rotate: [0, 0.5, -0.5, 0]
+              }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              transition={{
+                duration: 0.5,
+                ease: [0.4, 0, 0.2, 1]
+              }}
               style={{
-                backgroundColor: '#00AEEF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 24px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                minWidth: '80px',
-                transition: 'all 0.2s ease-in-out'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.backgroundColor = '#0088CC';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.backgroundColor = '#00AEEF';
+                background: '#e7f3f5ff',
+                borderRadius: '32px',
+                width: '100%',
+                maxWidth: '900px',
+                padding: '20px',
+                boxShadow: `
+                  0 12px 30px rgba(0, 0, 0, 0.12), 
+                  0 4px 12px rgba(0, 0, 0, 0.08)`,
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                position: 'relative',
+                overflow: 'hidden',
+                maxHeight: '90vh',
+                overflowY: 'auto'
               }}
             >
-              Oke
-            </button>
-          </div>
-        </div>
-      )}
+              {/* Decorative highlight */}
+              <div style={{
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '120px',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0))',
+                pointerEvents: 'none'
+              }} />
 
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+              {/* Close Button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  backgroundColor: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  zIndex: 10
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.2)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(3, 91, 113, 0.1)'}
+              >
+                <X size={20} color={colors.primary} />
+              </motion.button>
 
-        @keyframes slideUp {
-          from { 
-            transform: translateY(20px); 
-            opacity: 0; 
-          }
-          to { 
-            transform: translateY(0); 
-            opacity: 1; 
-          }
-        }
-      `}
-      </style>
-    </div>
+              {/* Header */}
+              <motion.div 
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                style={{
+                  padding: '40px 32px 20px',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 20px',
+                  boxShadow: `0 10px 30px rgba(239, 68, 68, 0.3)`
+                }}>
+                  <AlertTriangle size={32} color="white" />
+                </div>
+                <h2 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  margin: 0,
+                  letterSpacing: '-0.02em'
+                }}>
+                  Hapus Data Penawaran
+                </h2>
+                <p style={{
+                  color: colors.danger,
+                  fontSize: '16px',
+                  margin: '8px 0 0',
+                  opacity: 0.8,
+                  fontWeight: '600'
+                }}>
+                  Tindakan ini tidak dapat dibatalkan
+                </p>
+              </motion.div>
+
+              {/* Warning Message */}
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.1) 100%)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  margin: '0 32px 24px',
+                  border: `1px solid rgba(239, 68, 68, 0.3)`,
+                  textAlign: 'center'
+                }}
+              >
+                <p style={{
+                  color: colors.danger,
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  margin: 0,
+                  lineHeight: '1.5'
+                }}>
+                  Apakah Anda yakin ingin menghapus data penawaran berikut?
+                </p>
+                <p style={{
+                  color: colors.danger,
+                  fontSize: '14px',
+                  margin: '8px 0 0',
+                  opacity: 0.8
+                }}>
+                  Data penawaran dan semua data terkait akan terhapus permanen!
+                </p>
+              </motion.div>
+
+              {/* Form */}
+              <motion.div 
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{
+                  background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
+                  borderRadius: '20px',
+                  padding: '40px',
+                  margin: '0 32px 32px',
+                  border: `1px solid rgba(0, 192, 202, 0.68)`,
+                  position: 'relative'
+                }}
+              >
+                {/* Sales Field */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Sales
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <User size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="sales"
+                      value={formData.sales}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Tanggal */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Tanggal
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <ClipboardList size={18} />
+                    </div>
+                    <input
+                      type="date"
+                      name="tanggal"
+                      value={formData.tanggal}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Pelanggan */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Nama Pelanggan
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <User size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="pelanggan"
+                      value={formData.pelanggan}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Nomor Kontrak */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Nomor Kontrak / BAKB
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <FileText size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="nomorKontrak"
+                      value={formData.nomorKontrak}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Kontrak Tahun Ke */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Kontrak Tahun ke-
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <BarChart3 size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="kontrakTahunKe"
+                      value={formData.kontrakTahunKe}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Referensi HJT */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Referensi HJT
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <Settings size={18} />
+                    </div>
+                    <div
+                      style={{
+                        ...inputStyle,
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '48px'
+                      }}
+                    >
+                      {formData.referensiHJT}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Durasi Kontrak */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Durasi Kontrak (in thn)
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <BarChart3 size={18} />
+                    </div>
+                    <div
+                      style={{
+                        ...inputStyle,
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '48px'
+                      }}
+                    >
+                      {formData.durasiKontrak}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Discount */}
+                <motion.div 
+                  style={{
+                    marginBottom: '32px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Discount
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <DollarSign size={18} />
+                    </div>
+                    <div
+                      style={{
+                        ...inputStyle,
+                        display: 'flex',
+                        alignItems: 'center',
+                        paddingLeft: '48px'
+                      }}
+                    >
+                      {formData.discount}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Multiple Layanan Items Section */}
+                <div style={{ marginBottom: "32px" }}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      backgroundColor: "rgba(0, 191, 202, 0.08)",
+                      borderRadius: "20px",
+                      padding: "28px",
+                      marginBottom: "68px",
+                      border: `2px solid rgba(0, 192, 202, 0.25)`,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Decorative corner accent */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      width: '120px',
+                      height: '120px',
+                      background: `linear-gradient(135deg, ${colors.secondary}20 0%, ${colors.tertiary}20 100%)`,
+                      borderBottomLeftRadius: '100%',
+                      zIndex: 0
+                    }} />
+
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      {/* Header Section dengan icon - CENTERED */}
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '28px',
+                        paddingBottom: '16px',
+                        borderBottom: `3px solid ${colors.secondary}30`,
+                        textAlign: 'center'
+                      }}>
+                        {/* Icon Container */}
+                        <div style={{
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '16px',
+                          background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: `0 6px 20px rgba(239, 68, 68, 0.4)`,
+                          marginBottom: '16px'
+                        }}>
+                          <Package size={28} color="white" />
+                        </div>
+                        
+                        {/* Text Content */}
+                        <div>
+                          <h4 style={{
+                            margin: 0,
+                            fontSize: '22px',
+                            fontWeight: '700',
+                            background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            marginBottom: '8px'
+                          }}>
+                            Data Layanan yang akan Dihapus
+                          </h4>
+                          <p style={{
+                            margin: 0,
+                            fontSize: '15px',
+                            color: colors.danger,
+                            opacity: 0.8,
+                            lineHeight: '1.4'
+                          }}>
+                            {layananData.length} layanan akan terhapus permanen
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Multiple Layanan Items */}
+                      <div style={{
+                        display: 'grid',
+                        gap: '20px',
+                        marginBottom: '28px'
+                      }}>
+                        {loadingLayanan ? (
+                          <div style={{
+                            textAlign: 'center',
+                            padding: '40px',
+                            color: colors.danger
+                          }}>
+                            Memuat data layanan...
+                          </div>
+                        ) : layananData.length > 0 ? (
+                          layananData.map((item, index) => (
+                            <motion.div 
+                              key={item.id_penawaran_layanan || index} 
+                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                              transition={{ 
+                                delay: index * 0.1,
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20
+                              }}
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(189, 231, 225, 0.6) 100%)',
+                                border: `2px solid ${colors.secondary}20`,
+                                borderRadius: '18px',
+                                padding: '24px',
+                                position: 'relative',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: `
+                                  0 4px 20px rgba(0, 0, 0, 0.08),
+                                  0 2px 8px rgba(0, 0, 0, 0.04)
+                                `,
+                                overflow: 'hidden'
+                              }}
+                            >
+                              {/* Background Pattern */}
+                              <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                width: '80px',
+                                height: '80px',
+                                background: `radial-gradient(circle, ${colors.danger}08 0%, transparent 70%)`,
+                                zIndex: 0
+                              }} />
+
+                              <div style={{ position: 'relative', zIndex: 1 }}>
+                                {/* Header dengan nomor item dan status hapus */}
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  marginBottom: '24px',
+                                  paddingBottom: '16px',
+                                  borderBottom: `2px solid ${colors.danger}15`
+                                }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{
+                                      width: '36px',
+                                      height: '36px',
+                                      borderRadius: '10px',
+                                      background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: 'white',
+                                      fontSize: '14px',
+                                      fontWeight: '700'
+                                    }}>
+                                      {index + 1}
+                                    </div>
+                                    <span style={{
+                                      fontSize: '16px',
+                                      fontWeight: '700',
+                                      color: colors.danger
+                                    }}>
+                                      Layanan
+                                    </span>
+                                  </div>
+                                  
+                                  <div style={{
+                                    background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    padding: '8px 16px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                                  }}>
+                                    <AlertTriangle size={14} />
+                                    Akan Dihapus
+                                  </div>
+                                </div>
+
+                                {/* Grid Layout untuk Data Layanan */}
+                                <div style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: '1fr 1fr',
+                                  gap: '20px',
+                                  marginBottom: '20px'
+                                }}>
+                                  {/* Nama Layanan */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      📦 Nama Layanan
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.nama_layanan || '-'}
+                                    </div>
+                                  </div>
+
+                                  {/* Detail Layanan */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      🔧 Detail Layanan
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.detail_layanan || '-'}
+                                    </div>
+                                  </div>
+
+                                  {/* Kapasitas */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      📊 Kapasitas
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.kapasitas || '-'}
+                                    </div>
+                                  </div>
+
+                                  {/* QTY */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      🔢 QTY
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.qty || '-'}
+                                    </div>
+                                  </div>
+
+                                  {/* Akses Existing */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      🔌 Akses Existing
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.akses_existing ? (item.akses_existing.charAt(0).toUpperCase() + item.akses_existing.slice(1)) : '-'}
+                                    </div>
+                                  </div>
+
+                                  {/* Margin % */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      💰 Margin %
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.margin_percent ? `${item.margin_percent}%` : '-'}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))
+                        ) : (
+                          <div style={{
+                            textAlign: 'center',
+                            padding: '40px',
+                            color: colors.danger,
+                            backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                            borderRadius: '12px',
+                            border: `1px solid rgba(239, 68, 68, 0.2)`
+                          }}>
+                            Tidak ada data layanan ditemukan
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Pengeluaran Lain-lain Section*/}
+                {pengeluaranData.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      backgroundColor: "rgba(0, 191, 202, 0.08)",
+                      borderRadius: "20px",
+                      padding: "28px",
+                      marginBottom: "28px",
+                      border: `2px solid rgba(0, 192, 202, 0.25)`,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    {/* Decorative corner accent */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      width: '120px',
+                      height: '120px',
+                      background: `linear-gradient(135deg, ${colors.secondary}20 0%, ${colors.tertiary}20 100%)`,
+                      borderBottomLeftRadius: '100%',
+                      zIndex: 0
+                    }} />
+
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      {/* Header Section dengan icon */}
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '28px',
+                        paddingBottom: '16px',
+                        borderBottom: `3px solid ${colors.secondary}30`,
+                        textAlign: 'center'
+                      }}>
+                        {/* Icon Container */}
+                        <div style={{
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '16px',
+                          background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: `0 6px 20px rgba(239, 68, 68, 0.4)`,
+                          marginBottom: '16px'
+                        }}>
+                          <Calculator size={28} color="white" />
+                        </div>
+                        
+                        {/* Text Content */}
+                        <div>
+                          <h4 style={{
+                            margin: 0,
+                            fontSize: '22px',
+                            fontWeight: '700',
+                            background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            marginBottom: '8px'
+                          }}>
+                            Pengeluaran Lain-lain yang akan Dihapus
+                          </h4>
+                          <p style={{
+                            margin: 0,
+                            fontSize: '15px',
+                            color: colors.danger,
+                            opacity: 0.8,
+                            lineHeight: '1.4'
+                          }}>
+                            {pengeluaranData.length} item pengeluaran akan terhapus permanen
+                          </p>
+                        </div>
+
+                        {/* Total Display */}
+                        {pengeluaranData.length > 0 && (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            style={{
+                              background: `linear-gradient(135deg, ${colors.success}15 0%, ${colors.secondary}15 100%)`,
+                              border: `2px solid ${colors.danger}30`,
+                              borderRadius: '16px',
+                              padding: '16px 24px',
+                              textAlign: 'center',
+                              minWidth: '200px',
+                              marginTop: '16px'
+                            }}
+                          >
+                            <div style={{
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              color: colors.success,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em',
+                              marginBottom: '6px'
+                            }}>
+                              Total Pengeluaran
+                            </div>
+                            <div style={{
+                              fontSize: '22px',
+                              fontWeight: '700',
+                              color: colors.danger,
+                              background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              backgroundClip: 'text'
+                            }}>
+                              Rp {pengeluaranData.reduce((total, item) => total + (item.total_harga || 0), 0).toLocaleString('id-ID')}
+                            </div>
+                          </motion.div>
+                        )}
+                      </div>
+                      
+                      {/* Multiple Pengeluaran Items */}
+                      <div style={{
+                        display: 'grid',
+                        gap: '20px',
+                        marginBottom: '28px'
+                      }}>
+                        {loadingPengeluaran ? (
+                          <div style={{
+                            textAlign: 'center',
+                            padding: '40px',
+                            color: colors.danger
+                          }}>
+                            Memuat data pengeluaran...
+                          </div>
+                        ) : (
+                          pengeluaranData.map((item, index) => (
+                            <motion.div 
+                              key={item.id_pengeluaran || index} 
+                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                              transition={{ 
+                                delay: index * 0.1,
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20
+                              }}
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(189, 231, 225, 0.6) 100%)',
+                                border: `2px solid ${colors.secondary}20`,
+                                borderRadius: '18px',
+                                padding: '24px',
+                                position: 'relative',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: `
+                                  0 4px 20px rgba(0, 0, 0, 0.08),
+                                  0 2px 8px rgba(0, 0, 0, 0.04)
+                                `,
+                                overflow: 'hidden'
+                              }}
+                            >
+                              {/* Background Pattern */}
+                              <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                width: '80px',
+                                height: '80px',
+                                background: `radial-gradient(circle, ${colors.secondary}08 0%, transparent 70%)`,
+                                zIndex: 0
+                              }} />
+
+                              <div style={{ position: 'relative', zIndex: 1 }}>
+                                {/* Header dengan nomor item dan tombol hapus */}
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  marginBottom: '24px',
+                                  paddingBottom: '16px',
+                                  borderBottom: `2px solid ${colors.danger}15`
+                                }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{
+                                      width: '36px',
+                                      height: '36px',
+                                      borderRadius: '10px',
+                                      background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: 'white',
+                                      fontSize: '14px',
+                                      fontWeight: '700'
+                                    }}>
+                                      {index + 1}
+                                    </div>
+                                    <span style={{
+                                      fontSize: '16px',
+                                      fontWeight: '700',
+                                      color: colors.danger
+                                    }}>
+                                      Item Pengeluaran
+                                    </span>
+                                  </div>
+                                  
+                                  <div style={{
+                                    background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    padding: '8px 16px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                                  }}>
+                                    <AlertTriangle size={14} />
+                                    Akan Dihapus
+                                  </div>
+                                </div>
+
+                                {/* Grid Layout untuk Data Pengeluaran */}
+                                <div style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: '1fr 1fr',
+                                  gap: '20px',
+                                  marginBottom: '20px'
+                                }}>
+                                  {/* Item */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      📦 Item
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.item || '-'}
+                                    </div>
+                                  </div>
+
+                                  {/* Keterangan */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      📝 Keterangan
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.keterangan || '-'}
+                                    </div>
+                                  </div>
+
+                                  {/* Harga Satuan */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      💰 Harga Satuan
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      Rp {(item.harga_satuan || 0).toLocaleString('id-ID')}
+                                    </div>
+                                  </div>
+
+                                  {/* Jumlah */}
+                                  <div style={{ position: 'relative' }}>
+                                    <label style={{
+                                      display: 'block',
+                                      fontSize: '13px',
+                                      fontWeight: '600',
+                                      color: colors.primary,
+                                      marginBottom: '8px',
+                                      letterSpacing: '0.02em'
+                                    }}>
+                                      🔢 Jumlah
+                                    </label>
+                                    <div style={{
+                                      padding: '14px 16px',
+                                      border: `2px solid rgba(3, 91, 113, 0.38)`,
+                                      borderRadius: '12px',
+                                      fontSize: '14px',
+                                      backgroundColor: '#f8f9fa',
+                                      color: colors.primary,
+                                      width: '100%'
+                                    }}>
+                                      {item.jumlah || 0}
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {/* Display calculated total untuk item ini */}
+                                {item.harga_satuan && item.jumlah && (
+                                  <motion.div 
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    style={{
+                                      padding: '16px 20px',
+                                      background: `linear-gradient(135deg, ${colors.success}08 0%, ${colors.secondary}08 100%)`,
+                                      border: `2px solid ${colors.danger}30`,
+                                      borderRadius: '14px',
+                                      fontSize: '15px',
+                                      color: colors.success,
+                                      textAlign: 'center',
+                                      fontWeight: '700',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '8px'
+                                    }}
+                                  >
+                                    <Calculator size={16} />
+                                    <span>Total Item:</span>
+                                    <span style={{ 
+                                      fontSize: '16px',
+                                       background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                                      WebkitBackgroundClip: 'text',
+                                      WebkitTextFillColor: 'transparent',
+                                      backgroundClip: 'text'
+                                    }}>
+                                      Rp {(parseFloat(item.harga_satuan || 0) * parseInt(item.jumlah || 0)).toLocaleString('id-ID')}
+                                    </span>
+                                  </motion.div>
+                                )}
+                              </div>
+                            </motion.div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '16px',
+                  marginTop: '32px'
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleCancel}
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 32px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleConfirm}
+                    disabled={isDeleting}
+                    style={{
+                      background: isDeleting 
+                        ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
+                        : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '16px 40px',
+                      borderRadius: '12px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: isDeleting ? 'not-allowed' : 'pointer',
+                      boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.02em',
+                      opacity: isDeleting ? 0.8 : 1
+                    }}
+                  >
+                    {isDeleting ? 'Menghapus...' : 'Hapus Data'}
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(3, 91, 113, 0.3)',
+              backdropFilter: 'blur(2px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px',
+              fontFamily: "'Open Sans', sans-serif !important"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+              transition={{ 
+                duration: 0.5, 
+                ease: [0.4, 0, 0.2, 1],
+                type: "spring",
+                stiffness: 300,
+                damping: 20
+              }}
+              style={{
+                background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: '24px',
+                padding: '40px',
+                textAlign: 'center',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                position: 'relative',
+                width: '100%',
+                maxWidth: '400px',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              {/* Success Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                  borderRadius: '50%',
+                  width: '100px',
+                  height: '100px',
+                  margin: '0 auto 24px auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: `0 20px 40px rgba(63, 186, 140, 0.4)`
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                >
+                  <Check style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    color: 'white',
+                    strokeWidth: 3
+                  }} />
+                </motion.div>
+              </motion.div>
+
+              <motion.h3 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  margin: '0 0 12px 0',
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Berhasil!
+              </motion.h3>
+              
+              <motion.p 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                style={{
+                  margin: '0 0 32px 0',
+                  fontSize: '16px',
+                  color: colors.accent1,
+                  lineHeight: '1.5',
+                  opacity: 0.9
+                }}
+              >
+                Data penawaran berhasil dihapus dari sistem
+              </motion.p>
+              
+              <motion.button
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px 32px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.02em'
+                }}
+              >
+                Selesai
+              </motion.button>
+
+              {/* Close button */}
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCloseSuccessModal}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'rgba(3, 91, 113, 0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <X size={18} color={colors.primary} />
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
