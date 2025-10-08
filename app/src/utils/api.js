@@ -160,13 +160,17 @@ export const penawaranAPI = {
     apiRequest(API_CONFIG.ENDPOINTS.PENAWARAN.BY_STATUS(status)),
 
   // Get hasil penawaran
-  getHasil: (id) => apiRequest(`${API_CONFIG.ENDPOINTS.PENAWARAN.BASE}/${id}/hasil`),
+  getHasil: (id) =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.PENAWARAN.BASE}/${id}/hasil`),
 
   // Calculate result
   calculateResult: (id) =>
-    apiRequest(`${API_CONFIG.ENDPOINTS.PENAWARAN.BASE}/${id}/calculate-result`, {
-      method: "POST",
-    }),
+    apiRequest(
+      `${API_CONFIG.ENDPOINTS.PENAWARAN.BASE}/${id}/calculate-result`,
+      {
+        method: "POST",
+      }
+    ),
 };
 
 // Specific API functions for Pengeluaran
@@ -191,7 +195,7 @@ export const pengeluaranAPI = {
       body: JSON.stringify(data),
     }),
 
-  // Delete pengeluaran
+  // Hapus pengeluaran
   delete: (id) =>
     apiRequest(`${API_CONFIG.ENDPOINTS.PENGELUARAN}/${id}`, {
       method: "DELETE",
