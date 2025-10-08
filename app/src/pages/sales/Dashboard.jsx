@@ -1074,8 +1074,27 @@ const Dashboard = () => {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#666' }}
+                    tickFormatter={(value) => {
+                      if (value >= 1000000000) {
+                        return `${(value / 1000000000).toFixed(1)}B`;
+                      } else if (value >= 1000000) {
+                        return `${(value / 1000000).toFixed(1)}M`;
+                      } else if (value >= 1000) {
+                        return `${(value / 1000).toFixed(1)}K`;
+                      }
+                      return value.toString();
+                    }}
                   />
-                  <Tooltip content={renderCustomTooltip} />
+                  <Tooltip 
+                    formatter={(value, name) => [`Rp ${value.toLocaleString('id-ID')}`, 'Total Profit']}
+                    labelFormatter={(label) => `Bulan: ${label}`}
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      border: '1px solid #035b71',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
                   <Line 
                     type="monotone" 
                     dataKey="value" 
@@ -1097,7 +1116,28 @@ const Dashboard = () => {
                 fontSize: '24px',
                 fontWeight: 'bold',
                 color: colors.primary
-              }}>25200</div>
+              }}>
+                {(() => {
+                  // Get current month value or latest month with data
+                  const currentDate = new Date();
+                  const currentMonthShort = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                  
+                  // First try to get current month's data
+                  let currentPeriodData = totalRevenueData.find(item => item.month === currentMonthShort);
+                  
+                  // If current month has no data, get the latest month with data
+                  if (!currentPeriodData || currentPeriodData.value === 0) {
+                    // Get all months with data in reverse order (latest first)
+                    const monthsWithData = totalRevenueData
+                      .filter(item => item.value > 0)
+                      .reverse();
+                    currentPeriodData = monthsWithData[0];
+                  }
+                  
+                  const value = currentPeriodData ? currentPeriodData.value : 0;
+                  return `Rp ${value.toLocaleString('id-ID')}`;
+                })()}
+              </div>
               <div style={{
                 fontSize: '14px',
                 color: '#6b7280'
