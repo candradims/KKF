@@ -16,7 +16,7 @@ import {
   Legend
 } from 'recharts';
 import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
-import { getUserData, getAuthHeaders } from '../../utils/api';
+import { getUserData, getAuthHeaders, penawaranAPI } from '../../utils/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -25,6 +25,8 @@ const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [totalRevenueData, setTotalRevenueData] = useState([]);
+  const [loadingRevenue, setLoadingRevenue] = useState(true);
 
   const colors = {
     primary: '#035b71',
@@ -104,8 +106,143 @@ const Dashboard = () => {
     }
   };
 
+  // Function to load total revenue data for all sales (superadmin view)
+  const loadTotalRevenueData = async () => {
+    console.log('🎯 [SUPERADMIN DASHBOARD] loadTotalRevenueData function called');
+    try {
+      setLoadingRevenue(true);
+      console.log('🚀 [SUPERADMIN DASHBOARD] Loading total revenue data...');
+      
+      // Get all penawaran data
+      const response = await penawaranAPI.getAll();
+      console.log('📊 [SUPERADMIN DASHBOARD] API Response:', response);
+      console.log('📊 [SUPERADMIN DASHBOARD] Response success:', response?.success);
+      console.log('📊 [SUPERADMIN DASHBOARD] Response data length:', response?.data?.length);
+      console.log('📊 [SUPERADMIN DASHBOARD] Response data type:', Array.isArray(response?.data));
+      
+      if (response.success && response.data && Array.isArray(response.data)) {
+        console.log(`📊 [SUPERADMIN DASHBOARD] Processing ${response.data.length} penawaran from all sales`);
+        
+        // Group data by month and calculate total revenue from profit_dari_hjt_excl_ppn for all approved proposals
+        const monthlyRevenue = {};
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        
+        // Initialize all months with 0
+        monthNames.forEach(month => {
+          monthlyRevenue[month] = 0;
+        });
+        
+        let totalProfit = 0;
+        let processedCount = 0;
+        
+        // Process each penawaran from all sales (superadmin - all sales combined)
+        for (const penawaran of response.data) {
+          try {
+            console.log(`🔍 [SUPERADMIN DASHBOARD] Processing penawaran ${penawaran.id_penawaran} from sales: ${penawaran.user_id}...`);
+            console.log(`📋 [SUPERADMIN DASHBOARD] Full penawaran data:`, penawaran);
+            
+            const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            console.log(`📊 [SUPERADMIN DASHBOARD] Hasil response for ${penawaran.id_penawaran}:`, hasilResponse);
+            
+            if (hasilResponse.success && hasilResponse.data) {
+              const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
+              console.log(`💰 [SUPERADMIN DASHBOARD] Parsed profit: ${profit} from raw: ${hasilResponse.data.profit_dari_hjt_excl_ppn}`);
+              
+              if (profit > 0) {
+                console.log(`💰 [SUPERADMIN DASHBOARD] Found profit: ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran} (Sales: ${penawaran.user_id})`);
+                
+                // Get month from penawaran date
+                let monthName = null;
+                console.log(`📅 [SUPERADMIN DASHBOARD] Raw date: ${penawaran.tanggal_penawaran} for penawaran ${penawaran.id_penawaran}`);
+                
+                if (penawaran.tanggal_penawaran) {
+                  try {
+                    // Try different date formats
+                    let date;
+                    if (penawaran.tanggal_penawaran.includes('T')) {
+                      // ISO format: 2024-10-15T07:00:00.000Z
+                      date = new Date(penawaran.tanggal_penawaran);
+                    } else if (penawaran.tanggal_penawaran.includes('-')) {
+                      // Format: 2024-10-15 or similar
+                      date = new Date(penawaran.tanggal_penawaran);
+                    } else {
+                      // Try as is
+                      date = new Date(penawaran.tanggal_penawaran);
+                    }
+                    
+                    if (!isNaN(date.getTime())) {
+                      const monthIndex = date.getMonth(); // 0-11
+                      monthName = monthNames[monthIndex];
+                      
+                      console.log(`📅 [SUPERADMIN DASHBOARD] Date: ${penawaran.tanggal_penawaran} -> Month: ${monthName} (Index: ${monthIndex})`);
+                      
+                      monthlyRevenue[monthName] += profit;
+                      totalProfit += profit;
+                      processedCount++;
+                      console.log(`📈 [SUPERADMIN DASHBOARD] Added ${profit.toLocaleString('id-ID')} to ${monthName}. Total: ${monthlyRevenue[monthName].toLocaleString('id-ID')}`);
+                    } else {
+                      console.warn(`⚠️  [SUPERADMIN DASHBOARD] Invalid date format: ${penawaran.tanggal_penawaran}`);
+                    }
+                  } catch (dateError) {
+                    console.error(`❌ [SUPERADMIN DASHBOARD] Error parsing date: ${penawaran.tanggal_penawaran}`, dateError);
+                  }
+                } else {
+                  // If no tanggal_penawaran, use current month as fallback
+                  const currentDate = new Date();
+                  const monthIndex = currentDate.getMonth();
+                  monthName = monthNames[monthIndex];
+                  
+                  console.warn(`⚠️ [SUPERADMIN DASHBOARD] No tanggal_penawaran for penawaran ${penawaran.id_penawaran}, using current month: ${monthName}`);
+                  
+                  monthlyRevenue[monthName] += profit;
+                  totalProfit += profit;
+                  processedCount++;
+                  console.log(`📈 [SUPERADMIN DASHBOARD] Added ${profit.toLocaleString('id-ID')} to ${monthName} (fallback). Total: ${monthlyRevenue[monthName].toLocaleString('id-ID')}`);
+                }
+              } else {
+                console.log(`❌ [SUPERADMIN DASHBOARD] No valid profit found for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`❌ [SUPERADMIN DASHBOARD] Failed to fetch hasil for penawaran ${penawaran.id_penawaran}`);
+            }
+          } catch (hasilError) {
+            console.error(`❌ [SUPERADMIN DASHBOARD] Error getting hasil for penawaran ${penawaran.id_penawaran}:`, hasilError);
+          }
+        }
+        
+        console.log(`📊 [SUPERADMIN DASHBOARD] Processing completed: ${processedCount} penawaran processed`);
+        console.log(`💰 [SUPERADMIN DASHBOARD] Total Profit from all sales: Rp ${totalProfit.toLocaleString('id-ID')}`);
+        console.log('📊 [SUPERADMIN DASHBOARD] Final Monthly Revenue Data:', monthlyRevenue);
+        
+        // Convert to chart format
+        const chartData = monthNames.map(month => ({
+          month: month,
+          value: Math.round(monthlyRevenue[month])
+        }));
+        
+        console.log('📈 [SUPERADMIN DASHBOARD] Final Chart Data:', chartData);
+        setTotalRevenueData(chartData);
+      } else {
+        console.error('❌ [SUPERADMIN DASHBOARD] No data received from API or API call failed');
+        // Set empty data
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const emptyData = monthNames.map(month => ({ month: month, value: 0 }));
+        setTotalRevenueData(emptyData);
+      }
+    } catch (error) {
+      console.error('❌ [SUPERADMIN DASHBOARD] Error loading total revenue data:', error);
+      // Set empty data on error
+      const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const emptyData = monthNames.map(month => ({ month: month, value: 0 }));
+      setTotalRevenueData(emptyData);
+    } finally {
+      setLoadingRevenue(false);
+    }
+  };
+
   useEffect(() => {
     loadDashboardStats();
+    loadTotalRevenueData();
   }, []);
 
   // Data from table image: Sales names and Target NR 2025
@@ -150,20 +287,20 @@ const Dashboard = () => {
     }
   ];
   
-  // Data untuk line chart Total Profit
-  const totalProfitData = [
-    { month: 'JAN', value: 15000 },
-    { month: 'FEB', value: 18000 },
-    { month: 'MAR', value: 22000 },
-    { month: 'APR', value: 25200 },
-    { month: 'MAY', value: 28000 },
-    { month: 'JUN', value: 24000 },
-    { month: 'JUL', value: 26000 },
-    { month: 'AUG', value: 30000 },
-    { month: 'SEP', value: 32000 },
-    { month: 'OCT', value: 29000 },
-    { month: 'NOV', value: 35000 },
-    { month: 'DEC', value: 38000 }
+  // Data untuk line chart Total Revenue - using real data from profit_dari_hjt_excl_ppn (All Sales)
+  const totalRevenueChartData = totalRevenueData.length > 0 ? totalRevenueData : [
+    { month: 'JAN', value: 0 },
+    { month: 'FEB', value: 0 },
+    { month: 'MAR', value: 0 },
+    { month: 'APR', value: 0 },
+    { month: 'MAY', value: 0 },
+    { month: 'JUN', value: 0 },
+    { month: 'JUL', value: 0 },
+    { month: 'AUG', value: 0 },
+    { month: 'SEP', value: 0 },
+    { month: 'OCT', value: 0 },
+    { month: 'NOV', value: 0 },
+    { month: 'DEC', value: 0 }
   ];
 
   // Data untuk line chart Margin Trend
@@ -224,12 +361,22 @@ const Dashboard = () => {
         }}>
           <p style={{ color: '#6b7280' }}>{`Month: ${label}`}</p>
           {payload.map((entry, index) => {
-            // Add percentage symbol for margin data
+            // Format different data types appropriately
             const isMarginData = entry.dataKey.includes('margin');
-            const displayValue = isMarginData ? `${entry.value}%` : entry.value;
+            const isRevenueData = entry.dataKey === 'value' && !isMarginData;
+            
+            let displayValue;
+            if (isMarginData) {
+              displayValue = `${entry.value}%`;
+            } else if (isRevenueData) {
+              displayValue = `Rp ${entry.value.toLocaleString('id-ID')}`;
+            } else {
+              displayValue = entry.value;
+            }
+            
             return (
               <p key={index} style={{ color: colors.primary, fontWeight: '600' }}>
-                {`${entry.dataKey}: ${displayValue}`}
+                {`Revenue: ${displayValue}`}
               </p>
             );
           })}
@@ -441,8 +588,19 @@ const Dashboard = () => {
               </select>
             </div>
             <div style={{ height: '320px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={totalProfitData}>
+              {loadingRevenue ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%',
+                  color: colors.primary
+                }}>
+                  Loading chart data...
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={totalRevenueChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
                     dataKey="month" 
@@ -454,6 +612,16 @@ const Dashboard = () => {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12, fill: '#666' }}
+                    tickFormatter={(value) => {
+                      if (value >= 1000000000) {
+                        return `${(value / 1000000000).toFixed(1)}B`;
+                      } else if (value >= 1000000) {
+                        return `${(value / 1000000).toFixed(1)}M`;
+                      } else if (value >= 1000) {
+                        return `${(value / 1000).toFixed(1)}K`;
+                      }
+                      return value.toString();
+                    }}
                   />
                   <Tooltip content={renderCustomTooltip} />
                   <Line 
@@ -466,6 +634,7 @@ const Dashboard = () => {
                   />
                 </LineChart>
               </ResponsiveContainer>
+              )}
             </div>
             <div style={{
               marginTop: '16px',
@@ -477,7 +646,11 @@ const Dashboard = () => {
                 fontSize: '24px',
                 fontWeight: 'bold',
                 color: colors.primary
-              }}>25200</div>
+              }}>
+                {loadingRevenue ? 'Loading...' : 
+                  `Rp ${(totalRevenueChartData.reduce((sum, item) => sum + (item.value || 0), 0)).toLocaleString('id-ID')}`
+                }
+              </div>
               <div style={{
                 fontSize: '14px',
                 color: '#6b7280'
