@@ -27,6 +27,8 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [totalRevenueData, setTotalRevenueData] = useState([]);
   const [loadingRevenue, setLoadingRevenue] = useState(true);
+  const [regionalRevenueData, setRegionalRevenueData] = useState([]);
+  const [loadingRegionalRevenue, setLoadingRegionalRevenue] = useState(true);
 
   const colors = {
     primary: '#035b71',
@@ -240,9 +242,204 @@ const Dashboard = () => {
     }
   };
 
+  // Function to load regional revenue data for all sales based on HJT wilayah (superadmin view)
+  const loadRegionalRevenueData = async () => {
+    try {
+      setLoadingRegionalRevenue(true);
+      console.log('🔍 [SUPERADMIN REGIONAL] === STARTING REGIONAL REVENUE DATA LOAD ===');
+      console.log('🔍 [SUPERADMIN REGIONAL] Loading regional revenue data for all sales...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response.success && response.data && Array.isArray(response.data)) {
+        console.log(`📊 [SUPERADMIN REGIONAL] Processing ${response.data.length} penawaran from all sales for regional breakdown`);
+
+        // Initialize regional profit accumulator with 5 HJT regions (same as admin)
+        const regionalProfit = {
+          'HJT JAWA-BALI': 0,
+          'HJT SUMATRA': 0,
+          'HJT JABODETABEK': 0,
+          'HJT INTIM': 0,
+          'HJT KALIMANTAN': 0
+        };
+
+        let totalProfit = 0;
+        let processedCount = 0;
+
+        // Process each penawaran from all sales (copy exact logic from admin)
+        for (const penawaran of response.data) {
+          try {
+            console.log(`🔍 [SUPERADMIN REGIONAL] Processing penawaran ${penawaran.id_penawaran} from sales: ${penawaran.user_id}...`);
+            console.log(`📋 [PENAWARAN DATA]`, {
+              id: penawaran.id_penawaran,
+              user_id: penawaran.user_id,
+              wilayah_hjt: penawaran.wilayah_hjt,
+              tanggal: penawaran.tanggal_penawaran
+            });
+            
+            const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            
+            if (hasilResponse.success && hasilResponse.data) {
+              const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
+              
+              // Try multiple sources for wilayah data (same as admin)
+              let wilayahHjt = hasilResponse.data.hjt_wilayah || 
+                              hasilResponse.data.wilayah_hjt || 
+                              hasilResponse.data.referensi_hjt || 
+                              hasilResponse.data.wilayah || '';
+              
+              // If still empty, try to get from penawaran data
+              if (!wilayahHjt && penawaran.wilayah_hjt) {
+                wilayahHjt = penawaran.wilayah_hjt;
+                console.log(`📍 [FALLBACK] Using wilayah from penawaran data: "${wilayahHjt}"`);
+              }
+              
+              console.log(`📋 [SUPERADMIN REGIONAL RAW DATA] Penawaran ${penawaran.id_penawaran}:`);
+              console.log(`  - Profit: ${profit.toLocaleString('id-ID')}`);
+              console.log(`  - Raw HJT Wilayah: "${wilayahHjt}"`);
+              console.log(`  - Sales: ${penawaran.user_id}`);
+              console.log(`  - Available wilayah fields:`, {
+                hjt_wilayah: hasilResponse.data.hjt_wilayah,
+                wilayah_hjt: hasilResponse.data.wilayah_hjt,
+                referensi_hjt: hasilResponse.data.referensi_hjt,
+                wilayah: hasilResponse.data.wilayah,
+                penawaran_wilayah: penawaran.wilayah_hjt
+              });
+              
+              if (profit > 0) {
+                console.log(`💰 [SUPERADMIN REGIONAL] Profit found: ${profit.toLocaleString('id-ID')} for raw wilayah: "${wilayahHjt}" (Sales: ${penawaran.user_id})`);
+                
+                // Map HJT wilayah to standardized regions with detailed logging (exact same as admin)
+                let mappedWilayah = null;
+                const wilayahLower = wilayahHjt.toLowerCase().trim();
+                
+                console.log(`🔍 [SUPERADMIN REGIONAL MAPPING] Raw wilayah: "${wilayahHjt}" -> Lowercase: "${wilayahLower}"`);
+                
+                // Enhanced matching with more variations and exact values from database (same as admin)
+                if (wilayahLower === 'jawa-bali' || wilayahLower === 'jawa bali' || 
+                    wilayahLower === 'jawabali' || wilayahLower === 'hjt jawa-bali' ||
+                    wilayahLower.includes('jawa') || wilayahLower.includes('bali')) {
+                  mappedWilayah = 'HJT JAWA-BALI';
+                  console.log(`✅ [SUPERADMIN REGIONAL MAPPING] Matched to HJT JAWA-BALI`);
+                } else if (wilayahLower === 'sumatera' || wilayahLower === 'sumatra' || 
+                          wilayahLower === 'hjt sumatera' || wilayahLower === 'hjt sumatra' ||
+                          wilayahLower.includes('sumatra') || wilayahLower.includes('sumatera')) {
+                  mappedWilayah = 'HJT SUMATRA';
+                  console.log(`✅ [SUPERADMIN REGIONAL MAPPING] Matched to HJT SUMATRA`);
+                } else if (wilayahLower === 'jabodetabek' || wilayahLower === 'hjt jabodetabek' ||
+                          wilayahLower.includes('jabodetabek') || 
+                          wilayahLower.includes('jakarta') || wilayahLower.includes('bogor') || 
+                          wilayahLower.includes('depok') || wilayahLower.includes('tangerang') || 
+                          wilayahLower.includes('bekasi')) {
+                  mappedWilayah = 'HJT JABODETABEK';
+                  console.log(`✅ [SUPERADMIN REGIONAL MAPPING] Matched to HJT JABODETABEK`);
+                } else if (wilayahLower === 'kalimantan' || wilayahLower === 'hjt kalimantan' ||
+                          wilayahLower.includes('kalimantan') || wilayahLower.includes('borneo')) {
+                  mappedWilayah = 'HJT KALIMANTAN';
+                  console.log(`✅ [SUPERADMIN REGIONAL MAPPING] Matched to HJT KALIMANTAN`);
+                } else if (wilayahLower === 'intim' || wilayahLower === 'hjt intim' ||
+                          wilayahLower.includes('intim') || wilayahLower.includes('timur') || 
+                          wilayahLower.includes('indonesia timur')) {
+                  mappedWilayah = 'HJT INTIM';
+                  console.log(`✅ [SUPERADMIN REGIONAL MAPPING] Matched to HJT INTIM`);
+                } else {
+                  // For debugging - show all possible values to help identify the actual data format
+                  console.log(`⚠️ [SUPERADMIN REGIONAL MAPPING] UNRECOGNIZED wilayah: "${wilayahHjt}" (length: ${wilayahHjt.length})`);
+                  console.log(`🔍 [DEBUG] Character codes:`, Array.from(wilayahHjt).map(char => `${char}(${char.charCodeAt(0)})`));
+                  console.log(`❌ [SUPERADMIN REGIONAL MAPPING] Profit ${profit.toLocaleString('id-ID')} will be IGNORED due to unrecognized wilayah`);
+                  
+                  // TEMPORARY: Let's try to assign based on first few characters to help debug
+                  if (wilayahHjt.trim()) {
+                    console.log(`� [TEMP DEBUG] Assigning to HJT INTIM for debugging purposes`);
+                    mappedWilayah = 'HJT INTIM';
+                  } else {
+                    continue; // Skip empty wilayah
+                  }
+                }
+                
+                if (mappedWilayah && regionalProfit.hasOwnProperty(mappedWilayah)) {
+                  regionalProfit[mappedWilayah] += profit;
+                  console.log(`✅ [SUPERADMIN REGIONAL] Added ${profit.toLocaleString('id-ID')} to ${mappedWilayah} (mapped from "${wilayahHjt}") - Sales: ${penawaran.user_id}`);
+                } else {
+                  regionalProfit['HJT INTIM'] += profit;
+                  console.log(`✅ [SUPERADMIN REGIONAL] Added ${profit.toLocaleString('id-ID')} to HJT INTIM (fallback) - Sales: ${penawaran.user_id}`);
+                }
+                
+                totalProfit += profit;
+                processedCount++;
+              } else {
+                console.log(`❌ [SUPERADMIN REGIONAL] No valid profit found for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`❌ [SUPERADMIN REGIONAL] Failed to fetch hasil for penawaran ${penawaran.id_penawaran}`);
+            }
+          } catch (error) {
+            console.error(`❌ [SUPERADMIN REGIONAL] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+        
+        console.log(`📊 [SUPERADMIN REGIONAL] Processing completed: ${processedCount} penawaran processed from all sales`);
+        console.log(`💰 [SUPERADMIN REGIONAL] Total Profit from all regions: Rp ${totalProfit.toLocaleString('id-ID')}`);
+        console.log('🌍 [SUPERADMIN REGIONAL] Regional breakdown:', regionalProfit);
+        
+        // Convert to chart format with percentages (same format as admin)
+        const regionalChartData = [];
+        const colors = {
+          'HJT JAWA-BALI': '#035b71',
+          'HJT SUMATRA': '#00bfca', 
+          'HJT JABODETABEK': '#008bb0',
+          'HJT INTIM': '#00a2b9',
+          'HJT KALIMANTAN': '#0090a8'
+        };
+        
+        Object.keys(regionalProfit).forEach(region => {
+          const value = regionalProfit[region];
+          const percentage = totalProfit > 0 ? (value / totalProfit) * 100 : 0;
+          
+          regionalChartData.push({
+            name: region,
+            value: Math.round(value),
+            percentage: Math.round(percentage * 10) / 10, // Round to 1 decimal place
+            color: colors[region]
+          });
+          
+          console.log(`📊 [SUPERADMIN REGIONAL CHART DATA] ${region}: Rp ${value.toLocaleString('id-ID')} (${percentage.toFixed(1)}%)`);
+        });
+        
+        console.log('📈 [SUPERADMIN REGIONAL] Final Regional Chart Data for SuperAdmin:', regionalChartData);
+        setRegionalRevenueData(regionalChartData);
+      } else {
+        console.error('❌ [SUPERADMIN REGIONAL] No data received from API or API call failed');
+        // Set empty data
+        const emptyData = [
+          { name: 'HJT JAWA-BALI', value: 0, percentage: 0, color: '#035b71' },
+          { name: 'HJT SUMATRA', value: 0, percentage: 0, color: '#00bfca' },
+          { name: 'HJT JABODETABEK', value: 0, percentage: 0, color: '#008bb0' },
+          { name: 'HJT INTIM', value: 0, percentage: 0, color: '#00a2b9' },
+          { name: 'HJT KALIMANTAN', value: 0, percentage: 0, color: '#0090a8' }
+        ];
+        setRegionalRevenueData(emptyData);
+      }
+    } catch (error) {
+      console.error('❌ [SUPERADMIN REGIONAL] Error loading regional revenue data:', error);
+      // Set empty data on error
+      const emptyData = [
+        { name: 'HJT JAWA-BALI', value: 0, percentage: 0, color: '#035b71' },
+        { name: 'HJT SUMATRA', value: 0, percentage: 0, color: '#00bfca' },
+        { name: 'HJT JABODETABEK', value: 0, percentage: 0, color: '#008bb0' },
+        { name: 'HJT INTIM', value: 0, percentage: 0, color: '#00a2b9' },
+        { name: 'HJT KALIMANTAN', value: 0, percentage: 0, color: '#0090a8' }
+      ];
+      setRegionalRevenueData(emptyData);
+    } finally {
+      setLoadingRegionalRevenue(false);
+    }
+  };
+
   useEffect(() => {
     loadDashboardStats();
     loadTotalRevenueData();
+    loadRegionalRevenueData();
   }, []);
 
   // Data from table image: Sales names and Target NR 2025
@@ -319,13 +516,11 @@ const Dashboard = () => {
     { month: 'DEC', margin1: 68.5, margin2: 60.2 }
   ];
 
-  // Data untuk pie chart regional
-  const regionalData = [
-    { name: 'HJT JAWA-BALI', value: 37, color: colors.primary },
-    { name: 'HJT SUMATRA', value: 28, color: colors.secondary },
-    { name: 'HJT JABODETABEK', value: 24, color: colors.accent1 },
-    { name: 'HJT INTIM', value: 11, color: colors.tertiary }
-  ];
+  // Data untuk pie chart regional - now using real data from profit calculations (All Sales)
+  // Filter out regions with no data (value = 0) like admin dashboard
+  const regionalData = regionalRevenueData.length > 0 
+    ? regionalRevenueData.filter(item => item.value > 0) 
+    : [];
 
   // Data untuk pie chart status penawaran - diambil dari API
   const statusPenawaranData = [
@@ -346,7 +541,7 @@ const Dashboard = () => {
     }
   ];
 
-  const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary];
+  const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary, colors.accent2];
   const STATUS_COLORS = ['#fce40bff', '#3fba8c' , '#EF4444'];
 
   const renderCustomTooltip = ({ active, payload, label }) => {
@@ -682,10 +877,21 @@ const Dashboard = () => {
               marginBottom: '16px'
             }}>Total Revenue</h3>
             <div style={{ height: '192px', marginBottom: '16px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={regionalData}
+              {loadingRegionalRevenue ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%',
+                  color: colors.primary
+                }}>
+                  Loading regional data...
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={regionalData}
                     cx="50%"
                     cy="50%"
                     innerRadius={40}
@@ -694,12 +900,19 @@ const Dashboard = () => {
                     dataKey="value"
                   >
                     {regionalData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    formatter={(value, name) => {
+                      const total = regionalData.reduce((sum, item) => sum + (item.value || 0), 0);
+                      const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+                      return [`Rp ${value.toLocaleString('id-ID')} (${percentage}%)`, 'Revenue'];
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {regionalData.map((item, index) => (
@@ -719,15 +932,22 @@ const Dashboard = () => {
                         width: '12px',
                         height: '12px',
                         borderRadius: '50%',
-                        backgroundColor: COLORS[index]
+                        backgroundColor: item.color || COLORS[index]
                       }}
                     ></div>
                     <span style={{ color: '#6b7280' }}>{item.name}</span>
                   </div>
-                  <span style={{
-                    fontWeight: '600',
-                    color: '#1f2937'
-                  }}>{item.value}%</span>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      fontSize: '12px'
+                    }}>{item.percentage || 0}%</span>
+                    <div style={{
+                      fontSize: '11px',
+                      color: '#9ca3af'
+                    }}>Rp {(item.value || 0).toLocaleString('id-ID')}</div>
+                  </div>
                 </div>
               ))}
             </div>
