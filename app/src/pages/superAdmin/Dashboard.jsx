@@ -29,6 +29,9 @@ const Dashboard = () => {
   const [loadingRevenue, setLoadingRevenue] = useState(true);
   const [regionalRevenueData, setRegionalRevenueData] = useState([]);
   const [loadingRegionalRevenue, setLoadingRegionalRevenue] = useState(true);
+  const [marginTrendData, setMarginTrendData] = useState([]);
+  const [loadingMarginData, setLoadingMarginData] = useState(true);
+  const [currentMarginRate, setCurrentMarginRate] = useState(0);
 
   const colors = {
     primary: '#035b71',
@@ -242,6 +245,154 @@ const Dashboard = () => {
     }
   };
 
+  // Function to load margin trend data from margin_dari_hjt (SuperAdmin - All Sales)
+  const loadMarginTrendData = async () => {
+    try {
+      setLoadingMarginData(true);
+      console.log('🔍 [SUPERADMIN MARGIN] Loading margin trend data for all sales...');
+
+      const response = await penawaranAPI.getAll();
+      
+      if (response.success && response.data && Array.isArray(response.data)) {
+        console.log(`📊 [SUPERADMIN MARGIN] Processing ${response.data.length} penawaran from all sales`);
+
+        // Initialize monthly margin accumulator
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const monthlyMargin = {};
+        monthNames.forEach(month => {
+          monthlyMargin[month] = 0;
+        });
+
+        let totalAllMargin = 0;
+        let processedCount = 0;
+
+        // Process all penawaran from all sales (superadmin aggregation)
+        for (const penawaran of response.data) {
+          try {
+            console.log(`🔍 [SUPERADMIN MARGIN] Processing penawaran ${penawaran.id_penawaran}...`);
+            
+            // Use the same API method as admin dashboard
+            const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            
+            if (hasilResponse.success && hasilResponse.data) {
+              const margin = parseFloat(hasilResponse.data.margin_dari_hjt) || 0;
+              
+              if (margin > 0) {
+                console.log(`💰 [SUPERADMIN MARGIN] Found margin: ${margin.toFixed(2)}% for penawaran ${penawaran.id_penawaran}`);
+                
+                // Get month from penawaran date
+                let monthName = null;
+                
+                if (penawaran.tanggal_penawaran) {
+                  try {
+                    // Try different date formats (same as admin dashboard)
+                    let date;
+                    if (penawaran.tanggal_penawaran.includes('T')) {
+                      // ISO format: 2025-10-08T00:00:00.000Z
+                      date = new Date(penawaran.tanggal_penawaran);
+                    } else if (penawaran.tanggal_penawaran.includes('-')) {
+                      // Format: 2025-10-08 or 08-10-2025
+                      const parts = penawaran.tanggal_penawaran.split('-');
+                      if (parts[0].length === 4) {
+                        // YYYY-MM-DD
+                        date = new Date(penawaran.tanggal_penawaran);
+                      } else {
+                        // DD-MM-YYYY
+                        date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                      }
+                    } else if (penawaran.tanggal_penawaran.includes('/')) {
+                      // Format: DD/MM/YYYY or MM/DD/YYYY
+                      const parts = penawaran.tanggal_penawaran.split('/');
+                      // Assume DD/MM/YYYY format
+                      date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    } else {
+                      date = new Date(penawaran.tanggal_penawaran);
+                    }
+                    
+                    if (!isNaN(date.getTime())) {
+                      monthName = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                      console.log(`📅 [SUPERADMIN MARGIN] Date: ${penawaran.tanggal_penawaran} -> Parsed: ${date.toDateString()} -> Month: ${monthName}`);
+                    } else {
+                      console.log(`⚠️ [SUPERADMIN MARGIN] Invalid date: ${penawaran.tanggal_penawaran}`);
+                    }
+                  } catch (dateError) {
+                    console.log(`⚠️ [SUPERADMIN MARGIN] Date parsing error for ${penawaran.tanggal_penawaran}:`, dateError);
+                  }
+                }
+                
+                // If we couldn't parse the date, use current month
+                if (!monthName || !monthNames.includes(monthName)) {
+                  const currentDate = new Date();
+                  monthName = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                  console.log(`⚠️ [SUPERADMIN MARGIN] Using current month: ${monthName}`);
+                }
+                
+                // Add margin to the correct month (sum all margins for that month - superadmin view)
+                monthlyMargin[monthName] += margin;
+                console.log(`✅ [SUPERADMIN MARGIN] Added ${margin.toFixed(2)}% to ${monthName}, total now: ${monthlyMargin[monthName].toFixed(2)}%`);
+                
+                totalAllMargin += margin;
+                processedCount++;
+              } else {
+                console.log(`❌ [SUPERADMIN MARGIN] No valid margin found for penawaran ${penawaran.id_penawaran}`);
+              }
+            } else {
+              console.log(`❌ [SUPERADMIN MARGIN] Failed to fetch hasil for penawaran ${penawaran.id_penawaran}`);
+            }
+          } catch (error) {
+            console.error(`❌ [SUPERADMIN MARGIN] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        // Convert to chart data format - show total margin per month (superadmin aggregated view)
+        const chartData = monthNames.map(month => ({
+          month,
+          marginRate: Math.round(monthlyMargin[month] * 100) / 100 // Round to 2 decimal places
+        }));
+
+        console.log('📊 [SUPERADMIN MARGIN] Final margin summary (All Sales):');
+        console.log('  - Total margin across all penawaran:', totalAllMargin.toFixed(2));
+        console.log('  - Penawaran processed:', processedCount);
+        console.log('  - Monthly totals:', monthlyMargin);
+        console.log('  - Chart data:', chartData);
+
+        // Calculate current margin rate as total accumulated margin from all sales
+        const currentRate = totalAllMargin;
+        
+        console.log(`📊 [SUPERADMIN MARGIN] Current Rate Calculation:`);
+        console.log(`  - Total accumulated margin from all sales: ${totalAllMargin.toFixed(2)}%`);
+        console.log(`  - Using total accumulation as current rate: ${currentRate.toFixed(2)}%`);
+        
+        setMarginTrendData(chartData);
+        setCurrentMarginRate(Math.round(currentRate * 100) / 100); // Round to 2 decimal places
+      } else {
+        console.log('❌ [SUPERADMIN MARGIN] No valid penawaran data received');
+        setMarginTrendData([]);
+        setCurrentMarginRate(0);
+      }
+    } catch (error) {
+      console.error('❌ [SUPERADMIN MARGIN] Error loading margin trend data:', error);
+      // Initialize with empty data if error
+      setMarginTrendData([
+        { month: 'JAN', marginRate: 0 },
+        { month: 'FEB', marginRate: 0 },
+        { month: 'MAR', marginRate: 0 },
+        { month: 'APR', marginRate: 0 },
+        { month: 'MAY', marginRate: 0 },
+        { month: 'JUN', marginRate: 0 },
+        { month: 'JUL', marginRate: 0 },
+        { month: 'AUG', marginRate: 0 },
+        { month: 'SEP', marginRate: 0 },
+        { month: 'OCT', marginRate: 0 },
+        { month: 'NOV', marginRate: 0 },
+        { month: 'DEC', marginRate: 0 }
+      ]);
+      setCurrentMarginRate(0);
+    } finally {
+      setLoadingMarginData(false);
+    }
+  };
+
   // Function to load regional revenue data for all sales based on HJT wilayah (superadmin view)
   const loadRegionalRevenueData = async () => {
     try {
@@ -440,6 +591,7 @@ const Dashboard = () => {
     loadDashboardStats();
     loadTotalRevenueData();
     loadRegionalRevenueData();
+    loadMarginTrendData();
   }, []);
 
   // Data from table image: Sales names and Target NR 2025
@@ -500,20 +652,20 @@ const Dashboard = () => {
     { month: 'DEC', value: 0 }
   ];
 
-  // Data untuk line chart Margin Trend
-  const marginTrendData = [
-    { month: 'JAN', margin1: 45.2, margin2: 35.8 },
-    { month: 'FEB', margin1: 48.1, margin2: 40.3 },
-    { month: 'MAR', margin1: 52.7, margin2: 45.1 },
-    { month: 'APR', margin1: 57.3, margin2: 50.6 },
-    { month: 'MAY', margin1: 55.9, margin2: 48.2 },
-    { month: 'JUN', margin1: 53.4, margin2: 46.7 },
-    { month: 'JUL', margin1: 56.8, margin2: 49.5 },
-    { month: 'AUG', margin1: 60.2, margin2: 52.3 },
-    { month: 'SEP', margin1: 58.7, margin2: 50.9 },
-    { month: 'OCT', margin1: 62.1, margin2: 55.4 },
-    { month: 'NOV', margin1: 65.3, margin2: 58.7 },
-    { month: 'DEC', margin1: 68.5, margin2: 60.2 }
+  // Data untuk line chart Margin Trend - using real data from margin_dari_hjt (All Sales)
+  const marginTrendChartData = marginTrendData.length > 0 ? marginTrendData : [
+    { month: 'JAN', marginRate: 0 },
+    { month: 'FEB', marginRate: 0 },
+    { month: 'MAR', marginRate: 0 },
+    { month: 'APR', marginRate: 0 },
+    { month: 'MAY', marginRate: 0 },
+    { month: 'JUN', marginRate: 0 },
+    { month: 'JUL', marginRate: 0 },
+    { month: 'AUG', marginRate: 0 },
+    { month: 'SEP', marginRate: 0 },
+    { month: 'OCT', marginRate: 0 },
+    { month: 'NOV', marginRate: 0 },
+    { month: 'DEC', marginRate: 0 }
   ];
 
   // Data untuk pie chart regional - now using real data from profit calculations (All Sales)
@@ -1001,39 +1153,53 @@ const Dashboard = () => {
               </select>
             </div>
             <div style={{ height: '320px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={marginTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#666' }}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#666' }}
-                    domain={[0, 100]}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip content={renderCustomTooltip} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="margin1" 
-                    stroke={colors.primary} 
-                    strokeWidth={3}
-                    dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="margin2" 
-                    stroke={colors.secondary} 
-                    strokeWidth={3}
-                    dot={{ fill: colors.secondary, strokeWidth: 2, r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {loadingMarginData ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%',
+                  color: colors.primary
+                }}>
+                  Loading margin data...
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={marginTrendChartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#666' }}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#666' }}
+                      domain={[0, 'dataMax']}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip 
+                      formatter={(value, name) => [`${value}%`, 'Total Margin']}
+                      labelFormatter={(label) => `Month: ${label}`}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="marginRate" 
+                      stroke={colors.primary} 
+                      strokeWidth={3}
+                      dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
             <div style={{
               marginTop: '16px',
@@ -1045,11 +1211,11 @@ const Dashboard = () => {
                 fontSize: '24px',
                 fontWeight: 'bold',
                 color: colors.primary
-              }}>57%</div>
+              }}>{currentMarginRate.toFixed(2)}%</div>
               <div style={{
-                fontSize: '14px',
+                fontSize: '12px',
                 color: '#6b7280'
-              }}>Current Margin Rate</div>
+              }}>Total Akumulasi Margin (All Sales)</div>
             </div>
           </div>
 
