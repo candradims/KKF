@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Check, User, Mail, Lock, Shield } from 'lucide-react';
+import { X, Check, User, Mail, Lock, Shield, Target, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TambahData = ({ isOpen, onClose, onSave }) => {
@@ -7,7 +7,8 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
     nama: '',
     email: '',
     password: '',
-    role: ''
+    role: '',
+    targetNr: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,12 +26,16 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ 
+      ...formData, 
+      [name]: value 
+    });
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    setFormData({ nama: '', email: '', password: '', role: '' });
+    setFormData({ nama: '', email: '', password: '', role: '', targetNr: '' });
     onClose();
   };
 
@@ -42,7 +47,10 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
         nama_user: formData.nama,
         email_user: formData.email, 
         kata_sandi: formData.password,
-        role_user: formData.role
+        role_user: formData.role,
+        ...(formData.role === 'sales' && formData.targetNr && { 
+          target_nr: parseInt(formData.targetNr) 
+        })
       };
       
       await onSave(dataToSave);
@@ -56,7 +64,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
   };
 
   const handleCancel = () => {
-    setFormData({ nama: '', email: '', password: '', role: '' });
+    setFormData({ nama: '', email: '', password: '', role: '', targetNr: '' });
     onClose();
   };
 
@@ -91,6 +99,11 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
       <style>
         {`
           input::placeholder {
+            color: ${colors.accent1};
+            opacity: 0.6;
+            fontFamily: "'Open Sans', sans-serif !important";
+          }
+          select::placeholder {
             color: ${colors.accent1};
             opacity: 0.6;
             fontFamily: "'Open Sans', sans-serif !important";
@@ -369,7 +382,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                 <motion.div 
                   whileHover={{ y: -2 }}
                   style={{
-                    marginBottom: '32px',
+                    marginBottom: formData.role === 'sales' ? '24px' : '32px',
                     position: 'relative'
                   }}
                 >
@@ -411,6 +424,105 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                     </select>
                   </div>
                 </motion.div>
+
+                {/* Target NR */}
+                <AnimatePresence>
+                  {formData.role === 'sales' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0, y: -20 }}
+                      animate={{ height: 'auto', opacity: 1, y: 0 }}
+                      exit={{ height: 0, opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3, ease: 'easeOut' }}
+                      style={{
+                        marginBottom: '32px',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                        style={{
+                          background: `linear-gradient(135deg, rgba(0, 191, 202, 0.08) 0%, rgba(3, 91, 113, 0.03) 100%)`,
+                          border: `1px solid rgba(0, 191, 202, 0.3)`,
+                          borderRadius: '16px',
+                          padding: '24px',
+                          position: 'relative'
+                        }}
+                      >
+                        {/* Sales Badge */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '10px',
+                          right: '20px',
+                          background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                          color: 'white',
+                          padding: '6px 16px',
+                          borderRadius: '20px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: `0 4px 12px rgba(0, 191, 202, 0.3)`,
+                          letterSpacing: '0.02em'
+                        }}>
+                          <TrendingUp size={12} />
+                          Target Sales
+                        </div>
+
+                        <label style={{
+                          display: 'block',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: colors.primary,
+                          marginBottom: '12px',
+                          letterSpacing: '0.02em'
+                        }}>
+                          Target NR *
+                        </label>
+                        
+                        <div style={{ position: 'relative' }}>
+                          <div style={iconContainerStyle('targetNr')}>
+                            <Target size={18} />
+                          </div>
+                          <input
+                            type="number"
+                            name="targetNr"
+                            placeholder="Tetapkan target NR "
+                            value={formData.targetNr}
+                            onChange={handleChange}
+                            onFocus={() => setFocusedField('targetNr')}
+                            onBlur={() => setFocusedField('')}
+                            required={formData.role === 'sales'}
+                            min="0"
+                            step="1000000"
+                            style={inputStyle('targetNr')}
+                          />
+                        </div>
+                        
+                        {/* Helper text */}
+                        <motion.p 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                          style={{
+                            fontSize: '12px',
+                            color: colors.accent1,
+                            margin: '12px 0 0',
+                            opacity: 0.8,
+                            fontStyle: 'italic',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                        </motion.p>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Action Buttons */}
                 <div style={{
