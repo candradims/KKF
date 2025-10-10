@@ -731,89 +731,376 @@ const Penawaran = () => {
     }
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     try {
-      console.log('Starting PDF export...');
+      console.log('Starting comprehensive PDF export...');
       console.log('Filtered data:', filteredData);
       
       const doc = new jsPDF();
-      
-      doc.setFontSize(16);
-      doc.text('Data Penawaran', 14, 22);
-      
-      doc.setFontSize(10);
       const currentDate = new Date().toLocaleDateString('id-ID');
-      doc.text(`Tanggal Export: ${currentDate}`, 14, 32);
       
-      const tableColumns = [
-        'No',
-        'Tanggal',
-        'Nama Pelanggan', 
-        'Nomor Kontrak/BAKB',
-        'Kontrak Ke-',
-        'Referensi',
-        'Durasi Kontrak (in thn)',
-        'Status'
-      ];
-      
-      const tableRows = filteredData.map((item, index) => [
-        (index + 1).toString(),
-        item.tanggal || '',
-        item.namaPelanggan || '',
-        item.nomorKontrak || '',
-        item.kontrakKe ? item.kontrakKe.toString() : '',
-        item.referensi || '',
-        item.durasi ? item.durasi.toString() : '',
-        item.status || ''
-      ]);
-      
-      console.log('Table columns:', tableColumns);
-      console.log('Table rows:', tableRows);
-      
-      autoTable(doc, {
-        head: [tableColumns],
-        body: tableRows,
-        startY: 40,
-        margin: { top: 40, right: 10, bottom: 20, left: 10 },
-        styles: {
-          fontSize: 7,
-          cellPadding: 2,
-          overflow: 'linebreak',
-          halign: 'left',
-          valign: 'middle'
-        },
-        headStyles: {
-          fillColor: [0, 174, 239],
-          textColor: [255, 255, 255],
-          fontStyle: 'bold',
-          halign: 'center',
-          fontSize: 7
-        },
-        alternateRowStyles: {
-          fillColor: [245, 245, 245]
-        },
-        columnStyles: {
-          0: { halign: 'center', cellWidth: 12 },
-          1: { cellWidth: 25 },
-          2: { cellWidth: 35 },
-          3: { cellWidth: 35 },
-          4: { halign: 'center', cellWidth: 20 },
-          5: { cellWidth: 30 },
-          6: { halign: 'center', cellWidth: 20 },
-          7: { halign: 'center', cellWidth: 25 }
-        },
-        tableWidth: 'wrap'
-      });
+      // Process each penawaran data
+      for (let dataIndex = 0; dataIndex < filteredData.length; dataIndex++) {
+        const item = filteredData[dataIndex];
+        
+        // Add new page for each penawaran except the first one
+        if (dataIndex > 0) {
+          doc.addPage();
+        }
+        
+        let yPosition = 20;
+        
+        // Header
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(3, 91, 113); // Primary color
+        doc.text('DETAIL DATA PENAWARAN', doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
+        
+        yPosition += 10;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Tanggal Export: ${currentDate}`, doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
+        
+        yPosition += 15;
+        
+        // Basic Information Section
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('Informasi Dasar', 14, yPosition);
+        yPosition += 7;
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        
+        const basicInfo = [
+          ['Tanggal', `: ${item.tanggal || '-'}`],
+          ['Nama Pelanggan', `: ${item.namaPelanggan || '-'}`],
+          ['Nomor Kontrak/BAKB', `: ${item.nomorKontrak || '-'}`],
+          ['Kontrak Tahun ke-', `: ${item.kontrakKe || '-'}`],
+          ['Referensi HJT', `: ${item.referensi || '-'}`],
+          ['Discount', `: ${convertDiscountToPercentage(item.discount)}`],
+          ['Durasi Kontrak', `: ${item.durasi || '-'} tahun`],
+          ['Status', `: ${item.status || '-'}`]
+        ];
+        
+        basicInfo.forEach(([label, value]) => {
+          doc.setFont('helvetica', 'bold');
+          doc.text(label, 14, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(value, 70, yPosition);
+          yPosition += 6;
+        });
+        
+        yPosition += 5;
+        
+        // Fetch detailed data for this penawaran
+        try {
+          console.log(`📥 Fetching details for penawaran ID: ${item.id_penawaran}`);
+          
+          // Fetch full detail using direct fetch (same as Detail.jsx)
+          const userData = getUserData();
+          const detailResponse = await fetch(`http://localhost:3000/api/penawaran/${item.id_penawaran}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-User-ID': userData.id_user.toString(),
+              'X-User-Role': userData.role_user,
+              'X-User-Email': userData.email_user
+            }
+          });
+          
+          if (!detailResponse.ok) {
+            throw new Error(`HTTP error! status: ${detailResponse.status}`);
+          }
+          
+          const detailResult = await detailResponse.json();
+          console.log('📊 Detail Response:', detailResult);
+          console.log('📊 Data Penawaran Layanan:', detailResult?.data?.data_penawaran_layanan);
+          
+          const hasilResponse = await penawaranAPI.getHasil(item.id_penawaran);
+          console.log('💰 Hasil Response:', hasilResponse);
+          
+          // Fetch pengeluaran data using direct fetch with proper auth headers
+          let pengeluaranData = [];
+          try {
+            const userData = getUserData();
+            if (userData) {
+              const response = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${item.id_penawaran}`, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-User-ID': userData.id_user.toString(),
+                  'X-User-Role': userData.role_user,
+                  'X-User-Email': userData.email_user
+                }
+              });
+              
+              console.log('📦 Pengeluaran Response Status:', response.status);
+              
+              if (response.ok) {
+                const pengeluaranResponse = await response.json();
+                console.log('📦 Pengeluaran Response:', pengeluaranResponse);
+                
+                if (pengeluaranResponse.success && pengeluaranResponse.data) {
+                  pengeluaranData = pengeluaranResponse.data;
+                  console.log('✅ Pengeluaran Data Count:', pengeluaranData.length);
+                }
+              } else {
+                console.error('❌ Pengeluaran fetch failed with status:', response.status);
+              }
+            }
+          } catch (pengeluaranError) {
+            console.error('❌ Error fetching pengeluaran:', pengeluaranError);
+          }
+          
+          console.log('📋 Final Pengeluaran Data:', pengeluaranData);
+          
+          // A. Tabel Perhitungan Section
+          console.log('🔍 Checking Tabel Perhitungan conditions...');
+          console.log('- detailResult.success:', detailResult?.success);
+          console.log('- detailResult.data:', detailResult?.data);
+          console.log('- data_penawaran_layanan:', detailResult?.data?.data_penawaran_layanan);
+          console.log('- data_penawaran_layanan length:', detailResult?.data?.data_penawaran_layanan?.length);
+          
+          if (detailResult && detailResult.success && detailResult.data) {
+            const layananData = detailResult.data.data_penawaran_layanan || [];
+            
+            console.log('📊 Layanan Data:', layananData);
+            console.log('📊 Layanan Data Length:', layananData.length);
+            
+            if (layananData && layananData.length > 0) {
+              console.log('✅ Rendering Tabel Perhitungan...');
+              
+              doc.setFontSize(12);
+              doc.setFont('helvetica', 'bold');
+              doc.text('A. Tabel Perhitungan', 14, yPosition);
+              yPosition += 5;
+              
+              const perhitunganData = layananData.map((layanan, idx) => {
+                console.log(`Processing layanan ${idx}:`, layanan);
+                const hargaDasar = parseFloat(layanan.harga_dasar_icon) || 0;
+                const hargaFinal = parseFloat(layanan.harga_final_sebelum_ppn) || 0;
+                
+                return [
+                  layanan.nama_layanan || '-',
+                  layanan.detail_layanan || '-',
+                  layanan.kapasitas || '-',
+                  layanan.satuan || '-',
+                  layanan.qty || '-',
+                  `Rp ${hargaDasar.toLocaleString('id-ID')}`,
+                  `Rp ${hargaFinal.toLocaleString('id-ID')}`
+                ];
+              });
+              
+              console.log('📋 Perhitungan Table Data:', perhitunganData);
+              
+              autoTable(doc, {
+                head: [['Nama Layanan', 'Detail', 'Kapasitas', 'Satuan', 'QTY', 'Harga Dasar', 'Harga Final']],
+                body: perhitunganData,
+                startY: yPosition,
+                margin: { left: 14, right: 14 },
+                styles: {
+                  fontSize: 7,
+                  cellPadding: 2
+                },
+                headStyles: {
+                  fillColor: [3, 91, 113],
+                  textColor: [255, 255, 255],
+                  fontStyle: 'bold'
+                },
+                columnStyles: {
+                  0: { cellWidth: 30 },
+                  1: { cellWidth: 35 },
+                  2: { cellWidth: 20 },
+                  3: { cellWidth: 20 },
+                  4: { cellWidth: 15 },
+                  5: { cellWidth: 28 },
+                  6: { cellWidth: 28 }
+                }
+              });
+              
+              yPosition = doc.lastAutoTable.finalY + 10;
+              console.log('✅ Tabel Perhitungan rendered successfully');
+            } else {
+              console.log('⚠️ No layanan data found');
+            }
+          } else {
+            console.log('❌ Detail response invalid:', {
+              hasResult: !!detailResult,
+              success: detailResult?.success,
+              hasData: !!detailResult?.data
+            });
+          }
+          
+          // B. Pengeluaran Lain-Lain Section
+          console.log('🔍 Checking Pengeluaran Lain-Lain conditions...');
+          console.log('- pengeluaranData:', pengeluaranData);
+          console.log('- pengeluaranData length:', pengeluaranData?.length);
+          
+          if (pengeluaranData && pengeluaranData.length > 0) {
+            console.log('✅ Rendering Pengeluaran Lain-Lain...');
+            
+            // Check if we need a new page
+            if (yPosition > 200) {
+              doc.addPage();
+              yPosition = 20;
+            }
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('B. Pengeluaran Lain-Lain', 14, yPosition);
+            yPosition += 5;
+            
+            const pengeluaranTableData = pengeluaranData.map((item, idx) => {
+              console.log(`Processing pengeluaran ${idx}:`, item);
+              console.log(`  - item: ${item.item}`);
+              console.log(`  - keterangan: ${item.keterangan}`);
+              console.log(`  - harga_satuan: ${item.harga_satuan}`);
+              console.log(`  - jumlah: ${item.jumlah}`);
+              console.log(`  - total_harga: ${item.total_harga}`);
+              
+              const hargaSatuan = parseFloat(item.harga_satuan) || 0;
+              const jumlah = parseInt(item.jumlah) || 0;
+              const totalHarga = parseFloat(item.total_harga) || 0;
+              
+              return [
+                item.item || '-',
+                item.keterangan || '-',
+                `Rp ${hargaSatuan.toLocaleString('id-ID')}`,
+                jumlah.toLocaleString('id-ID'),
+                `Rp ${totalHarga.toLocaleString('id-ID')}`
+              ];
+            });
+            
+            console.log('📋 Pengeluaran Table Data:', pengeluaranTableData);
+            
+            autoTable(doc, {
+              head: [['Item', 'Keterangan', 'Harga Satuan (Rp)', 'Jumlah', 'Total (Rp)']],
+              body: pengeluaranTableData,
+              startY: yPosition,
+              margin: { left: 14, right: 14 },
+              styles: {
+                fontSize: 7,
+                cellPadding: 2
+              },
+              headStyles: {
+                fillColor: [3, 91, 113],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold'
+              },
+              columnStyles: {
+                0: { cellWidth: 35 },
+                1: { cellWidth: 50 },
+                2: { cellWidth: 30, halign: 'right' },
+                3: { cellWidth: 20, halign: 'right' },
+                4: { cellWidth: 35, halign: 'right' }
+              }
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 10;
+            console.log('✅ Pengeluaran Lain-Lain rendered successfully');
+          } else {
+            console.log('⚠️ No pengeluaran data found or empty array');
+          }
+          
+          // Hasil Perhitungan / Summary Section
+          if (hasilResponse.success && hasilResponse.data) {
+            // Check if we need a new page
+            if (yPosition > 220) {
+              doc.addPage();
+              yPosition = 20;
+            }
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Ringkasan Perhitungan', 14, yPosition);
+            yPosition += 5;
+            
+            const hasil = hasilResponse.data;
+            
+            console.log('📊 Hasil Penawaran Data for PDF:', hasil);
+            console.log('📊 Field Mapping Check:', {
+              total_per_bulan_harga_dasar: hasil.total_per_bulan_harga_dasar_icon,
+              total_per_bulan_harga_final: hasil.total_per_bulan_harga_final_sebelum_ppn,
+              grand_total_12_bulan_harga_dasar: hasil.grand_total_12_bulan_harga_dasar_icon,
+              grand_total_12_bulan_harga_final: hasil.grand_total_12_bulan_harga_final_sebelum_ppn,
+              discount: hasil.discount,
+              grand_total_disc_harga_dasar: hasil.grand_total_disc_lain2_harga_dasar_icon,
+              grand_total_disc_harga_final: hasil.grand_total_disc_lain2_harga_final_sebelum_ppn,
+              profit: hasil.profit_dari_hjt_excl_ppn,
+              margin: hasil.margin_dari_hjt
+            });
+            
+            // Calculate total pengeluaran from pengeluaranData using correct field: total_harga
+            const totalPengeluaranLain = pengeluaranData.reduce((sum, item) => {
+              const totalHarga = parseFloat(item.total_harga) || 0;
+              console.log(`Adding pengeluaran: ${item.item}, total_harga: ${totalHarga}`);
+              return sum + totalHarga;
+            }, 0);
+            
+            console.log('💰 Total Pengeluaran Lain-lain calculated:', totalPengeluaranLain);
+            
+            // Get discount value from hasil_penawaran
+            const discountAmount = parseFloat(hasil.discount) || 0;
+            console.log('💵 Discount amount from hasil_penawaran:', discountAmount);
+            
+            const summaryData = [
+              ['Total/Bulan', `Rp ${(hasil.total_per_bulan_harga_dasar_icon || 0).toLocaleString('id-ID')}`, `Rp ${(hasil.total_per_bulan_harga_final_sebelum_ppn || 0).toLocaleString('id-ID')}`],
+              ['Grand Total (12 Bulan)', `Rp ${(hasil.grand_total_12_bulan_harga_dasar_icon || 0).toLocaleString('id-ID')}`, `Rp ${(hasil.grand_total_12_bulan_harga_final_sebelum_ppn || 0).toLocaleString('id-ID')}`],
+              ['Discount', `Rp ${discountAmount.toLocaleString('id-ID')}`, ''],
+              ['Total Pengeluaran Lain-lain', '', `Rp ${totalPengeluaranLain.toLocaleString('id-ID')}`],
+              ['Grand Total - Disc/Lain2', `Rp ${(hasil.grand_total_disc_lain2_harga_dasar_icon || 0).toLocaleString('id-ID')}`, `Rp ${(hasil.grand_total_disc_lain2_harga_final_sebelum_ppn || 0).toLocaleString('id-ID')}`],
+              ['Profit dari HJT (excl.PPN)', '', `Rp ${(hasil.profit_dari_hjt_excl_ppn || 0).toLocaleString('id-ID')}`],
+              ['Margin dari HJT', '', `${(hasil.margin_dari_hjt || 0).toFixed(2)}%`]
+            ];
+            
+            autoTable(doc, {
+              body: summaryData,
+              startY: yPosition,
+              margin: { left: 14, right: 14 },
+              styles: {
+                fontSize: 8,
+                cellPadding: 3
+              },
+              columnStyles: {
+                0: { cellWidth: 70, fontStyle: 'bold' },
+                1: { cellWidth: 50, halign: 'right' },
+                2: { cellWidth: 50, halign: 'right', fontStyle: 'bold' }
+              }
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 5;
+          }
+          
+        } catch (detailError) {
+          console.error(`Error fetching detail for penawaran ${item.id_penawaran}:`, detailError);
+          doc.setFontSize(9);
+          doc.setTextColor(255, 0, 0);
+          doc.text('Data detail tidak dapat dimuat', 14, yPosition);
+        }
+        
+        // Footer with page number
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `Halaman ${dataIndex + 1} dari ${filteredData.length} | Data Penawaran - ${item.namaPelanggan || 'N/A'}`,
+          doc.internal.pageSize.width / 2,
+          doc.internal.pageSize.height - 10,
+          { align: 'center' }
+        );
+      }
       
       const safeDate = currentDate.replace(/[\/\\:*?"<>|]/g, '-');
-      const filename = `Data_Penawaran_${safeDate}.pdf`;
+      const filename = `Detail_Penawaran_${safeDate}.pdf`;
       
-      console.log('Saving PDF with filename:', filename);
+      console.log('Saving comprehensive PDF with filename:', filename);
       
       doc.save(filename);
       
-      console.log('PDF exported successfully');
-      alert('PDF berhasil diexport!');
+      console.log('Comprehensive PDF exported successfully');
+      alert('PDF detail lengkap berhasil diexport!');
     } catch (error) {
       console.error('Detailed error exporting PDF:', error);
       console.error('Error stack:', error.stack);
