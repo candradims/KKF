@@ -6,7 +6,7 @@ export class UserModel {
     const { data, error } = await supabase
       .from("data_user")
       .select(
-        "id_user, nama_user, tanggal, email_user, kata_sandi, role_user, is_active, created_at, updated_at"
+        "id_user, nama_user, tanggal, email_user, kata_sandi, role_user, target_nr, is_active, created_at, updated_at"
       );
 
     if (error) throw new Error(error.message);
@@ -21,7 +21,7 @@ export class UserModel {
       const { data, error } = await supabase
         .from("data_user")
         .select(
-          "id_user, nama_user, tanggal, email_user, kata_sandi, role_user, is_active, created_at, updated_at"
+          "id_user, nama_user, tanggal, email_user, kata_sandi, role_user, target_nr, is_active, created_at, updated_at"
         )
         .eq("id_user", id)
         .maybeSingle();
@@ -47,7 +47,7 @@ export class UserModel {
       const { data, error } = await supabase
         .from("data_user")
         .select(
-          "id_user, nama_user, tanggal, email_user, kata_sandi, role_user, is_active, created_at, updated_at"
+          "id_user, nama_user, tanggal, email_user, kata_sandi, role_user, target_nr, is_active, created_at, updated_at"
         )
         .eq("email_user", email)
         .maybeSingle();
@@ -78,6 +78,7 @@ export class UserModel {
         email_user: userData.email_user,
         kata_sandi: userData.kata_sandi,
         role_user: userData.role_user,
+        target_nr: userData.target_nr || null, // Add target_nr
         is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -89,7 +90,7 @@ export class UserModel {
         .from("data_user")
         .insert([userDataToInsert])
         .select(
-          "id_user, nama_user, tanggal, email_user, role_user, is_active, created_at, updated_at"
+          "id_user, nama_user, tanggal, email_user, role_user, target_nr, is_active, created_at, updated_at"
         );
 
       if (error) {
@@ -127,7 +128,7 @@ export class UserModel {
       // Tambahkan updated_at
       const updateData = {
         ...userData,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       const { data, error } = await supabase
@@ -186,7 +187,9 @@ export class UserModel {
     try {
       const { data, error } = await supabase
         .from("data_user")
-        .select("id_user, nama_user, tanggal, email_user, role_user, is_active, created_at, updated_at")
+        .select(
+          "id_user, nama_user, tanggal, email_user, role_user, target_nr, is_active, created_at, updated_at"
+        )
         .eq("role_user", role);
       if (error) throw error;
       return data;

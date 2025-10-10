@@ -147,10 +147,13 @@ const LaporanLaba = () => {
           // Get logged-in user data
           const currentUser = getUserData();
           const userName = currentUser?.nama_user || currentUser?.name || 'Sales User';
+          const userTargetNR = currentUser?.target_nr || null; // Get target_nr from user data
           
           console.log('👤 [LAPORAN LABA] Logged-in user:', userName);
+          console.log('🎯 [LAPORAN LABA] User Target NR from database:', userTargetNR);
           
-          const target = totalRevenueAccumulated * 1.2;
+          // Use target from database if available, otherwise calculate default
+          const target = userTargetNR || (totalRevenueAccumulated * 1.2);
           const achievementRate = (totalRevenueAccumulated / target) * 100;
           const growth = Math.random() * 30 - 10; // Random growth for demo
           const lastMonth = totalRevenueAccumulated * (1 - growth / 100);
@@ -160,7 +163,7 @@ const LaporanLaba = () => {
             id: 1,
             nama: userName, // Use logged-in user's name from data_user.nama_user
             penawaran: Math.round(totalRevenueAccumulated),
-            target: Math.round(target),
+            target: Math.round(target), // Use target from database (data_user.target_nr)
             komisi: Math.round(komisi),
             growth: parseFloat(growth.toFixed(1)),
             lastMonth: Math.round(lastMonth),

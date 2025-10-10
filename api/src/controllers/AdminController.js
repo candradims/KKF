@@ -25,7 +25,8 @@ export class AdminController {
     try {
       console.log("📨 Received create user request:", req.body);
 
-      const { nama_user, email_user, kata_sandi, role_user } = req.body;
+      const { nama_user, email_user, kata_sandi, role_user, target_nr } =
+        req.body;
 
       // Validasi input
       if (!nama_user || !email_user || !kata_sandi || !role_user) {
@@ -59,6 +60,7 @@ export class AdminController {
         email_user,
         kata_sandi,
         role_user,
+        target_nr: target_nr || null, // Add target_nr
       });
 
       if (!newUser || newUser.length === 0) {
@@ -93,13 +95,20 @@ export class AdminController {
   static async updateUser(req, res) {
     try {
       const { id } = req.params;
-      const { nama_user, email_user, kata_sandi, role_user } = req.body;
+      const { nama_user, email_user, kata_sandi, role_user, target_nr } =
+        req.body;
 
       console.log("📝 AdminController - Updating user ID:", id);
       console.log("📝 AdminController - Request body:", req.body);
 
       // Validasi input yang diperlukan
-      if (!nama_user && !email_user && !kata_sandi && !role_user) {
+      if (
+        !nama_user &&
+        !email_user &&
+        !kata_sandi &&
+        !role_user &&
+        target_nr === undefined
+      ) {
         console.log("❌ No fields provided for update");
         return res.status(400).json({
           success: false,
@@ -132,6 +141,21 @@ export class AdminController {
           });
         }
         updateData.role_user = role_user;
+      }
+
+      // Handle target_nr - explicitly set to null if role is not sales
+      if (role_user === "sales") {
+        updateData.target_nr =
+          target_nr !== undefined && target_nr !== null && target_nr !== ""
+            ? parseInt(target_nr)
+            : null;
+      } else if (role_user && role_user !== "sales") {
+        // If role is changed to non-sales, set target_nr to null
+        updateData.target_nr = null;
+      } else if (target_nr !== undefined) {
+        // If only target_nr is being updated (no role change)
+        updateData.target_nr =
+          target_nr !== null && target_nr !== "" ? parseInt(target_nr) : null;
       }
 
       console.log("📝 AdminController - Final update data:", updateData);

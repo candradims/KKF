@@ -74,6 +74,7 @@ const Index = () => {
         kata_sandi: user.kata_sandi || user.password,
         role: formatRoleForDisplay(user.role_user || user.role), // Format for display
         originalRole: user.role_user || user.role, // Keep original for API calls
+        target_nr: user.target_nr || null, // Include target_nr
         actions: ['view', 'edit', 'delete'],
         originalDate: user.tanggal 
       }));
@@ -162,20 +163,33 @@ const Index = () => {
 
   const handleSaveData = async (newUserData) => {
     try {
+      console.log("📝 Frontend - Creating new user with data:", newUserData);
+      
+      const requestBody = {
+        nama_user: newUserData.nama_user,
+        email_user: newUserData.email_user,
+        kata_sandi: newUserData.kata_sandi,
+        role_user: newUserData.role_user
+      };
+
+      // Add target_nr if provided and role is sales
+      if (newUserData.target_nr !== undefined && newUserData.target_nr !== null && newUserData.target_nr !== '') {
+        requestBody.target_nr = parseInt(newUserData.target_nr);
+        console.log("📝 Frontend - Including target_nr:", requestBody.target_nr);
+      }
+
+      console.log("📝 Frontend - Final request body:", requestBody);
+
       const response = await fetch('http://localhost:3000/api/admin/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          nama_user: newUserData.nama_user,
-          email_user: newUserData.email_user,
-          kata_sandi: newUserData.kata_sandi,
-          role_user: newUserData.role_user
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const result = await response.json();
+      console.log("📝 Frontend - Create response:", result);
 
       if (!response.ok) {
         throw new Error(result.message || `HTTP error! status: ${response.status}`);
@@ -243,6 +257,17 @@ const Index = () => {
         console.log("📝 Frontend - Password tidak diupdate (kosong)");
       }
 
+      // Add target_nr if provided (for sales role or to clear it for non-sales)
+      if (updatedData.target_nr !== undefined) {
+        if (updatedData.target_nr !== null && updatedData.target_nr !== '') {
+          updatePayload.target_nr = parseInt(updatedData.target_nr);
+          console.log("📝 Frontend - Including target_nr:", updatePayload.target_nr);
+        } else {
+          updatePayload.target_nr = null;
+          console.log("📝 Frontend - Clearing target_nr");
+        }
+      }
+
       console.log("📝 Frontend - Final payload:", updatePayload);
 
       const response = await fetch(`http://localhost:3000/api/admin/users/${editingUser.id}`, {
@@ -264,20 +289,8 @@ const Index = () => {
       const result = await response.json();
       console.log("✅ Frontend - Update response:", result);
 
-      // Update UI dengan data yang baru
-      setUsersData(prevUsers =>
-        prevUsers.map(user =>
-          user.id === editingUser.id
-            ? {
-                ...user,
-                nama: updatedData.nama,
-                email: updatedData.email,
-                role: updatedData.role,
-                // Tidak menampilkan password di UI
-              }
-            : user
-        )
-      );
+      // Refresh data from server to get latest state
+      await fetchUsers();
 
       // Tutup modal
       setShowEditModal(false);
