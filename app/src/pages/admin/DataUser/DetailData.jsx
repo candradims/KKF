@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Mail, Lock, Shield } from 'lucide-react';
+import { X, User, Mail, Lock, Shield, Target, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DetailData = ({ isOpen, onClose, initialData }) => {
@@ -8,6 +8,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
     email: '',
     kata_sandi: '',
     role: '',
+    targetNr: ''
   });
 
   // Color palette
@@ -17,19 +18,41 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
     tertiary: '#00a2b9',
     accent1: '#008bb0',
     accent2: '#0090a8',
+    success: '#3fba8c',
   };
 
   useEffect(() => {
     if (initialData) {
       console.log("📋 DetailData - Initial data received:", initialData);
+      
+      // Convert role to display format
+      const convertRoleToDisplay = (dbRole) => {
+        switch(dbRole) {
+          case 'superAdmin': return 'superAdmin';
+          case 'admin': return 'admin';
+          case 'sales': return 'sales';
+          case 'Super Admin': return 'superAdmin';
+          case 'Admin': return 'admin';
+          case 'Sales': return 'sales';
+          default: return dbRole;
+        }
+      };
+
       setFormData({
         nama: initialData.nama || '',
         email: initialData.email || '',
-        kata_sandi: initialData.kata_sandi || '',
-        role: initialData.role || '',
+        kata_sandi: initialData.kata_sandi || initialData.password || '',
+        role: convertRoleToDisplay(initialData.role) || '',
+        targetNr: initialData.target_nr || initialData.targetNr || ''
       });
     }
   }, [initialData]);
+
+  // Format number with dots as thousand separators
+  const formatNumber = (num) => {
+    if (!num) return '0';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
 
   return (
     <>
@@ -161,7 +184,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
               </motion.div>
 
               {/* Form */}
-              <motion.form
+              <motion.div
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
@@ -244,7 +267,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                 </div>
 
                 {/* Role */}
-                <div style={{ marginBottom: '24px' }}>
+                <div style={{ marginBottom: formData.role === 'sales' ? '24px' : '32px' }}>
                   <label style={{
                     fontSize: '14px',
                     fontWeight: '600',
@@ -262,10 +285,249 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                     color: colors.primary
                   }}>
                     <Shield size={18} style={{ marginRight: '12px' }} />
-                    {formData.role}
+                    {formData.role === 'superAdmin' && '👑 Super Admin'}
+                    {formData.role === 'admin' && '👨‍💼 Admin'}
+                    {formData.role === 'sales' && '💼 Sales'}
+                    {!['superAdmin', 'admin', 'sales'].includes(formData.role) && formData.role}
                   </div>
                 </div>
-              </motion.form>
+
+                {/* Target NR Section */}
+                <AnimatePresence>
+                  {formData.role === 'sales' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0, y: -30 }}
+                      animate={{ height: 'auto', opacity: 1, y: 0 }}
+                      exit={{ height: 0, opacity: 0, y: -30 }}
+                      transition={{ 
+                        duration: 0.6, 
+                        ease: [0.4, 0, 0.2, 1],
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20
+                      }}
+                      style={{
+                        marginBottom: '35px',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0.85, opacity: 0, x: -20 }}
+                        animate={{ scale: 1, opacity: 1, x: 0 }}
+                        transition={{ 
+                          delay: 0.2, 
+                          duration: 0.5,
+                          type: "spring",
+                          stiffness: 300
+                        }}
+                        style={{
+                          background: `linear-gradient(135deg, 
+                            rgba(0, 191, 202, 0.12) 0%, 
+                            rgba(63, 186, 140, 0.08) 50%,
+                            rgba(3, 91, 113, 0.04) 100%)`,
+                          border: `2px solid rgba(0, 191, 202, 0.4)`,
+                          borderRadius: '20px',
+                          padding: '28px',
+                          position: 'relative',
+                          backdropFilter: 'blur(10px)',
+                          boxShadow: `
+                            0 12px 40px rgba(0, 191, 202, 0.25),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                            inset 0 -1px 0 rgba(3, 91, 113, 0.1)
+                          `,
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {/* Animated Background Pattern */}
+                        <motion.div
+                          animate={{
+                            rotate: [0, 360],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{
+                            rotate: {
+                              duration: 20,
+                              repeat: Infinity,
+                              ease: "linear"
+                            },
+                            scale: {
+                              duration: 4,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '-50%',
+                            right: '-50%',
+                            width: '200%',
+                            height: '200%',
+                            background: `radial-gradient(circle, 
+                              rgba(0, 191, 202, 0.05) 0%, 
+                              transparent 70%)`,
+                            pointerEvents: 'none'
+                          }}
+                        />
+
+                        {/* Floating Particles */}
+                        <motion.div
+                          animate={{
+                            y: [0, -10, 0],
+                            opacity: [0.3, 0.7, 0.3]
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '15px',
+                            left: '25px',
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: colors.secondary,
+                            filter: 'blur(1px)'
+                          }}
+                        />
+                        <motion.div
+                          animate={{
+                            y: [0, -15, 0],
+                            opacity: [0.4, 0.8, 0.4]
+                          }}
+                          transition={{
+                            duration: 4,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                            delay: 0.5
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '40px',
+                            right: '30px',
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: colors.success,
+                            filter: 'blur(1px)'
+                          }}
+                        />
+
+                        {/* Pulsing Border Effect */}
+                        <motion.div
+                          animate={{
+                            opacity: [0.2, 0.5, 0.2],
+                            scale: [1, 1.02, 1]
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                          style={{
+                            position: 'absolute',
+                            inset: '-3px',
+                            borderRadius: '23px',
+                            background: `linear-gradient(135deg, 
+                              ${colors.secondary} 0%, 
+                              ${colors.success} 50%,
+                              ${colors.tertiary} 100%)`,
+                            opacity: 0.3,
+                            zIndex: 1,
+                            pointerEvents: 'none',
+                            filter: 'blur(2px)'
+                          }}
+                        />
+
+                        <div style={{ position: 'relative', zIndex: 2 }}>
+                          {/* Label with Icon */}
+                          <motion.label
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            style={{
+                              display: 'block',
+                              fontSize: '16px',
+                              fontWeight: '700',
+                              color: colors.primary,
+                              marginBottom: '16px',
+                              letterSpacing: '0.02em',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px'
+                            }}
+                          >
+                            <motion.div
+                              animate={{ 
+                                scale: [1, 1.2, 1],
+                                rotate: [0, 5, -5, 0]
+                              }}
+                              transition={{ 
+                                duration: 3, 
+                                repeat: Infinity,
+                                ease: "easeInOut" 
+                              }}
+                              style={{
+                                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                                borderRadius: '10px',
+                                padding: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <Target size={18} color="white" />
+                            </motion.div>
+                            Target NR
+                          </motion.label>
+                          
+                          {/* Display Container */}
+                          <div style={{ position: 'relative' }}>
+                            <motion.div 
+                              style={{
+                                position: 'absolute',
+                                left: '18px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                color: colors.primary,
+                                transition: 'all 0.3s ease',
+                                zIndex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '1px'
+                              }}
+                            >
+                              <TrendingUp size={20} />
+                            </motion.div>
+                            
+                            <div
+                              style={{
+                                padding: '16px 16px 16px 52px',
+                                borderRadius: '12px',
+                                border: '2px solid rgba(0, 191, 202, 0.3)',
+                                fontSize: '15px',
+                                fontWeight: '600',
+                                backgroundColor: '#f8fcfd',
+                                color: colors.primary,
+                                width: '100%',
+                                height: '52px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                backdropFilter: 'blur(10px)'
+                              }}
+                            >
+                              Rp {formatNumber(formData.targetNr)}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
 
               {/* Tombol Batal */}
               <div style={{
