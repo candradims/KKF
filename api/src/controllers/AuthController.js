@@ -55,7 +55,7 @@ export class AuthController {
         target_nr: user.target_nr || null, // Include target_nr for sales
         is_active: user.is_active,
         created_at: user.created_at,
-        updated_at: user.updated_at
+        updated_at: user.updated_at,
       };
 
       res.status(200).json({
@@ -90,7 +90,7 @@ export class AuthController {
       });
     }
   }
-  
+
   static async resetPassword(req, res) {
     try {
       const { email_user, new_password } = req.body;
@@ -118,7 +118,10 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: "Password berhasil diperbarui",
-        data: { id_user: updatedUser[0].id_user, email_user: updatedUser[0].email_user },
+        data: {
+          id_user: updatedUser[0].id_user,
+          email_user: updatedUser[0].email_user,
+        },
       });
     } catch (error) {
       console.error("❌ Reset password error:", error);
