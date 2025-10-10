@@ -514,8 +514,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                       initial={{ height: 0, opacity: 0, y: -30 }}
                       animate={{ height: 'auto', opacity: 1, y: 0 }}
                       exit={{ height: 0, opacity: 0, y: -30 }}
-                      transition={{ 
-                        duration: 0.6, 
+                      transition={{
+                        duration: 0.6,
                         ease: [0.4, 0, 0.2, 1],
                         type: "spring",
                         stiffness: 200,
@@ -530,15 +530,15 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                       <motion.div
                         initial={{ scale: 0.85, opacity: 0, x: -20 }}
                         animate={{ scale: 1, opacity: 1, x: 0 }}
-                        transition={{ 
-                          delay: 0.2, 
+                        transition={{
+                          delay: 0.2,
                           duration: 0.5,
                           type: "spring",
                           stiffness: 300
                         }}
                         style={{
-                          background: `linear-gradient(135deg, 
-                            rgba(0, 191, 202, 0.12) 0%, 
+                          background: `linear-gradient(135deg,
+                            rgba(0, 191, 202, 0.12) 0%,
                             rgba(63, 186, 140, 0.08) 50%,
                             rgba(3, 91, 113, 0.04) 100%)`,
                           border: `2px solid rgba(0, 191, 202, 0.4)`,
@@ -556,21 +556,10 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                       >
                         {/* Animated Background Pattern */}
                         <motion.div
-                          animate={{
-                            rotate: [0, 360],
-                            scale: [1, 1.1, 1]
-                          }}
+                          animate={{ rotate: [0, 360], scale: [1, 1.1, 1] }}
                           transition={{
-                            rotate: {
-                              duration: 20,
-                              repeat: Infinity,
-                              ease: "linear"
-                            },
-                            scale: {
-                              duration: 4,
-                              repeat: Infinity,
-                              ease: "easeInOut"
-                            }
+                            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                            scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                           }}
                           style={{
                             position: 'absolute',
@@ -578,8 +567,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                             right: '-50%',
                             width: '200%',
                             height: '200%',
-                            background: `radial-gradient(circle, 
-                              rgba(0, 191, 202, 0.05) 0%, 
+                            background: `radial-gradient(circle,
+                              rgba(0, 191, 202, 0.05) 0%,
                               transparent 70%)`,
                             pointerEvents: 'none'
                           }}
@@ -587,15 +576,8 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
 
                         {/* Floating Particles */}
                         <motion.div
-                          animate={{
-                            y: [0, -10, 0],
-                            opacity: [0.3, 0.7, 0.3]
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                          }}
+                          animate={{ y: [0, -10, 0], opacity: [0.3, 0.7, 0.3] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           style={{
                             position: 'absolute',
                             top: '15px',
@@ -608,10 +590,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                           }}
                         />
                         <motion.div
-                          animate={{
-                            y: [0, -15, 0],
-                            opacity: [0.4, 0.8, 0.4]
-                          }}
+                          animate={{ y: [0, -15, 0], opacity: [0.4, 0.8, 0.4] }}
                           transition={{
                             duration: 4,
                             repeat: Infinity,
@@ -632,21 +611,14 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
 
                         {/* Pulsing Border Effect */}
                         <motion.div
-                          animate={{
-                            opacity: [0.2, 0.5, 0.2],
-                            scale: [1, 1.02, 1]
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                          }}
+                          animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.02, 1] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           style={{
                             position: 'absolute',
                             inset: '-3px',
                             borderRadius: '23px',
-                            background: `linear-gradient(135deg, 
-                              ${colors.secondary} 0%, 
+                            background: `linear-gradient(135deg,
+                              ${colors.secondary} 0%,
                               ${colors.success} 50%,
                               ${colors.tertiary} 100%)`,
                             opacity: 0.3,
@@ -663,27 +635,19 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
                             style={{
-                              display: 'block',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px',
                               fontSize: '16px',
                               fontWeight: '700',
                               color: colors.primary,
                               marginBottom: '16px',
-                              letterSpacing: '0.02em',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '12px'
+                              letterSpacing: '0.02em'
                             }}
                           >
                             <motion.div
-                              animate={{ 
-                                scale: [1, 1.2, 1],
-                                rotate: [0, 5, -5, 0]
-                              }}
-                              transition={{ 
-                                duration: 3, 
-                                repeat: Infinity,
-                                ease: "easeInOut" 
-                              }}
+                              animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+                              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                               style={{
                                 background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
                                 borderRadius: '10px',
@@ -697,32 +661,38 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                             </motion.div>
                             Target NR *
                           </motion.label>
-                          
+
                           {/* Input Container */}
                           <div style={{ position: 'relative' }}>
-                            <motion.div 
+                            {/* Ikon + Rp */}
+                            <div
                               style={{
                                 position: 'absolute',
                                 left: '18px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                color: focusedField === 'targetNr' ? colors.success : colors.primary,
-                                transition: 'all 0.3s ease',
-                                zIndex: 1,
+                                top: 0,
+                                bottom: 0,
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '1px'
-                              }}
-                              animate={{
+                                gap: '18px',
                                 color: focusedField === 'targetNr' ? colors.success : colors.primary,
-                                scale: focusedField === 'targetNr' ? 1.1 : 1
+                                zIndex: 2,
                               }}
-                              transition={{ duration: 0.3 }}
                             >
                               <TrendingUp size={20} />
-                            </motion.div>
-                            
+                              <span
+                                style={{
+                                  fontWeight: '700',
+                                  fontSize: '16px',
+                                  left: '28px',
+                                  color: focusedField === 'targetNr' ? colors.success : '#6B7280',
+                                  transition: 'all 0.3s ease',
+                                }}
+                              >
+                                Rp
+                              </span>
+                            </div>
+
+                            {/* Input Field */}
                             <motion.input
                               type="number"
                               name="targetNr"
@@ -735,18 +705,18 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                               step="1000000"
                               style={{
                                 ...inputStyle('targetNr'),
-                                paddingLeft: '52px', 
+                                paddingLeft: '105px', 
                                 fontSize: '15px',
                                 fontWeight: '600',
                                 borderColor: focusedField === 'targetNr' ? colors.success : 'rgba(0, 191, 202, 0.5)',
                                 backgroundColor: focusedField === 'targetNr' ? 'rgba(63, 186, 140, 0.08)' : '#ffffff',
-                                backdropFilter: 'blur(10px)',
                                 height: '52px',
-                                opacity: formData.targetNr ? 1 : 0.7
+                                borderRadius: '12px',
+                                paddingTop: '19px', 
+                                boxSizing: 'border-box'
                               }}
                               whileFocus={{
-                                boxShadow: `0 0 0 4px rgba(63, 186, 140, 0.2), 0 12px 30px rgba(0, 191, 202, 0.3)`,
-                                opacity: 0.9
+                                boxShadow: `0 0 0 4px rgba(63, 186, 140, 0.2), 0 12px 30px rgba(0, 191, 202, 0.3)`
                               }}
                             />
                           </div>
