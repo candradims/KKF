@@ -479,16 +479,8 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                             scale: [1, 1.1, 1]
                           }}
                           transition={{
-                            rotate: {
-                              duration: 20,
-                              repeat: Infinity,
-                              ease: "linear"
-                            },
-                            scale: {
-                              duration: 4,
-                              repeat: Infinity,
-                              ease: "easeInOut"
-                            }
+                            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                            scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                           }}
                           style={{
                             position: 'absolute',
@@ -505,15 +497,8 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
 
                         {/* Floating Particles */}
                         <motion.div
-                          animate={{
-                            y: [0, -10, 0],
-                            opacity: [0.3, 0.7, 0.3]
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                          }}
+                          animate={{ y: [0, -10, 0], opacity: [0.3, 0.7, 0.3] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           style={{
                             position: 'absolute',
                             top: '15px',
@@ -526,10 +511,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                           }}
                         />
                         <motion.div
-                          animate={{
-                            y: [0, -15, 0],
-                            opacity: [0.4, 0.8, 0.4]
-                          }}
+                          animate={{ y: [0, -15, 0], opacity: [0.4, 0.8, 0.4] }}
                           transition={{
                             duration: 4,
                             repeat: Infinity,
@@ -548,17 +530,10 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                           }}
                         />
 
-                        {/* Pulsing Border Effect */}
+                        {/* Pulsing Border */}
                         <motion.div
-                          animate={{
-                            opacity: [0.2, 0.5, 0.2],
-                            scale: [1, 1.02, 1]
-                          }}
-                          transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                          }}
+                          animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.02, 1] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           style={{
                             position: 'absolute',
                             inset: '-3px',
@@ -575,33 +550,25 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                         />
 
                         <div style={{ position: 'relative', zIndex: 2 }}>
-                          {/* Label with Icon */}
+                          {/* Label */}
                           <motion.label
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
                             style={{
-                              display: 'block',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px',
                               fontSize: '16px',
                               fontWeight: '700',
                               color: colors.primary,
                               marginBottom: '16px',
-                              letterSpacing: '0.02em',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '12px'
+                              letterSpacing: '0.02em'
                             }}
                           >
                             <motion.div
-                              animate={{ 
-                                scale: [1, 1.2, 1],
-                                rotate: [0, 5, -5, 0]
-                              }}
-                              transition={{ 
-                                duration: 3, 
-                                repeat: Infinity,
-                                ease: "easeInOut" 
-                              }}
+                              animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+                              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                               style={{
                                 background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
                                 borderRadius: '10px',
@@ -615,32 +582,38 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                             </motion.div>
                             Target NR *
                           </motion.label>
-                          
+
                           {/* Input Container */}
                           <div style={{ position: 'relative' }}>
-                            <motion.div 
+                            {/* Ikon + Rp */}
+                            <div
                               style={{
                                 position: 'absolute',
                                 left: '18px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                color: focusedField === 'targetNr' ? colors.success : colors.primary,
-                                transition: 'all 0.3s ease',
-                                zIndex: 1,
+                                top: 0,
+                                bottom: 0,
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '1px'
-                              }}
-                              animate={{
+                                gap: '18px',
                                 color: focusedField === 'targetNr' ? colors.success : colors.primary,
-                                scale: focusedField === 'targetNr' ? 1.1 : 1
+                                zIndex: 2,
                               }}
-                              transition={{ duration: 0.3 }}
                             >
                               <TrendingUp size={20} />
-                            </motion.div>
-                            
+                              <span
+                                style={{
+                                  fontWeight: '700',
+                                  fontSize: '16px',
+                                  left: '28px',
+                                  color: focusedField === 'targetNr' ? colors.success : '#6B7280',
+                                  transition: 'all 0.3s ease',
+                                }}
+                              >
+                                Rp
+                              </span>
+                            </div>
+
+                            {/* Input Field */}
                             <motion.input
                               type="number"
                               name="targetNr"
@@ -654,13 +627,15 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                               step="1000000"
                               style={{
                                 ...inputStyle('targetNr'),
-                                paddingLeft: '52px', 
+                                paddingLeft: '105px',
                                 fontSize: '15px',
                                 fontWeight: '600',
                                 borderColor: focusedField === 'targetNr' ? colors.success : 'rgba(0, 191, 202, 0.5)',
                                 backgroundColor: focusedField === 'targetNr' ? 'rgba(63, 186, 140, 0.08)' : '#ffffff',
-                                backdropFilter: 'blur(10px)',
-                                height: '52px'
+                                height: '52px',
+                                borderRadius: '12px',
+                                paddingTop: '19px',
+                                boxSizing: 'border-box'
                               }}
                               whileFocus={{
                                 boxShadow: `0 0 0 4px rgba(63, 186, 140, 0.2), 0 12px 30px rgba(0, 191, 202, 0.3)`
