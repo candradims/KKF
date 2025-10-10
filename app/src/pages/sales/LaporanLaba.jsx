@@ -19,7 +19,7 @@ import {
   Legend,
   ReferenceLine
 } from 'recharts';
-import { penawaranAPI } from '../../utils/api';
+import { penawaranAPI, getUserData } from '../../utils/api';
 
 const LaporanLaba = () => {
   const [selectedYearSales, setSelectedYearSales] = useState('2024');
@@ -27,6 +27,7 @@ const LaporanLaba = () => {
   const [monthlyData, setMonthlyData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeChart, setActiveChart] = useState('performance');
+  const [totalRevenueFromProfit, setTotalRevenueFromProfit] = useState(0); // NEW: State for real total revenue
 
   const colors = {
     primary: '#035b71',
@@ -78,6 +79,7 @@ const LaporanLaba = () => {
         const salesTargetMap = new Map();
 
         let processedCount = 0;
+        let totalRevenueAccumulated = 0; // NEW: Accumulate total revenue from all penawaran
 
         // Process each penawaran
         for (const penawaran of response.data) {
@@ -90,15 +92,21 @@ const LaporanLaba = () => {
               const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
               
               if (profit > 0) {
-                console.log(`💰 [LAPORAN LABA] Found profit: ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
+                console.log(`💰 [LAPORAN LABA] Found profit: Rp ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
+                
+                // NEW: Accumulate total revenue
+                totalRevenueAccumulated += profit;
                 
                 // Get sales person name
                 const salesPerson = penawaran.nama_sales || penawaran.sales_person || 'Sales ' + (processedCount + 1);
                 
-                // Get month from created_at or use current month as fallback
-                const createdAt = penawaran.created_at ? new Date(penawaran.created_at) : new Date();
+                // Get month from tanggal_dibuat or created_at or use current month as fallback
+                const dateString = penawaran.tanggal_dibuat || penawaran.created_at;
+                const createdAt = dateString ? new Date(dateString) : new Date();
                 const month = createdAt.getMonth() + 1; // 1-12
                 const monthKey = `${createdAt.getFullYear()}-${month.toString().padStart(2, '0')}`;
+                
+                console.log(`📅 [LAPORAN LABA] Date: ${dateString}, Month: ${month}, MonthKey: ${monthKey}`);
                 
                 // Accumulate revenue for this sales person
                 const currentRevenue = salesRevenueMap.get(salesPerson) || 0;
@@ -115,54 +123,71 @@ const LaporanLaba = () => {
                 
                 processedCount++;
               } else {
-                console.log(`❌ [LAPORAN LABA] No valid profit found for penawaran ${penawaran.id_penawaran}`);
+                console.log(`⚠️ [LAPORAN LABA] Zero or no profit found for penawaran ${penawaran.id_penawaran}`);
               }
             } else {
-              console.log(`❌ [LAPORAN LABA] Failed to fetch hasil for penawaran ${penawaran.id_penawaran}`);
+              console.log(`⚠️ [LAPORAN LABA] No hasil data for penawaran ${penawaran.id_penawaran}`);
             }
           } catch (error) {
             console.error(`❌ [LAPORAN LABA] Error processing penawaran ${penawaran.id_penawaran}:`, error);
           }
         }
 
-        // Convert map to array for sales data
-        const salesDataArray = Array.from(salesRevenueMap.entries()).map(([nama, penawaran], index) => {
-          const target = salesTargetMap.get(nama) || penawaran * 1.2;
-          const achievementRate = (penawaran / target) * 100;
-          const growth = Math.random() * 30 - 10;
-          const lastMonth = penawaran * (1 - growth / 100);
-          const komisi = penawaran * 0.1;
+        console.log('💰 [LAPORAN LABA] ===== REVENUE CALCULATION COMPLETE =====');
+        console.log(`💰 [LAPORAN LABA] Total Revenue from all penawaran: Rp ${totalRevenueAccumulated.toLocaleString('id-ID')}`);
+        console.log(`📊 [LAPORAN LABA] Processed ${processedCount} penawaran with profit data`);
+        
+        // NEW: Set total revenue state
+        setTotalRevenueFromProfit(totalRevenueAccumulated);
 
-          return {
-            id: index + 1,
-            nama,
-            penawaran: Math.round(penawaran),
+        // UPDATED: Create single aggregated sales data entry with logged-in user name
+        const salesDataArray = [];
+        
+        if (totalRevenueAccumulated > 0) {
+          // Get logged-in user data
+          const currentUser = getUserData();
+          const userName = currentUser?.nama_user || currentUser?.name || 'Sales User';
+          
+          console.log('👤 [LAPORAN LABA] Logged-in user:', userName);
+          
+          const target = totalRevenueAccumulated * 1.2;
+          const achievementRate = (totalRevenueAccumulated / target) * 100;
+          const growth = Math.random() * 30 - 10; // Random growth for demo
+          const lastMonth = totalRevenueAccumulated * (1 - growth / 100);
+          const komisi = totalRevenueAccumulated * 0.1;
+
+          salesDataArray.push({
+            id: 1,
+            nama: userName, // Use logged-in user's name from data_user.nama_user
+            penawaran: Math.round(totalRevenueAccumulated),
             target: Math.round(target),
             komisi: Math.round(komisi),
             growth: parseFloat(growth.toFixed(1)),
             lastMonth: Math.round(lastMonth),
             achievement: parseFloat(achievementRate.toFixed(1))
-          };
-        });
+          });
+        }
 
         // Convert monthly data to array and fill missing months
         const monthlyDataArray = generateMonthlyData(monthlyRevenueMap);
 
         console.log('📊 [LAPORAN LABA] Final sales performance summary:');
-        console.log('  - Sales persons:', salesDataArray.length);
-        console.log('  - Total revenue:', salesDataArray.reduce((sum, sales) => sum + sales.penawaran, 0).toLocaleString('id-ID'));
+        console.log('  - Sales data entries:', salesDataArray.length);
+        console.log('  - Total revenue from salesData:', salesDataArray.reduce((sum, sales) => sum + sales.penawaran, 0).toLocaleString('id-ID'));
         console.log('  - Monthly data points:', monthlyDataArray.length);
         
         setSalesData(salesDataArray);
         setMonthlyData(monthlyDataArray);
       } else {
         console.log('❌ [LAPORAN LABA] No valid penawaran data received');
+        setTotalRevenueFromProfit(0);
         const { salesData: fallbackSales, monthlyData: fallbackMonthly } = generateFallbackData();
         setSalesData(fallbackSales);
         setMonthlyData(fallbackMonthly);
       }
     } catch (error) {
       console.error('❌ [LAPORAN LABA] Error loading revenue data:', error);
+      setTotalRevenueFromProfit(0);
       const { salesData: fallbackSales, monthlyData: fallbackMonthly } = generateFallbackData();
       setSalesData(fallbackSales);
       setMonthlyData(fallbackMonthly);
@@ -252,8 +277,8 @@ const LaporanLaba = () => {
   const currentMonth = new Date().getMonth();
   const currentMonthData = filteredMonthlyData.find(item => item.month === currentMonth + 1) || filteredMonthlyData[0];
 
-  // Hitung statistik
-  const totalRevenue = salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
+  // Hitung statistik - UPDATED: Use totalRevenueFromProfit for accurate total
+  const totalRevenue = totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
   const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
   const achievementRate = salesData.length > 0 
     ? (salesData.filter(sales => sales.penawaran >= sales.target).length / salesData.length) * 100 
@@ -261,6 +286,12 @@ const LaporanLaba = () => {
   const averageGrowth = salesData.length > 0
     ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length
     : 0;
+  
+  console.log('📊 [LAPORAN LABA] Display Statistics:');
+  console.log('  - Total Revenue (from profit):', totalRevenue.toLocaleString('id-ID'));
+  console.log('  - Total Komisi:', totalKomisi.toLocaleString('id-ID'));
+  console.log('  - Achievement Rate:', achievementRate.toFixed(2) + '%');
+  console.log('  - Average Growth:', averageGrowth.toFixed(2) + '%');
 
   // Data untuk chart performa bulanan
   const monthlyPerformanceData = filteredMonthlyData.map(item => ({
@@ -272,13 +303,8 @@ const LaporanLaba = () => {
   }));
 
   const formatNumber = (num) => {
-    if (Math.abs(num) >= 1000000) {
-      return 'Rp. ' + (Math.abs(num) / 1000000).toFixed(1) + 'Jt';
-    }
-    if (Math.abs(num) >= 1000) {
-      return 'Rp. ' + (Math.abs(num) / 1000).toFixed(1) + 'Rb';
-    }
-    return 'Rp. ' + Math.abs(num);
+    // Format to full number with thousand separators like Dashboard Sales
+    return 'Rp ' + Math.round(num).toLocaleString('id-ID') + ',-';
   };
 
   const formatPercent = (num) => {
