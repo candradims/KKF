@@ -52,6 +52,7 @@ export class AuthController {
         nama_user: user.nama_user,
         email_user: user.email_user,
         role_user: user.role_user,
+        target_nr: user.target_nr || null, // Include target_nr for sales
         is_active: user.is_active,
         created_at: user.created_at,
         updated_at: user.updated_at

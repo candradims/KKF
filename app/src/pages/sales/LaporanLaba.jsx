@@ -149,15 +149,27 @@ const LaporanLaba = () => {
           const userName = currentUser?.nama_user || currentUser?.name || 'Sales User';
           const userTargetNR = currentUser?.target_nr || null; // Get target_nr from user data
           
+          console.log('👤 [LAPORAN LABA] ===== USER TARGET INFO =====');
           console.log('👤 [LAPORAN LABA] Logged-in user:', userName);
-          console.log('🎯 [LAPORAN LABA] User Target NR from database:', userTargetNR);
+          console.log('👤 [LAPORAN LABA] User role:', currentUser?.role_user);
+          console.log('🎯 [LAPORAN LABA] Target NR from database (data_user.target_nr):', userTargetNR);
+          console.log('💰 [LAPORAN LABA] Total Revenue (actual):', totalRevenueAccumulated);
           
-          // Use target from database if available, otherwise calculate default
-          const target = userTargetNR || (totalRevenueAccumulated * 1.2);
+          // Use target from database if available, otherwise calculate default (20% above revenue)
+          const target = userTargetNR && userTargetNR > 0 
+            ? userTargetNR 
+            : (totalRevenueAccumulated * 1.2);
+          
+          console.log('🎯 [LAPORAN LABA] Final Target used:', target);
+          console.log('📊 [LAPORAN LABA] Target source:', userTargetNR && userTargetNR > 0 ? 'DATABASE (data_user.target_nr)' : 'CALCULATED (revenue * 1.2)');
+          
           const achievementRate = (totalRevenueAccumulated / target) * 100;
           const growth = Math.random() * 30 - 10; // Random growth for demo
           const lastMonth = totalRevenueAccumulated * (1 - growth / 100);
           const komisi = totalRevenueAccumulated * 0.1;
+
+          console.log('📈 [LAPORAN LABA] Achievement Rate:', achievementRate.toFixed(2) + '%');
+          console.log('💵 [LAPORAN LABA] Komisi (10%):', komisi.toLocaleString('id-ID'));
 
           salesDataArray.push({
             id: 1,
@@ -169,6 +181,8 @@ const LaporanLaba = () => {
             lastMonth: Math.round(lastMonth),
             achievement: parseFloat(achievementRate.toFixed(1))
           });
+          
+          console.log('✅ [LAPORAN LABA] Sales data created:', salesDataArray[0]);
         }
 
         // Convert monthly data to array and fill missing months
