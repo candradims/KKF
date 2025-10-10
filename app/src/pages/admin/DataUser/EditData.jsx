@@ -726,7 +726,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                               required={formData.role === 'sales'}
                               style={{
                                 ...inputStyle('targetNr'),
-                                paddingLeft: '105px', 
+                                paddingLeft: '80px', 
                                 fontSize: '15px',
                                 fontWeight: '600',
                                 borderColor: focusedField === 'targetNr' ? colors.success : 'rgba(0, 191, 202, 0.5)',
