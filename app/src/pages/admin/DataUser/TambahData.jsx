@@ -425,100 +425,374 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                   </div>
                 </motion.div>
 
-                {/* Target NR */}
+                {/* Target NR Section */}
                 <AnimatePresence>
                   {formData.role === 'sales' && (
                     <motion.div
-                      initial={{ height: 0, opacity: 0, y: -20 }}
+                      initial={{ height: 0, opacity: 0, y: -30 }}
                       animate={{ height: 'auto', opacity: 1, y: 0 }}
-                      exit={{ height: 0, opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, ease: 'easeOut' }}
+                      exit={{ height: 0, opacity: 0, y: -30 }}
+                      transition={{ 
+                        duration: 0.6, 
+                        ease: [0.4, 0, 0.2, 1],
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 20
+                      }}
                       style={{
-                        marginBottom: '32px',
+                        marginBottom: '35px',
                         position: 'relative',
                         overflow: 'hidden'
                       }}
                     >
                       <motion.div
-                        initial={{ scale: 0.8 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.1 }}
+                        initial={{ scale: 0.85, opacity: 0, x: -20 }}
+                        animate={{ scale: 1, opacity: 1, x: 0 }}
+                        transition={{ 
+                          delay: 0.2, 
+                          duration: 0.5,
+                          type: "spring",
+                          stiffness: 300
+                        }}
                         style={{
-                          background: `linear-gradient(135deg, rgba(0, 191, 202, 0.08) 0%, rgba(3, 91, 113, 0.03) 100%)`,
-                          border: `1px solid rgba(0, 191, 202, 0.3)`,
-                          borderRadius: '16px',
-                          padding: '24px',
-                          position: 'relative'
+                          background: `linear-gradient(135deg, 
+                            rgba(0, 191, 202, 0.12) 0%, 
+                            rgba(63, 186, 140, 0.08) 50%,
+                            rgba(3, 91, 113, 0.04) 100%)`,
+                          border: `2px solid rgba(0, 191, 202, 0.4)`,
+                          borderRadius: '20px',
+                          padding: '28px',
+                          position: 'relative',
+                          backdropFilter: 'blur(10px)',
+                          boxShadow: `
+                            0 12px 40px rgba(0, 191, 202, 0.25),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.7),
+                            inset 0 -1px 0 rgba(3, 91, 113, 0.1)
+                          `,
+                          overflow: 'hidden'
                         }}
                       >
-                        {/* Sales Badge */}
-                        <div style={{
-                          position: 'absolute',
-                          top: '10px',
-                          right: '20px',
-                          background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                          color: 'white',
-                          padding: '6px 16px',
-                          borderRadius: '20px',
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          boxShadow: `0 4px 12px rgba(0, 191, 202, 0.3)`,
-                          letterSpacing: '0.02em'
-                        }}>
-                          <TrendingUp size={12} />
-                          Target Sales
-                        </div>
-
-                        <label style={{
-                          display: 'block',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: colors.primary,
-                          marginBottom: '12px',
-                          letterSpacing: '0.02em'
-                        }}>
-                          Target NR *
-                        </label>
-                        
-                        <div style={{ position: 'relative' }}>
-                          <div style={iconContainerStyle('targetNr')}>
-                            <Target size={18} />
-                          </div>
-                          <input
-                            type="number"
-                            name="targetNr"
-                            placeholder="Tetapkan target NR "
-                            value={formData.targetNr}
-                            onChange={handleChange}
-                            onFocus={() => setFocusedField('targetNr')}
-                            onBlur={() => setFocusedField('')}
-                            required={formData.role === 'sales'}
-                            min="0"
-                            step="1000000"
-                            style={inputStyle('targetNr')}
-                          />
-                        </div>
-                        
-                        {/* Helper text */}
-                        <motion.p 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                          style={{
-                            fontSize: '12px',
-                            color: colors.accent1,
-                            margin: '12px 0 0',
-                            opacity: 0.8,
-                            fontStyle: 'italic',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
+                        {/* Animated Background Pattern */}
+                        <motion.div
+                          animate={{
+                            rotate: [0, 360],
+                            scale: [1, 1.1, 1]
                           }}
-                        >
-                        </motion.p>
+                          transition={{
+                            rotate: {
+                              duration: 20,
+                              repeat: Infinity,
+                              ease: "linear"
+                            },
+                            scale: {
+                              duration: 4,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '-50%',
+                            right: '-50%',
+                            width: '200%',
+                            height: '200%',
+                            background: `radial-gradient(circle, 
+                              rgba(0, 191, 202, 0.05) 0%, 
+                              transparent 70%)`,
+                            pointerEvents: 'none'
+                          }}
+                        />
+
+                        {/* Floating Particles */}
+                        <motion.div
+                          animate={{
+                            y: [0, -10, 0],
+                            opacity: [0.3, 0.7, 0.3]
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '15px',
+                            left: '25px',
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: colors.secondary,
+                            filter: 'blur(1px)'
+                          }}
+                        />
+                        <motion.div
+                          animate={{
+                            y: [0, -15, 0],
+                            opacity: [0.4, 0.8, 0.4]
+                          }}
+                          transition={{
+                            duration: 4,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                            delay: 0.5
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '40px',
+                            right: '30px',
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: colors.success,
+                            filter: 'blur(1px)'
+                          }}
+                        />
+
+                        {/* Pulsing Border Effect */}
+                        <motion.div
+                          animate={{
+                            opacity: [0.2, 0.5, 0.2],
+                            scale: [1, 1.02, 1]
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                          style={{
+                            position: 'absolute',
+                            inset: '-3px',
+                            borderRadius: '23px',
+                            background: `linear-gradient(135deg, 
+                              ${colors.secondary} 0%, 
+                              ${colors.success} 50%,
+                              ${colors.tertiary} 100%)`,
+                            opacity: 0.3,
+                            zIndex: 1,
+                            pointerEvents: 'none',
+                            filter: 'blur(2px)'
+                          }}
+                        />
+
+                        <div style={{ position: 'relative', zIndex: 2 }}>
+                          {/* Label with Icon */}
+                          <motion.label
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            style={{
+                              display: 'block',
+                              fontSize: '16px',
+                              fontWeight: '700',
+                              color: colors.primary,
+                              marginBottom: '16px',
+                              letterSpacing: '0.02em',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px'
+                            }}
+                          >
+                            <motion.div
+                              animate={{ 
+                                scale: [1, 1.2, 1],
+                                rotate: [0, 5, -5, 0]
+                              }}
+                              transition={{ 
+                                duration: 3, 
+                                repeat: Infinity,
+                                ease: "easeInOut" 
+                              }}
+                              style={{
+                                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                                borderRadius: '10px',
+                                padding: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <Target size={18} color="white" />
+                            </motion.div>
+                            Target Net Revenue (NR) *
+                          </motion.label>
+                          
+                          {/* Input Container */}
+                          <div style={{ position: 'relative' }}>
+                            <motion.div 
+                              style={{
+                                position: 'absolute',
+                                left: '18px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                color: focusedField === 'targetNr' ? colors.success : colors.primary,
+                                transition: 'all 0.3s ease',
+                                zIndex: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '1px'
+                              }}
+                              animate={{
+                                color: focusedField === 'targetNr' ? colors.success : colors.primary,
+                                scale: focusedField === 'targetNr' ? 1.1 : 1
+                              }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <TrendingUp size={20} />
+                            </motion.div>
+                            
+                            <motion.input
+                              type="number"
+                              name="targetNr"
+                              placeholder="Masukkan target NR"
+                              value={formData.targetNr}
+                              onChange={handleChange}
+                              onFocus={() => setFocusedField('targetNr')}
+                              onBlur={() => setFocusedField('')}
+                              required={formData.role === 'sales'}
+                              min="0"
+                              step="1000000"
+                              style={{
+                                ...inputStyle('targetNr'),
+                                paddingLeft: '52px', 
+                                fontSize: '15px',
+                                fontWeight: '600',
+                                borderColor: focusedField === 'targetNr' ? colors.success : 'rgba(0, 191, 202, 0.5)',
+                                backgroundColor: focusedField === 'targetNr' ? 'rgba(63, 186, 140, 0.08)' : '#ffffff',
+                                backdropFilter: 'blur(10px)',
+                                height: '52px'
+                              }}
+                              whileFocus={{
+                                boxShadow: `0 0 0 4px rgba(63, 186, 140, 0.2), 0 12px 30px rgba(0, 191, 202, 0.3)`
+                              }}
+                            />
+                          </div>
+                          
+                          {/* Real-time Progress Indicator */}
+                          {formData.targetNr && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              transition={{ duration: 0.4 }}
+                              style={{
+                                marginTop: '18px',
+                                background: 'rgba(255, 255, 255, 0.9)',
+                                borderRadius: '14px',
+                                padding: '16px',
+                                border: `1.5px solid rgba(0, 191, 202, 0.3)`,
+                                backdropFilter: 'blur(10px)'
+                              }}
+                            >
+                              <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: '12px'
+                              }}>
+                                <motion.span 
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  style={{
+                                    fontSize: '13px',
+                                    fontWeight: '700',
+                                    color: colors.primary,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                  }}
+                                >
+                                  <motion.div
+                                    animate={{ rotate: [0, 360] }}
+                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                    style={{ fontSize: '16px' }}
+                                  >
+                                    ⚡
+                                  </motion.div>
+                                  Target Set:
+                                </motion.span>
+                                <motion.span 
+                                  initial={{ opacity: 0, x: 10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: '800',
+                                    color: colors.success,
+                                    background: 'rgba(63, 186, 140, 0.15)',
+                                    padding: '6px 14px',
+                                    borderRadius: '10px',
+                                    border: `1.5px solid rgba(63, 186, 140, 0.3)`
+                                  }}
+                                >
+                                  {parseInt(formData.targetNr).toLocaleString('id-ID')} IDR
+                                </motion.span>
+                              </div>
+                              
+                              {/* Animated Progress Bar */}
+                              <div style={{
+                                height: '8px',
+                                background: 'rgba(0, 191, 202, 0.15)',
+                                borderRadius: '4px',
+                                overflow: 'hidden',
+                                position: 'relative'
+                              }}>
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: '100%' }}
+                                  transition={{ 
+                                    duration: 1.5, 
+                                    ease: "easeOut",
+                                    delay: 0.2
+                                  }}
+                                  style={{
+                                    height: '100%',
+                                    background: `linear-gradient(90deg, 
+                                      ${colors.secondary} 0%, 
+                                      ${colors.success} 50%,
+                                      ${colors.tertiary} 100%)`,
+                                    borderRadius: '4px',
+                                    position: 'relative'
+                                  }}
+                                >
+                                  {/* Shimmer Effect */}
+                                  <motion.div
+                                    animate={{ x: ['-100%', '100%'] }}
+                                    transition={{
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      ease: "easeInOut"
+                                    }}
+                                    style={{
+                                      position: 'absolute',
+                                      top: 0,
+                                      left: 0,
+                                      right: 0,
+                                      bottom: 0,
+                                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
+                                    }}
+                                  />
+                                </motion.div>
+                              </div>
+                              
+                              {/* Helper Text */}
+                              <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.6 }}
+                                style={{
+                                  fontSize: '12px',
+                                  color: colors.accent1,
+                                  margin: '10px 0 0',
+                                  opacity: 0.8,
+                                  fontStyle: 'italic',
+                                  textAlign: 'center',
+                                  fontWeight: '500'
+                                }}
+                              >
+                                Target bulanan untuk performa sales
+                              </motion.p>
+                            </motion.div>
+                          )}
+                        </div>
                       </motion.div>
                     </motion.div>
                   )}
