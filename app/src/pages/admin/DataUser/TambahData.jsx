@@ -613,7 +613,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                             >
                               <Target size={18} color="white" />
                             </motion.div>
-                            Target Net Revenue (NR) *
+                            Target NR *
                           </motion.label>
                           
                           {/* Input Container */}
@@ -667,131 +667,6 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                               }}
                             />
                           </div>
-                          
-                          {/* Real-time Progress Indicator */}
-                          {formData.targetNr && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              transition={{ duration: 0.4 }}
-                              style={{
-                                marginTop: '18px',
-                                background: 'rgba(255, 255, 255, 0.9)',
-                                borderRadius: '14px',
-                                padding: '16px',
-                                border: `1.5px solid rgba(0, 191, 202, 0.3)`,
-                                backdropFilter: 'blur(10px)'
-                              }}
-                            >
-                              <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '12px'
-                              }}>
-                                <motion.span 
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  style={{
-                                    fontSize: '13px',
-                                    fontWeight: '700',
-                                    color: colors.primary,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px'
-                                  }}
-                                >
-                                  <motion.div
-                                    animate={{ rotate: [0, 360] }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                    style={{ fontSize: '16px' }}
-                                  >
-                                    ⚡
-                                  </motion.div>
-                                  Target Set:
-                                </motion.span>
-                                <motion.span 
-                                  initial={{ opacity: 0, x: 10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  style={{
-                                    fontSize: '14px',
-                                    fontWeight: '800',
-                                    color: colors.success,
-                                    background: 'rgba(63, 186, 140, 0.15)',
-                                    padding: '6px 14px',
-                                    borderRadius: '10px',
-                                    border: `1.5px solid rgba(63, 186, 140, 0.3)`
-                                  }}
-                                >
-                                  {parseInt(formData.targetNr).toLocaleString('id-ID')} IDR
-                                </motion.span>
-                              </div>
-                              
-                              {/* Animated Progress Bar */}
-                              <div style={{
-                                height: '8px',
-                                background: 'rgba(0, 191, 202, 0.15)',
-                                borderRadius: '4px',
-                                overflow: 'hidden',
-                                position: 'relative'
-                              }}>
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: '100%' }}
-                                  transition={{ 
-                                    duration: 1.5, 
-                                    ease: "easeOut",
-                                    delay: 0.2
-                                  }}
-                                  style={{
-                                    height: '100%',
-                                    background: `linear-gradient(90deg, 
-                                      ${colors.secondary} 0%, 
-                                      ${colors.success} 50%,
-                                      ${colors.tertiary} 100%)`,
-                                    borderRadius: '4px',
-                                    position: 'relative'
-                                  }}
-                                >
-                                  {/* Shimmer Effect */}
-                                  <motion.div
-                                    animate={{ x: ['-100%', '100%'] }}
-                                    transition={{
-                                      duration: 2,
-                                      repeat: Infinity,
-                                      ease: "easeInOut"
-                                    }}
-                                    style={{
-                                      position: 'absolute',
-                                      top: 0,
-                                      left: 0,
-                                      right: 0,
-                                      bottom: 0,
-                                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)'
-                                    }}
-                                  />
-                                </motion.div>
-                              </div>
-                              
-                              {/* Helper Text */}
-                              <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.6 }}
-                                style={{
-                                  fontSize: '12px',
-                                  color: colors.accent1,
-                                  margin: '10px 0 0',
-                                  opacity: 0.8,
-                                  fontStyle: 'italic',
-                                  textAlign: 'center',
-                                  fontWeight: '500'
-                                }}
-                              >
-                                Target bulanan untuk performa sales
-                              </motion.p>
-                            </motion.div>
-                          )}
                         </div>
                       </motion.div>
                     </motion.div>
