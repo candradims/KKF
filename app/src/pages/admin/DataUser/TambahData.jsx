@@ -25,12 +25,34 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
     success: '#3fba8c',
   };
 
+  // Format number to Rupiah display
+  const formatRupiah = (value) => {
+    if (!value) return '';
+    const numberValue = value.toString().replace(/\D/g, '');
+    return numberValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // Remove Rupiah formatting to get plain number
+  const unformatRupiah = (value) => {
+    return value.replace(/\./g, '');
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ 
-      ...formData, 
-      [name]: value 
-    });
+    
+    // Handle Target NR with Rupiah formatting
+    if (name === 'targetNr') {
+      const plainNumber = unformatRupiah(value);
+      setFormData({ 
+        ...formData, 
+        [name]: plainNumber 
+      });
+    } else {
+      setFormData({ 
+        ...formData, 
+        [name]: value 
+      });
+    }
   };
 
   const handleCloseSuccessModal = () => {
@@ -615,16 +637,14 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
 
                             {/* Input Field */}
                             <motion.input
-                              type="number"
+                              type="text"
                               name="targetNr"
-                              placeholder="Masukkan target NR"
-                              value={formData.targetNr}
+                              placeholder="0"
+                              value={formatRupiah(formData.targetNr)}
                               onChange={handleChange}
                               onFocus={() => setFocusedField('targetNr')}
                               onBlur={() => setFocusedField('')}
                               required={formData.role === 'sales'}
-                              min="0"
-                              step="1000000"
                               style={{
                                 ...inputStyle('targetNr'),
                                 paddingLeft: '105px',
