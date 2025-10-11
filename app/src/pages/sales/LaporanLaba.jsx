@@ -294,7 +294,8 @@ const LaporanLaba = () => {
           const achievementRate = growth; // Same as growth
           
           // Status: Tercapai jika Pencapaian >= Target × 10
-          const isAchieved = totalPencapaianAccumulated >= targetFull;
+          // IMPORTANT: If no data at all (pencapaian = 0), status should be "Belum Tercapai"
+          const isAchieved = totalPencapaianAccumulated > 0 && totalPencapaianAccumulated >= targetFull;
           
           const lastMonth = totalPencapaianAccumulated * 0.9; // Assume 90% of current
           const komisi = totalRevenueAccumulated * 0.1;

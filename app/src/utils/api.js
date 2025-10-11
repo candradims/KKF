@@ -201,3 +201,36 @@ export const pengeluaranAPI = {
       method: "DELETE",
     }),
 };
+
+// Specific API functions for Admin/Users
+export const adminAPI = {
+  // Get all users
+  getAllUsers: () => apiRequest(API_CONFIG.ENDPOINTS.ADMIN.USERS),
+
+  // Get user by ID
+  getUserById: (id) => apiRequest(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${id}`),
+
+  // Get users by role
+  getUsersByRole: (role) =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/role/${role}`),
+
+  // Create new user
+  createUser: (data) =>
+    apiRequest(API_CONFIG.ENDPOINTS.ADMIN.USERS, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Update user
+  updateUser: (id, data) =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Delete user
+  deleteUser: (id) =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/${id}`, {
+      method: "DELETE",
+    }),
+};

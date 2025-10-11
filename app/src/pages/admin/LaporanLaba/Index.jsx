@@ -19,12 +19,14 @@ import {
   Legend,
   ReferenceLine
 } from 'recharts';
+import { adminAPI, penawaranAPI } from '../../../utils/api';
 
 const LaporanLaba = () => {
-  const [selectedYearSales, setSelectedYearSales] = useState('2024');
+  const [selectedYearSales, setSelectedYearSales] = useState('2025');
   const [salesData, setSalesData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeChart, setActiveChart] = useState('performance');
+  const [totalSalesCount, setTotalSalesCount] = useState(0); // NEW: State for real sales count
 
   const colors = {
     primary: '#035b71',
@@ -58,11 +60,140 @@ const LaporanLaba = () => {
     const fetchSalesData = async () => {
       try {
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulasi loading
-        setSalesData(generateFallbackData());
+        console.log('🔍 [ADMIN LAPORAN LABA] Starting to fetch all sales data...');
+        
+        // Step 1: Fetch all sales users from database
+        const salesUsersResponse = await adminAPI.getUsersByRole('sales');
+        
+        if (!salesUsersResponse.success || !salesUsersResponse.data || salesUsersResponse.data.length === 0) {
+          console.warn('⚠️ [ADMIN LAPORAN LABA] No sales users found');
+          setTotalSalesCount(0);
+          setSalesData([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const salesUsers = salesUsersResponse.data;
+        const salesCount = salesUsers.length;
+        setTotalSalesCount(salesCount);
+        
+        console.log('✅ [ADMIN LAPORAN LABA] Found', salesCount, 'sales users');
+        console.log('📊 [ADMIN LAPORAN LABA] Sales users:', salesUsers);
+
+        // Step 2: Get all penawaran
+        const penawaranResponse = await penawaranAPI.getAll();
+        
+        if (!penawaranResponse.success || !penawaranResponse.data) {
+          console.warn('⚠️ [ADMIN LAPORAN LABA] No penawaran data found');
+          setSalesData([]);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log(`📊 [ADMIN LAPORAN LABA] Processing ${penawaranResponse.data.length} penawaran`);
+
+        // Step 3: Create a map to accumulate data per sales
+        const salesDataMap = new Map();
+
+        // Initialize map with all sales users
+        salesUsers.forEach(user => {
+          salesDataMap.set(user.id_user, {
+            id: user.id_user,
+            nama: user.nama_user,
+            target: parseFloat(user.target_nr) || 0,
+            totalRevenue: 0,
+            totalPencapaian: 0,
+            penawaranCount: 0
+          });
+        });
+
+        // Step 4: Process each penawaran and accumulate data
+        for (const penawaran of penawaranResponse.data) {
+          try {
+            const salesId = penawaran.id_user;
+            
+            if (!salesDataMap.has(salesId)) {
+              console.log(`⚠️ [ADMIN LAPORAN LABA] Penawaran ${penawaran.id_penawaran} belongs to non-sales user ${salesId}, skipping`);
+              continue;
+            }
+
+            // Get hasil for this penawaran
+            const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            
+            if (hasilResponse.success && hasilResponse.data) {
+              const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
+              const pencapaian = parseFloat(hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
+
+              console.log(`💰 [ADMIN LAPORAN LABA] Penawaran ${penawaran.id_penawaran} (Sales ID: ${salesId}):`);
+              console.log(`   - Revenue (profit): Rp ${profit.toLocaleString('id-ID')}`);
+              console.log(`   - Pencapaian: Rp ${pencapaian.toLocaleString('id-ID')}`);
+
+              const salesData = salesDataMap.get(salesId);
+              salesData.totalRevenue += profit;
+              salesData.totalPencapaian += pencapaian;
+              salesData.penawaranCount += 1;
+
+              salesDataMap.set(salesId, salesData);
+            }
+          } catch (error) {
+            console.error(`❌ [ADMIN LAPORAN LABA] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        // Step 5: Convert map to array and calculate growth/status
+        const salesDataArray = [];
+        
+        salesDataMap.forEach((data, salesId) => {
+          const target = data.target;
+          const pencapaian = data.totalPencapaian;
+          const revenue = data.totalRevenue;
+
+          // NEW LOGIC: Target tercapai jika Pencapaian >= Target × 10
+          const targetMultiplier = 10;
+          const targetFull = target * targetMultiplier; // Target × 10
+          
+          // Growth calculation: percentage toward 10x target
+          const growth = targetFull > 0 ? (pencapaian / targetFull) * 100 : 0;
+          
+          // Status: Tercapai jika Pencapaian >= Target × 10
+          // IMPORTANT: If no data at all (pencapaian = 0), status should be "Belum Tercapai"
+          const isAchieved = pencapaian > 0 && pencapaian >= targetFull;
+
+          const komisi = revenue * 0.1; // 10% commission
+
+          console.log(`🎯 [ADMIN LAPORAN LABA] Sales: ${data.nama}`);
+          console.log(`   - Target: Rp ${target.toLocaleString('id-ID')}`);
+          console.log(`   - Target Full (10x): Rp ${targetFull.toLocaleString('id-ID')}`);
+          console.log(`   - Revenue: Rp ${revenue.toLocaleString('id-ID')}`);
+          console.log(`   - Pencapaian: Rp ${pencapaian.toLocaleString('id-ID')}`);
+          console.log(`   - Growth (to 10x): ${growth.toFixed(1)}%`);
+          console.log(`   - Status: ${isAchieved ? 'TERCAPAI' : 'BELUM TERCAPAI'}`);
+          console.log(`   - Penawaran count: ${data.penawaranCount}`);
+
+          salesDataArray.push({
+            id: salesId,
+            nama: data.nama,
+            penawaran: Math.round(revenue), // Revenue from profit_dari_hjt_excl_ppn
+            pencapaian: Math.round(pencapaian), // From total_per_bulan_harga_final_sebelum_ppn
+            target: Math.round(target), // From data_user.target_nr
+            targetFull: Math.round(targetFull), // Target × 10
+            komisi: Math.round(komisi),
+            growth: parseFloat(growth.toFixed(1)), // Progress to 10x target
+            lastMonth: Math.round(pencapaian * 0.9), // Estimate
+            achievement: parseFloat(growth.toFixed(1)),
+            isAchieved: isAchieved, // Status tercapai atau belum
+            penawaranCount: data.penawaranCount
+          });
+        });
+
+        console.log('✅ [ADMIN LAPORAN LABA] Final sales data:', salesDataArray);
+        console.log('📊 [ADMIN LAPORAN LABA] Total sales with data:', salesDataArray.length);
+
+        setSalesData(salesDataArray);
       } catch (error) {
-        console.error("Gagal mengambil data sales:", error);
-        setSalesData(generateFallbackData());
+        console.error("❌ [ADMIN LAPORAN LABA] Error fetching sales data:", error);
+        setTotalSalesCount(0);
+        setSalesData([]);
       } finally {
         setIsLoading(false);
       }
@@ -120,24 +251,35 @@ const LaporanLaba = () => {
   }));
 
   // Hitung statistik
-  const totalSalesCount = salesData.length;
+  // totalSalesCount now comes from state (fetched from API)
   const totalRevenue = salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
   const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
+  
+  // NEW: Total Pencapaian from all sales (sum of total_per_bulan_harga_final_sebelum_ppn)
+  const totalPencapaian = salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0);
+  
+  // NEW: Achievement rate based on 10x target logic (same as sales page)
+  // Status tercapai jika Pencapaian >= Target × 10
   const achievementRate = salesData.length > 0 
-    ? (salesData.filter(sales => sales.penawaran >= sales.target).length / salesData.length) * 100 
+    ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 
     : 0;
+  
+  // NEW: Average Growth from all sales (already calculated correctly)
   const averageGrowth = salesData.length > 0
     ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length
     : 0;
 
+  console.log('📊 [ADMIN LAPORAN LABA] Display Statistics:');
+  console.log('  - Total Sales Count (from API):', totalSalesCount);
+  console.log('  - Total Revenue:', totalRevenue.toLocaleString('id-ID'));
+  console.log('  - Total Pencapaian:', totalPencapaian.toLocaleString('id-ID'));
+  console.log('  - Total Komisi:', totalKomisi.toLocaleString('id-ID'));
+  console.log('  - Achievement Rate (10x logic):', achievementRate.toFixed(2) + '%');
+  console.log('  - Average Growth (to 10x target):', averageGrowth.toFixed(2) + '%');
+
   const formatNumber = (num) => {
-    if (Math.abs(num) >= 1000000) {
-      return 'Rp. ' + (Math.abs(num) / 1000000).toFixed(1) + 'Jt';
-    }
-    if (Math.abs(num) >= 1000) {
-      return 'Rp. ' + (Math.abs(num) / 1000).toFixed(1) + 'Rb';
-    }
-    return 'Rp. ' + Math.abs(num);
+    // Format to full number with thousand separators (same as sales page)
+    return 'Rp ' + Math.round(num).toLocaleString('id-ID') + ',-';
   };
 
   const formatCount = (num) => {
@@ -211,7 +353,7 @@ const LaporanLaba = () => {
   };
 
   const handleRefresh = () => {
-    setSelectedYearSales('2024');
+    setSelectedYearSales('2025');
     setActiveChart('performance');
   };
 
@@ -288,7 +430,7 @@ const LaporanLaba = () => {
             },
             {
               title: 'Pencapaian Target',
-              value: formatPercent(achievementRate),
+              value: formatNumber(totalPencapaian),
               icon: Target,
               gradient: `linear-gradient(135deg, ${colors.accent1} 0%, ${colors.accent2} 100%)`,
               bgGradient: `linear-gradient(135deg, ${colors.accent1}15 0%, ${colors.accent2}10 100%)`
@@ -914,7 +1056,7 @@ const LaporanLaba = () => {
                 }}>
                   {[
                     { label: 'Nama Sales', align: 'left' },
-                    { label: 'Penawaran', align: 'right' },
+                    { label: 'Revenue', align: 'right' },
                     { label: 'Target', align: 'right' },
                     { label: 'Pencapaian', align: 'center' },
                     { label: 'Growth', align: 'center' },
@@ -1002,19 +1144,10 @@ const LaporanLaba = () => {
                       fontSize: '15px',
                       fontWeight: '700',
                       borderBottom: `1px solid ${colors.gray200}`,
-                      textAlign: 'center'
+                      textAlign: 'right',
+                      color: colors.success
                     }}>
-                      <div style={{
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: ((sales.penawaran / sales.target) * 100) >= 100 ? colors.success : colors.warning,
-                        background: ((sales.penawaran / sales.target) * 100) >= 100 ? `${colors.success}20` : `${colors.warning}20`,
-                        border: `1px solid ${((sales.penawaran / sales.target) * 100) >= 100 ? colors.success : colors.warning}30`
-                      }}>
-                        {((sales.penawaran / sales.target) * 100).toFixed(1)}%
-                      </div>
+                      {formatNumber(sales.pencapaian || 0)}
                     </td>
                     <td style={{
                       padding: '18px 16px',
@@ -1028,16 +1161,28 @@ const LaporanLaba = () => {
                         borderRadius: '8px',
                         fontSize: '13px',
                         fontWeight: '700',
-                        color: (sales.growth || 0) >= 0 ? colors.success : colors.danger,
-                        background: (sales.growth || 0) >= 0 ? `${colors.success}20` : `${colors.danger}20`,
-                        border: `1px solid ${(sales.growth || 0) >= 0 ? colors.success : colors.danger}30`,
+                        color: sales.growth >= 100 
+                          ? colors.success 
+                          : sales.growth > 0 
+                            ? colors.warning 
+                            : colors.danger,
+                        background: sales.growth >= 100 
+                          ? `${colors.success}20` 
+                          : sales.growth > 0 
+                            ? `${colors.warning}20` 
+                            : `${colors.danger}20`,
+                        border: `1px solid ${sales.growth >= 100 
+                          ? colors.success 
+                          : sales.growth > 0 
+                            ? colors.warning 
+                            : colors.danger}30`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '4px'
                       }}>
-                        {(sales.growth || 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                        {sales.growth > 0 ? '+' : ''}{(sales.growth || 0).toFixed(1)}%
+                        {sales.growth >= 100 ? <Award size={12} /> : sales.growth >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {(sales.growth || 0).toFixed(1)}%
                       </div>
                     </td>
                     <td style={{
@@ -1052,21 +1197,21 @@ const LaporanLaba = () => {
                         borderRadius: '20px',
                         fontSize: '13px',
                         fontWeight: '800',
-                        backgroundColor: sales.penawaran >= sales.target 
+                        backgroundColor: sales.isAchieved 
                           ? `${colors.success}25` 
                           : `${colors.warning}25`,
-                        color: sales.penawaran >= sales.target 
+                        color: sales.isAchieved 
                           ? colors.success 
                           : colors.warning,
-                        border: `2px solid ${sales.penawaran >= sales.target 
+                        border: `2px solid ${sales.isAchieved 
                           ? colors.success 
                           : colors.warning}40`,
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px'
                       }}>
-                        {sales.penawaran >= sales.target ? <Award size={14} /> : <Target size={14} />}
-                        {sales.penawaran >= sales.target ? 'Tercapai' : 'Belum Tercapai'}
+                        {sales.isAchieved ? <Award size={14} /> : <Target size={14} />}
+                        {sales.isAchieved ? 'Tercapai' : 'Belum Tercapai'}
                       </span>
                     </td>
                   </tr>
