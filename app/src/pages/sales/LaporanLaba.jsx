@@ -276,12 +276,30 @@ const LaporanLaba = () => {
           console.log('🎯 [LAPORAN LABA] Final Target used:', target);
           console.log('📊 [LAPORAN LABA] Target source:', userTargetNR && userTargetNR > 0 ? 'DATABASE (data_user.target_nr)' : 'CALCULATED (revenue * 1.2)');
           
-          const achievementRate = (totalPencapaianAccumulated / target) * 100; // Use pencapaian instead of revenue
-          const growth = Math.random() * 30 - 10; // Random growth for demo
-          const lastMonth = totalPencapaianAccumulated * (1 - growth / 100);
+          // NEW LOGIC: Target tercapai jika Pencapaian >= Target × 10
+          const targetMultiplier = 10; // Sales harus mencapai 10x target
+          const targetFull = target * targetMultiplier; // Target penuh = Target × 10
+          
+          // Growth calculation: 100% jika mencapai 10x target
+          // Formula: (Pencapaian / (Target × 10)) × 100
+          const growth = (totalPencapaianAccumulated / targetFull) * 100;
+          
+          // Achievement rate based on 10x target
+          const achievementRate = growth; // Same as growth
+          
+          // Status: Tercapai jika Pencapaian >= Target × 10
+          const isAchieved = totalPencapaianAccumulated >= targetFull;
+          
+          const lastMonth = totalPencapaianAccumulated * 0.9; // Assume 90% of current
           const komisi = totalRevenueAccumulated * 0.1;
 
+          console.log('🎯 [LAPORAN LABA] ===== NEW TARGET LOGIC (10x) =====');
+          console.log('🎯 [LAPORAN LABA] Base Target:', target.toLocaleString('id-ID'));
+          console.log('🎯 [LAPORAN LABA] Target Full (10x):', targetFull.toLocaleString('id-ID'));
+          console.log('🎯 [LAPORAN LABA] Pencapaian:', totalPencapaianAccumulated.toLocaleString('id-ID'));
+          console.log('📈 [LAPORAN LABA] Growth (to 10x target):', growth.toFixed(2) + '%');
           console.log('📈 [LAPORAN LABA] Achievement Rate:', achievementRate.toFixed(2) + '%');
+          console.log('✅ [LAPORAN LABA] Status:', isAchieved ? 'TERCAPAI' : 'BELUM TERCAPAI');
           console.log('💵 [LAPORAN LABA] Komisi (10%):', komisi.toLocaleString('id-ID'));
 
           salesDataArray.push({
@@ -290,10 +308,12 @@ const LaporanLaba = () => {
             penawaran: Math.round(totalRevenueAccumulated), // Revenue
             pencapaian: Math.round(totalPencapaianAccumulated), // NEW: Pencapaian from total_per_bulan_harga_final_sebelum_ppn
             target: Math.round(target), // Use target from database (data_user.target_nr)
+            targetFull: Math.round(targetFull), // NEW: Target full = Target × 10
             komisi: Math.round(komisi),
-            growth: parseFloat(growth.toFixed(1)),
+            growth: parseFloat(growth.toFixed(1)), // Growth based on 10x target
             lastMonth: Math.round(lastMonth),
-            achievement: parseFloat(achievementRate.toFixed(1))
+            achievement: parseFloat(achievementRate.toFixed(1)),
+            isAchieved: isAchieved // NEW: Status tercapai atau belum
           });
           
           console.log('✅ [LAPORAN LABA] Sales data created:', salesDataArray[0]);
@@ -414,9 +434,13 @@ const LaporanLaba = () => {
   const totalRevenue = totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
   const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
   const totalPencapaian = nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0);
+  
+  // NEW: Achievement rate based on 10x target logic
+  // Status tercapai jika Pencapaian >= Target × 10
   const achievementRate = salesData.length > 0 
-    ? (salesData.filter(sales => sales.penawaran >= sales.target).length / salesData.length) * 100 
+    ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 
     : 0;
+  
   const averageGrowth = salesData.length > 0
     ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length
     : 0;
@@ -563,15 +587,19 @@ const LaporanLaba = () => {
               bgGradient: `linear-gradient(135deg, ${colors.accent1}15 0%, ${colors.accent2}10 100%)`
             },
             {
-              title: 'Rata-rata Growth',
-              value: `${averageGrowth > 0 ? '+' : ''}${averageGrowth.toFixed(1)}%`,
-              icon: averageGrowth > 0 ? TrendingUp : TrendingDown,
-              gradient: averageGrowth > 0 
-                ? `linear-gradient(135deg, ${colors.success} 0%, #22c55e 100%)`
-                : `linear-gradient(135deg, ${colors.danger} 0%, #f87171 100%)`,
-              bgGradient: averageGrowth > 0
-                ? `linear-gradient(135deg, ${colors.success}15 0%, #22c55e10 100%)`
-                : `linear-gradient(135deg, ${colors.danger}15 0%, #f8717110 100%)`
+              title: 'Progress ke 10x Target',
+              value: `${averageGrowth.toFixed(1)}%`,
+              icon: averageGrowth >= 100 ? Award : (averageGrowth > 0 ? TrendingUp : TrendingDown),
+              gradient: averageGrowth >= 100
+                ? `linear-gradient(135deg, #10b981 0%, ${colors.success} 100%)`
+                : averageGrowth > 0 
+                  ? `linear-gradient(135deg, ${colors.warning} 0%, #fbbf24 100%)`
+                  : `linear-gradient(135deg, ${colors.danger} 0%, #f87171 100%)`,
+              bgGradient: averageGrowth >= 100
+                ? `linear-gradient(135deg, #10b98115 0%, ${colors.success}10 100%)`
+                : averageGrowth > 0
+                  ? `linear-gradient(135deg, ${colors.warning}15 0%, #fbbf2410 100%)`
+                  : `linear-gradient(135deg, ${colors.danger}15 0%, #f8717110 100%)`
             }
           ].map((stat, index) => (
             <div key={index} style={{
@@ -1130,16 +1158,16 @@ const LaporanLaba = () => {
                         borderRadius: '8px',
                         fontSize: '13px',
                         fontWeight: '700',
-                        color: (sales.growth || 0) >= 0 ? colors.success : colors.danger,
-                        background: (sales.growth || 0) >= 0 ? `${colors.success}20` : `${colors.danger}20`,
-                        border: `1px solid ${(sales.growth || 0) >= 0 ? colors.success : colors.danger}30`,
+                        color: (sales.growth || 0) >= 100 ? colors.success : (sales.growth || 0) > 0 ? colors.warning : colors.danger,
+                        background: (sales.growth || 0) >= 100 ? `${colors.success}20` : (sales.growth || 0) > 0 ? `${colors.warning}20` : `${colors.danger}20`,
+                        border: `1px solid ${(sales.growth || 0) >= 100 ? colors.success : (sales.growth || 0) > 0 ? colors.warning : colors.danger}30`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '4px'
                       }}>
-                        {(sales.growth || 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                        {sales.growth > 0 ? '+' : ''}{(sales.growth || 0).toFixed(1)}%
+                        {(sales.growth || 0) >= 100 ? <Award size={12} /> : (sales.growth || 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {(sales.growth || 0).toFixed(1)}%
                       </div>
                     </td>
                     <td style={{
@@ -1154,21 +1182,21 @@ const LaporanLaba = () => {
                         borderRadius: '20px',
                         fontSize: '13px',
                         fontWeight: '800',
-                        backgroundColor: sales.penawaran >= sales.target 
+                        backgroundColor: sales.isAchieved 
                           ? `${colors.success}25` 
                           : `${colors.warning}25`,
-                        color: sales.penawaran >= sales.target 
+                        color: sales.isAchieved 
                           ? colors.success 
                           : colors.warning,
-                        border: `2px solid ${sales.penawaran >= sales.target 
+                        border: `2px solid ${sales.isAchieved 
                           ? colors.success 
                           : colors.warning}40`,
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '6px'
                       }}>
-                        {sales.penawaran >= sales.target ? <Award size={14} /> : <Target size={14} />}
-                        {sales.penawaran >= sales.target ? 'Tercapai' : 'Belum Tercapai'}
+                        {sales.isAchieved ? <Award size={14} /> : <Target size={14} />}
+                        {sales.isAchieved ? 'Tercapai' : 'Belum Tercapai'}
                       </span>
                     </td>
                   </tr>
