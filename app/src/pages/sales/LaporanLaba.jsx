@@ -28,6 +28,7 @@ const LaporanLaba = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeChart, setActiveChart] = useState('performance');
   const [totalRevenueFromProfit, setTotalRevenueFromProfit] = useState(0); // NEW: State for real total revenue
+  const [nilaiPencapaian, setNilaiPencapaian] = useState(0); // NEW: State for nilai pencapaian from total_per_bulan_harga_final_sebelum_ppn
 
   const colors = {
     primary: '#035b71',
@@ -62,6 +63,96 @@ const LaporanLaba = () => {
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
 
+  // NEW: Function to calculate pencapaian from total_per_bulan_harga_final_sebelum_ppn
+  const calculatePencapaianFromDatabase = async (currentUser) => {
+    try {
+      console.log('🎯 [PENCAPAIAN] ===== CALCULATING PENCAPAIAN FROM HASIL_PENAWARAN =====');
+      console.log('🎯 [PENCAPAIAN] Current User:', currentUser);
+      console.log('🎯 [PENCAPAIAN] User Name:', currentUser?.nama_user);
+      console.log('🎯 [PENCAPAIAN] User ID:', currentUser?.id_user);
+      
+      const response = await penawaranAPI.getAll();
+      console.log('🎯 [PENCAPAIAN] API Response:', response);
+      
+      if (response.success && response.data && Array.isArray(response.data)) {
+        console.log(`🎯 [PENCAPAIAN] Total penawaran in database: ${response.data.length}`);
+        console.log('🎯 [PENCAPAIAN] All penawaran data:', response.data);
+        
+        let totalPencapaian = 0;
+        let processedCount = 0;
+        let skippedCount = 0;
+
+        for (const penawaran of response.data) {
+          try {
+            console.log(`🔍 [PENCAPAIAN] Checking penawaran ${penawaran.id_penawaran}:`);
+            console.log(`   - nama_sales: "${penawaran.nama_sales}"`);
+            console.log(`   - current user: "${currentUser?.nama_user}"`);
+            console.log(`   - Match: ${penawaran.nama_sales === currentUser?.nama_user}`);
+            
+            // Filter by current user's name
+            if (penawaran.nama_sales !== currentUser?.nama_user) {
+              skippedCount++;
+              console.log(`   ⏭️  Skipped (different user)`);
+              continue;
+            }
+
+            console.log(`   ✓ Processing penawaran for this user...`);
+
+            // Get hasil penawaran
+            const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+            console.log(`   📊 Hasil response for penawaran ${penawaran.id_penawaran}:`, hasilResponse);
+            
+            if (hasilResponse.success && hasilResponse.data) {
+              console.log(`   📊 Hasil data:`, hasilResponse.data);
+              console.log(`   📊 All keys in hasil data:`, Object.keys(hasilResponse.data));
+              
+              // Get total_per_bulan_harga_final_sebelum_ppn
+              const totalPerBulan = hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn;
+              console.log(`   💰 total_per_bulan_harga_final_sebelum_ppn: ${totalPerBulan}`);
+              console.log(`   💰 Type: ${typeof totalPerBulan}`);
+              console.log(`   💰 Raw value:`, totalPerBulan);
+              
+              const totalPerBulanValue = parseFloat(totalPerBulan) || 0;
+              console.log(`   💰 Parsed value: ${totalPerBulanValue}`);
+              console.log(`   💰 Formatted: ${totalPerBulanValue.toLocaleString('id-ID')}`);
+              
+              if (totalPerBulanValue > 0) {
+                totalPencapaian += totalPerBulanValue;
+                processedCount++;
+                console.log(`   ✅ Added! Running total: Rp ${totalPencapaian.toLocaleString('id-ID')}`);
+              } else {
+                console.log(`   ⚠️  Zero or invalid value, not added`);
+                console.log(`   ⚠️  Check if hasil_penawaran table has data for this penawaran`);
+              }
+            } else {
+              console.log(`   ⚠️  No hasil data found`);
+              console.log(`   ⚠️  hasilResponse:`, hasilResponse);
+            }
+          } catch (error) {
+            console.error(`❌ [PENCAPAIAN] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+          }
+        }
+
+        console.log('🎯 [PENCAPAIAN] ===== CALCULATION COMPLETE =====');
+        console.log(`📊 [PENCAPAIAN] Total penawaran checked: ${response.data.length}`);
+        console.log(`⏭️  [PENCAPAIAN] Skipped (different user): ${skippedCount}`);
+        console.log(`✅ [PENCAPAIAN] Processed for this user: ${processedCount}`);
+        console.log(`💰 [PENCAPAIAN] FINAL Total Pencapaian: Rp ${totalPencapaian.toLocaleString('id-ID')}`);
+
+        console.log('💾 [PENCAPAIAN] Setting nilaiPencapaian state to:', totalPencapaian);
+        setNilaiPencapaian(totalPencapaian);
+        return totalPencapaian;
+      }
+
+      console.log('❌ [PENCAPAIAN] No valid response data');
+      return 0;
+    } catch (error) {
+      console.error('❌ [PENCAPAIAN] Error calculating pencapaian:', error);
+      console.error('❌ [PENCAPAIAN] Error stack:', error.stack);
+      return 0;
+    }
+  };
+
   // Function to load real revenue data from profit_dari_hjt_excl_ppn
   const loadRevenueData = async () => {
     try {
@@ -80,6 +171,7 @@ const LaporanLaba = () => {
 
         let processedCount = 0;
         let totalRevenueAccumulated = 0; // NEW: Accumulate total revenue from all penawaran
+        let totalPencapaianAccumulated = 0; // NEW: Accumulate total pencapaian from total_per_bulan_harga_final_sebelum_ppn
 
         // Process each penawaran
         for (const penawaran of response.data) {
@@ -90,12 +182,24 @@ const LaporanLaba = () => {
             
             if (hasilResponse.success && hasilResponse.data) {
               const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
+              const totalPerBulan = parseFloat(hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
+              
+              console.log(`💰 [LAPORAN LABA] Penawaran ${penawaran.id_penawaran}:`);
+              console.log(`   - profit_dari_hjt_excl_ppn: Rp ${profit.toLocaleString('id-ID')}`);
+              console.log(`   - total_per_bulan_harga_final_sebelum_ppn: Rp ${totalPerBulan.toLocaleString('id-ID')}`);
               
               if (profit > 0) {
                 console.log(`💰 [LAPORAN LABA] Found profit: Rp ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
                 
                 // NEW: Accumulate total revenue
                 totalRevenueAccumulated += profit;
+                
+                // NEW: Accumulate total pencapaian
+                if (totalPerBulan > 0) {
+                  totalPencapaianAccumulated += totalPerBulan;
+                  console.log(`🎯 [LAPORAN LABA] Added pencapaian: Rp ${totalPerBulan.toLocaleString('id-ID')}`);
+                  console.log(`🎯 [LAPORAN LABA] Running pencapaian total: Rp ${totalPencapaianAccumulated.toLocaleString('id-ID')}`);
+                }
                 
                 // Get sales person name
                 const salesPerson = penawaran.nama_sales || penawaran.sales_person || 'Sales ' + (processedCount + 1);
@@ -135,25 +239,34 @@ const LaporanLaba = () => {
 
         console.log('💰 [LAPORAN LABA] ===== REVENUE CALCULATION COMPLETE =====');
         console.log(`💰 [LAPORAN LABA] Total Revenue from all penawaran: Rp ${totalRevenueAccumulated.toLocaleString('id-ID')}`);
+        console.log(`🎯 [LAPORAN LABA] Total Pencapaian from all penawaran: Rp ${totalPencapaianAccumulated.toLocaleString('id-ID')}`);
         console.log(`📊 [LAPORAN LABA] Processed ${processedCount} penawaran with profit data`);
         
         // NEW: Set total revenue state
         setTotalRevenueFromProfit(totalRevenueAccumulated);
+        
+        // NEW: Set total pencapaian state
+        setNilaiPencapaian(totalPencapaianAccumulated);
+        console.log(`💾 [LAPORAN LABA] Set nilaiPencapaian to: Rp ${totalPencapaianAccumulated.toLocaleString('id-ID')}`);
+
+        // Get logged-in user data BEFORE checking revenue
+        const currentUser = getUserData();
+        const userName = currentUser?.nama_user || currentUser?.name || 'Sales User';
+        const userTargetNR = currentUser?.target_nr || null;
+
+        console.log('👤 [LAPORAN LABA] ===== USER INFO =====');
+        console.log('👤 [LAPORAN LABA] Logged-in user:', userName);
+        console.log('👤 [LAPORAN LABA] User role:', currentUser?.role_user);
+        console.log('🎯 [LAPORAN LABA] Target NR from database (data_user.target_nr):', userTargetNR);
+        console.log('🎯 [LAPORAN LABA] Pencapaian from accumulation:', totalPencapaianAccumulated);
 
         // UPDATED: Create single aggregated sales data entry with logged-in user name
         const salesDataArray = [];
         
-        if (totalRevenueAccumulated > 0) {
-          // Get logged-in user data
-          const currentUser = getUserData();
-          const userName = currentUser?.nama_user || currentUser?.name || 'Sales User';
-          const userTargetNR = currentUser?.target_nr || null; // Get target_nr from user data
-          
-          console.log('👤 [LAPORAN LABA] ===== USER TARGET INFO =====');
-          console.log('👤 [LAPORAN LABA] Logged-in user:', userName);
-          console.log('👤 [LAPORAN LABA] User role:', currentUser?.role_user);
-          console.log('🎯 [LAPORAN LABA] Target NR from database (data_user.target_nr):', userTargetNR);
+        // Changed condition: Create entry if we have EITHER revenue OR pencapaian
+        if (totalRevenueAccumulated > 0 || totalPencapaianAccumulated > 0) {
           console.log('💰 [LAPORAN LABA] Total Revenue (actual):', totalRevenueAccumulated);
+          console.log('🎯 [LAPORAN LABA] Total Pencapaian (actual):', totalPencapaianAccumulated);
           
           // Use target from database if available, otherwise calculate default (20% above revenue)
           const target = userTargetNR && userTargetNR > 0 
@@ -163,9 +276,9 @@ const LaporanLaba = () => {
           console.log('🎯 [LAPORAN LABA] Final Target used:', target);
           console.log('📊 [LAPORAN LABA] Target source:', userTargetNR && userTargetNR > 0 ? 'DATABASE (data_user.target_nr)' : 'CALCULATED (revenue * 1.2)');
           
-          const achievementRate = (totalRevenueAccumulated / target) * 100;
+          const achievementRate = (totalPencapaianAccumulated / target) * 100; // Use pencapaian instead of revenue
           const growth = Math.random() * 30 - 10; // Random growth for demo
-          const lastMonth = totalRevenueAccumulated * (1 - growth / 100);
+          const lastMonth = totalPencapaianAccumulated * (1 - growth / 100);
           const komisi = totalRevenueAccumulated * 0.1;
 
           console.log('📈 [LAPORAN LABA] Achievement Rate:', achievementRate.toFixed(2) + '%');
@@ -174,7 +287,8 @@ const LaporanLaba = () => {
           salesDataArray.push({
             id: 1,
             nama: userName, // Use logged-in user's name from data_user.nama_user
-            penawaran: Math.round(totalRevenueAccumulated),
+            penawaran: Math.round(totalRevenueAccumulated), // Revenue
+            pencapaian: Math.round(totalPencapaianAccumulated), // NEW: Pencapaian from total_per_bulan_harga_final_sebelum_ppn
             target: Math.round(target), // Use target from database (data_user.target_nr)
             komisi: Math.round(komisi),
             growth: parseFloat(growth.toFixed(1)),
@@ -198,6 +312,7 @@ const LaporanLaba = () => {
       } else {
         console.log('❌ [LAPORAN LABA] No valid penawaran data received');
         setTotalRevenueFromProfit(0);
+        setNilaiPencapaian(0); // Reset pencapaian
         const { salesData: fallbackSales, monthlyData: fallbackMonthly } = generateFallbackData();
         setSalesData(fallbackSales);
         setMonthlyData(fallbackMonthly);
@@ -205,6 +320,7 @@ const LaporanLaba = () => {
     } catch (error) {
       console.error('❌ [LAPORAN LABA] Error loading revenue data:', error);
       setTotalRevenueFromProfit(0);
+      setNilaiPencapaian(0); // Reset pencapaian
       const { salesData: fallbackSales, monthlyData: fallbackMonthly } = generateFallbackData();
       setSalesData(fallbackSales);
       setMonthlyData(fallbackMonthly);
@@ -294,9 +410,10 @@ const LaporanLaba = () => {
   const currentMonth = new Date().getMonth();
   const currentMonthData = filteredMonthlyData.find(item => item.month === currentMonth + 1) || filteredMonthlyData[0];
 
-  // Hitung statistik - UPDATED: Use totalRevenueFromProfit for accurate total
+  // Hitung statistik - UPDATED: Use nilaiPencapaian for accurate total
   const totalRevenue = totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
   const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
+  const totalPencapaian = nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0);
   const achievementRate = salesData.length > 0 
     ? (salesData.filter(sales => sales.penawaran >= sales.target).length / salesData.length) * 100 
     : 0;
@@ -306,6 +423,7 @@ const LaporanLaba = () => {
   
   console.log('📊 [LAPORAN LABA] Display Statistics:');
   console.log('  - Total Revenue (from profit):', totalRevenue.toLocaleString('id-ID'));
+  console.log('  - Total Pencapaian (from total_per_bulan):', totalPencapaian.toLocaleString('id-ID'));
   console.log('  - Total Komisi:', totalKomisi.toLocaleString('id-ID'));
   console.log('  - Achievement Rate:', achievementRate.toFixed(2) + '%');
   console.log('  - Average Growth:', averageGrowth.toFixed(2) + '%');
@@ -439,7 +557,7 @@ const LaporanLaba = () => {
             },
             {
               title: 'Pencapaian Target',
-              value: formatPercent(achievementRate),
+              value: formatNumber(totalPencapaian), // Changed from percentage to Rupiah
               icon: Target,
               gradient: `linear-gradient(135deg, ${colors.accent1} 0%, ${colors.accent2} 100%)`,
               bgGradient: `linear-gradient(135deg, ${colors.accent1}15 0%, ${colors.accent2}10 100%)`
@@ -985,18 +1103,19 @@ const LaporanLaba = () => {
                       fontSize: '15px',
                       fontWeight: '700',
                       borderBottom: `1px solid ${colors.gray200}`,
-                      textAlign: 'center'
+                      textAlign: 'right'
                     }}>
                       <div style={{
                         padding: '6px 12px',
                         borderRadius: '8px',
-                        fontSize: '13px',
+                        fontSize: '14px',
                         fontWeight: '700',
-                        color: ((sales.penawaran / sales.target) * 100) >= 100 ? colors.success : colors.warning,
-                        background: ((sales.penawaran / sales.target) * 100) >= 100 ? `${colors.success}20` : `${colors.warning}20`,
-                        border: `1px solid ${((sales.penawaran / sales.target) * 100) >= 100 ? colors.success : colors.warning}30`
+                        color: (sales.pencapaian >= sales.target) ? colors.success : colors.warning,
+                        background: (sales.pencapaian >= sales.target) ? `${colors.success}20` : `${colors.warning}20`,
+                        border: `1px solid ${(sales.pencapaian >= sales.target) ? colors.success : colors.warning}30`,
+                        display: 'inline-block'
                       }}>
-                        {((sales.penawaran / sales.target) * 100).toFixed(1)}%
+                        {formatNumber(sales.pencapaian || 0)}
                       </div>
                     </td>
                     <td style={{
