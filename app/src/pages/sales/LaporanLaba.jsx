@@ -22,7 +22,7 @@ import {
 import { penawaranAPI, getUserData } from '../../utils/api';
 
 const LaporanLaba = () => {
-  const [selectedYearSales, setSelectedYearSales] = useState('2024');
+  const [selectedYearSales, setSelectedYearSales] = useState('2025');
   const [salesData, setSalesData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,6 +167,7 @@ const LaporanLaba = () => {
         // Create maps to accumulate revenue by sales person and by month
         const salesRevenueMap = new Map();
         const monthlyRevenueMap = new Map();
+        const monthlyPencapaianMap = new Map(); // NEW: Map for pencapaian per month
         const salesTargetMap = new Map();
 
         let processedCount = 0;
@@ -219,6 +220,11 @@ const LaporanLaba = () => {
                 // Accumulate revenue for this month
                 const currentMonthlyRevenue = monthlyRevenueMap.get(monthKey) || 0;
                 monthlyRevenueMap.set(monthKey, currentMonthlyRevenue + profit);
+                
+                // NEW: Accumulate pencapaian for this month
+                const currentMonthlyPencapaian = monthlyPencapaianMap.get(monthKey) || 0;
+                monthlyPencapaianMap.set(monthKey, currentMonthlyPencapaian + totalPerBulan);
+                console.log(`📊 [LAPORAN LABA] Monthly pencapaian for ${monthKey}: Rp ${(currentMonthlyPencapaian + totalPerBulan).toLocaleString('id-ID')}`);
                 
                 // Set target
                 if (!salesTargetMap.has(salesPerson)) {
@@ -320,7 +326,7 @@ const LaporanLaba = () => {
         }
 
         // Convert monthly data to array and fill missing months
-        const monthlyDataArray = generateMonthlyData(monthlyRevenueMap);
+        const monthlyDataArray = generateMonthlyData(monthlyRevenueMap, monthlyPencapaianMap, userTargetNR);
 
         console.log('📊 [LAPORAN LABA] Final sales performance summary:');
         console.log('  - Sales data entries:', salesDataArray.length);
@@ -350,38 +356,52 @@ const LaporanLaba = () => {
   };
 
   // Generate monthly data with realistic trends
-  const generateMonthlyData = (monthlyRevenueMap) => {
+  const generateMonthlyData = (monthlyRevenueMap, monthlyPencapaianMap, userTargetNR) => {
     const currentYear = new Date().getFullYear();
     const monthlyData = [];
     
+    console.log('📊 [GENERATE MONTHLY DATA] Starting generation for year:', currentYear);
+    console.log('📊 [GENERATE MONTHLY DATA] User Target NR:', userTargetNR);
+    console.log('📊 [GENERATE MONTHLY DATA] Revenue Map entries:', monthlyRevenueMap.size);
+    console.log('📊 [GENERATE MONTHLY DATA] Pencapaian Map entries:', monthlyPencapaianMap.size);
+    
     for (let month = 1; month <= 12; month++) {
       const monthKey = `${currentYear}-${month.toString().padStart(2, '0')}`;
+      
+      // Get actual data from maps
       const actualRevenue = monthlyRevenueMap.get(monthKey) || 0;
+      const actualPencapaian = monthlyPencapaianMap.get(monthKey) || 0;
       
-      // Generate realistic data with seasonal trends
-      let baseRevenue = actualRevenue || Math.random() * 50000 + 10000;
+      // Use user's target from database (target_nr) if available
+      const target = userTargetNR && userTargetNR > 0 ? userTargetNR : (actualRevenue * 1.15);
       
-      // Apply seasonal factors
-      if (month === 1) baseRevenue *= 0.8;  // January dip
-      if (month === 6) baseRevenue *= 1.3;  // June peak
-      if (month === 12) baseRevenue *= 1.4; // December peak
+      // Calculate achievement percentage (Revenue vs Target)
+      const achievement = target > 0 ? (actualRevenue / target) * 100 : 0;
       
-      const target = baseRevenue * 1.15;
-      const achievement = (baseRevenue / target) * 100;
+      // Calculate growth (compared to previous month)
       const growth = month > 1 ? 
-        ((baseRevenue - (monthlyData[month-2]?.revenue || baseRevenue * 0.9)) / (monthlyData[month-2]?.revenue || baseRevenue * 0.9)) * 100 
+        ((actualRevenue - (monthlyData[month-2]?.revenue || actualRevenue * 0.9)) / (monthlyData[month-2]?.revenue || actualRevenue * 0.9)) * 100 
         : 0;
+
+      console.log(`📊 [GENERATE MONTHLY DATA] ${monthNames[month - 1]} (${monthKey}):`);
+      console.log(`   - Revenue: Rp ${actualRevenue.toLocaleString('id-ID')}`);
+      console.log(`   - Pencapaian: Rp ${actualPencapaian.toLocaleString('id-ID')}`);
+      console.log(`   - Target: Rp ${target.toLocaleString('id-ID')}`);
+      console.log(`   - Achievement: ${achievement.toFixed(1)}%`);
+      console.log(`   - Growth: ${growth.toFixed(1)}%`);
 
       monthlyData.push({
         month: month,
         monthName: monthNames[month - 1],
-        revenue: Math.round(baseRevenue),
+        revenue: Math.round(actualRevenue),
+        pencapaian: Math.round(actualPencapaian), // NEW: Real pencapaian data
         target: Math.round(target),
         achievement: parseFloat(achievement.toFixed(1)),
         growth: parseFloat(growth.toFixed(1))
       });
     }
     
+    console.log('✅ [GENERATE MONTHLY DATA] Generation complete. Total months:', monthlyData.length);
     return monthlyData;
   };
 
@@ -456,6 +476,7 @@ const LaporanLaba = () => {
   const monthlyPerformanceData = filteredMonthlyData.map(item => ({
     name: item.monthName,
     revenue: item.revenue,
+    pencapaian: item.pencapaian || 0, // NEW: Add pencapaian to chart data
     target: item.target,
     achievement: item.achievement,
     growth: item.growth
@@ -487,15 +508,10 @@ const LaporanLaba = () => {
           {payload.map((entry, index) => (
             <div key={index} style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: entry.color, fontWeight: '600', fontSize: '13px' }}>
-                {entry.name === 'revenue' ? 'Revenue' : 
-                 entry.name === 'target' ? 'Target' :
-                 entry.name === 'achievement' ? 'Pencapaian' :
-                 entry.name}:
+                {entry.name}:
               </span>
               <span style={{ color: entry.color, fontWeight: 'bold', marginLeft: '8px' }}>
-                {entry.name === 'achievement' ? 
-                  `${entry.value.toFixed(1)}%` : 
-                  formatNumber(entry.value)}
+                {formatNumber(entry.value)}
               </span>
             </div>
           ))}
@@ -506,7 +522,7 @@ const LaporanLaba = () => {
   };
 
   const handleRefresh = () => {
-    setSelectedYearSales('2024');
+    setSelectedYearSales('2025');
     setActiveChart('performance');
     loadRevenueData();
   };
@@ -736,6 +752,7 @@ const LaporanLaba = () => {
                   >
                     <option value="2023">2023</option>
                     <option value="2024">2024</option>
+                    <option value="2025">2025</option>
                   </select>
                   <div style={{
                     position: 'absolute',
@@ -962,6 +979,12 @@ const LaporanLaba = () => {
                     iconType="rect"
                   />
                   <Bar 
+                    dataKey="pencapaian" 
+                    fill={colors.warning}
+                    name="Pencapaian"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar 
                     dataKey="revenue" 
                     fill={colors.primary}
                     name="Revenue"
@@ -972,14 +995,6 @@ const LaporanLaba = () => {
                     fill={colors.tertiary}
                     name="Target"
                     radius={[4, 4, 0, 0]}
-                  />
-                  <Line 
-                    type="monotone"
-                    dataKey="achievement"
-                    stroke={colors.warning}
-                    strokeWidth={3}
-                    name="Pencapaian (%)"
-                    dot={{ fill: colors.success, strokeWidth: 2, r: 6 }}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
