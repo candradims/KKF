@@ -12,7 +12,8 @@ import {
   Cell,
   BarChart,
   Bar,
-  Legend
+  Legend,
+  ComposedChart
 } from 'recharts';
 import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 import { penawaranAPI, getUserData, getAuthHeaders } from '../../utils/api';
@@ -390,6 +391,14 @@ const Dashboard = () => {
       setLoadingRevenue(true);
       console.log('🔄 [FINAL] Loading revenue using proper API...');
 
+      // Get current user data
+      const currentUser = getUserData();
+      if (!currentUser) {
+        console.error('❌ No user data found');
+        setLoadingRevenue(false);
+        return;
+      }
+
       const response = await penawaranAPI.getAll();
       
       if (response && response.success && response.data) {
@@ -397,15 +406,19 @@ const Dashboard = () => {
         console.log('📋 [FINAL] Found', penawaranList.length, 'penawaran');
 
         const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        const monthlyRevenue = {};
+        const monthlyData = {};
         
         monthNames.forEach(month => {
-          monthlyRevenue[month] = 0;
+          monthlyData[month] = {
+            totalProfit: 0,
+            pencapaian: 0,
+            target: parseFloat(currentUser.target_nr) || 0
+          };
         });
 
         let totalRevenue = 0;
 
-        // Process each penawaran to get profit
+        // Process each penawaran to get profit and pencapaian
         for (const penawaran of penawaranList) {
           try {
             console.log(`💰 [FINAL] Processing penawaran ${penawaran.id_penawaran}`);
@@ -415,9 +428,10 @@ const Dashboard = () => {
             
             if (hasilData && hasilData.success && hasilData.data) {
               const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
+              const pencapaian = parseFloat(hasilData.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
               
-              if (profit > 0) {
-                console.log(`✅ [FINAL] Profit found: ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
+              if (profit > 0 || pencapaian > 0) {
+                console.log(`✅ [FINAL] Profit: ${profit.toLocaleString('id-ID')}, Pencapaian: ${pencapaian.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
                 totalRevenue += profit;
                 
                 // Add to appropriate month
@@ -425,16 +439,16 @@ const Dashboard = () => {
                   const date = new Date(penawaran.tanggal_dibuat);
                   const monthIndex = date.getMonth();
                   const monthName = monthNames[monthIndex];
-                  monthlyRevenue[monthName] += profit;
-                  console.log(`📅 [FINAL] Added ${profit.toLocaleString('id-ID')} to ${monthName}`);
+                  monthlyData[monthName].totalProfit += profit;
+                  monthlyData[monthName].pencapaian += pencapaian;
+                  console.log(`📅 [FINAL] Added to ${monthName}`);
                 } else {
                   // Add to current month if no date
                   const currentMonth = monthNames[new Date().getMonth()];
-                  monthlyRevenue[currentMonth] += profit;
-                  console.log(`📅 [FINAL] Added ${profit.toLocaleString('id-ID')} to current month (${currentMonth})`);
+                  monthlyData[currentMonth].totalProfit += profit;
+                  monthlyData[currentMonth].pencapaian += pencapaian;
+                  console.log(`📅 [FINAL] Added to current month (${currentMonth})`);
                 }
-              } else {
-                console.log(`⚠️ [FINAL] Zero profit for penawaran ${penawaran.id_penawaran}`);
               }
             } else {
               console.log(`⚠️ [FINAL] No hasil data for penawaran ${penawaran.id_penawaran}`);
@@ -446,12 +460,14 @@ const Dashboard = () => {
 
         const chartData = monthNames.map(month => ({
           month,
-          value: Math.round(monthlyRevenue[month])
+          totalProfit: Math.round(monthlyData[month].totalProfit),
+          pencapaian: Math.round(monthlyData[month].pencapaian),
+          target: Math.round(monthlyData[month].target)
         }));
 
         console.log('📊 [FINAL] === REVENUE CALCULATION COMPLETE ===');
         console.log(`💰 Total Revenue: Rp ${totalRevenue.toLocaleString('id-ID')}`);
-        console.log('📅 Monthly breakdown:', monthlyRevenue);
+        console.log('📅 Monthly breakdown:', monthlyData);
         console.log('📈 Chart data:', chartData);
 
         setTotalRevenueData(chartData);
@@ -764,6 +780,7 @@ const Dashboard = () => {
     accent1: '#008bb0',
     accent2: '#0090a8',
     success: '#3fba8c',
+    warning: '#f59e0b',
   };
 
   // Data untuk status penawaran - now using dynamic data
@@ -1072,7 +1089,7 @@ const Dashboard = () => {
                 }}>
                   {loadingRevenue ? 'Loading...' : 
                     (() => {
-                      const total = totalRevenueData.reduce((sum, item) => sum + (item.value || 0), 0);
+                      const total = totalRevenueData.reduce((sum, item) => sum + (item.totalProfit || 0), 0);
                       console.log('💰 Total Revenue Display Calculation:', {
                         revenueData: totalRevenueData,
                         total: total
@@ -1111,31 +1128,179 @@ const Dashboard = () => {
           e.currentTarget.style.transform = 'translateY(0)';
           e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
         }}>
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '16px'
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '24px'
           }}>
-            Target NR & Pencapaian Sales Saya
-          </h3>
-          <div style={{ height: '340px', paddingLeft: '32px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mySalesData} margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#666' }} />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: '#666', dx: 0 }} 
-                  tickFormatter={v => `Rp ${v.toLocaleString()}`}
-                  width={100}
-                  tickMargin={16}
-                />
-                <Tooltip formatter={(value) => `Rp ${value.toLocaleString()}`} />
-                <Legend />
-                <Bar dataKey="TargetNR" fill={colors.primary} name="Target NR" barSize={32} />
-                <Bar dataKey="Achievement" fill={colors.secondary} name="Pencapaian" barSize={32} />
-              </BarChart>
-            </ResponsiveContainer>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#1f2937',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <div style={{
+                padding: '6px',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                borderRadius: '8px',
+                color: 'white'
+              }}>
+                <BarChart3 size={18} />
+              </div>
+              Analisis Performa
+            </h3>
+            <div style={{
+              padding: '6px 12px',
+              background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.tertiary}15 100%)`,
+              borderRadius: '8px',
+              border: `2px solid ${colors.success}30`,
+              fontSize: '13px',
+              fontWeight: '600',
+              color: colors.success
+            }}>
+              Tahun 2025
+            </div>
+          </div>
+          <div style={{ height: '340px', paddingLeft: '16px' }}>
+            {loadingRevenue ? (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+                flexDirection: 'column',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: `3px solid ${colors.primary}20`,
+                  borderTop: `3px solid ${colors.primary}`,
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+                <p style={{
+                  color: colors.primary,
+                  fontWeight: '600',
+                  fontSize: '14px'
+                }}>
+                  Memuat data performa...
+                </p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart 
+                  data={totalRevenueData}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 60 }}
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#f0f0f0" 
+                    horizontal={true}
+                    vertical={false}
+                  />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#666', fontWeight: '600' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: '#666', fontWeight: '600' }}
+                    tickFormatter={(value) => {
+                      if (value >= 1000000000) {
+                        return `Rp ${(value / 1000000000).toFixed(1)}B`;
+                      } else if (value >= 1000000) {
+                        return `Rp ${(value / 1000000).toFixed(1)}M`;
+                      }
+                      return `Rp ${value.toLocaleString()}`;
+                    }}
+                    width={100}
+                  />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            padding: '12px',
+                            border: '1px solid #035b71',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                          }}>
+                            <p style={{ 
+                              color: colors.primary, 
+                              fontWeight: 'bold', 
+                              marginBottom: '8px',
+                              fontSize: '14px'
+                            }}>{label}</p>
+                            {payload.map((entry, index) => (
+                              <div key={index} style={{ 
+                                marginBottom: '4px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: '12px'
+                              }}>
+                                <span style={{ 
+                                  color: entry.color, 
+                                  fontWeight: '600',
+                                  fontSize: '12px'
+                                }}>
+                                  {entry.name}:
+                                </span>
+                                <span style={{ 
+                                  color: entry.color, 
+                                  fontWeight: 'bold',
+                                  fontSize: '12px'
+                                }}>
+                                  Rp {entry.value.toLocaleString('id-ID')}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
+                    iconType="rect"
+                    iconSize={10}
+                  />
+                  <Bar 
+                    dataKey="pencapaian" 
+                    fill={colors.warning}
+                    name="Pencapaian"
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
+                  <Bar 
+                    dataKey="totalProfit" 
+                    fill={colors.primary}
+                    name="Revenue"
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
+                  <Bar 
+                    dataKey="target" 
+                    fill={colors.tertiary}
+                    name="Target"
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -1223,7 +1388,7 @@ const Dashboard = () => {
                   />
                   <Line 
                     type="monotone" 
-                    dataKey="value" 
+                    dataKey="totalProfit" 
                     stroke={colors.primary} 
                     strokeWidth={3}
                     dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
@@ -1255,12 +1420,12 @@ const Dashboard = () => {
                   if (!currentPeriodData || currentPeriodData.value === 0) {
                     // Get all months with data in reverse order (latest first)
                     const monthsWithData = totalRevenueData
-                      .filter(item => item.value > 0)
+                      .filter(item => item.totalProfit > 0)
                       .reverse();
                     currentPeriodData = monthsWithData[0];
                   }
                   
-                  const value = currentPeriodData ? currentPeriodData.value : 0;
+                  const value = currentPeriodData ? currentPeriodData.totalProfit : 0;
                   return `Rp ${value.toLocaleString('id-ID')}`;
                 })()}
               </div>
