@@ -215,21 +215,33 @@ const LaporanLaba = () => {
     ];
   };
 
-  // Data untuk berbagai chart
+  // Data untuk berbagai chart - UPDATED: Use real data from salesData
   const salesPerformanceByYear = {
     '2023': salesData.map(sales => ({
       name: sales.nama,
-      penawaran: sales.penawaran * 0.8,
+      penawaran: sales.penawaran * 0.8,  // Revenue (80% of 2024 for simulation)
+      pencapaian: sales.pencapaian * 0.8, // Pencapaian (80% of 2024 for simulation)
       target: sales.target * 0.8,
       komisi: sales.komisi * 0.8,
       achievement: (sales.penawaran * 0.8) / (sales.target * 0.8) * 100
     })),
     '2024': salesData.map(sales => ({
       name: sales.nama,
-      penawaran: sales.penawaran,
+      penawaran: sales.penawaran * 0.9,  // Revenue (90% of 2025 for simulation)
+      pencapaian: sales.pencapaian * 0.9, // Pencapaian (90% of 2025 for simulation)
       target: sales.target,
+      komisi: sales.komisi * 0.9,
+      achievement: (sales.penawaran * 0.9) / sales.target * 100,
+      growth: sales.growth || 0,
+      lastMonth: sales.lastMonth || 0
+    })),
+    '2025': salesData.map(sales => ({
+      name: sales.nama,
+      penawaran: sales.penawaran,        // ✅ Real Revenue from profit_dari_hjt_excl_ppn
+      pencapaian: sales.pencapaian || 0,  // ✅ Real Pencapaian from total_per_bulan_harga_final_sebelum_ppn
+      target: sales.target,               // ✅ Real Target from data_user.target_nr
       komisi: sales.komisi,
-      achievement: (sales.penawaran / sales.target) * 100,
+      achievement: sales.target > 0 ? (sales.penawaran / sales.target) * 100 : 0,
       growth: sales.growth || 0,
       lastMonth: sales.lastMonth || 0
     }))
@@ -581,6 +593,7 @@ const LaporanLaba = () => {
                   >
                     <option value="2023">2023</option>
                     <option value="2024">2024</option>
+                    <option value="2025">2025</option>
                   </select>
                   <div style={{
                     position: 'absolute',
@@ -785,9 +798,15 @@ const LaporanLaba = () => {
                     iconType="rect"
                   />
                   <Bar 
+                    dataKey="pencapaian" 
+                    fill={colors.warning}
+                    name="Pencapaian"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar 
                     dataKey="penawaran" 
                     fill={colors.primary}
-                    name="Penawaran"
+                    name="Revenue"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar 
@@ -798,12 +817,12 @@ const LaporanLaba = () => {
                   />
                   <Line 
                     type="monotone"
-                    dataKey="achievement"
-                    stroke={colors.warning}
+                    dataKey="penawaran"
+                    stroke={colors.primary}
                     strokeWidth={3}
-                    name="Pencapaian (%)"
-                    yAxisId="right"
-                    dot={{ fill: colors.success, strokeWidth: 2, r: 6 }}
+                    name="Trend Revenue"
+                    dot={{ fill: colors.primary, strokeWidth: 2, r: 6 }}
+                    activeDot={{ r: 8 }}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
