@@ -179,7 +179,7 @@ const LaporanLaba = () => {
             targetFull: Math.round(targetFull), // Target × 10
             komisi: Math.round(komisi),
             growth: parseFloat(growth.toFixed(1)), // Progress to 10x target
-            lastMonth: Math.round(pencapaian * 0.9), // Estimate
+            lastMonth: 0, // Set to 0 as we don't have separate historical data for previous year
             achievement: parseFloat(growth.toFixed(1)),
             isAchieved: isAchieved, // Status tercapai atau belum
             penawaranCount: data.penawaranCount
@@ -314,7 +314,9 @@ const LaporanLaba = () => {
           color: colors.gray700,
           minWidth: '180px'
         }}>
-          <p style={{ color: colors.primary, fontWeight: 'bold', marginBottom: '8px', fontSize: '16px' }}>Nama Sales: {label}</p>
+          <p style={{ color: colors.primary, fontWeight: 'bold', marginBottom: '8px', fontSize: '16px' }}>
+            {payload.some(p => p.dataKey === 'current') ? 'Sales: ' : 'Nama Sales: '}{label}
+          </p>
           {payload.map((entry, index) => (
             <div key={index} style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: entry.color, fontWeight: '600', fontSize: '13px' }}>
@@ -323,13 +325,13 @@ const LaporanLaba = () => {
                  entry.name === 'target' ? 'Target' :
                  entry.name === 'komisi' ? 'Komisi' :
                  entry.name === 'achievement' ? 'Pencapaian' :
-                 entry.name === 'growth' ? 'Pertumbuhan' :
-                 entry.name === 'current' ? 'Tahun ini' :
-                 entry.name === 'previous' ? 'Tahun lalu' :
+                 entry.name === 'growth' ? 'Growth' :
+                 entry.name === 'current' ? 'Tahun Ini' :
+                 entry.name === 'previous' ? 'Tahun Lalu' :
                  entry.name}:
               </span>
               <span style={{ color: entry.color, fontWeight: 'bold', marginLeft: '8px' }}>
-                {entry.name === 'achievement' || entry.name === 'growth' ? 
+                {entry.name === 'achievement' || entry.name === 'growth' || entry.dataKey === 'growth' ? 
                   `${entry.value.toFixed(1)}%` : 
                   formatNumber(entry.value)}
               </span>
@@ -853,6 +855,15 @@ const LaporanLaba = () => {
                     tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
                     tickFormatter={formatNumber}
                     width={100}
+                  />
+                  <YAxis 
+                    yAxisId="right"
+                    orientation="right"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: colors.warning, fontWeight: '600' }}
+                    tickFormatter={(value) => `${value.toFixed(0)}%`}
+                    width={60}
                   />
                   <Tooltip content={renderCustomTooltip} />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
