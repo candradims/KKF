@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, Check, X, FileSpreadsheet } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import * as XLSX from 'xlsx'; 
 
 const ImportData = ({ isOpen, onClose, onImport }) => {
   const [file, setFile] = useState(null);
@@ -40,16 +41,307 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
     }
   };
 
+  // Fungsi parsing Excel
+  const parseExcel = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          console.log('🔍 Starting Excel parsing...');
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { 
+            type: 'array',
+            cellDates: true,
+            cellText: false,
+            raw: false
+          });
+          
+          console.log('📊 Sheet names:', workbook.SheetNames);
+          
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          // Convert to JSON
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          console.log('📋 Raw Excel data:', jsonData);
+          
+          if (jsonData.length === 0) {
+            resolve([]);
+            return;
+          }
+          
+          // Process data
+          const mappedData = jsonData.map((row, index) => {
+            console.log(`🔍 Raw row ${index}:`, row);
+            const rowLower = {};
+            Object.keys(row).forEach(key => {
+              rowLower[key.toLowerCase()] = row[key];
+            });
+            
+            const mappedRow = {
+              nama_user: 
+                row.nama_user || row.nama || row.name || 
+                rowLower.nama_user || rowLower.nama || rowLower.name || 
+                row['Nama User'] || row['nama user'] || '',
+              
+              email_user: 
+                row.email_user || row.email || 
+                rowLower.email_user || rowLower.email || 
+                row['Email User'] || row['email user'] || '',
+              
+              kata_sandi: 
+                row.kata_sandi || row.password || 
+                rowLower.kata_sandi || rowLower.password || 
+                row['Kata Sandi'] || row['kata sandi'] || 'default123',
+              
+              role_user: 
+                row.role_user || row.role || 
+                rowLower.role_user || rowLower.role || 
+                row['Role User'] || row['role user'] || '',
+              
+              target_nr: null
+            };
+
+            if (row.target_nr !== undefined && row.target_nr !== null && row.target_nr !== '') {
+              const numValue = Number(String(row.target_nr).replace(/[^\d]/g, ''));
+              mappedRow.target_nr = isNaN(numValue) ? null : numValue;
+            } else if (row.target !== undefined && row.target !== null && row.target !== '') {
+              const numValue = Number(String(row.target).replace(/[^\d]/g, ''));
+              mappedRow.target_nr = isNaN(numValue) ? null : numValue;
+            } else if (rowLower.target_nr !== undefined && rowLower.target_nr !== null && rowLower.target_nr !== '') {
+              const numValue = Number(String(rowLower.target_nr).replace(/[^\d]/g, ''));
+              mappedRow.target_nr = isNaN(numValue) ? null : numValue;
+            } else if (rowLower.target !== undefined && rowLower.target !== null && rowLower.target !== '') {
+              const numValue = Number(String(rowLower.target).replace(/[^\d]/g, ''));
+              mappedRow.target_nr = isNaN(numValue) ? null : numValue;
+            }
+            
+            console.log(`✅ Mapped row ${index}:`, mappedRow);
+            return mappedRow;
+          });
+          
+          console.log('🎯 Final mapped data:', mappedData);
+          resolve(mappedData);
+          
+        } catch (error) {
+          console.error('❌ Excel parsing error:', error);
+          reject(new Error(`Gagal memparsing file Excel: ${error.message}`));
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error('❌ File reading error:', error);
+        reject(new Error('Gagal membaca file'));
+      };
+      
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  // Fungsi parsing CSV
+  const parseCSV = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          console.log('🔍 Starting CSV parsing...');
+          const csvText = e.target.result;
+          const lines = csvText.split('\n').filter(line => line.trim() !== '');
+          
+          console.log('📄 CSV lines:', lines.length);
+          
+          if (lines.length <= 1) {
+            resolve([]);
+            return;
+          }
+          
+          // Parse header
+          const headers = lines[0].split(',').map(h => 
+            h.toLowerCase().trim().replace(/\s+/g, '_')
+          );
+          console.log('📝 CSV headers:', headers);
+          
+          const results = [];
+          
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            // Simple CSV parsing
+            const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+            const row = {};
+            
+            headers.forEach((header, index) => {
+              const value = values[index] || '';
+              
+              if (header.includes('nama')) {
+                row.nama_user = value;
+              } else if (header.includes('email')) {
+                row.email_user = value.toLowerCase();
+              } else if (header.includes('password') || header.includes('kata_sandi') || header.includes('sandi')) {
+                row.kata_sandi = value || 'default123';
+              } else if (header.includes('role')) {
+                row.role_user = value;
+              } else if (header.includes('target')) {
+                const numValue = value ? Number(value.replace(/[^\d]/g, '')) : null;
+                row.target_nr = isNaN(numValue) ? null : numValue;
+              }
+            });
+            
+            console.log(`📝 CSV Row ${i} parsed:`, row);
+            
+            if (row.nama_user && row.email_user && row.role_user) {
+              results.push(row);
+            }
+          }
+          
+          console.log('✅ Final CSV results:', results);
+          resolve(results);
+          
+        } catch (error) {
+          console.error('❌ CSV parsing error:', error);
+          reject(new Error(`Gagal memparsing file CSV: ${error.message}`));
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error('❌ File reading error:', error);
+        reject(new Error('Gagal membaca file'));
+      };
+      
+      reader.readAsText(file, 'UTF-8');
+    });
+  };
+
+  // Fungsi utama untuk parse file
+  const parseFileToUsers = async (file) => {
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    console.log('📁 Parsing file:', file.name, 'Type:', fileExtension);
+    
+    try {
+      let users = [];
+      
+      if (fileExtension === 'csv') {
+        users = await parseCSV(file);
+      } else if (['xlsx', 'xls'].includes(fileExtension)) {
+        users = await parseExcel(file);
+      } else {
+        throw new Error('Format file tidak didukung');
+      }
+      
+      const validUsers = users.filter(user => 
+        user.nama_user && 
+        user.email_user && 
+        user.role_user &&
+        ['superAdmin', 'admin', 'sales'].includes(user.role_user)
+      );
+      
+      console.log('✅ Valid users for import:', validUsers);
+      return validUsers;
+      
+    } catch (error) {
+      console.error('❌ Parse file error:', error);
+      throw error;
+    }
+  };
+
+  // Fungsi untuk validasi dan normalisasi data
+  const validateAndNormalizeUsers = (users) => {
+    return users.map(user => {
+      let normalizedRole = user.role_user.toLowerCase().trim();
+      if (normalizedRole === 'superadmin') normalizedRole = 'superAdmin';
+      if (normalizedRole === 'administrator') normalizedRole = 'admin';
+      
+      const validatedUser = {
+        nama_user: user.nama_user.trim(),
+        email_user: user.email_user.trim().toLowerCase(),
+        kata_sandi: user.kata_sandi || 'default123',
+        role_user: normalizedRole,
+        target_nr: user.target_nr && !isNaN(user.target_nr) ? parseInt(user.target_nr) : null
+      };
+      
+      // Untuk role non-sales, set target_nr ke null
+      if (validatedUser.role_user !== 'sales') {
+        validatedUser.target_nr = null;
+      }
+      
+      return validatedUser;
+    });
+  };
+
   const handleImportClick = async () => {
     if (file) {
       setIsLoading(true);
       setError('');
+      
       try {
-        await onImport(file);
-        setFile(null);
-        setShowSuccessModal(true);
+        console.log("🚀 Starting import process...", file);
+        
+        // Parse file
+        const users = await parseFileToUsers(file);
+        
+        console.log("📊 Users parsed:", users);
+        
+        if (!users || users.length === 0) {
+          setError('Tidak ada data yang valid ditemukan dalam file. Pastikan file memiliki data dengan format yang benar.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Validasi dan normalisasi data
+        const validUsers = validateAndNormalizeUsers(users);
+
+        if (validUsers.length === 0) {
+          setError(`
+            Tidak ada data yang valid. Pastikan:
+            1. File memiliki header yang benar
+            2. Kolom nama, email, dan role terisi
+            3. Role harus: superAdmin, admin, atau sales
+            4. Format email valid
+          `);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log("✅ Valid users ready for import:", validUsers);
+
+        const response = await fetch('http://localhost:3000/api/admin/users/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ users: validUsers }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log("📨 Server response:", result);
+
+        if (result.success) {
+          setFile(null);
+          setShowSuccessModal(true);
+          
+          // Tampilkan summary
+          if (result.data.failed && result.data.failed.length > 0) {
+            console.warn('⚠️ Some imports failed:', result.data.failed);
+          }
+          
+          if (onImport) {
+            onImport(result.data);
+          }
+        } else {
+          setError(result.message || 'Gagal mengimpor data ke server');
+        }
+        
       } catch (e) {
-        setError('Terjadi kesalahan saat mengimpor data.');
+        console.error('❌ Import process error:', e);
+        setError(`Terjadi kesalahan: ${e.message}`);
       } finally {
         setIsLoading(false);
       }
