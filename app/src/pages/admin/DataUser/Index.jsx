@@ -343,31 +343,15 @@ const Index = () => {
     setShowImportModal(false);
   };
 
-  const handleImportData = async (file) => {
-    setIsImporting(true);
-    console.log('Mulai mengimpor file:', file.name);
-
+  const handleImportData = async () => {
     try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const importedUsers = [
-            { id: 10, date: '01/06/2023', email: 'budi@example.com', password: 'budi_pass', role: 'Sales', actions: ['view', 'edit', 'delete'] },
-            { id: 11, date: '01/06/2023', email: 'siti@example.com', password: 'siti_pass', role: 'Sales', actions: ['view', 'edit', 'delete'] },
-        ];
-        
-        const maxId = usersData.length > 0 ? Math.max(...usersData.map(user => user.id)) : 0;
-        const newUsersWithId = importedUsers.map((user, index) => ({
-            ...user,
-            id: maxId + index + 1,
-        }));
-
-        setUsersData(prevUsers => [...prevUsers, ...newUsersWithId]);
-        console.log('Data berhasil diimpor!');
-
+      console.log('Import berhasil, melakukan refresh data...');
+      // Fetch ulang data user dari database
+      await fetchUsers();
+      // Tutup modal
+      setShowImportModal(false);
     } catch (error) {
-        console.error('Gagal mengimpor file:', error);
-    } finally {
-        setIsImporting(false);
+      console.error('Error saat refresh data setelah import:', error);
     }
   }
 

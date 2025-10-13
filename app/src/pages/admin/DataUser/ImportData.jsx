@@ -332,9 +332,8 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
             console.warn('⚠️ Some imports failed:', result.data.failed);
           }
           
-          if (onImport) {
-            onImport(result.data);
-          }
+          // Tidak langsung memanggil onImport di sini
+          // Akan dipanggil saat modal success ditutup
         } else {
           setError(result.message || 'Gagal mengimpor data ke server');
         }
@@ -359,7 +358,13 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+    setFile(null);
+    setError('');
     onClose();
+    // Trigger refresh data di parent component
+    if (onImport) {
+      onImport();
+    }
   };
 
   return (
