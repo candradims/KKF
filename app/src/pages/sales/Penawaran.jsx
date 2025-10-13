@@ -1081,6 +1081,28 @@ const Penawaran = () => {
           doc.text('Data detail tidak dapat dimuat', 14, yPosition);
         }
         
+        // Add signature section at bottom right
+        const pageHeight = doc.internal.pageSize.height;
+        const pageWidth = doc.internal.pageSize.width;
+        const signatureY = pageHeight - 50; // 50mm from bottom
+        const signatureX = pageWidth - 70; // 70mm from right edge
+        
+        // Reset text color to black for signature
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(9);
+        
+        // Add "Tanda tangan" text
+        doc.text('Tanda tangan', signatureX, signatureY);
+        
+        // Add space for signature (blank area - no line)
+        // Space of about 15mm for manual signature
+        
+        // Add name below signature space - aligned with "Tanda tangan"
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('Alya Fadhiyan', signatureX, signatureY + 20);
+        doc.setFont(undefined, 'normal');
+        
         // Footer with page number
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
