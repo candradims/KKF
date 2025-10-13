@@ -1193,17 +1193,6 @@ const Dashboard = () => {
                 fontWeight: '600',
                 color: '#1f2937'
               }}>Tren Total Revenue</h3>
-              <select style={{
-                padding: '4px 12px',
-                border: '1px solid #035b71',
-                borderRadius: '6px',
-                fontSize: '14px',
-                outline: 'none'
-              }}>
-                <option>Years</option>
-                <option>2025</option>
-                <option>2026</option>
-              </select>
             </div>
             <div style={{ height: '320px' }}>
               {loadingRevenue ? (
@@ -1436,17 +1425,6 @@ const Dashboard = () => {
                 fontWeight: '600',
                 color: '#1f2937'
               }}>Tren Margin Rata-Rata </h3>
-              <select style={{
-                padding: '4px 12px',
-                border: '1px solid #035b71',
-                borderRadius: '6px',
-                fontSize: '14px',
-                outline: 'none'
-              }}>
-                <option>Years</option>
-                <option>2025</option>
-                <option>2026</option>
-              </select>
             </div>
             <div style={{ height: '320px' }}>
               {loadingMarginData ? (
