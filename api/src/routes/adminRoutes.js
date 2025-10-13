@@ -11,5 +11,6 @@ router.get("/users/role/:role", AdminController.getUsersByRole);
 router.post("/users", AdminController.createUser);
 router.put("/users/:id", AdminController.updateUser);
 router.delete("/users/:id", AdminController.deleteUser);
+router.post("/users/import", AdminController.importUsers);
 
 export default router;
