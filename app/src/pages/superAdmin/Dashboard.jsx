@@ -13,10 +13,11 @@ import {
   Cell,
   BarChart,
   Bar,
-  Legend
+  Legend,
+  ComposedChart
 } from 'recharts';
 import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
-import { getUserData, getAuthHeaders, penawaranAPI } from '../../utils/api';
+import { getUserData, getAuthHeaders, penawaranAPI, adminAPI } from '../../utils/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -32,6 +33,9 @@ const Dashboard = () => {
   const [marginTrendData, setMarginTrendData] = useState([]);
   const [loadingMarginData, setLoadingMarginData] = useState(true);
   const [currentMarginRate, setCurrentMarginRate] = useState(0);
+  const [selectedYearPerformance, setSelectedYearPerformance] = useState('2025');
+  const [salesPerformanceData, setSalesPerformanceData] = useState([]);
+  const [loadingSalesPerformance, setLoadingSalesPerformance] = useState(true);
 
   const colors = {
     primary: '#035b71',
@@ -40,6 +44,7 @@ const Dashboard = () => {
     accent1: '#008bb0',
     accent2: '#0090a8',
     success: '#3fba8c',
+    warning: '#f59e0b',
   };
 
   // Navigate to data penawaran with status filter
@@ -587,32 +592,136 @@ const Dashboard = () => {
     }
   };
 
+  // Function to load sales performance data for Analisis Performa chart
+  const loadSalesPerformanceData = async () => {
+    try {
+      setLoadingSalesPerformance(true);
+      console.log('🔍 [SUPER ADMIN DASHBOARD] Starting to fetch sales performance data...');
+      
+      // Step 1: Fetch all sales users from database
+      const salesUsersResponse = await adminAPI.getUsersByRole('sales');
+      
+      if (!salesUsersResponse.success || !salesUsersResponse.data || salesUsersResponse.data.length === 0) {
+        console.warn('⚠️ [SUPER ADMIN DASHBOARD] No sales users found');
+        setSalesPerformanceData([]);
+        setLoadingSalesPerformance(false);
+        return;
+      }
+
+      const salesUsers = salesUsersResponse.data;
+      console.log('✅ [SUPER ADMIN DASHBOARD] Found', salesUsers.length, 'sales users');
+
+      // Step 2: Get all penawaran
+      const penawaranResponse = await penawaranAPI.getAll();
+      
+      if (!penawaranResponse.success || !penawaranResponse.data) {
+        console.warn('⚠️ [SUPER ADMIN DASHBOARD] No penawaran data found');
+        setSalesPerformanceData([]);
+        setLoadingSalesPerformance(false);
+        return;
+      }
+
+      // Step 3: Create a map to accumulate data per sales
+      const salesDataMap = new Map();
+
+      // Initialize map with all sales users
+      salesUsers.forEach(user => {
+        salesDataMap.set(user.id_user, {
+          id: user.id_user,
+          nama: user.nama_user,
+          target: parseFloat(user.target_nr) || 0,
+          totalRevenue: 0,
+          totalPencapaian: 0,
+          penawaranCount: 0
+        });
+      });
+
+      // Step 4: Process each penawaran and accumulate data
+      for (const penawaran of penawaranResponse.data) {
+        try {
+          const salesId = penawaran.id_user;
+          
+          if (!salesDataMap.has(salesId)) {
+            continue;
+          }
+
+          // Get hasil for this penawaran
+          const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
+          
+          if (hasilResponse.success && hasilResponse.data) {
+            const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
+            const pencapaian = parseFloat(hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
+
+            const salesData = salesDataMap.get(salesId);
+            salesData.totalRevenue += profit;
+            salesData.totalPencapaian += pencapaian;
+            salesData.penawaranCount += 1;
+
+            salesDataMap.set(salesId, salesData);
+          }
+        } catch (error) {
+          console.error(`❌ [SUPER ADMIN DASHBOARD] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+        }
+      }
+
+      // Step 5: Convert map to array
+      const salesDataArray = [];
+      
+      salesDataMap.forEach((data) => {
+        const target = data.target;
+        const pencapaian = data.totalPencapaian;
+        const revenue = data.totalRevenue;
+
+        salesDataArray.push({
+          name: data.nama,
+          penawaran: Math.round(revenue),
+          pencapaian: Math.round(pencapaian),
+          target: Math.round(target)
+        });
+      });
+
+      console.log('✅ [SUPER ADMIN DASHBOARD] Sales performance data loaded:', salesDataArray);
+      setSalesPerformanceData(salesDataArray);
+    } catch (error) {
+      console.error("❌ [SUPER ADMIN DASHBOARD] Error fetching sales performance data:", error);
+      setSalesPerformanceData([]);
+    } finally {
+      setLoadingSalesPerformance(false);
+    }
+  };
+
   useEffect(() => {
     loadDashboardStats();
     loadTotalRevenueData();
     loadRegionalRevenueData();
     loadMarginTrendData();
+    loadSalesPerformanceData();
   }, []);
 
-  // Data from table image: Sales names and Target NR 2025
-  const salesBarChartData = [
-    { name: 'Achmad', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
-    { name: 'Firmanda', TargetNR: 14257895010, Achievement: Math.round(14257895010 * 0.1) },
-    { name: 'Pungky', TargetNR: 7604210672, Achievement: Math.round(7604210672 * 0.1) },
-    { name: 'Divia', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
-    { name: 'Mohamad', TargetNR: 12356842342, Achievement: Math.round(12356842342 * 0.1) },
-    { name: 'Yanur', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
-    { name: 'Senna', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
-    { name: 'Rahma', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
-    { name: 'Yesy', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
-    { name: 'Gumilang', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
-    { name: 'Deidra', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
-    { name: 'Febrina', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
-    { name: 'Yeni', TargetNR: 9505263340, Achievement: Math.round(9505263340 * 0.1) },
-    { name: 'Yustika', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) },
-    { name: 'Ganjar', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) },
-    { name: 'Zahrotul', TargetNR: 3802105336, Achievement: Math.round(3802105336 * 0.1) }
-  ];
+  // Data untuk Analisis Performa by year - similar to Laporan Laba
+  const salesPerformanceByYear = {
+    '2023': salesPerformanceData.map(sales => ({
+      name: sales.name,
+      penawaran: sales.penawaran * 0.8,
+      pencapaian: sales.pencapaian * 0.8,
+      target: sales.target * 0.8
+    })),
+    '2024': salesPerformanceData.map(sales => ({
+      name: sales.name,
+      penawaran: sales.penawaran * 0.9,
+      pencapaian: sales.pencapaian * 0.9,
+      target: sales.target
+    })),
+    '2025': salesPerformanceData.map(sales => ({
+      name: sales.name,
+      penawaran: sales.penawaran,
+      pencapaian: sales.pencapaian,
+      target: sales.target
+    }))
+  };
+
+  // Get data for selected year
+  const currentPerformanceData = salesPerformanceByYear[selectedYearPerformance] || [];
 
   // Data untuk status penawaran - diambil dari API
   const statusData = [
@@ -696,35 +805,53 @@ const Dashboard = () => {
   const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary, colors.accent2];
   const STATUS_COLORS = ['#fce40bff', '#3fba8c' , '#EF4444'];
 
+  const formatNumber = (num) => {
+    return 'Rp ' + Math.round(num).toLocaleString('id-ID') + ',-';
+  };
+
   const renderCustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div style={{
           backgroundColor: 'white',
-          padding: '12px',
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+          padding: '16px',
+          border: '1px solid #e2e8f0',
+          borderRadius: '12px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          fontSize: '14px',
+          color: '#334155',
+          minWidth: '180px'
         }}>
-          <p style={{ color: '#6b7280' }}>{`Month: ${label}`}</p>
+          <p style={{ color: colors.primary, fontWeight: 'bold', marginBottom: '8px', fontSize: '16px' }}>
+            {payload.some(p => p.dataKey === 'name' || p.name === 'Nama Sales') ? 'Nama Sales: ' : 'Month: '}{label}
+          </p>
           {payload.map((entry, index) => {
-            // Format different data types appropriately
-            const isMarginData = entry.dataKey.includes('margin');
-            const isRevenueData = entry.dataKey === 'value' && !isMarginData;
+            // Handle different data types
+            const isMarginData = entry.dataKey && entry.dataKey.includes('margin');
+            const displayName = entry.name === 'penawaran' ? 'Revenue' : 
+                               entry.name === 'pencapaian' ? 'Pencapaian' :
+                               entry.name === 'target' ? 'Target' :
+                               entry.name === 'Trend Revenue' ? 'Trend Revenue' :
+                               entry.name;
             
             let displayValue;
             if (isMarginData) {
               displayValue = `${entry.value}%`;
-            } else if (isRevenueData) {
-              displayValue = `Rp ${entry.value.toLocaleString('id-ID')}`;
+            } else if (typeof entry.value === 'number') {
+              displayValue = formatNumber(entry.value);
             } else {
               displayValue = entry.value;
             }
             
             return (
-              <p key={index} style={{ color: colors.primary, fontWeight: '600' }}>
-                {`Revenue: ${displayValue}`}
-              </p>
+              <div key={index} style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: entry.color, fontWeight: '600', fontSize: '13px' }}>
+                  {displayName}:
+                </span>
+                <span style={{ color: entry.color, fontWeight: 'bold', marginLeft: '8px' }}>
+                  {displayValue}
+                </span>
+              </div>
             );
           })}
         </div>
@@ -841,7 +968,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Sales Target & Achievement Bar Chart */}
+        {/* Analisis Performa Sales Chart */}
         <div style={{
           background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
           borderRadius: '12px',
@@ -859,31 +986,133 @@ const Dashboard = () => {
           e.currentTarget.style.transform = 'translateY(0)';
           e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
         }}>
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '16px'
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '24px'
           }}>
-            Target NR & Pencapaian Sales
-          </h3>
-          <div style={{ height: '340px', paddingLeft: '32px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesBarChartData} margin={{ top: 20, right: 30, left: 40, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#666' }} />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: '#666', dx: 0 }} 
-                  tickFormatter={v => `Rp ${v.toLocaleString()}`}
-                  width={100}
-                  tickMargin={16}
-                />
-                <Tooltip formatter={(value) => `Rp ${value.toLocaleString()}`} />
-                <Legend />
-                <Bar dataKey="TargetNR" fill={colors.primary} name="Target NR" barSize={32} />
-                <Bar dataKey="Achievement" fill={colors.secondary} name="Pencapaian" barSize={32} />
-              </BarChart>
-            </ResponsiveContainer>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#1f2937',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <div style={{
+                padding: '8px',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                borderRadius: '10px',
+                color: 'white'
+              }}>
+                <BarChart3 size={20} />
+              </div>
+              Analisis Performa Sales
+            </h3>
+            <div style={{
+              padding: '8px 16px',
+              background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.tertiary}15 100%)`,
+              borderRadius: '12px',
+              border: `2px solid ${colors.success}30`,
+              fontSize: '14px',
+              fontWeight: '700',
+              color: colors.success
+            }}>
+              Tahun 2025
+            </div>
+          </div>
+          <div style={{ height: '400px' }}>
+            {loadingSalesPerformance ? (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+                flexDirection: 'column',
+                gap: '16px'
+              }}>
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  border: `4px solid ${colors.primary}20`,
+                  borderTop: `4px solid ${colors.primary}`,
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+                <p style={{
+                  color: colors.primary,
+                  fontWeight: '600',
+                  fontSize: '16px'
+                }}>
+                  Memuat data performa sales...
+                </p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart 
+                  data={currentPerformanceData}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 80 }}
+                >
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    stroke="#f0f0f0" 
+                    horizontal={true}
+                    vertical={false}
+                  />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#666', fontWeight: '600' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: '#666', fontWeight: '600' }}
+                    tickFormatter={(value) => {
+                      return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
+                    }}
+                    width={120}
+                  />
+                  <Tooltip content={renderCustomTooltip} />
+                  <Legend 
+                    wrapperStyle={{ paddingTop: '20px' }}
+                    iconType="rect"
+                  />
+                  <Bar 
+                    dataKey="pencapaian" 
+                    fill={colors.warning}
+                    name="Pencapaian"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar 
+                    dataKey="penawaran" 
+                    fill={colors.primary}
+                    name="Revenue"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar 
+                    dataKey="target" 
+                    fill={colors.tertiary}
+                    name="Target"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Line 
+                    type="monotone"
+                    dataKey="penawaran"
+                    stroke={colors.primary}
+                    strokeWidth={3}
+                    name="Trend Revenue"
+                    dot={{ fill: colors.primary, strokeWidth: 2, r: 6 }}
+                    activeDot={{ r: 8 }}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 

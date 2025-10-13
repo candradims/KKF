@@ -1053,40 +1053,15 @@ const Dashboard = () => {
               Analisis Performa Sales
             </h3>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
+              padding: '8px 16px',
+              background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.tertiary}15 100%)`,
+              borderRadius: '12px',
+              border: `2px solid ${colors.success}30`,
+              fontSize: '14px',
+              fontWeight: '700',
+              color: colors.success
             }}>
-              <div style={{
-                padding: '8px 16px',
-                background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.tertiary}15 100%)`,
-                borderRadius: '12px',
-                border: `2px solid ${colors.success}30`,
-                fontSize: '14px',
-                fontWeight: '700',
-                color: colors.success
-              }}>
-                Tahun {selectedYearPerformance}
-              </div>
-              <select
-                value={selectedYearPerformance}
-                onChange={(e) => setSelectedYearPerformance(e.target.value)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: `2px solid ${colors.primary}`,
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: colors.primary,
-                  backgroundColor: 'white',
-                  cursor: 'pointer',
-                  outline: 'none'
-                }}
-              >
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-              </select>
+              Tahun 2025
             </div>
           </div>
           <div style={{ height: '400px' }}>
