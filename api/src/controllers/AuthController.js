@@ -23,14 +23,6 @@ export class AuthController {
         });
       }
 
-      // Periksa apakah user aktif
-      if (!user.is_active) {
-        return res.status(401).json({
-          success: false,
-          message: "Akun tidak aktif",
-        });
-      }
-
       // Periksa password
       if (user.kata_sandi !== kata_sandi) {
         return res.status(401).json({
@@ -52,8 +44,7 @@ export class AuthController {
         nama_user: user.nama_user,
         email_user: user.email_user,
         role_user: user.role_user,
-        target_nr: user.target_nr || null, // Include target_nr for sales
-        is_active: user.is_active,
+        target_nr: user.target_nr || null,
         created_at: user.created_at,
         updated_at: user.updated_at,
       };
