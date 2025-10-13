@@ -64,15 +64,6 @@ export const authenticate = async (req, res, next) => {
         message: "Authentication data tidak valid",
       });
     }
-
-    // Verify user is active
-    if (!user.is_active) {
-      return res.status(401).json({
-        success: false,
-        message: "Akun tidak aktif",
-      });
-    }
-
     console.log("✅ Authentication successful for user:", user.email_user);
     req.user = user;
     next();

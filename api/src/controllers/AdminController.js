@@ -277,4 +277,118 @@ export class AdminController {
       });
     }
   }
+
+  // Import Data
+  static async importUsers(req, res) {
+    try {
+      console.log("📨 Received import users request");
+      
+      const { users } = req.body;
+
+      // Validasi input
+      if (!users || !Array.isArray(users) || users.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Data users harus berupa array dan tidak boleh kosong",
+        });
+      }
+
+      const results = {
+        success: [],
+        failed: []
+      };
+
+      // Process each user
+      for (const userData of users) {
+        try {
+          const { nama_user, email_user, kata_sandi, role_user, target_nr } = userData;
+
+          // Validasi field wajib
+          if (!nama_user || !email_user || !kata_sandi || !role_user) {
+            results.failed.push({
+              user: userData,
+              error: "Nama, email, kata sandi, dan role wajib diisi"
+            });
+            continue;
+          }
+
+          // Validasi role
+          const validRoles = ["superAdmin", "admin", "sales"];
+          if (!validRoles.includes(role_user)) {
+            results.failed.push({
+              user: userData,
+              error: "Role harus superAdmin, admin, atau sales"
+            });
+            continue;
+          }
+
+          // Cek email sudah ada
+          const existingUser = await UserModel.getUserByEmail(email_user);
+          if (existingUser) {
+            results.failed.push({
+              user: userData,
+              error: "Pengguna dengan email ini sudah ada"
+            });
+            continue;
+          }
+
+          // Buat user baru
+          const newUser = await UserModel.createUser({
+            nama_user,
+            email_user,
+            kata_sandi,
+            role_user,
+            target_nr: role_user === 'sales' ? (target_nr || null) : null,
+          });
+
+          if (!newUser || newUser.length === 0) {
+            throw new Error("Tidak ada data yang dikembalikan dari database");
+          }
+
+          // Hapus password dari response
+          const userResponse = { ...newUser[0] };
+          delete userResponse.kata_sandi;
+
+          results.success.push(userResponse);
+          
+          console.log(`✅ User imported successfully: ${email_user}`);
+
+        } catch (error) {
+          console.error(`❌ Error importing user:`, error);
+          results.failed.push({
+            user: userData,
+            error: error.message
+          });
+        }
+      }
+
+      const response = {
+        success: true,
+        message: `Import selesai. Berhasil: ${results.success.length}, Gagal: ${results.failed.length}`,
+        data: {
+          success: results.success,
+          failed: results.failed
+        }
+      };
+
+      if (results.success.length === 0 && results.failed.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Semua data gagal diimport",
+          data: response.data
+        });
+      }
+
+      res.status(201).json(response);
+
+    } catch (error) {
+      console.error("❌ Error in importUsers:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal mengimpor data pengguna",
+        error: process.env.NODE_ENV === "development" ? error.message : "Internal server error",
+      });
+    }
+  }
+
 }
