@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Check, X, FileSpreadsheet } from 'lucide-react';
+import { Upload, Check, X, FileSpreadsheet, Download } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import * as XLSX from 'xlsx'; 
 
@@ -19,6 +19,66 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
     success: '#3fba8c',
     gray300: '#cbd5e1',
     gray400: '#94a3b8',
+  };
+
+  // Template Excel
+  const downloadTemplate = () => {
+    // Data contoh untuk template
+    const templateData = [
+      {
+        nama_user: 'John Doe',
+        email_user: 'john@example.com',
+        kata_sandi: 'password123',
+        role_user: 'sales',
+        target_nr: 10000000
+      },
+      {
+        nama_user: 'Jane Smith',
+        email_user: 'jane@example.com', 
+        kata_sandi: 'password456',
+        role_user: 'admin',
+        target_nr: ''
+      },
+      {
+        nama_user: 'Bob Johnson',
+        email_user: 'bob@example.com',
+        kata_sandi: 'password789',
+        role_user: 'superAdmin',
+        target_nr: ''
+      }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Template User');
+    
+    XLSX.writeFile(workbook, 'Template_Import_User.xlsx');
+  };
+
+  // Template CSV
+  const downloadCSVTemplate = () => {
+    const csvHeaders = 'nama_user,email_user,kata_sandi,role_user,target_nr';
+    const csvData = [
+      'John Doe,john@example.com,password123,sales,10000000',
+      'Jane Smith,jane@example.com,password456,admin,',
+      'Bob Johnson,bob@example.com,password789,superAdmin,'
+    ].join('\n');
+
+    const csvContent = csvHeaders + '\n' + csvData;
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'Template_Import_User.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -512,6 +572,92 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
                   position: 'relative'
                 }}
               >
+                {/* Template Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  style={{
+                    marginBottom: '32px',
+                    padding: '20px',
+                    background: 'linear-gradient(135deg, rgba(3, 91, 113, 0.05) 0%, rgba(0, 191, 202, 0.03) 100%)',
+                    borderRadius: '12px',
+                    border: `1px solid ${colors.secondary}30`
+                  }}
+                >
+                  <h3 style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <Download size={18} />
+                    Download Template
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: colors.accent1,
+                    marginBottom: '16px',
+                    lineHeight: '1.5'
+                  }}>
+                    Unduh template untuk memastikan format file sesuai
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    flexWrap: 'wrap'
+                  }}>
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={downloadTemplate}
+                      style={{
+                        background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.secondary} 100%)`,
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 12px',
+                        borderRadius: '8px',
+                        fontWeight: '500',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: `0 2px 10px rgba(63, 186, 140, 0.3)`
+                      }}
+                    >
+                      <FileSpreadsheet size={16} />
+                      Template Excel (.xlsx)
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -1 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={downloadCSVTemplate}
+                      style={{
+                        background: `linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent1} 100%)`,
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 12px',
+                        borderRadius: '8px',
+                        fontWeight: '500',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: `0 2px 10px rgba(0, 162, 185, 0.3)`
+                      }}
+                    >
+                      <FileSpreadsheet size={16} />
+                      Template CSV (.csv)
+                    </motion.button>
+                  </div>
+                </motion.div>
+
                 {/* File Input */}
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{
@@ -572,7 +718,7 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
                         color: colors.accent1,
                         marginTop: '4px'
                       }}>
-                        Format yang didukung: .xlsx, .xls, .csv
+                        Format yang didukung: .xlsx, .csv
                       </p>
                     </div>
                   </motion.div>
