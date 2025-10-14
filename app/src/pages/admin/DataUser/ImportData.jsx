@@ -50,24 +50,100 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
 
     const workbook = XLSX.utils.book_new();
     
+    // Convert data to worksheet
     const worksheet = XLSX.utils.json_to_sheet(templateData);
+    
+    // Get the range of the worksheet
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 20 },  // nama_user
+      { wch: 30 },  // email_user
+      { wch: 20 },  // kata_sandi
+      { wch: 15 },  // role_user
+      { wch: 15 }   // target_nr
+    ];
+    
+    // Style for header row (row 0)
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (!worksheet[cellAddress]) continue;
+      
+      // Add styling to header
+      worksheet[cellAddress].s = {
+        font: {
+          bold: true,
+          color: { rgb: "FFFFFF" },
+          sz: 12
+        },
+        fill: {
+          fgColor: { rgb: "035b71" }  // Primary color from your palette
+        },
+        alignment: {
+          horizontal: "center",
+          vertical: "center"
+        },
+        border: {
+          top: { style: "thin", color: { rgb: "000000" } },
+          bottom: { style: "thin", color: { rgb: "000000" } },
+          left: { style: "thin", color: { rgb: "000000" } },
+          right: { style: "thin", color: { rgb: "000000" } }
+        }
+      };
+    }
+    
+    // Style for data rows with alternating colors
+    for (let row = range.s.r + 1; row <= range.e.r; row++) {
+      const isEvenRow = (row % 2) === 0;
+      
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+        if (!worksheet[cellAddress]) continue;
+        
+        worksheet[cellAddress].s = {
+          font: {
+            sz: 11
+          },
+          fill: {
+            fgColor: { rgb: isEvenRow ? "F8FAFC" : "FFFFFF" }  // Alternating row colors
+          },
+          alignment: {
+            horizontal: col === 4 ? "right" : "left",  // Right align for target_nr
+            vertical: "center"
+          },
+          border: {
+            top: { style: "thin", color: { rgb: "E2E8F0" } },
+            bottom: { style: "thin", color: { rgb: "E2E8F0" } },
+            left: { style: "thin", color: { rgb: "E2E8F0" } },
+            right: { style: "thin", color: { rgb: "E2E8F0" } }
+          }
+        };
+      }
+    }
     
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Template User');
     
-    XLSX.writeFile(workbook, 'Template_Import_User.xlsx');
+    // Write file with styling support
+    XLSX.writeFile(workbook, 'Template_Import_User.xlsx', { 
+      bookType: 'xlsx',
+      cellStyles: true 
+    });
   };
 
   // Template CSV
   const downloadCSVTemplate = () => {
-    const csvHeaders = 'nama_user,email_user,kata_sandi,role_user,target_nr';
-    const csvData = [
+    // CSV template tanpa petunjuk, langsung header dan data
+    const csvContent = [
+      'nama_user,email_user,kata_sandi,role_user,target_nr',
       'John Doe,john@example.com,password123,sales,10000000',
       'Jane Smith,jane@example.com,password456,admin,',
       'Bob Johnson,bob@example.com,password789,superAdmin,'
     ].join('\n');
 
-    const csvContent = csvHeaders + '\n' + csvData;
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Add BOM for UTF-8 to ensure proper encoding in Excel
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     
     if (link.download !== undefined) {
@@ -78,6 +154,7 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -208,7 +285,13 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
         try {
           console.log('🔍 Starting CSV parsing...');
           const csvText = e.target.result;
-          const lines = csvText.split('\n').filter(line => line.trim() !== '');
+          
+          // Filter out empty lines (backward compatible: also filters # comments if any)
+          const lines = csvText.split('\n')
+            .filter(line => {
+              const trimmed = line.trim();
+              return trimmed !== '' && !trimmed.startsWith('#');
+            });
           
           console.log('📄 CSV lines:', lines.length);
           
