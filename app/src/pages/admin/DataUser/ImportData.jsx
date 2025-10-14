@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Upload, Check, X, FileSpreadsheet, Download } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import * as XLSX from 'xlsx'; 
@@ -392,9 +392,8 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
             console.warn('⚠️ Some imports failed:', result.data.failed);
           }
           
-          if (onImport) {
-            onImport(result.data);
-          }
+          // onImport akan dipanggil saat user menutup success modal
+          // Tidak dipanggil di sini agar flow-nya: success modal -> tutup -> refresh
         } else {
           setError(result.message || 'Gagal mengimpor data ke server');
         }
@@ -419,6 +418,15 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+    setFile(null);
+    setError('');
+    
+    // 1. Trigger refresh data di parent component (Index.jsx)
+    if (onImport) {
+      onImport();
+    }
+    
+    // 2. Tutup import modal
     onClose();
   };
 
