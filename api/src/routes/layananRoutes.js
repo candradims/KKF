@@ -9,6 +9,7 @@ router.get("/public", LayananController.getAllLayanan);
 router.post("/public", LayananController.createLayanan);
 router.put("/public/:id", LayananController.updateLayanan);
 router.delete("/public/:id", LayananController.deleteLayanan);
+router.post("/public/import", LayananController.importLayanan);
 
 // Semua rute memerlukan autentikasi
 router.use(authenticate);
@@ -26,5 +27,6 @@ router.get(
 router.post("/", adminOnly, LayananController.createLayanan);
 router.put("/:id", adminOnly, LayananController.updateLayanan);
 router.delete("/:id", adminOnly, LayananController.deleteLayanan);
+router.post("/import", adminOnly, LayananController.importLayanan);
 
 export default router;
