@@ -4,6 +4,7 @@ import TambahLayanan from './TambahLayanan';
 import EditLayanan from './EditLayanan';
 import DetailLayanan from './DetailLayanan';
 import HapusLayanan from './HapusLayanan'; 
+import ImportData from './ImportData';
 
 const Index = () => {
   const [filterHJT, setFilterHJT] = useState('');
@@ -233,9 +234,18 @@ const Index = () => {
     setShowImportModal(false);
   };
 
-  const handleImportData = async (file) => {
-    console.log('Mulai mengimpor file:', file.name);
-    // Implementasi import data
+  const handleImportData = async () => {
+    try {
+      console.log('✅ Import berhasil! Melakukan refresh data dari database...');
+      
+      await fetchLayanan();
+      
+      setShowImportModal(false);
+      
+      console.log('✅ Data berhasil di-refresh dan ditampilkan!');
+    } catch (error) {
+      console.error('❌ Error saat refresh data setelah import:', error);
+    }
   };
 
   // Filter dan pagination logic
@@ -590,6 +600,7 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Tombol Aksi */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
           <button 
             onClick={handleOpenImportModal}
@@ -620,7 +631,7 @@ const Index = () => {
             }}
           >
             <FileSpreadsheet size={16} />
-            Import Excel
+            Import Layanan
           </button>
           
           <button
@@ -1472,6 +1483,7 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Modal Components */}
       {showTambahModal && (
         <TambahLayanan
           isOpen={showTambahModal}
@@ -1502,6 +1514,11 @@ const Index = () => {
           initialData={selectedLayanan}
         />
       )}
+      <ImportData
+        isOpen={showImportModal}
+        onClose={handleCloseImportModal}
+        onImport={handleImportData}
+      />
     </div>
   );
 };
