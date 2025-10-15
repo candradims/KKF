@@ -217,24 +217,8 @@ const LaporanLaba = () => {
 
   // Data untuk berbagai chart - UPDATED: Use real data from salesData
   const salesPerformanceByYear = {
-    '2023': salesData.map(sales => ({
-      name: sales.nama,
-      penawaran: sales.penawaran * 0.8,  // Revenue (80% of 2024 for simulation)
-      pencapaian: sales.pencapaian * 0.8, // Pencapaian (80% of 2024 for simulation)
-      target: sales.target * 0.8,
-      komisi: sales.komisi * 0.8,
-      achievement: (sales.penawaran * 0.8) / (sales.target * 0.8) * 100
-    })),
-    '2024': salesData.map(sales => ({
-      name: sales.nama,
-      penawaran: sales.penawaran * 0.9,  // Revenue (90% of 2025 for simulation)
-      pencapaian: sales.pencapaian * 0.9, // Pencapaian (90% of 2025 for simulation)
-      target: sales.target,
-      komisi: sales.komisi * 0.9,
-      achievement: (sales.penawaran * 0.9) / sales.target * 100,
-      growth: sales.growth || 0,
-      lastMonth: sales.lastMonth || 0
-    })),
+    '2023': [], // Tidak ada data penawaran di tahun 2023
+    '2024': [], // Tidak ada data penawaran di tahun 2024
     '2025': salesData.map(sales => ({
       name: sales.nama,
       penawaran: sales.penawaran,        // ✅ Real Revenue from profit_dari_hjt_excl_ppn
@@ -247,41 +231,51 @@ const LaporanLaba = () => {
     }))
   };
 
-  // Data untuk growth comparison chart
-  const growthData = salesData.map(sales => ({
+  // Data untuk growth comparison chart - hanya untuk tahun 2025
+  const growthData = selectedYearSales === '2025' ? salesData.map(sales => ({
     name: sales.nama,
     current: sales.penawaran,
     previous: sales.lastMonth,
     growth: sales.growth
-  }));
+  })) : [];
 
-  // Data untuk donut chart distribusi penawaran
-  const distributionData = salesData.map((sales, index) => ({
+  // Data untuk donut chart distribusi penawaran - hanya untuk tahun 2025
+  const distributionData = selectedYearSales === '2025' ? salesData.map((sales, index) => ({
     name: sales.nama,
     value: sales.penawaran,
     color: [colors.primary, colors.secondary, colors.success, colors.warning, colors.accent1, colors.tertiary, colors.gradient1][index % 7]
-  }));
+  })) : [];
 
-  // Hitung statistik
+  // Hitung statistik - hanya untuk tahun yang memiliki data (2025)
+  const currentYearData = salesPerformanceByYear[selectedYearSales] || [];
+  
   // totalSalesCount now comes from state (fetched from API)
-  const totalRevenue = salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
-  const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
+  const totalRevenue = selectedYearSales === '2025' 
+    ? salesData.reduce((sum, sales) => sum + sales.penawaran, 0)
+    : 0;
+    
+  const totalKomisi = selectedYearSales === '2025'
+    ? salesData.reduce((sum, sales) => sum + sales.komisi, 0)
+    : 0;
   
   // NEW: Total Pencapaian from all sales (sum of total_per_bulan_harga_final_sebelum_ppn)
-  const totalPencapaian = salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0);
+  const totalPencapaian = selectedYearSales === '2025'
+    ? salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0)
+    : 0;
   
   // NEW: Achievement rate based on 10x target logic (same as admin page)
   // Status tercapai jika Pencapaian >= Target × 10
-  const achievementRate = salesData.length > 0 
+  const achievementRate = selectedYearSales === '2025' && salesData.length > 0 
     ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 
     : 0;
   
   // Average Growth from all sales
-  const averageGrowth = salesData.length > 0
+  const averageGrowth = selectedYearSales === '2025' && salesData.length > 0
     ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length
     : 0;
 
   console.log('📊 [SUPER ADMIN LAPORAN LABA] Display Statistics:');
+  console.log('  - Selected Year:', selectedYearSales);
   console.log('  - Total Sales Count (from API):', totalSalesCount);
   console.log('  - Total Revenue:', totalRevenue.toLocaleString('id-ID'));
   console.log('  - Total Pencapaian:', totalPencapaian.toLocaleString('id-ID'));
@@ -766,144 +760,174 @@ const LaporanLaba = () => {
           </div>
           
           <div style={{ height: '500px' }}>
-            {activeChart === 'performance' && (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart 
-                  data={salesPerformanceByYear[selectedYearSales]}
-                  margin={{ top: 20, right: 30, left: 30, bottom: 80 }}
-                >
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    stroke={colors.gray200} 
-                    horizontal={true}
-                    vertical={false}
-                  />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
-                    tickFormatter={formatNumber}
-                    width={100}
-                  />
-                  <Tooltip content={renderCustomTooltip} />
-                  <Legend 
-                    wrapperStyle={{ paddingTop: '20px' }}
-                    iconType="rect"
-                  />
-                  <Bar 
-                    dataKey="pencapaian" 
-                    fill={colors.warning}
-                    name="Pencapaian"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="penawaran" 
-                    fill={colors.primary}
-                    name="Revenue"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="target" 
-                    fill={colors.tertiary}
-                    name="Target"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Line 
-                    type="monotone"
-                    dataKey="penawaran"
-                    stroke={colors.primary}
-                    strokeWidth={3}
-                    name="Trend Revenue"
-                    dot={{ fill: colors.primary, strokeWidth: 2, r: 6 }}
-                    activeDot={{ r: 8 }}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            )}
-
-            {activeChart === 'growth' && (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart 
-                  data={growthData}
-                  margin={{ top: 20, right: 30, left: 30, bottom: 80 }}
-                >
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    stroke={colors.gray200}
-                  />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
-                    tickFormatter={formatNumber}
-                    width={100}
-                  />
-                  <YAxis 
-                    yAxisId="right"
-                    orientation="right"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: colors.warning, fontWeight: '600' }}
-                    tickFormatter={(value) => `${value.toFixed(0)}%`}
-                    width={60}
-                  />
-                  <Tooltip content={renderCustomTooltip} />
-                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                  <Bar 
-                    dataKey="current" 
-                    fill={colors.primary}
-                    name="Tahun Ini"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="previous" 
-                    fill={colors.tertiary}
-                    name="Tahun Lalu"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Line 
-                    type="monotone"
-                    dataKey="growth"
-                    stroke={colors.warning}
-                    strokeWidth={3}
-                    name="Growth (%)"
-                    yAxisId="right"
-                    dot={{ fill: colors.success, strokeWidth: 2, r: 6 }}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            )}
-
-            {activeChart === 'distribution' && (
-              <div style={{ display: 'flex', height: '100%', gap: '40px', alignItems: 'center' }}>
-                <div style={{ 
-                  flex: 1, 
-                  height: '100%', 
-                  position: 'relative',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
+            {currentYearData.length === 0 ? (
+              // Tampilkan pesan jika tidak ada data
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+                gap: '16px'
+              }}>
+                <TrendingUp size={64} color={colors.gray300} />
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: colors.gray500,
+                  textAlign: 'center'
                 }}>
+                  Tidak Ada Data Penawaran
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: colors.gray400,
+                  textAlign: 'center',
+                  maxWidth: '400px'
+                }}>
+                  Belum ada data penawaran untuk tahun {selectedYearSales}. Data penawaran hanya tersedia untuk tahun 2025.
+                </div>
+              </div>
+            ) : (
+              <>
+                {activeChart === 'performance' && (
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <ComposedChart 
+                      data={salesPerformanceByYear[selectedYearSales]}
+                      margin={{ top: 20, right: 30, left: 30, bottom: 80 }}
+                    >
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke={colors.gray200} 
+                        horizontal={true}
+                        vertical={false}
+                      />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
+                        tickFormatter={formatNumber}
+                        width={100}
+                      />
+                      <Tooltip content={renderCustomTooltip} />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: '20px' }}
+                        iconType="rect"
+                      />
+                      <Bar 
+                        dataKey="pencapaian" 
+                        fill={colors.warning}
+                        name="Pencapaian"
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar 
+                        dataKey="penawaran" 
+                        fill={colors.primary}
+                        name="Revenue"
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar 
+                        dataKey="target" 
+                        fill={colors.tertiary}
+                        name="Target"
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Line 
+                        type="monotone"
+                        dataKey="penawaran"
+                        stroke={colors.primary}
+                        strokeWidth={3}
+                        name="Trend Revenue"
+                        dot={{ fill: colors.primary, strokeWidth: 2, r: 6 }}
+                        activeDot={{ r: 8 }}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                )}
+
+                {activeChart === 'growth' && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart 
+                      data={growthData}
+                      margin={{ top: 20, right: 30, left: 30, bottom: 80 }}
+                    >
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke={colors.gray200}
+                      />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
+                        tickFormatter={formatNumber}
+                        width={100}
+                      />
+                      <YAxis 
+                        yAxisId="right"
+                        orientation="right"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: colors.warning, fontWeight: '600' }}
+                        tickFormatter={(value) => `${value.toFixed(0)}%`}
+                        width={60}
+                      />
+                      <Tooltip content={renderCustomTooltip} />
+                      <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                      <Bar 
+                        dataKey="current" 
+                        fill={colors.primary}
+                        name="Tahun Ini"
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar 
+                        dataKey="previous" 
+                        fill={colors.tertiary}
+                        name="Tahun Lalu"
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Line 
+                        type="monotone"
+                        dataKey="growth"
+                        stroke={colors.warning}
+                        strokeWidth={3}
+                        name="Growth (%)"
+                        yAxisId="right"
+                        dot={{ fill: colors.success, strokeWidth: 2, r: 6 }}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                )}
+
+                {activeChart === 'distribution' && (
+                  <div style={{ display: 'flex', height: '100%', gap: '40px', alignItems: 'center' }}>
+                    <div style={{ 
+                      flex: 1, 
+                      height: '100%', 
+                      position: 'relative',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
                       <Pie
                         data={distributionData}
                         cx="50%"
@@ -1026,6 +1050,8 @@ const LaporanLaba = () => {
                   ))}
                 </div>
               </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -1073,7 +1099,36 @@ const LaporanLaba = () => {
           </h3>
           
           <div style={{ overflowX: 'auto' }}>
-            <table style={{
+            {currentYearData.length === 0 ? (
+              // Tampilkan pesan jika tidak ada data
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '60px 20px',
+                gap: '16px'
+              }}>
+                <Users size={64} color={colors.gray300} />
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: colors.gray500,
+                  textAlign: 'center'
+                }}>
+                  Tidak Ada Data Performa Sales
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: colors.gray400,
+                  textAlign: 'center',
+                  maxWidth: '400px'
+                }}>
+                  Belum ada data performa sales untuk tahun {selectedYearSales}. Data hanya tersedia untuk tahun 2025.
+                </div>
+              </div>
+            ) : (
+              <table style={{
               width: '100%',
               borderCollapse: 'separate',
               borderSpacing: 0,
@@ -1243,6 +1298,7 @@ const LaporanLaba = () => {
                 ))}
               </tbody>
             </table>
+            )}
           </div>
         </div>
       </div>
