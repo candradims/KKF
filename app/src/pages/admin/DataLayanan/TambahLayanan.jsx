@@ -21,7 +21,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
   const [layananOptions, setLayananOptions] = useState([]);
   const [jenisLayananOptions, setJenisLayananOptions] = useState([]);
   const [satuanOptions, setSatuanOptions] = useState([]);
-  const [hjtOptions, setHjtOptions] = useState([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   
   // State untuk custom input
@@ -56,11 +55,10 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       const result = await response.json();
       const data = Array.isArray(result) ? result : result.data || [];
       
-      // Ambil unique nama_layanan, jenis_layanan, satuan, dan wilayah_hjt dari database
+      // Ambil unique nama_layanan, jenis_layanan, dan satuan dari database
       const uniqueLayanan = [...new Set(data.map(item => item.nama_layanan).filter(Boolean))];
       const uniqueJenisLayanan = [...new Set(data.map(item => item.jenis_layanan).filter(Boolean))];
       const rawSatuan = [...new Set(data.map(item => item.satuan).filter(Boolean))];
-      const uniqueHjt = [...new Set(data.map(item => item.wilayah_hjt).filter(Boolean))];
       
       // Normalize dan filter satuan untuk hanya Mbps dan units
       const normalizedSatuan = rawSatuan
@@ -82,13 +80,11 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
         "Premium"
       ]);
       setSatuanOptions(uniqueSatuan.length > 0 ? uniqueSatuan : ["Mbps", "units"]);
-      setHjtOptions(uniqueHjt.sort());
       
       console.log("✅ Options loaded:", { 
         layanan: uniqueLayanan.length,
         jenisLayanan: uniqueJenisLayanan.length,
-        satuan: uniqueSatuan.length,
-        hjt: uniqueHjt.length 
+        satuan: uniqueSatuan.length
       });
     } catch (error) {
       console.error("❌ Gagal mengambil data options:", error);
@@ -117,7 +113,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
         "Premium"
       ]);
       setSatuanOptions(["Mbps", "units"]);
-      setHjtOptions(["Sumatra", "Jawa Bali", "Jabodetabek", "Intim"]);
     } finally {
       setIsLoadingOptions(false);
     }
@@ -511,7 +506,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                   </div>
                 </motion.div>
 
-                {/* Select Hjt */}
+                {/* Input HJT */}
                 <motion.div 
                   whileHover={{ y: -2 }}
                   style={{
@@ -533,30 +528,17 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                     <div style={iconContainerStyle('hjt')}>
                       <MapPin size={18} />
                     </div>
-                    <select
+                    <input
                       name="hjt"
+                      type="text"
+                      placeholder="Masukkan HJT (contoh: Kota A, Kota B, dll)"
                       value={formData.hjt}
                       onChange={handleChange}
                       onFocus={() => setFocusedField('hjt')}
                       onBlur={() => setFocusedField('')}
                       required
-                      style={{
-                        ...inputStyle('hjt'),
-                        appearance: "none",
-                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === 'hjt' ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 16px center",
-                        backgroundSize: "20px",
-                        cursor: "pointer"
-                      }}
-                    >
-                      <option value="" disabled hidden>Pilih HJT</option>
-                      {hjtOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      style={inputStyle('hjt')}
+                    />
                   </div>
                 </motion.div>
 
