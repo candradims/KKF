@@ -696,7 +696,7 @@ const Index = () => {
                   transition: 'all 0.3s ease',
                   backgroundColor: colors.white,
                   color: colors.gray700,
-                  fontFamily: "'Open Sans', sans-serif"
+                  fontFamily: "'Open Sans', sans-serif !important",
                 }}
                 className="search-input"
                 onFocus={(e) => {
