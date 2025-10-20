@@ -363,7 +363,7 @@ const Index = () => {
       
       <div style={{
         padding: '24px',
-        backgroundColor: colors.gray50,
+        background: '#e7f3f5ff',
         minHeight: '100vh',
         position: 'relative'
       }}>
