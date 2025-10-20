@@ -248,10 +248,7 @@ const Index = () => {
       }
       
       // Call API to update status
-      const result = await penawaranAPI.updateStatus(selectedStatusItem.id, {
-        status: newStatus,
-        catatan: finalCatatan
-      });
+      const result = await penawaranAPI.updateStatus(selectedStatusItem.id, newStatus, finalCatatan);
       
       if (result.success) {
         console.log("✅ Status updated successfully");

@@ -171,9 +171,14 @@ export const penawaranAPI = {
         method: "POST",
       }
     ),
-};
 
-// Specific API functions for Pengeluaran
+  // Update status penawaran (for admin/superAdmin)
+  updateStatus: (id, status, catatan = "") =>
+    apiRequest(`${API_CONFIG.ENDPOINTS.PENAWARAN.BY_ID(id)}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status, catatan }),
+    }),
+};
 export const pengeluaranAPI = {
   // Get all pengeluaran
   getAll: () => apiRequest(API_CONFIG.ENDPOINTS.PENGELUARAN),
