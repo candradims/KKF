@@ -546,7 +546,7 @@ const LaporanLaba = () => {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #e7f3f5 0%, #f0f9ff 100%)',
       padding: '24px',
-      fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      fontFamily: "'Open Sans', sans-serif !important",
       position: 'relative'
     }}>
       
