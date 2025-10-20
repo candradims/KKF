@@ -442,31 +442,40 @@ const LaporanLaba = () => {
   }, []);
 
   // Filter data berdasarkan tahun yang dipilih
-  const filteredMonthlyData = monthlyData.filter(item => {
+  const filteredMonthlyData = selectedYearSales === '2025' ? monthlyData.filter(item => {
     // For demo purposes, we'll use the current year data
     return true;
-  });
+  }) : [];
 
   // Get current month data for stats
   const currentMonth = new Date().getMonth();
   const currentMonthData = filteredMonthlyData.find(item => item.month === currentMonth + 1) || filteredMonthlyData[0];
 
-  // Hitung statistik - UPDATED: Use nilaiPencapaian for accurate total
-  const totalRevenue = totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
-  const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
-  const totalPencapaian = nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0);
+  // Hitung statistik - UPDATED: Only show data for 2025
+  const totalRevenue = selectedYearSales === '2025' 
+    ? (totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0))
+    : 0;
+    
+  const totalKomisi = selectedYearSales === '2025'
+    ? salesData.reduce((sum, sales) => sum + sales.komisi, 0)
+    : 0;
+    
+  const totalPencapaian = selectedYearSales === '2025'
+    ? (nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0))
+    : 0;
   
   // NEW: Achievement rate based on 10x target logic
   // Status tercapai jika Pencapaian >= Target × 10
-  const achievementRate = salesData.length > 0 
+  const achievementRate = selectedYearSales === '2025' && salesData.length > 0 
     ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 
     : 0;
   
-  const averageGrowth = salesData.length > 0
+  const averageGrowth = selectedYearSales === '2025' && salesData.length > 0
     ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length
     : 0;
   
   console.log('📊 [LAPORAN LABA] Display Statistics:');
+  console.log('  - Selected Year:', selectedYearSales);
   console.log('  - Total Revenue (from profit):', totalRevenue.toLocaleString('id-ID'));
   console.log('  - Total Pencapaian (from total_per_bulan):', totalPencapaian.toLocaleString('id-ID'));
   console.log('  - Total Komisi:', totalKomisi.toLocaleString('id-ID'));
@@ -946,6 +955,34 @@ const LaporanLaba = () => {
                   Memuat data revenue bulanan...
                 </p>
               </div>
+            ) : filteredMonthlyData.length === 0 ? (
+              // Tampilkan pesan jika tidak ada data
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100%',
+                gap: '16px'
+              }}>
+                <TrendingUp size={64} color={colors.gray300} />
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: colors.gray500,
+                  textAlign: 'center'
+                }}>
+                  Tidak Ada Data Performa
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: colors.gray400,
+                  textAlign: 'center',
+                  maxWidth: '400px'
+                }}>
+                  Belum ada data performa untuk tahun {selectedYearSales}. Data performa hanya tersedia untuk tahun 2025.
+                </div>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart 
@@ -1046,7 +1083,36 @@ const LaporanLaba = () => {
           </h3>
           
           <div style={{ overflowX: 'auto' }}>
-            <table style={{
+            {filteredMonthlyData.length === 0 ? (
+              // Tampilkan pesan jika tidak ada data
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '60px 20px',
+                gap: '16px'
+              }}>
+                <Users size={64} color={colors.gray300} />
+                <div style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: colors.gray500,
+                  textAlign: 'center'
+                }}>
+                  Tidak Ada Data Performa
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: colors.gray400,
+                  textAlign: 'center',
+                  maxWidth: '400px'
+                }}>
+                  Belum ada data performa untuk tahun {selectedYearSales}. Data hanya tersedia untuk tahun 2025.
+                </div>
+              </div>
+            ) : (
+              <table style={{
               width: '100%',
               borderCollapse: 'separate',
               borderSpacing: 0,
@@ -1219,6 +1285,7 @@ const LaporanLaba = () => {
                 ))}
               </tbody>
             </table>
+            )}
           </div>
         </div>
       </div>
