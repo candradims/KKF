@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, RotateCcw, Filter, Calendar } from 'lucide-react';
+import { Eye, RotateCcw, Filter, Calendar, Check } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Helper function untuk konversi diskon
 const convertDiscountToPercentage = (discount) => {
@@ -58,6 +59,10 @@ const Index = () => {
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [selectedDiscountItem, setSelectedDiscountItem] = useState(null);
   const [newDiscount, setNewDiscount] = useState('');
+
+  // State untuk success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // State untuk data dari API
   const [penawaranData, setPenawaranData] = useState([]);
@@ -212,6 +217,18 @@ const Index = () => {
     setSelectedDetailData(null);
   };
 
+  // Fungsi untuk menampilkan success modal
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
+    setShowSuccessModal(true);
+    
+    // Auto close setelah 3 detik
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      setSuccessMessage('');
+    }, 3000);
+  };
+
   const handleStatusClick = (item) => {
     setSelectedStatusItem(item);
     setNewStatus(item.status);
@@ -267,7 +284,9 @@ const Index = () => {
         );
         
         console.log("✅ Status updated successfully:", result.data);
-        alert(`Status penawaran berhasil diubah menjadi "${newStatus}"`);
+        
+        // Tampilkan success modal
+        showSuccessMessage(`Status penawaran berhasil diubah menjadi "${newStatus}"`);
         fetchPenawaranData();
         
       } else {
@@ -357,7 +376,9 @@ const Index = () => {
       const result = await response.json();
       
       if (result.success) {
-        alert(`Discount penawaran berhasil diubah menjadi "${newDiscount}"`);
+        // Tampilkan success modal
+        showSuccessMessage(`Discount penawaran berhasil diubah menjadi "${newDiscount}"`);
+        
         setShowDiscountModal(false);
         setSelectedDiscountItem(null);
         setNewDiscount('');
@@ -1967,6 +1988,142 @@ const Index = () => {
             </div>
           </div>
         )}
+
+        {/* Success Modal */}
+        <AnimatePresence>
+          {showSuccessModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(3, 91, 113, 0.3)',
+                backdropFilter: 'blur(2px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1001,
+                padding: '20px'
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+                transition={{ 
+                  duration: 0.5, 
+                  ease: [0.4, 0, 0.2, 1],
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20
+                }}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '24px',
+                  padding: '40px',
+                  textAlign: 'center',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  position: 'relative',
+                  width: '100%',
+                  maxWidth: '400px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                {/* Success Icon */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                    borderRadius: '50%',
+                    width: '100px',
+                    height: '100px',
+                    margin: '0 auto 24px auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: `0 20px 40px rgba(63, 186, 140, 0.4)`
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                  >
+                    <Check style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      color: 'white',
+                      strokeWidth: 3
+                    }} />
+                  </motion.div>
+                </motion.div>
+
+                <motion.h3 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  style={{
+                    margin: '0 0 12px 0',
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
+                  Berhasil!
+                </motion.h3>
+                
+                <motion.p 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  style={{
+                    margin: '0 0 32px 0',
+                    fontSize: '16px',
+                    color: colors.accent1,
+                    lineHeight: '1.5',
+                    opacity: 0.9
+                  }}
+                >
+                  {successMessage}
+                </motion.p>
+                
+                <motion.button
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowSuccessModal(false)}
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '16px 32px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
+                    transition: 'all 0.3s ease',
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  Tutup
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
