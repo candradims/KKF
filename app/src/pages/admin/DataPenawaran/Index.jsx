@@ -2128,7 +2128,7 @@ const Index = () => {
                     }}
                   >
                     <option value="" disabled hidden>Pilih discount...</option>
-                    <option value="0%">0% - Tanpa Discount</option>
+                    <option value="0%">0%</option>
                     <option value="10%">10% - MB Niaga</option>
                     <option value="20%">20% - GM SBU</option>
                   </motion.select>
