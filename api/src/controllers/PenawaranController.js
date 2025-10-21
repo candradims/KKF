@@ -1339,6 +1339,71 @@ export class PenawaranController {
         });
       }
 
+      // Also persist discount into hasil_penawaran (create or update)
+      try {
+        let discountNumeric;
+        switch (discount) {
+          case "0%":
+            discountNumeric = 0;
+            break;
+          case "10%":
+            discountNumeric = 10;
+            break;
+          case "20%":
+            discountNumeric = 20;
+            break;
+          default:
+            discountNumeric =
+              parseFloat(discount.toString().replace("%", "")) || 0;
+        }
+
+        let discountAmount = 0;
+        try {
+          const existingHasil =
+            await HasilPenawaranModel.getHasilPenawaranByPenawaranId(id);
+          if (existingHasil) {
+            const grandTotal = parseFloat(
+              existingHasil.grand_total_12_bulan_harga_dasar_icon || 0
+            );
+            if (grandTotal > 0) {
+              discountAmount = (grandTotal * discountNumeric) / 100;
+            } else {
+              const totalPerBulan = parseFloat(
+                existingHasil.total_per_bulan_harga_dasar_icon || 0
+              );
+              if (totalPerBulan > 0) {
+                discountAmount = (totalPerBulan * 12 * discountNumeric) / 100;
+              } else {
+                discountAmount = 0;
+              }
+            }
+          } else {
+            discountAmount = 0;
+          }
+        } catch (e) {
+          console.error(
+            "❌ Error while computing discountAmount from existing hasil_penawaran:",
+            e
+          );
+          discountAmount = 0;
+        }
+
+        console.log("🎯 Upserting monetary discount into hasil_penawaran", {
+          id_penawaran: id,
+          discountPercent: discountNumeric,
+          discountAmount,
+        });
+
+        await HasilPenawaranModel.createOrUpdateHasilPenawaran(id, {
+          discount: discountAmount,
+        });
+      } catch (err) {
+        console.error(
+          "❌ Failed to upsert discount into hasil_penawaran:",
+          err
+        );
+      }
+
       // Convert discount percentage to numeric for response consistency
       let numericDiscount;
       switch (discount) {
