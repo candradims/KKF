@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Eye, RotateCcw, Filter, Calendar } from 'lucide-react';
+import { Eye, RotateCcw, Filter, Calendar, Check } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Helper function untuk konversi diskon
 const convertDiscountToPercentage = (discount) => {
@@ -47,6 +48,10 @@ const Index = () => {
   const [selectedStatusItem, setSelectedStatusItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [statusCatatan, setStatusCatatan] = useState('');
+
+  // State untuk success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // State untuk data dari API
   const [penawaranData, setPenawaranData] = useState([]);
@@ -220,6 +225,18 @@ const Index = () => {
     setSelectedDetailData(null);
   };
 
+  // Fungsi untuk menampilkan success modal
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
+    setShowSuccessModal(true);
+    
+    // Auto close setelah 3 detik
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      setSuccessMessage('');
+    }, 3000);
+  };
+
   const handleStatusClick = (item) => {
     setSelectedStatusItem(item);
     setNewStatus(item.status);
@@ -262,8 +279,10 @@ const Index = () => {
           )
         );
         
+        // Tampilkan success modal
+        showSuccessMessage(`Status penawaran berhasil diubah menjadi "${newStatus}"`);
+        
         handleCloseStatusModal();
-        alert('Status berhasil diperbarui!');
       } else {
         console.error("❌ Failed to update status:", result.message);
         alert(`Gagal memperbarui status: ${result.message}`);
@@ -287,45 +306,41 @@ const Index = () => {
         return {
           backgroundColor: '#FEF3C7',
           color: '#92400E',
-          padding: '8px 16px',
-          borderRadius: '20px',
+          border: '2px solid #F59E0B',
+          padding: '4px 8px',
+          borderRadius: '12px',
           fontSize: '12px',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
+          fontWeight: '500'
         };
       case 'Disetujui':
         return {
           backgroundColor: '#D1FAE5',
           color: '#065F46',
-          padding: '8px 16px',
-          borderRadius: '20px',
+          border: '2px solid #10B981',
+          padding: '4px 8px',
+          borderRadius: '12px',
           fontSize: '12px',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
+          fontWeight: '500'
         };
       case 'Ditolak':
         return {
           backgroundColor: '#FEE2E2',
           color: '#991B1B',
-          padding: '8px 16px',
-          borderRadius: '20px',
+          border: '2px solid #EF4444',
+          padding: '4px 8px',
+          borderRadius: '12px',
           fontSize: '12px',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
+          fontWeight: '500'
         };
       default:
         return {
-          backgroundColor: colors.gray200,
-          color: colors.gray700,
-          padding: '8px 16px',
-          borderRadius: '20px',
+          backgroundColor: '#F3F4F6',
+          color: '#374151',
+          border: '2px solid #9CA3AF',
+          padding: '4px 8px',
+          borderRadius: '12px',
           fontSize: '12px',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px'
+          fontWeight: '500'
         };
     }
   };
@@ -337,37 +352,22 @@ const Index = () => {
         return colors.secondary;
       case 'filtered':
         return colors.success;
-      case 'penawaran':
-        return colors.primary;
-      case 'layanan':
-        return colors.secondary;
       default:
-        return colors.gray300;
+        return colors.primary;
     }
   };
 
   return (
-    <>
-      {/* CSS Animation for spinner */}
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
-      
+    <div style={{
+      minHeight: '100vh',
+      background: '#e7f3f5ff',
+      padding: '24px',
+      fontFamily: "'Open Sans', sans-serif !important",
+      position: 'relative'
+    }}>
+      {/* Background Pattern */}
       <div style={{
-        padding: '24px',
-        background: '#e7f3f5ff',
-        minHeight: '100vh',
-        position: 'relative'
-      }}>
-      
-      {/* Background decorative elements */}
-      <div style={{
-        position: 'fixed',
+        position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
@@ -510,75 +510,43 @@ const Index = () => {
         {/* Loading State */}
         {isLoading && (
           <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '200px',
+            fontSize: '16px',
+            color: colors.gray600,
             background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
             borderRadius: '16px',
-            padding: '48px 24px',
-            textAlign: 'center',
-            boxShadow: `0 4px 20px ${colors.primary}10`,
-            border: `2px solid ${colors.primary}20`
+            border: `2px solid ${colors.primary}`
           }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              border: `4px solid ${colors.gray200}`,
-              borderTop: `4px solid ${colors.secondary}`,
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 16px'
-            }}></div>
-            <p style={{
-              fontSize: '16px',
-              color: colors.gray600,
-              margin: 0
-            }}>
-              Memuat data penawaran...
-            </p>
+            Memuat data penawaran...
           </div>
         )}
 
         {/* Error State */}
-        {error && (
+        {error && !isLoading && (
           <div style={{
-            background: `linear-gradient(135deg, #FEF2F2 0%, #FECACA20 100%)`,
-            borderRadius: '16px',
-            padding: '32px 24px',
-            textAlign: 'center',
-            boxShadow: '0 4px 20px #EF444410',
-            border: '2px solid #FCA5A5'
+            backgroundColor: '#FEE2E2',
+            border: '2px solid #EF4444',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '24px',
+            color: '#DC2626',
+            background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`
           }}>
-            <div style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#DC2626',
-              marginBottom: '8px'
-            }}>
-              Error memuat data
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#7F1D1D',
-              marginBottom: '16px'
-            }}>
-              {error}
-            </div>
-            <button
+            <strong>Error:</strong> {error}
+            <button 
               onClick={fetchPenawaranData}
               style={{
-                padding: '12px 24px',
-                backgroundColor: '#DC2626',
+                marginLeft: '16px',
+                padding: '10px 20px',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.backgroundColor = '#B91C1C';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.backgroundColor = '#DC2626';
+                fontWeight: '600'
               }}
             >
               Coba Lagi
@@ -586,17 +554,17 @@ const Index = () => {
           </div>
         )}
 
-        {/* Main Content - Only show when not loading and no error */}
+        {/* Main Content */}
         {!isLoading && !error && (
           <>
             {/* Filter Section */}
             <div style={{
               background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
               borderRadius: '20px',
-              padding: '32px',
-              marginBottom: '32px',
-              boxShadow: `0 10px 40px ${colors.primary}10`,
-              border: `2px solid ${colors.primary}15`,
+              padding: '28px',
+              boxShadow: `0 8px 32px ${colors.primary}08`,
+              border: `2px solid ${colors.primary}`,
+              marginBottom: '24px',
               position: 'relative',
               overflow: 'hidden'
             }}>
@@ -707,14 +675,14 @@ const Index = () => {
                       e.target.style.boxShadow = 'none';
                     }}
                   >
-                    <option value="">Semua Status</option>
+                    <option value="" disabled hidden>Semua Status</option>
                     <option value="Menunggu">Menunggu</option>
                     <option value="Disetujui">Disetujui</option>
                     <option value="Ditolak">Ditolak</option>
                   </select>
                 </div>
 
-                {/* Reset Filter Button */}
+                {/* Refresh Button */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'end' }}>
                   <button
                     onClick={() => {
@@ -723,584 +691,826 @@ const Index = () => {
                       setCurrentPage(1);
                     }}
                     style={{
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                      color: 'white',
+                      padding: '12px 20px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
-                      padding: '12px 24px',
-                      background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                      color: colors.white,
-                      border: 'none',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '600',
                       transition: 'all 0.3s ease',
-                      boxShadow: `0 4px 12px ${colors.secondary}30`,
+                      boxShadow: `0 4px 15px ${colors.primary}30`,
                       whiteSpace: 'nowrap'
                     }}
                     onMouseOver={(e) => {
                       e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = `0 6px 20px ${colors.secondary}40`;
+                      e.target.style.boxShadow = `0 6px 20px ${colors.primary}40`;
                     }}
                     onMouseOut={(e) => {
-                      e.target.style.transform = 'translateY(0px)';
-                      e.target.style.boxShadow = `0 4px 12px ${colors.secondary}30`;
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = `0 4px 15px ${colors.primary}30`;
                     }}
                   >
                     <RotateCcw size={16} />
-                    Reset Filter
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Data Section */}
+            {/* Table Section */}
             <div style={{
               background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
               borderRadius: '20px',
               overflow: 'hidden',
-              boxShadow: `0 10px 40px ${colors.primary}10`,
-              border: `2px solid ${colors.primary}15`
+              boxShadow: `0 12px 40px ${colors.primary}08`,
+              border: `2px solid ${colors.primary}`,
+              position: 'relative'
             }}>
               {/* Table Header */}
               <div style={{
-                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
-                padding: '20px 32px',
-                borderBottom: `2px solid ${colors.primary}20`
+                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                padding: '20px 24px',
+                borderBottom: `1px solid ${colors.gray200}`,
+                position: 'relative',
+                overflow: 'hidden'
               }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '-50%',
+                  left: '-10%',
+                  width: '120%',
+                  height: '200%',
+                  background: `radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+                  transform: 'rotate(-15deg)',
+                  pointerEvents: 'none'
+                }} />
                 <h3 style={{
-                  fontSize: '20px',
-                  fontWeight: '700',
                   color: colors.white,
-                  margin: '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  margin: 0,
+                  position: 'relative',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}>
-                  <Filter size={24} />
                   Daftar Penawaran
                 </h3>
               </div>
 
-              {/* Table Container */}
               <div style={{ overflowX: 'auto' }}>
                 <table style={{
                   width: '100%',
-                  borderCollapse: 'collapse'
+                  borderCollapse: 'separate',
+                  borderSpacing: 0
                 }}>
                   <thead>
-                    <tr style={{ 
-                      background: `linear-gradient(135deg, ${colors.gray50} 0%, ${colors.white} 100%)`,
-                      borderBottom: `2px solid ${colors.primary}20`
+                    <tr style={{
+                      background: `linear-gradient(135deg, ${colors.light}60 0%, ${colors.gray100} 100%)`
                     }}>
                       <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>No</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Tanggal</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Nama Pelanggan</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Nama Sales</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Nomor Kontrak/BAKB</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Kontrak Ke-</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Referensi</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Discount</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Durasi Kontrak (thn)</th>
-                      <th style={{
-                        padding: '16px 20px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Status</th>
-                      <th style={{
-                        padding: '16px 20px',
+                        padding: '20px 16px',
                         textAlign: 'center',
-                        fontSize: '13px',
+                        fontSize: '14px',
                         fontWeight: '700',
                         color: colors.primary,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px'
-                      }}>Actions</th>
+                        borderBottom: `2px solid ${colors.primary}`,
+                        width: '80px'
+                      }}>
+                        No.
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                        width: '140px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Calendar size={16} />
+                          Tanggal
+                        </div>
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Nama Pelanggan
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Sales
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Nomor Kontrak
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Kontrak Ke-
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Referensi
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Discount
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Durasi Kontrak
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        Status
+                      </th>
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                        width: '100px'
+                      }}>
+                        Aksi
+                      </th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    {currentData.map((item, index) => (
-                      <tr key={item.id} style={{
-                        background: index % 2 === 0 
-                          ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
-                          : colors.white,
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = `linear-gradient(135deg, ${colors.light}30 0%, ${colors.secondary}05 100%)`;
-                        e.currentTarget.style.transform = 'scale(1.005)';
-                        e.currentTarget.style.boxShadow = `0 8px 25px ${colors.primary}08`;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = index % 2 === 0 
-                          ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
-                          : colors.white;
-                        e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                      >
-                        <td style={{
-                          padding: '20px 16px',
-                          textAlign: 'center',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            width: '32px',
-                            height: '32px',
-                            background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: '12px',
-                            fontWeight: '700',
-                            margin: '0 auto',
-                            boxShadow: `0 2px 8px ${colors.secondary}30`
-                          }}>
-                            {startIndex + index + 1}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
+                    {currentData.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="11"
+                          style={{
+                            padding: '60px 20px',
+                            textAlign: 'center',
+                            color: colors.gray500,
+                            fontSize: '16px',
+                            background: `linear-gradient(135deg, ${colors.gray50} 0%, ${colors.white} 100%)`
+                          }}
+                        >
                           <div style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '2px'
-                          }}>
-                            <span style={{ fontWeight: '600' }}>{formatTanggal(item.tanggal)}</span>
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            display: 'flex',
                             alignItems: 'center',
                             gap: '12px'
                           }}>
+                            <Filter size={48} style={{ color: colors.gray300 }} />
+                            <span>Tidak ada data yang ditemukan</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentData.map((item, index) => (
+                        <tr
+                          key={item.id}
+                          style={{
+                            background: index % 2 === 0 
+                              ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
+                              : colors.white,
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = `linear-gradient(135deg, ${colors.light}30 0%, ${colors.secondary}05 100%)`;
+                            e.currentTarget.style.transform = 'scale(1.005)';
+                            e.currentTarget.style.boxShadow = `0 8px 25px ${colors.primary}08`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = index % 2 === 0 
+                              ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}50 100%)`
+                              : colors.white;
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          <td style={{
+                            padding: '20px 16px',
+                            textAlign: 'center',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
                             <div style={{
-                              width: '40px',
-                              height: '40px',
-                              background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
-                              borderRadius: '10px',
+                              width: '32px',
+                              height: '32px',
+                              background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
+                              borderRadius: '8px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               color: 'white',
-                              fontSize: '16px',
+                              fontSize: '12px',
                               fontWeight: '700',
-                              boxShadow: `0 4px 12px ${colors.success}25`
+                              margin: '0 auto',
+                              boxShadow: `0 2px 8px ${colors.secondary}30`
                             }}>
-                              {item.namaPelanggan.charAt(0).toUpperCase()}
+                              {startIndex + index + 1}
                             </div>
-                            <div>
-                              <div style={{ fontWeight: '600', marginBottom: '2px' }}>
-                                {item.namaPelanggan}
-                              </div>
-                              <div style={{ 
-                                fontSize: '12px', 
-                                color: colors.gray500 
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '2px'
+                            }}>
+                              <span style={{ fontWeight: '600' }}>{item.tanggal}</span>
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px'
+                            }}>
+                              <div style={{
+                                width: '40px',
+                                height: '40px',
+                                background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                                borderRadius: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '16px',
+                                fontWeight: '700',
+                                boxShadow: `0 4px 12px ${colors.success}25`
                               }}>
-                                Pelanggan
+                                {item.namaPelanggan.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: '600', marginBottom: '2px' }}>
+                                  {item.namaPelanggan}
+                                </div>
+                                <div style={{ 
+                                  fontSize: '12px', 
+                                  color: colors.gray500 
+                                }}>
+                                  Pelanggan
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            background: `${colors.gray100}`,
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            fontFamily: "'Open Sans', sans-serif !important",
-                            border: `1px solid ${colors.primary}`,
-                            display: 'inline-block'
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
                           }}>
-                            {item.namaSales}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            background: `${colors.gray100}`,
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            fontFamily: "'Open Sans', sans-serif !important",
-                            border: `1px solid ${colors.primary}`,
-                            display: 'inline-block'
-                          }}>
-                            {item.nomorKontrak}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            background: `${colors.gray100}`,
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            fontFamily: "'Open Sans', sans-serif !important",
-                            border: `1px solid ${colors.primary}`,
-                            display: 'inline-block'
-                          }}>
-                            {item.kontrakKe}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            background: `${colors.gray100}`,
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            fontFamily: "'Open Sans', sans-serif !important",
-                            border: `1px solid ${colors.primary}`,
-                            display: 'inline-block'
-                          }}>
-                            {item.referensi}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            background: `${colors.gray100}`,
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            fontFamily: "'Open Sans', sans-serif !important",
-                            border: `1px solid ${colors.primary}`,
-                            display: 'inline-block'
-                          }}>
-                            {convertDiscountToPercentage(item.discount)}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <div style={{
-                            background: `${colors.gray100}`,
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            fontFamily: "'Open Sans', sans-serif !important",
-                            border: `1px solid ${colors.primary}`,
-                            display: 'inline-block'
-                          }}>
-                            {item.durasi}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          fontSize: '14px',
-                          color: colors.primary,
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <button
-                            onClick={() => handleStatusClick(item)}
-                            style={{
-                              ...getStatusStyle(item.status),
-                              border: 'none',
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease',
-                              outline: 'none'
-                            }}
-                            onMouseOver={(e) => {
-                              e.target.style.transform = 'scale(1.05)';
-                              e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                            }}
-                            onMouseOut={(e) => {
-                              e.target.style.transform = 'scale(1)';
-                              e.target.style.boxShadow = 'none';
-                            }}
-                            title="Klik untuk mengubah status"
-                          >
-                            {item.status}
-                          </button>
-                        </td>
-                        <td style={{
-                          padding: '20px 16px',
-                          textAlign: 'center',
-                          borderBottom: `2px solid ${colors.gray200}`,
-                        }}>
-                          <button
-                            onClick={() => handleDetailData(item)}
-                            style={{
-                              background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                              color: colors.white,
+                            <div style={{
+                              background: `${colors.gray100}`,
                               padding: '8px 12px',
                               borderRadius: '8px',
-                              border: 'none',
-                              cursor: 'pointer',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.namaSales}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.nomorKontrak}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.kontrakKe}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.referensi}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {convertDiscountToPercentage(item.diskon)}
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                            }}>
+                              {item.durasi} tahun
+                            </div>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.gray700,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <button
+                              onClick={() => handleStatusClick(item)}
+                              style={{
+                                ...getStatusStyle(item.status),
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                outline: 'none',
+                                fontWeight: '600'
+                              }}
+                              onMouseOver={(e) => {
+                                e.target.style.opacity = '0.8';
+                                e.target.style.transform = 'scale(1.02)';
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.opacity = '1';
+                                e.target.style.transform = 'scale(1)';
+                              }}
+                              title="Klik untuk mengubah status"
+                            >
+                              {item.status}
+                            </button>
+                          </td>
+                          <td style={{
+                            padding: '20px 16px',
+                            textAlign: 'center',
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              transition: 'all 0.3s ease',
-                              fontSize: '12px',
-                              fontWeight: '600',
-                              boxShadow: `0 2px 8px ${colors.secondary}30`,
-                              margin: '0 auto'
-                            }}
-                            onMouseOver={(e) => {
-                              e.target.style.transform = 'translateY(-2px)';
-                              e.target.style.boxShadow = `0 4px 12px ${colors.secondary}40`;
-                            }}
-                            onMouseOut={(e) => {
-                              e.target.style.transform = 'translateY(0px)';
-                              e.target.style.boxShadow = `0 2px 8px ${colors.secondary}30`;
-                            }}
-                            title="View Details"
-                          >
-                            <Eye size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                              gap: '6px'
+                            }}>
+                              <button
+                                onClick={() => handleDetailData(item)}
+                                style={{
+                                  background: `linear-gradient(135deg, ${colors.secondary}15 0%, ${colors.secondary}25 100%)`,
+                                  color: colors.secondary,
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  border: `1px solid ${colors.tertiary}90`,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.3s ease',
+                                  boxShadow: `0 2px 8px ${colors.secondary}20`
+                                }}
+                                onMouseOver={(e) => {
+                                  e.target.style.background = colors.secondary;
+                                  e.target.style.color = 'white';
+                                  e.target.style.transform = 'translateY(-2px)';
+                                  e.target.style.boxShadow = `0 4px 12px ${colors.secondary}40`;
+                                }}
+                                onMouseOut={(e) => {
+                                  e.target.style.background = `linear-gradient(135deg, ${colors.secondary}15 0%, ${colors.secondary}25 100%)`;
+                                  e.target.style.color = colors.secondary;
+                                  e.target.style.transform = 'translateY(0)';
+                                  e.target.style.boxShadow = `0 2px 8px ${colors.secondary}20`;
+                                }}
+                                title="View Details"
+                              >
+                                <Eye size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
 
-              {/* Pagination */}
+              {/* Enhanced Pagination */}
               <div style={{
+                padding: '24px',
+                borderTop: `1px solid ${colors.gray200}`,
                 display: 'flex',
-                justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '24px 32px',
+                justifyContent: 'space-between',
                 background: `linear-gradient(135deg, ${colors.gray50} 0%, ${colors.white} 100%)`,
-                borderTop: `2px solid ${colors.primary}10`
+                flexWrap: 'wrap',
+                gap: '16px'
               }}>
                 <div style={{
                   fontSize: '14px',
                   color: colors.gray600,
-                  fontWeight: '500'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
-                  Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} entries
+                  <div style={{
+                    padding: '6px 12px',
+                    background: `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`,
+                    borderRadius: '8px',
+                    border: `1px solid ${colors.primary}`,
+                    fontWeight: '600',
+                    color: colors.primary
+                  }}>
+                    {startIndex + 1}-{Math.min(endIndex, filteredData.length)} dari {filteredData.length} data
+                  </div>
                 </div>
+                
                 <div style={{
                   display: 'flex',
-                  gap: '8px',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
                   <button
                     onClick={handlePrevious}
                     disabled={currentPage === 1}
                     style={{
                       padding: '10px 16px',
-                      backgroundColor: currentPage === 1 ? colors.gray200 : colors.white,
-                      color: currentPage === 1 ? colors.gray400 : colors.primary,
-                      border: `2px solid ${currentPage === 1 ? colors.gray300 : colors.primary}`,
+                      border: `2px solid ${currentPage === 1 ? colors.gray400 : colors.secondary}`,
                       borderRadius: '10px',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      background: currentPage === 1 
+                        ? colors.gray100 
+                        : `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`,
+                      color: currentPage === 1 ? colors.gray400 : colors.secondary,
                       fontSize: '14px',
                       fontWeight: '600',
-                      transition: 'all 0.3s ease'
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
                     }}
                     onMouseOver={(e) => {
                       if (currentPage !== 1) {
-                        e.target.style.backgroundColor = colors.primary;
-                        e.target.style.color = colors.white;
+                        e.target.style.background = colors.secondary;
+                        e.target.style.color = 'white';
+                        e.target.style.transform = 'translateY(-1px)';
                       }
                     }}
                     onMouseOut={(e) => {
                       if (currentPage !== 1) {
-                        e.target.style.backgroundColor = colors.white;
-                        e.target.style.color = colors.primary;
+                        e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`;
+                        e.target.style.color = colors.secondary;
+                        e.target.style.transform = 'translateY(0)';
                       }
                     }}
                   >
-                    Previous
+                    ← Previous
                   </button>
-                  
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    let page;
-                    if (totalPages <= 5) {
-                      page = i + 1;
-                    } else if (currentPage <= 3) {
-                      page = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      page = totalPages - 4 + i;
-                    } else {
-                      page = currentPage - 2 + i;
-                    }
-                    
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        style={{
-                          padding: '10px 14px',
-                          backgroundColor: page === currentPage ? colors.secondary : colors.white,
-                          color: page === currentPage ? colors.white : colors.primary,
-                          border: `2px solid ${page === currentPage ? colors.secondary : colors.primary}`,
-                          borderRadius: '10px',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          minWidth: '44px',
-                          transition: 'all 0.3s ease',
-                          boxShadow: page === currentPage ? `0 4px 12px ${colors.secondary}30` : 'none'
-                        }}
-                        onMouseOver={(e) => {
-                          if (page !== currentPage) {
-                            e.target.style.backgroundColor = colors.secondary;
-                            e.target.style.color = colors.white;
-                            e.target.style.borderColor = colors.secondary;
-                            e.target.style.transform = 'translateY(-2px)';
-                          }
-                        }}
-                        onMouseOut={(e) => {
-                          if (page !== currentPage) {
-                            e.target.style.backgroundColor = colors.white;
-                            e.target.style.color = colors.primary;
-                            e.target.style.borderColor = colors.primary;
-                            e.target.style.transform = 'translateY(0px)';
-                          }
-                        }}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                  
+
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    {(() => {
+                      const maxVisiblePages = 10;
+                      let startPage, endPage;
+
+                      if (totalPages <= maxVisiblePages) {
+                        startPage = 1;
+                        endPage = totalPages;
+                      } else {
+                        if (currentPage <= 6) {
+                          startPage = 1;
+                          endPage = maxVisiblePages;
+                        } else if (currentPage + 4 >= totalPages) {
+                          startPage = totalPages - 9;
+                          endPage = totalPages;
+                        } else {
+                          startPage = currentPage - 5;
+                          endPage = currentPage + 4;
+                        }
+                      }
+
+                      const pages = [];
+                      
+                      if (startPage > 1) {
+                        pages.push(
+                          <button
+                            key={1}
+                            onClick={() => handlePageChange(1)}
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              border: `2px solid ${1 === currentPage ? colors.secondary : colors.gray300}`,
+                              borderRadius: '10px',
+                              background: 1 === currentPage 
+                                ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                                : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                              color: 1 === currentPage ? 'white' : colors.gray600,
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: 1 === currentPage 
+                                ? `0 4px 12px ${colors.secondary}30`
+                                : '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                            onMouseOver={(e) => {
+                              if (1 !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                                e.target.style.borderColor = colors.secondary;
+                                e.target.style.color = colors.secondary;
+                              }
+                              e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseOut={(e) => {
+                              if (1 !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                                e.target.style.borderColor = colors.gray300;
+                                e.target.style.color = colors.gray600;
+                              }
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            1
+                          </button>
+                        );
+
+                        if (startPage > 2) {
+                          pages.push(
+                            <span key="ellipsis1" style={{
+                              width: '44px',
+                              height: '44px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: colors.gray500,
+                              fontSize: '14px',
+                              fontWeight: '600'
+                            }}>
+                              ...
+                            </span>
+                          );
+                        }
+                      }
+
+                      for (let page = startPage; page <= endPage; page++) {
+                        const isCurrentPage = page === currentPage;
+                        
+                        pages.push(
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              border: `2px solid ${isCurrentPage ? colors.secondary : colors.gray300}`,
+                              borderRadius: '10px',
+                              background: isCurrentPage 
+                                ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                                : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                              color: isCurrentPage ? 'white' : colors.gray600,
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: isCurrentPage 
+                                ? `0 4px 12px ${colors.secondary}30`
+                                : '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                            onMouseOver={(e) => {
+                              if (!isCurrentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                                e.target.style.borderColor = colors.secondary;
+                                e.target.style.color = colors.secondary;
+                              }
+                              e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseOut={(e) => {
+                              if (!isCurrentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                                e.target.style.borderColor = colors.gray300;
+                                e.target.style.color = colors.gray600;
+                              }
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            {page}
+                          </button>
+                        );
+                      }
+                      if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                          pages.push(
+                            <span key="ellipsis2" style={{
+                              width: '44px',
+                              height: '44px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: colors.gray500,
+                              fontSize: '14px',
+                              fontWeight: '600'
+                            }}>
+                              ...
+                            </span>
+                          );
+                        }
+
+                        pages.push(
+                          <button
+                            key={totalPages}
+                            onClick={() => handlePageChange(totalPages)}
+                            style={{
+                              width: '44px',
+                              height: '44px',
+                              border: `2px solid ${totalPages === currentPage ? colors.secondary : colors.gray300}`,
+                              borderRadius: '10px',
+                              background: totalPages === currentPage 
+                                ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+                                : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                              color: totalPages === currentPage ? 'white' : colors.gray600,
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: totalPages === currentPage 
+                                ? `0 4px 12px ${colors.secondary}30`
+                                : '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                            onMouseOver={(e) => {
+                              if (totalPages !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`;
+                                e.target.style.borderColor = colors.secondary;
+                                e.target.style.color = colors.secondary;
+                              }
+                              e.target.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseOut={(e) => {
+                              if (totalPages !== currentPage) {
+                                e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`;
+                                e.target.style.borderColor = colors.gray300;
+                                e.target.style.color = colors.gray600;
+                              }
+                              e.target.style.transform = 'translateY(0)';
+                            }}
+                          >
+                            {totalPages}
+                          </button>
+                        );
+                      }
+
+                      return pages;
+                    })()}
+                  </div>
+
                   <button
                     onClick={handleNext}
                     disabled={currentPage === totalPages}
                     style={{
                       padding: '10px 16px',
-                      backgroundColor: currentPage === totalPages ? colors.gray200 : colors.white,
-                      color: currentPage === totalPages ? colors.gray400 : colors.primary,
-                      border: `2px solid ${currentPage === totalPages ? colors.gray300 : colors.primary}`,
+                      border: `2px solid ${currentPage === totalPages ? colors.gray400 : colors.secondary}`,
                       borderRadius: '10px',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      background: currentPage === totalPages 
+                        ? colors.gray100 
+                        : `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`,
+                      color: currentPage === totalPages ? colors.gray400 : colors.secondary,
                       fontSize: '14px',
                       fontWeight: '600',
-                      transition: 'all 0.3s ease'
+                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
                     }}
                     onMouseOver={(e) => {
                       if (currentPage !== totalPages) {
-                        e.target.style.backgroundColor = colors.primary;
-                        e.target.style.color = colors.white;
+                        e.target.style.background = colors.secondary;
+                        e.target.style.color = 'white';
+                        e.target.style.transform = 'translateY(-1px)';
                       }
                     }}
                     onMouseOut={(e) => {
                       if (currentPage !== totalPages) {
-                        e.target.style.backgroundColor = colors.white;
-                        e.target.style.color = colors.primary;
+                        e.target.style.background = `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`;
+                        e.target.style.color = colors.secondary;
+                        e.target.style.transform = 'translateY(0)';
                       }
                     }}
                   >
-                    Next
+                    Next →
                   </button>
                 </div>
               </div>
@@ -1316,240 +1526,473 @@ const Index = () => {
         />
 
         {/* Status Change Modal */}
-        {showStatusModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
-              borderRadius: '20px',
-              padding: '32px',
-              width: '480px',
-              maxWidth: '90vw',
-              boxShadow: `0 20px 40px ${colors.primary}20`,
-              border: `2px solid ${colors.primary}20`,
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              {/* Decorative elements */}
-              <div style={{
-                position: 'absolute',
-                top: '-20px',
-                right: '-20px',
-                width: '100px',
-                height: '100px',
-                background: `radial-gradient(circle, ${colors.secondary}15 0%, transparent 70%)`,
-                borderRadius: '50%'
-              }} />
-              
-              <h3 style={{
-                fontSize: '24px',
-                fontWeight: '700',
-                color: colors.primary,
-                margin: '0 0 24px 0',
-                position: 'relative'
-              }}>
-                Ubah Status Penawaran
-              </h3>
-              
-              <div style={{
-                marginBottom: '20px',
-                position: 'relative'
-              }}>
-                <p style={{
-                  fontSize: '15px',
-                  color: colors.gray600,
-                  margin: '0 0 8px 0',
-                  fontWeight: '500'
-                }}>
-                  Pelanggan: <strong style={{ color: colors.primary }}>{selectedStatusItem?.namaPelanggan}</strong>
-                </p>
-                <p style={{
-                  fontSize: '15px',
-                  color: colors.gray600,
-                  margin: '0 0 20px 0',
-                  fontWeight: '500'
-                }}>
-                  Nomor Kontrak: <strong style={{ color: colors.primary }}>{selectedStatusItem?.nomorKontrak}</strong>
-                </p>
-              </div>
-
-              <div style={{
-                marginBottom: '24px'
-              }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: colors.primary,
-                  marginBottom: '12px'
-                }}>
-                  Status Baru:
-                </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '14px 16px',
-                    border: `2px solid ${colors.primary}`,
-                    borderRadius: '12px',
-                    fontSize: '15px',
-                    outline: 'none',
-                    backgroundColor: colors.white,
-                    color: colors.gray700,
-                    fontWeight: '500',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.secondary;
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = colors.primary;
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Menunggu">Menunggu</option>
-                  <option value="Disetujui">Disetujui</option>
-                  <option value="Ditolak">Ditolak</option>
-                </select>
-              </div>
-
-              {newStatus === 'Ditolak' && (
+        <AnimatePresence>
+          {showStatusModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(3, 91, 113, 0.4)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                padding: '20px'
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: -20 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 25 
+                }}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                  borderRadius: '24px',
+                  padding: '32px',
+                  width: '480px',
+                  maxWidth: '90vw',
+                  boxShadow: `0 25px 50px -12px ${colors.primary}20`,
+                  border: `2px solid ${colors.primary}20`,
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                {/* Background decorative elements */}
                 <div style={{
-                  marginBottom: '24px'
+                  position: 'absolute',
+                  top: '-50px',
+                  right: '-50px',
+                  width: '120px',
+                  height: '120px',
+                  background: `radial-gradient(circle, ${colors.secondary}15 0%, transparent 70%)`,
+                  borderRadius: '50%'
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-30px',
+                  left: '-30px',
+                  width: '80px',
+                  height: '80px',
+                  background: `radial-gradient(circle, ${colors.success}10 0%, transparent 70%)`,
+                  borderRadius: '50%'
+                }} />
+
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '24px',
+                  position: 'relative'
                 }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    boxShadow: `0 4px 12px ${colors.primary}30`
+                  }}>
+                    <Check size={24} />
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: '22px',
+                      fontWeight: '700',
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      margin: '0 0 4px 0'
+                    }}>
+                      Ubah Status Penawaran
+                    </h3>
+                    <p style={{
+                      fontSize: '14px',
+                      color: colors.gray500,
+                      margin: 0
+                    }}>
+                      Perbarui status penawaran pelanggan
+                    </p>
+                  </div>
+                </div>
+
+                {/* Customer Info */}
+                <div style={{
+                  background: `linear-gradient(135deg, ${colors.light}20 0%, ${colors.secondary}08 100%)`,
+                  borderRadius: '16px',
+                  padding: '20px',
+                  marginBottom: '24px',
+                  border: `1px solid ${colors.primary}15`
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      boxShadow: `0 4px 12px ${colors.success}25`
+                    }}>
+                      {selectedStatusItem?.namaPelanggan?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ 
+                        fontWeight: '600', 
+                        color: colors.primary,
+                        marginBottom: '2px'
+                      }}>
+                        {selectedStatusItem?.namaPelanggan}
+                      </div>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: colors.gray500 
+                      }}>
+                        No. Kontrak: {selectedStatusItem?.nomorKontrak}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Selection */}
+                <div style={{ marginBottom: '24px' }}>
                   <label style={{
                     display: 'block',
-                    fontSize: '16px',
+                    fontSize: '14px',
                     fontWeight: '600',
                     color: colors.primary,
-                    marginBottom: '12px'
+                    marginBottom: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
                   }}>
-                    Catatan Penolakan <span style={{ color: '#DC2626' }}>*</span>:
+                    <Filter size={16} />
+                    Status Baru
                   </label>
-                  <textarea
-                    value={statusCatatan}
-                    onChange={(e) => setStatusCatatan(e.target.value)}
-                    placeholder="Masukkan alasan penolakan..."
+                  <motion.select
+                    whileFocus={{ scale: 1.02 }}
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
                     style={{
                       width: '100%',
                       padding: '14px 16px',
-                      border: `2px solid ${colors.primary}`,
-                      borderRadius: '12px',
-                      fontSize: '15px',
+                      border: `2px solid ${colors.primary}30`,
+                      borderRadius: '14px',
+                      fontSize: '14px',
                       outline: 'none',
                       backgroundColor: colors.white,
+                      transition: 'all 0.3s ease',
                       color: colors.gray700,
-                      resize: 'vertical',
-                      minHeight: '90px',
-                      fontFamily: 'inherit',
-                      transition: 'all 0.3s ease'
+                      fontWeight: '500',
+                      cursor: 'pointer'
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = colors.secondary;
                       e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = colors.primary;
+                      e.target.style.borderColor = `${colors.primary}30`;
                       e.target.style.boxShadow = 'none';
                     }}
-                  />
-                  <p style={{
-                    fontSize: '13px',
-                    color: colors.gray500,
-                    margin: '8px 0 0 0',
-                    fontStyle: 'italic'
-                  }}>
-                    Catatan wajib diisi untuk status Ditolak
-                  </p>
+                  >
+                    <option value="Menunggu">🟡 Menunggu</option>
+                    <option value="Disetujui">🟢 Disetujui</option>
+                    <option value="Ditolak">🔴 Ditolak</option>
+                  </motion.select>
                 </div>
-              )}
 
-              <div style={{
+                {/* Rejection Note */}
+                <AnimatePresence>
+                  {newStatus === 'Ditolak' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        marginBottom: '24px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: colors.primary,
+                        marginBottom: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M12 16h.01M12 8v4" strokeWidth="2" strokeLinecap="round"/>
+                          <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                        </svg>
+                        Catatan Penolakan <span style={{ color: '#EF4444' }}>*</span>
+                      </label>
+                      <motion.textarea
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        value={statusCatatan}
+                        onChange={(e) => setStatusCatatan(e.target.value)}
+                        placeholder="Masukkan alasan penolakan..."
+                        style={{
+                          width: '100%',
+                          padding: '14px 16px',
+                          border: `2px solid ${colors.primary}30`,
+                          borderRadius: '14px',
+                          fontSize: '14px',
+                          outline: 'none',
+                          backgroundColor: colors.white,
+                          resize: 'vertical',
+                          minHeight: '100px',
+                          transition: 'all 0.3s ease',
+                          color: colors.gray700,
+                          fontFamily: 'inherit'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = colors.secondary;
+                          e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = `${colors.primary}30`;
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        style={{
+                          fontSize: '12px',
+                          color: colors.gray500,
+                          margin: '8px 0 0 0'
+                        }}
+                      >
+                        Catatan wajib diisi untuk status Ditolak
+                      </motion.p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  justifyContent: 'flex-end',
+                  marginTop: '8px'
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCloseStatusModal}
+                    style={{
+                      padding: '14px 28px',
+                      background: `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`,
+                      color: colors.gray700,
+                      border: 'none',
+                      borderRadius: '14px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: `0 2px 8px ${colors.gray300}30`
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ 
+                      scale: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 1 : 1.05,
+                      y: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 0 : -2
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleStatusChange}
+                    disabled={!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())}
+                    style={{
+                      padding: '14px 28px',
+                      background: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
+                        ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
+                        : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '14px',
+                      cursor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
+                        ? 'none' 
+                        : `0 4px 15px ${colors.secondary}40`
+                    }}
+                  >
+                    Simpan Perubahan
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Success Modal */}
+        <AnimatePresence>
+          {showSuccessModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(3, 91, 113, 0.3)',
+                backdropFilter: 'blur(2px)',
                 display: 'flex',
-                gap: '16px',
-                justifyContent: 'flex-end'
-              }}>
-                <button
-                  onClick={handleCloseStatusModal}
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1001,
+                padding: '20px'
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+                transition={{ 
+                  duration: 0.5, 
+                  ease: [0.4, 0, 0.2, 1],
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20
+                }}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '24px',
+                  padding: '40px',
+                  textAlign: 'center',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  position: 'relative',
+                  width: '100%',
+                  maxWidth: '400px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                {/* Success Icon */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
                   style={{
-                    padding: '12px 24px',
-                    backgroundColor: colors.gray200,
-                    color: colors.gray700,
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                    borderRadius: '50%',
+                    width: '100px',
+                    height: '100px',
+                    margin: '0 auto 24px auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: `0 20px 40px rgba(63, 186, 140, 0.4)`
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
+                  >
+                    <Check style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      color: 'white',
+                      strokeWidth: 3
+                    }} />
+                  </motion.div>
+                </motion.div>
+
+                <motion.h3 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  style={{
+                    margin: '0 0 12px 0',
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
+                  Berhasil!
+                </motion.h3>
+                
+                <motion.p 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  style={{
+                    margin: '0 0 32px 0',
+                    fontSize: '16px',
+                    color: colors.accent1,
+                    lineHeight: '1.5',
+                    opacity: 0.9
+                  }}
+                >
+                  {successMessage}
+                </motion.p>
+                
+                <motion.button
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowSuccessModal(false)}
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                    color: 'white',
                     border: 'none',
                     borderRadius: '12px',
+                    padding: '16px 32px',
+                    fontSize: '16px',
+                    fontWeight: '600',
                     cursor: 'pointer',
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    e.target.style.backgroundColor = colors.gray300;
-                    e.target.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.backgroundColor = colors.gray200;
-                    e.target.style.transform = 'translateY(0px)';
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleStatusChange}
-                  disabled={!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())}
-                  style={{
-                    padding: '12px 24px',
-                    background: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
-                      ? colors.gray300 
-                      : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                    color: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
-                      ? colors.gray500 
-                      : colors.white,
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
-                      ? 'not-allowed' 
-                      : 'pointer',
-                    fontSize: '15px',
-                    fontWeight: '600',
+                    boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
                     transition: 'all 0.3s ease',
-                    boxShadow: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
-                      ? 'none' 
-                      : `0 4px 12px ${colors.secondary}30`
-                  }}
-                  onMouseOver={(e) => {
-                    if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
-                      e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = `0 6px 16px ${colors.secondary}40`;
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
-                      e.target.style.transform = 'translateY(0px)';
-                      e.target.style.boxShadow = `0 4px 12px ${colors.secondary}30`;
-                    }
+                    letterSpacing: '0.02em'
                   }}
                 >
-                  Simpan
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+                  Tutup
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      </div>
-    </>
+    </div>
   );
 };
 
