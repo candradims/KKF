@@ -775,7 +775,7 @@ const Index = () => {
                       e.target.style.boxShadow = 'none';
                     }}
                   >
-                    <option value="">Semua Status</option>
+                    <option  value="" disabled hidden>Semua Status</option>
                     <option value="Menunggu">Menunggu</option>
                     <option value="Disetujui">Disetujui</option>
                     <option value="Ditolak">Ditolak</option>
@@ -1644,350 +1644,580 @@ const Index = () => {
         />
 
         {/* Status Change Modal */}
-        {showStatusModal && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '16px',
-              padding: '28px',
-              width: '450px',
-              maxWidth: '90vw',
-              boxShadow: `0 20px 25px ${colors.primary}10`,
-              border: `2px solid ${colors.primary}`
-            }}>
-              <h3 style={{
-                fontSize: '20px',
-                fontWeight: '700',
-                color: colors.primary,
-                margin: '0 0 20px 0'
-              }}>
-                Ubah Status Penawaran
-              </h3>
-              
-              <div style={{
-                marginBottom: '20px'
-              }}>
-                <p style={{
-                  fontSize: '14px',
-                  color: colors.gray600,
-                  margin: '0 0 8px 0'
-                }}>
-                  Pelanggan: <strong>{selectedStatusItem?.namaPelanggan}</strong>
-                </p>
-                <p style={{
-                  fontSize: '14px',
-                  color: colors.gray600,
-                  margin: '0 0 16px 0'
-                }}>
-                  Nomor Kontrak: <strong>{selectedStatusItem?.nomorKontrak}</strong>
-                </p>
-              </div>
-
-              <div style={{
-                marginBottom: '24px'
-              }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: colors.primary,
-                  marginBottom: '8px'
-                }}>
-                  Status Baru:
-                </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: `1px solid ${colors.primary}`,
-                    borderRadius: '12px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: colors.white,
-                    transition: 'all 0.3s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.secondary;
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = colors.primary;
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Menunggu">Menunggu</option>
-                  <option value="Disetujui">Disetujui</option>
-                  <option value="Ditolak">Ditolak</option>
-                </select>
-              </div>
-
-              {newStatus === 'Ditolak' && (
+        <AnimatePresence>
+          {showStatusModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(3, 91, 113, 0.4)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                padding: '20px'
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: -20 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 25 
+                }}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                  borderRadius: '24px',
+                  padding: '32px',
+                  width: '480px',
+                  maxWidth: '90vw',
+                  boxShadow: `0 25px 50px -12px ${colors.primary}20`,
+                  border: `2px solid ${colors.primary}20`,
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                {/* Background decorative elements */}
                 <div style={{
-                  marginBottom: '24px'
+                  position: 'absolute',
+                  top: '-50px',
+                  right: '-50px',
+                  width: '120px',
+                  height: '120px',
+                  background: `radial-gradient(circle, ${colors.secondary}15 0%, transparent 70%)`,
+                  borderRadius: '50%'
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-30px',
+                  left: '-30px',
+                  width: '80px',
+                  height: '80px',
+                  background: `radial-gradient(circle, ${colors.success}10 0%, transparent 70%)`,
+                  borderRadius: '50%'
+                }} />
+
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '24px',
+                  position: 'relative'
                 }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    boxShadow: `0 4px 12px ${colors.primary}30`
+                  }}>
+                    <Check size={24} />
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: '22px',
+                      fontWeight: '700',
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      margin: '0 0 4px 0'
+                    }}>
+                      Ubah Status Penawaran
+                    </h3>
+                    <p style={{
+                      fontSize: '14px',
+                      color: colors.gray500,
+                      margin: 0
+                    }}>
+                      Perbarui status penawaran pelanggan
+                    </p>
+                  </div>
+                </div>
+
+                {/* Customer Info */}
+                <div style={{
+                  background: `linear-gradient(135deg, ${colors.light}20 0%, ${colors.secondary}08 100%)`,
+                  borderRadius: '16px',
+                  padding: '20px',
+                  marginBottom: '24px',
+                  border: `1px solid ${colors.primary}15`
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      boxShadow: `0 4px 12px ${colors.success}25`
+                    }}>
+                      {selectedStatusItem?.namaPelanggan?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ 
+                        fontWeight: '600', 
+                        color: colors.primary,
+                        marginBottom: '2px'
+                      }}>
+                        {selectedStatusItem?.namaPelanggan}
+                      </div>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: colors.gray500 
+                      }}>
+                        No. Kontrak: {selectedStatusItem?.nomorKontrak}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Selection */}
+                <div style={{ marginBottom: '24px' }}>
                   <label style={{
                     display: 'block',
                     fontSize: '14px',
                     fontWeight: '600',
                     color: colors.primary,
-                    marginBottom: '8px'
+                    marginBottom: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
                   }}>
-                    Catatan Penolakan <span style={{ color: '#DC2626' }}>*</span>:
+                    <Filter size={16} />
+                    Status Baru
                   </label>
-                  <textarea
-                    value={statusCatatan}
-                    onChange={(e) => setStatusCatatan(e.target.value)}
-                    placeholder="Masukkan alasan penolakan..."
+                  <motion.select
+                    whileFocus={{ scale: 1.02 }}
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      border: `1px solid ${colors.primary}`,
-                      borderRadius: '12px',
+                      padding: '14px 16px',
+                      border: `2px solid ${colors.primary}30`,
+                      borderRadius: '14px',
                       fontSize: '14px',
                       outline: 'none',
                       backgroundColor: colors.white,
-                      resize: 'vertical',
-                      minHeight: '80px',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      color: colors.gray700,
+                      fontWeight: '500',
+                      cursor: 'pointer'
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = colors.secondary;
                       e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = colors.primary;
+                      e.target.style.borderColor = `${colors.primary}30`;
                       e.target.style.boxShadow = 'none';
                     }}
-                  />
-                  <p style={{
-                    fontSize: '12px',
-                    color: colors.gray500,
-                    margin: '4px 0 0 0'
-                  }}>
-                    Catatan wajib diisi untuk status Ditolak
-                  </p>
+                  >
+                    <option value="Menunggu">🟡 Menunggu</option>
+                    <option value="Disetujui">🟢 Disetujui</option>
+                    <option value="Ditolak">🔴 Ditolak</option>
+                  </motion.select>
                 </div>
-              )}
 
-              <div style={{
-                display: 'flex',
-                gap: '12px',
-                justifyContent: 'flex-end'
-              }}>
-                <button
-                  onClick={handleCloseStatusModal}
-                  style={{
-                    padding: '12px 24px',
-                    background: `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`,
-                    color: colors.gray700,
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    e.target.style.background = `linear-gradient(135deg, ${colors.gray200} 0%, ${colors.gray300} 100%)`;
-                    e.target.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.background = `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`;
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleStatusChange}
-                  disabled={!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())}
-                  style={{
-                    padding: '12px 24px',
-                    background: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
-                      ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
-                      : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = `0 4px 12px ${colors.secondary}30`;
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (newStatus && newStatus !== selectedStatusItem?.status && !(newStatus === 'Ditolak' && !statusCatatan.trim())) {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = 'none';
-                    }
-                  }}
-                >
-                  Simpan
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+                {/* Rejection Note */}
+                <AnimatePresence>
+                  {newStatus === 'Ditolak' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      style={{
+                        marginBottom: '24px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: colors.primary,
+                        marginBottom: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path d="M12 16h.01M12 8v4" strokeWidth="2" strokeLinecap="round"/>
+                          <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                        </svg>
+                        Catatan Penolakan <span style={{ color: '#EF4444' }}>*</span>
+                      </label>
+                      <motion.textarea
+                        initial={{ scale: 0.95 }}
+                        animate={{ scale: 1 }}
+                        value={statusCatatan}
+                        onChange={(e) => setStatusCatatan(e.target.value)}
+                        placeholder="Masukkan alasan penolakan..."
+                        style={{
+                          width: '100%',
+                          padding: '14px 16px',
+                          border: `2px solid ${colors.primary}30`,
+                          borderRadius: '14px',
+                          fontSize: '14px',
+                          outline: 'none',
+                          backgroundColor: colors.white,
+                          resize: 'vertical',
+                          minHeight: '100px',
+                          transition: 'all 0.3s ease',
+                          color: colors.gray700,
+                          fontFamily: 'inherit'
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = colors.secondary;
+                          e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = `${colors.primary}30`;
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      />
+                      <motion.p 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        style={{
+                          fontSize: '12px',
+                          color: colors.gray500,
+                          margin: '8px 0 0 0'
+                        }}
+                      >
+                        Catatan wajib diisi untuk status Ditolak
+                      </motion.p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  justifyContent: 'flex-end',
+                  marginTop: '8px'
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCloseStatusModal}
+                    style={{
+                      padding: '14px 28px',
+                      background: `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`,
+                      color: colors.gray700,
+                      border: 'none',
+                      borderRadius: '14px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: `0 2px 8px ${colors.gray300}30`
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ 
+                      scale: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 1 : 1.05,
+                      y: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 0 : -2
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleStatusChange}
+                    disabled={!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())}
+                    style={{
+                      padding: '14px 28px',
+                      background: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
+                        ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
+                        : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '14px',
+                      cursor: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: (!newStatus || newStatus === selectedStatusItem?.status || (newStatus === 'Ditolak' && !statusCatatan.trim())) 
+                        ? 'none' 
+                        : `0 4px 15px ${colors.secondary}40`
+                    }}
+                  >
+                    Simpan Perubahan
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Modal Edit Discount */}
-        {showDiscountModal && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: 1000
-            }}
-            onClick={handleCloseDiscountModal}
-          >
-            <div
+        <AnimatePresence>
+          {showDiscountModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               style={{
-                backgroundColor: 'white',
-                padding: '30px',
-                borderRadius: '16px',
-                width: '500px',
-                maxWidth: '90vw',
-                boxShadow: `0 20px 25px ${colors.primary}10`,
-                border: `2px solid ${colors.primary}`
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(3, 91, 113, 0.4)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000,
+                padding: '20px'
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={handleCloseDiscountModal}
             >
-              <h3 style={{ 
-                margin: '0 0 20px 0', 
-                fontSize: '20px', 
-                fontWeight: '700',
-                color: colors.primary
-              }}>
-                Edit Discount
-              </h3>
-              
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ 
-                  display: 'block', 
-                  marginBottom: '8px', 
-                  fontSize: '14px', 
-                  fontWeight: '600',
-                  color: colors.primary
-                }}>
-                  Pilih Discount:
-                </label>
-                <select
-                  value={newDiscount}
-                  onChange={handleDiscountSelectChange}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: `1px solid ${colors.primary}`,
-                    borderRadius: '12px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    backgroundColor: colors.white,
-                    transition: 'all 0.3s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = colors.secondary;
-                    e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = colors.primary;
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="">Pilih discount...</option>
-                  <option value="0%">0%</option>
-                  <option value="10%">10% (MB Niaga)</option>
-                  <option value="20%">20% (GM SBU)</option>
-                </select>
-              </div>
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: -20 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 25 
+                }}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+                  borderRadius: '24px',
+                  padding: '32px',
+                  width: '480px',
+                  maxWidth: '90vw',
+                  boxShadow: `0 25px 50px -12px ${colors.primary}20`,
+                  border: `2px solid ${colors.primary}20`,
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Background decorative elements */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-40px',
+                  right: '-40px',
+                  width: '100px',
+                  height: '100px',
+                  background: `radial-gradient(circle, ${colors.tertiary}15 0%, transparent 70%)`,
+                  borderRadius: '50%'
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-20px',
+                  left: '-20px',
+                  width: '60px',
+                  height: '60px',
+                  background: `radial-gradient(circle, ${colors.accent1}10 0%, transparent 70%)`,
+                  borderRadius: '50%'
+                }} />
 
-              <div style={{ 
-                display: 'flex', 
-                gap: '12px', 
-                justifyContent: 'flex-end' 
-              }}>
-                <button
-                  onClick={handleCloseDiscountModal}
-                  style={{
-                    padding: '12px 24px',
-                    background: `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`,
-                    color: colors.gray700,
-                    border: 'none',
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '28px',
+                  position: 'relative'
+                }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    background: `linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent1} 100%)`,
                     borderRadius: '12px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    e.target.style.background = `linear-gradient(135deg, ${colors.gray200} 0%, ${colors.gray300} 100%)`;
-                    e.target.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.background = `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`;
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleDiscountChange}
-                  disabled={isDiscountUnchanged()}
-                  style={{
-                    padding: '12px 24px',
-                    background: isDiscountUnchanged() 
-                      ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
-                      : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: isDiscountUnchanged() ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
+                    boxShadow: `0 4px 12px ${colors.tertiary}30`
+                  }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: '22px',
+                      fontWeight: '700',
+                      background: `linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent1} 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      margin: '0 0 4px 0'
+                    }}>
+                      Edit Discount
+                    </h3>
+                    <p style={{
+                      fontSize: '14px',
+                      color: colors.gray500,
+                      margin: 0
+                    }}>
+                      Atur persentase discount penawaran
+                    </p>
+                  </div>
+                </div>
+
+                {/* Discount Selection */}
+                <div style={{ marginBottom: '32px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '12px', 
+                    fontSize: '14px', 
                     fontWeight: '600',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    if (!isDiscountUnchanged()) {
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = `0 4px 12px ${colors.secondary}30`;
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (!isDiscountUnchanged()) {
-                      e.target.style.transform = 'translateY(0)';
+                    color: colors.primary,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    Pilih Discount
+                  </label>
+                  <motion.select
+                    whileFocus={{ scale: 1.02 }}
+                    value={newDiscount}
+                    onChange={handleDiscountSelectChange}
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      border: `2px solid ${colors.primary}30`,
+                      borderRadius: '14px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      backgroundColor: colors.white,
+                      transition: 'all 0.3s ease',
+                      color: colors.gray700,
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.tertiary;
+                      e.target.style.boxShadow = `0 0 0 3px ${colors.tertiary}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = `${colors.primary}30`;
                       e.target.style.boxShadow = 'none';
-                    }
-                  }}
-                >
-                  Simpan
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+                    }}
+                  >
+                    <option value="" disabled hidden>Pilih discount...</option>
+                    <option value="0%">0% - Tanpa Discount</option>
+                    <option value="10%">10% - MB Niaga</option>
+                    <option value="20%">20% - GM SBU</option>
+                  </motion.select>
+                  
+                  {/* Discount Info */}
+                  {newDiscount && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{
+                        marginTop: '12px',
+                        padding: '12px 16px',
+                        background: `linear-gradient(135deg, ${colors.light}20 0%, ${colors.tertiary}08 100%)`,
+                        borderRadius: '12px',
+                        border: `1px solid ${colors.tertiary}20`
+                      }}
+                    >
+                      <div style={{
+                        fontSize: '13px',
+                        color: colors.tertiary,
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                        Discount terpilih: <span style={{ fontSize: '14px' }}>{newDiscount}</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '12px', 
+                  justifyContent: 'flex-end' 
+                }}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCloseDiscountModal}
+                    style={{
+                      padding: '14px 28px',
+                      background: `linear-gradient(135deg, ${colors.gray100} 0%, ${colors.gray200} 100%)`,
+                      color: colors.gray700,
+                      border: 'none',
+                      borderRadius: '14px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: `0 2px 8px ${colors.gray300}30`
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: isDiscountUnchanged() ? 1 : 1.05, y: isDiscountUnchanged() ? 0 : -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleDiscountChange}
+                    disabled={isDiscountUnchanged()}
+                    style={{
+                      padding: '14px 28px',
+                      background: isDiscountUnchanged() 
+                        ? `linear-gradient(135deg, ${colors.gray300} 0%, ${colors.gray400} 100%)`
+                        : `linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent1} 100%)`,
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '14px',
+                      cursor: isDiscountUnchanged() ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: isDiscountUnchanged() 
+                        ? 'none' 
+                        : `0 4px 15px ${colors.tertiary}40`
+                    }}
+                  >
+                    Simpan Discount
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Success Modal */}
         <AnimatePresence>
