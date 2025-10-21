@@ -845,6 +845,10 @@ const Dashboard = () => {
     return null;
   };
 
+  const formatNumber = (value) => {
+    return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -1215,14 +1219,7 @@ const Dashboard = () => {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 11, fill: '#666', fontWeight: '600' }}
-                    tickFormatter={(value) => {
-                      if (value >= 1000000000) {
-                        return `Rp ${(value / 1000000000).toFixed(1)}B`;
-                      } else if (value >= 1000000) {
-                        return `Rp ${(value / 1000000).toFixed(1)}M`;
-                      }
-                      return `Rp ${value.toLocaleString()}`;
-                    }}
+                    tickFormatter={formatNumber}
                     width={100}
                   />
                   <Tooltip 
@@ -1698,7 +1695,7 @@ const Dashboard = () => {
                     dataKey="value"
                   >
                     {statusPenawaranData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[index]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -1716,7 +1713,7 @@ const Dashboard = () => {
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                                       gap: '8px'
                   }}>
                     <div 
                       style={{
