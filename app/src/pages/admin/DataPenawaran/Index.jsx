@@ -2255,7 +2255,7 @@ const Index = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      marginBottom: '8px'
+                      marginBottom: '18px'
                     }}>
                       <label style={{
                         fontSize: '14px',
