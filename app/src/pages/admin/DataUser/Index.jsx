@@ -496,7 +496,7 @@ const Index = () => {
 
       <div style={{ maxWidth: '80rem', margin: '0 auto', position: 'relative' }}>
         {/* Header Section */}
-        <div style={{ marginBottom: '32px' }}>
+        <div style={{ marginBottom: '32px', marginTop: '0' }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -833,7 +833,8 @@ const Index = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end'}}>
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '0' }}>
               <button 
                 onClick={handleOpenImportModal}
                 style={{
@@ -851,8 +852,7 @@ const Index = () => {
                   transition: 'all 0.3s ease',
                   boxShadow: `0 4px 15px ${colors.tertiary}30`,
                   whiteSpace: 'nowrap',
-                  marginBottom: '16px',
-                  marginTop: '35px'
+                  marginBottom: '16px'
                 }}
                 onMouseOver={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
@@ -884,8 +884,7 @@ const Index = () => {
                   transition: 'all 0.3s ease',
                   boxShadow: `0 4px 15px ${colors.secondary}30`,
                   whiteSpace: 'nowrap',
-                  marginBottom: '16px',
-                  marginTop: '35px'
+                  marginBottom: '16px'
                 }}
                 onMouseOver={(e) => {
                   e.target.style.transform = 'translateY(-2px)';
@@ -909,7 +908,7 @@ const Index = () => {
           boxShadow: `0 12px 40px ${colors.primary}08`,
           border: '1px solid #035b71',
           position: 'relative',
-          marginTop: '15px'
+          marginTop: '0'
         }}>
           {/* Table Header */}
           <div style={{
