@@ -824,8 +824,7 @@ const Dashboard = () => {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#e7f3f5ff',
-      padding: '24px',
-      paddingTop: '105px'
+      padding: '24px'
     }}>
       <div style={{
         maxWidth: '80rem',
