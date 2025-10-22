@@ -108,7 +108,6 @@ const Index = () => {
       : '0 1px 3px rgba(0, 0, 0, 0.1)',
     outline: 'none',
     fontFamily: "'Open Sans', sans-serif !important",
-    // Tambahan khusus untuk select
     cursor: 'pointer',
     appearance: 'none',
     backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === fieldName ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
