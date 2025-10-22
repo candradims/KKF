@@ -93,7 +93,7 @@ const Index = () => {
     gray900: '#0f172a'
   };
 
-  // Styles untuk input dan select sesuai template
+  // Styles untuk input
   const inputStyle = (fieldName) => ({
     padding: '16px 16px 16px 48px',
     borderRadius: '12px',
