@@ -453,7 +453,6 @@ const Index = () => {
         await fetchPenawaranData();
         setShowHapusModal(false);
         setSelectedDeleteData(null);
-        showSuccessMessage('Data penawaran berhasil dihapus');
       } else {
         console.error('❌ Delete API Error:', result.error);
         alert(`Gagal menghapus data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
