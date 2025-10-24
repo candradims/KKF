@@ -915,51 +915,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                   position: 'relative'
                 }}
               >
-                {/* Sales Field */}
-                <motion.div 
-                  whileHover={{ y: -2 }}
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Sales *
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle('sales')}>
-                      <User size={18} />
-                    </div>
-                    <select
-                      name="sales"
-                      value={formData.sales}
-                      onChange={handleInputChange}
-                      style={{
-                        ...selectStyle('sales'),
-                        backgroundColor: '#ffffff',
-                        color: formData.sales ? colors.primary : colors.accent1
-                      }}
-                    >
-                      <option value="" disabled>
-                        Pilih Sales
-                      </option>
-                      {salesOptions.map((s) => (
-                        <option key={s.id_user || s.id} value={s.nama_user}>
-                          {s.nama_user}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </motion.div>
-
-                {/* Tanggal */}
+                 {/* Tanggal */}
                 <motion.div 
                   whileHover={{ y: -2 }}
                   style={{
@@ -995,6 +951,48 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                         cursor: 'not-allowed'
                       }}
                     />
+                  </div>
+                </motion.div>
+
+                {/* Sales Field */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Sales *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('sales')}>
+                      <User size={18} />
+                    </div>
+                    <select
+                      name="sales"
+                      value={formData.sales}
+                      onChange={handleInputChange}
+                      style={{
+                        ...selectStyle('sales'),
+                        backgroundColor: '#ffffff',
+                        color: formData.sales ? colors.primary : colors.accent1
+                      }}
+                    >
+                      <option value="" disabled hidden>Pilih Sales </option>
+                      {salesOptions.map((s) => (
+                        <option key={s.id_user || s.id} value={s.nama_user}>
+                          {s.nama_user}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </motion.div>
 
