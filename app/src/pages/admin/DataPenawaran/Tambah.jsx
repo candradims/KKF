@@ -306,17 +306,6 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     zIndex: 1
   });
 
-  // Auto-fill sales field dengan nama user yang login
-  useEffect(() => {
-    const userData = getUserData();
-    if (userData && userData.nama_user) {
-      setFormData(prev => ({
-        ...prev,
-        sales: userData.nama_user
-      }));
-    }
-  }, []);
-
   // Load data layanan when component first mounts
   useEffect(() => {
     console.log('🚀 Component mounted, loading layanan data...');
@@ -330,7 +319,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       console.log('✅ isOpen is true, resetting form and loading layanan data...');
       const userData = getUserData();
       setFormData({
-        sales: userData?.nama_user || "",
+        sales: "",
         tanggal: getTodayDate(),
         pelanggan: "",
         nomorKontrak: "",
