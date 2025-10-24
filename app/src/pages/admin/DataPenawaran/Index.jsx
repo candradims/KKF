@@ -332,7 +332,6 @@ const Index = () => {
       if (result.success) {
         await fetchPenawaranData();
         setShowTambahModal(false);
-        showSuccessMessage('Data penawaran berhasil ditambahkan');
         return true;
       } else {
         console.error('❌ API Error:', result.error);
@@ -408,7 +407,6 @@ const Index = () => {
         await fetchPenawaranData();
         setShowEditModal(false);
         setSelectedEditData(null);
-        showSuccessMessage('Data penawaran berhasil diperbarui');
       } else {
         console.error('❌ API Error:', result.error);
         alert(`Gagal memperbarui data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
