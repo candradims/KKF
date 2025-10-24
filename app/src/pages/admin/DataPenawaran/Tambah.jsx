@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Plus, Calculator, Check, User, FileText, ClipboardList, BarChart3, DollarSign, Package, Settings } from "lucide-react";
-import { getUserData } from "../../../utils/api";
+import { getUserData, adminAPI } from "../../../utils/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 const layananOptions = [
@@ -226,6 +226,30 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     marginPercent: "",
     discount: "",
   });
+
+  // Sales dropdown options loaded from API
+  const [salesOptions, setSalesOptions] = useState([]);
+
+  // Load sales users (role = 'sales') when modal opens
+  useEffect(() => {
+    const loadSales = async () => {
+      try {
+        const res = await adminAPI.getUsersByRole("sales");
+        if (res && res.data) {
+          setSalesOptions(res.data);
+        } else if (Array.isArray(res)) {
+          setSalesOptions(res);
+        } else {
+          setSalesOptions([]);
+        }
+      } catch (err) {
+        console.error("❌ Failed to load sales users:", err);
+        setSalesOptions([]);
+      }
+    };
+
+    if (isOpen) loadSales();
+  }, [isOpen]);
 
   // State for multiple layanan items
   const [layananItems, setLayananItems] = useState([
@@ -913,19 +937,25 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     <div style={iconContainerStyle('sales')}>
                       <User size={18} />
                     </div>
-                    <input
-                      type="text"
+                    <select
                       name="sales"
                       value={formData.sales}
-                      readOnly
-                      placeholder="Auto-filled from login"
+                      onChange={handleInputChange}
                       style={{
-                        ...inputStyle('sales'),
-                        backgroundColor: '#f8f9fa',
-                        cursor: 'not-allowed',
-                        color: '#6c757d'
+                        ...selectStyle('sales'),
+                        backgroundColor: '#ffffff',
+                        color: formData.sales ? colors.primary : colors.accent1
                       }}
-                    />
+                    >
+                      <option value="" disabled>
+                        Pilih Sales
+                      </option>
+                      {salesOptions.map((s) => (
+                        <option key={s.id_user || s.id} value={s.nama_user}>
+                          {s.nama_user}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </motion.div>
 
