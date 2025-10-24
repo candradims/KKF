@@ -2481,7 +2481,7 @@ const Penawaran = () => {
           </>
         )}
 
-        {/* Modal Components - SEMUA ACTION BUTTONS TETAP ADA */}
+        {/* Modal Components*/}
         <Tambah
           isOpen={showTambahModal}
           onClose={handleCloseModal}
