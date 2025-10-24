@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, RotateCcw, Filter, Calendar, Check, X, Settings, Tag, DollarSign } from 'lucide-react';
+import { Eye, Edit2, Trash2, Plus, RotateCcw, Filter, Calendar, Check, X, Settings, Tag, DollarSign } from 'lucide-react';
 import Detail from './Detail';
+import Tambah from './Tambah';
+import Edit from './Edit';
+import Hapus from './Hapus';
 import { penawaranAPI, getUserData } from '../../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -48,8 +51,16 @@ const formatTanggal = (tanggal) => {
 const Index = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [showTambahModal, setShowTambahModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedEditData, setSelectedEditData] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetailData, setSelectedDetailData] = useState(null);
+  const [showHapusModal, setShowHapusModal] = useState(false);
+  const [selectedDeleteData, setSelectedDeleteData] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // State untuk modal status
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatusItem, setSelectedStatusItem] = useState(null);
   const [newStatus, setNewStatus] = useState('');
@@ -166,7 +177,7 @@ const Index = () => {
               discount: convertDiscountToPercentage(item.diskon),
               durasi: item.durasi_kontrak,
               status: item.status || 'Menunggu',
-              actions: ['view'],
+              actions: ['view', 'edit', 'delete'],
               rawData: item
             };
             console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount);
@@ -214,13 +225,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const filteredData = penawaranData.filter(item => {
-    // Format filter date untuk matching dengan format DD-MM-YYYY
-    const formattedFilterDate = filterDate ? formatTanggal(new Date(filterDate).toLocaleDateString('id-ID')) : '';
-    const matchesDate = filterDate ? item.tanggal.includes(formattedFilterDate) : true;
-    const matchesStatus = filterStatus ? item.status === filterStatus : true;
-    return matchesDate && matchesStatus;
-  });
+  const filteredData = penawaranData;
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -243,16 +248,6 @@ const Index = () => {
     }
   };
 
-  const handleDetailData = (item) => {
-    setSelectedDetailData(item);
-    setShowDetailModal(true);
-  };
-
-  const handleCloseDetailModal = () => {
-    setShowDetailModal(false);
-    setSelectedDetailData(null);
-  };
-
   // Fungsi untuk menampilkan success modal
   const showSuccessMessage = (message) => {
     setSuccessMessage(message);
@@ -265,6 +260,211 @@ const Index = () => {
     }, 3000);
   };
 
+  // Handler untuk tambah data
+  const handleTambahData = () => {
+    setShowTambahModal(true);
+  };
+
+  const handleCloseTambahModal = () => {
+    setShowTambahModal(false);
+  };
+
+  // Handler untuk edit data
+  const handleEditData = (item) => {
+    const editData = {
+      ...item,
+      id: item.id || item.id_penawaran,
+      id_penawaran: item.id_penawaran || item.id
+    };
+    console.log('🖊️ Setting edit data:', editData);
+    setSelectedEditData(editData);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setSelectedEditData(null);
+  };
+
+  // Handler untuk detail data
+  const handleDetailData = (item) => {
+    setSelectedDetailData(item);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedDetailData(null);
+  };
+
+  // Handler untuk hapus data
+  const handleDeleteData = (item) => {
+    setSelectedDeleteData(item);
+    setShowHapusModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowHapusModal(false);
+    setSelectedDeleteData(null);
+  };
+
+  // Handler untuk save data (tambah dan edit)
+  const handleSaveData = async (newData) => {
+    try {
+      const userData = getUserData();
+      if (!userData) {
+        alert('User tidak terautentikasi. Silakan login kembali.');
+        return false;
+      }
+
+      console.log('💾 User data:', userData);
+      console.log('💾 Sending penawaran data:', newData);
+
+      const dataToSave = {
+        ...newData,
+        discount: newData.discount ? newData.discount.toString().replace('%', '').trim() : '0'
+      };
+
+      const result = await penawaranAPI.create(dataToSave);
+      
+      console.log('📬 API Response:', result);
+      
+      if (result.success) {
+        await fetchPenawaranData();
+        setShowTambahModal(false);
+        showSuccessMessage('Data penawaran berhasil ditambahkan');
+        return true;
+      } else {
+        console.error('❌ API Error:', result.error);
+        alert(`Gagal menyimpan data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error saving penawaran:', error);
+      console.error('❌ Error details:', error.message);
+      alert(`Terjadi kesalahan saat menyimpan data:\n${error.message}`);
+      return false;
+    }
+  };
+
+  const handleSaveEditData = async (updatedData) => {
+    try {
+      const userData = getUserData();
+      if (!userData) {
+        alert('User tidak terautentikasi. Silakan login kembali.');
+        return;
+      }
+
+      console.log('🔄 Updating penawaran data:', updatedData);
+      
+      const penawaranId = selectedEditData.id_penawaran || selectedEditData.id;
+      
+      if (!penawaranId) {
+        alert('ID penawaran tidak ditemukan. Silakan coba lagi.');
+        return;
+      }
+
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        
+        try {
+          if (dateString.includes('/')) {
+            const [day, month, year] = dateString.split('/');
+            const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+            if (!isNaN(date.getTime())) {
+              return date.toISOString().split('T')[0];
+            }
+          }
+          return dateString;
+        } catch (error) {
+          console.error('❌ Error formatting date:', error);
+          return dateString;
+        }
+      };
+      
+      const apiData = {
+        tanggal: formatDate(updatedData.tanggal),
+        pelanggan: updatedData.pelanggan,
+        nomorKontrak: updatedData.nomorKontrak,
+        kontrakTahunKe: updatedData.kontrakTahunKe,
+        referensiHJT: updatedData.referensiHJT,
+        durasiKontrak: updatedData.durasiKontrak,
+        discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0',
+        total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0,
+        selectedLayananId: updatedData.selectedLayananId,
+        hjtWilayah: updatedData.hjtWilayah
+      };
+
+      const numericId = parseInt(penawaranId, 10);
+      
+      console.log('📤 Sending API data for ID:', numericId, apiData);
+
+      const cleanApiData = JSON.parse(JSON.stringify(apiData));
+      
+      const result = await penawaranAPI.update(numericId, cleanApiData);
+      console.log('📬 API Response:', result);
+      
+      if (result.success) {
+        await fetchPenawaranData();
+        setShowEditModal(false);
+        setSelectedEditData(null);
+        showSuccessMessage('Data penawaran berhasil diperbarui');
+      } else {
+        console.error('❌ API Error:', result.error);
+        alert(`Gagal memperbarui data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
+      }
+    } catch (error) {
+      console.error('❌ Error updating penawaran:', error);
+      console.error('❌ Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      if (error.response?.status === 401) {
+        alert('Authentication data tidak valid. Silakan login kembali.');
+      } else if (error.response?.status === 403) {
+        alert('Anda tidak memiliki izin untuk melakukan aksi ini.');
+      } else if (error.response?.status === 500) {
+        alert('Terjadi kesalahan server. Silakan coba lagi.');
+      } else {
+        alert(`Terjadi kesalahan saat memperbarui data:\n${error.message}`);
+      }
+    }
+  };
+
+  const handleConfirmDelete = async (deleteData) => {
+    try {
+      const userData = getUserData();
+      if (!userData) {
+        alert('User tidak terautentikasi. Silakan login kembali.');
+        return;
+      }
+
+      console.log('🗑️ Deleting penawaran:', deleteData);
+      console.log('🔍 Delete data ID:', deleteData.id);
+
+      const result = await penawaranAPI.delete(deleteData.id);
+      
+      console.log('📬 Delete API Response:', result);
+      
+      if (result.success) {
+        await fetchPenawaranData();
+        setShowHapusModal(false);
+        setSelectedDeleteData(null);
+        showSuccessMessage('Data penawaran berhasil dihapus');
+      } else {
+        console.error('❌ Delete API Error:', result.error);
+        alert(`Gagal menghapus data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
+      }
+    } catch (error) {
+      console.error('❌ Error deleting penawaran:', error);
+      alert(`Terjadi kesalahan saat menghapus data:\n${error.message}`);
+    }
+  };
+
+  // Handler untuk status change
   const handleStatusClick = (item) => {
     setSelectedStatusItem(item);
     setNewStatus(item.status);
@@ -531,11 +731,11 @@ const Index = () => {
           select option {
             background-color: #e7f3f5ff !important;
             color: #035b71 !important;
-            padding: 12px 16px !important;
-            font-size: 14px !important;
+            padding: '12px 16px' !important;
+            font-size: '14px' !important;
             font-family: "'Open Sans', sans-serif !important";
-            border-bottom: 1px solid rgba(3, 91, 113, 0.1) !important;
-            transition: all 0.3s ease !important;
+            border-bottom: '1px solid rgba(3, 91, 113, 0.1)' !important;
+            transition: 'all 0.3s ease' !important;
           }
           
           select option:hover {
@@ -708,6 +908,46 @@ const Index = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Action Buttons Section */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '16px',
+            alignItems: 'center'
+          }}>
+            {/* Tambah Data Button */}
+            <button
+              onClick={handleTambahData}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '600',
+                transition: 'all 0.3s ease',
+                boxShadow: `0 4px 15px ${colors.secondary}30`,
+                whiteSpace: 'nowrap'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = `0 6px 20px ${colors.secondary}40`;
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = `0 4px 15px ${colors.secondary}30`;
+              }}
+            >
+              <Plus size={16} />
+              Tambah Data
+            </button>
           </div>
         </div>
 
@@ -1074,7 +1314,7 @@ const Index = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '100px'
+                        width: '140px'
                       }}>
                         Aksi
                       </th>
@@ -1371,6 +1611,7 @@ const Index = () => {
                               justifyContent: 'center',
                               gap: '6px'
                             }}>
+                              {/* View Button */}
                               <button
                                 onClick={() => handleDetailData(item)}
                                 style={{
@@ -1401,6 +1642,72 @@ const Index = () => {
                                 title="View Details"
                               >
                                 <Eye size={16} />
+                              </button>
+
+                              {/* Edit Button */}
+                              <button
+                                onClick={() => handleEditData(item)}
+                                style={{
+                                  background: `linear-gradient(135deg, ${colors.success}15 0%, ${colors.success}25 100%)`,
+                                  color: colors.success,
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  border: `1px solid ${colors.success}90`,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.3s ease',
+                                  boxShadow: `0 2px 8px ${colors.success}20`
+                                }}
+                                onMouseOver={(e) => {
+                                  e.target.style.background = colors.success;
+                                  e.target.style.color = 'white';
+                                  e.target.style.transform = 'translateY(-2px)';
+                                  e.target.style.boxShadow = `0 4px 12px ${colors.success}40`;
+                                }}
+                                onMouseOut={(e) => {
+                                  e.target.style.background = `linear-gradient(135deg, ${colors.success}15 0%, ${colors.success}25 100%)`;
+                                  e.target.style.color = colors.success;
+                                  e.target.style.transform = 'translateY(0)';
+                                  e.target.style.boxShadow = `0 2px 8px ${colors.success}20`;
+                                }}
+                                title="Edit"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              
+                              {/* Delete Button */}
+                              <button
+                                onClick={() => handleDeleteData(item)}
+                                style={{
+                                  background: `linear-gradient(135deg, #FEE2E215 0%, #FEE2E225 100%)`,
+                                  color: '#DC2626',
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  border: `1px solid #EF444490`,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.3s ease',
+                                  boxShadow: `0 2px 8px #FEE2E220`
+                                }}
+                                onMouseOver={(e) => {
+                                  e.target.style.background = '#DC2626';
+                                  e.target.style.color = 'white';
+                                  e.target.style.transform = 'translateY(-2px)';
+                                  e.target.style.boxShadow = `0 4px 12px #DC262640`;
+                                }}
+                                onMouseOut={(e) => {
+                                  e.target.style.background = `linear-gradient(135deg, #FEE2E215 0%, #FEE2E225 100%)`;
+                                  e.target.style.color = '#DC2626';
+                                  e.target.style.transform = 'translateY(0)';
+                                  e.target.style.boxShadow = `0 2px 8px #FEE2E220`;
+                                }}
+                                title="Delete"
+                              >
+                                <Trash2 size={16} />
                               </button>
                             </div>
                           </td>
@@ -1733,6 +2040,29 @@ const Index = () => {
           isOpen={showDetailModal}
           onClose={handleCloseDetailModal}
           detailData={selectedDetailData}
+        />
+
+        {/* Modal Tambah Data */}
+        <Tambah
+          isOpen={showTambahModal}
+          onClose={handleCloseTambahModal}
+          onSave={handleSaveData}
+        />
+
+        {/* Modal Edit Data */}
+        <Edit
+          isOpen={showEditModal}
+          onClose={handleCloseEditModal}
+          onSave={handleSaveEditData}
+          editData={selectedEditData}
+        />
+
+        {/* Modal Hapus Data */}
+        <Hapus
+          isOpen={showHapusModal}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+          deleteData={selectedDeleteData}
         />
 
         {/* Status Change Modal */}
