@@ -120,20 +120,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Handle custom layanan
-    if (name === 'namaLayanan') {
-      if (value === 'custom') {
-        setShowCustomLayanan(true);
-        setFormData((prev) => ({ ...prev, [name]: '' }));
-      } else {
-        setShowCustomLayanan(false);
-        setFormData((prev) => ({ ...prev, [name]: value }));
-      }
-    }
-    else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCancel = () => {
@@ -419,7 +406,7 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                   position: "relative"
                 }}
               >
-                {/* Select Layanan */}
+                {/* Input Nama Layanan (previously dropdown) */}
                 <motion.div 
                   whileHover={{ y: -2 }}
                   style={{
@@ -441,32 +428,17 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                     <div style={iconContainerStyle('namaLayanan')}>
                       <Box size={18} />
                     </div>
-                    <select
+                    <input
                       name="namaLayanan"
+                      type="text"
+                      placeholder={isLoadingOptions ? "Memuat layanan..." : "Masukkan nama layanan"}
                       value={formData.namaLayanan}
                       onChange={handleChange}
                       onFocus={() => setFocusedField('namaLayanan')}
                       onBlur={() => setFocusedField('')}
                       required
-                      style={{
-                        ...inputStyle('namaLayanan'),
-                        appearance: "none",
-                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === 'namaLayanan' ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 16px center",
-                        backgroundSize: "20px",
-                        cursor: "pointer"
-                      }}
-                    >
-                      <option value="" disabled hidden>
-                        {isLoadingOptions ? "Memuat layanan..." : "Pilih layanan"}
-                      </option>
-                      {layananOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      style={inputStyle('namaLayanan')}
+                    />
                   </div>
                 </motion.div>
 
@@ -564,32 +536,17 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                     <div style={iconContainerStyle('satuan')}>
                       <Cpu size={18} />
                     </div>
-                    <select
+                    <input
                       name="satuan"
+                      type="text"
+                      placeholder={isLoadingOptions ? "Memuat satuan..." : "Masukkan satuan (contoh: Mbps atau units)"}
                       value={formData.satuan}
                       onChange={handleChange}
                       onFocus={() => setFocusedField('satuan')}
                       onBlur={() => setFocusedField('')}
                       required
-                      style={{
-                        ...inputStyle('satuan'),
-                        appearance: "none",
-                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(focusedField === 'satuan' ? colors.secondary : colors.primary)}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 16px center",
-                        backgroundSize: "20px",
-                        cursor: "pointer"
-                      }}
-                    >
-                      <option value="" disabled hidden>
-                        {isLoadingOptions ? "Memuat satuan..." : "Pilih satuan"}
-                      </option>
-                      {satuanOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      style={inputStyle('satuan')}
+                    />
                   </div>
                 </motion.div>
 
