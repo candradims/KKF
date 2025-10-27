@@ -282,29 +282,28 @@ const LaporanLaba = () => {
           console.log('🎯 [LAPORAN LABA] Final Target used:', target);
           console.log('📊 [LAPORAN LABA] Target source:', userTargetNR && userTargetNR > 0 ? 'DATABASE (data_user.target_nr)' : 'CALCULATED (revenue * 1.2)');
           
-          // NEW LOGIC: Target tercapai jika Pencapaian >= Target × 10
-          const targetMultiplier = 10; // Sales harus mencapai 10x target
-          const targetFull = target * targetMultiplier; // Target penuh = Target × 10
-          
-          // Growth calculation: 100% jika mencapai 10x target
-          // Formula: (Pencapaian / (Target × 10)) × 100
-          const growth = (totalPencapaianAccumulated / targetFull) * 100;
-          
-          // Achievement rate based on 10x target
+          // NEW LOGIC: Target tercapai jika Pencapaian >= Target (1x)
+          const targetFull = target; // Target penuh = Target (1x)
+
+          // Growth calculation: 100% jika pencapaian sama dengan target
+          // Formula: (Pencapaian / Target) × 100
+          const growth = targetFull > 0 ? (totalPencapaianAccumulated / targetFull) * 100 : 0;
+
+          // Achievement rate based on target (1x)
           const achievementRate = growth; // Same as growth
-          
-          // Status: Tercapai jika Pencapaian >= Target × 10
+
+          // Status: Tercapai jika Pencapaian >= Target
           // IMPORTANT: If no data at all (pencapaian = 0), status should be "Belum Tercapai"
           const isAchieved = totalPencapaianAccumulated > 0 && totalPencapaianAccumulated >= targetFull;
           
           const lastMonth = totalPencapaianAccumulated * 0.9; // Assume 90% of current
           const komisi = totalRevenueAccumulated * 0.1;
 
-          console.log('🎯 [LAPORAN LABA] ===== NEW TARGET LOGIC (10x) =====');
+          console.log('🎯 [LAPORAN LABA] ===== NEW TARGET LOGIC (1x) =====');
           console.log('🎯 [LAPORAN LABA] Base Target:', target.toLocaleString('id-ID'));
-          console.log('🎯 [LAPORAN LABA] Target Full (10x):', targetFull.toLocaleString('id-ID'));
+          console.log('🎯 [LAPORAN LABA] Target Full (1x):', targetFull.toLocaleString('id-ID'));
           console.log('🎯 [LAPORAN LABA] Pencapaian:', totalPencapaianAccumulated.toLocaleString('id-ID'));
-          console.log('📈 [LAPORAN LABA] Growth (to 10x target):', growth.toFixed(2) + '%');
+          console.log('📈 [LAPORAN LABA] Growth (to target):', growth.toFixed(2) + '%');
           console.log('📈 [LAPORAN LABA] Achievement Rate:', achievementRate.toFixed(2) + '%');
           console.log('✅ [LAPORAN LABA] Status:', isAchieved ? 'TERCAPAI' : 'BELUM TERCAPAI');
           console.log('💵 [LAPORAN LABA] Komisi (10%):', komisi.toLocaleString('id-ID'));
@@ -317,7 +316,7 @@ const LaporanLaba = () => {
             target: Math.round(target), // Use target from database (data_user.target_nr)
             targetFull: Math.round(targetFull), // NEW: Target full = Target × 10
             komisi: Math.round(komisi),
-            growth: parseFloat(growth.toFixed(1)), // Growth based on 10x target
+            growth: parseFloat(growth.toFixed(1)), // Growth based on target (100% when pencapaian == target)
             lastMonth: Math.round(lastMonth),
             achievement: parseFloat(achievementRate.toFixed(1)),
             isAchieved: isAchieved // NEW: Status tercapai atau belum
@@ -464,8 +463,8 @@ const LaporanLaba = () => {
     ? (nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0))
     : 0;
   
-  // NEW: Achievement rate based on 10x target logic
-  // Status tercapai jika Pencapaian >= Target × 10
+  // NEW: Achievement rate based on target (1x)
+  // Status tercapai jika Pencapaian >= Target
   const achievementRate = selectedYearSales === '2025' && salesData.length > 0 
     ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 
     : 0;
@@ -591,29 +590,25 @@ const LaporanLaba = () => {
           marginBottom: '32px'
         }}>
           {[
+              {
+                title: 'Target',
+                // Use target from salesData (which is populated from data_user.target_nr) if available
+                value: formatNumber(salesData && salesData.length > 0 ? salesData[0].target : 0),
+                icon: Target,
+                gradient: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                bgGradient: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.accent1}10 100%)`
+              },
             {
-              title: 'Total Revenue',
-              value: formatNumber(totalRevenue),
-              icon: DollarSign,
-              gradient: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
-              bgGradient: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.accent1}10 100%)`
-            },
-            {
-              title: 'Revenue Bulan Ini',
-              value: currentMonthData ? formatNumber(currentMonthData.revenue) : formatNumber(0),
-              icon: CircleDollarSign,
+              title: 'Pencapaian Target',
+              // show total pencapaian (Rp)
+              value: formatNumber(totalPencapaian),
+              icon: Target,
               gradient: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
               bgGradient: `linear-gradient(135deg, ${colors.secondary}15 0%, ${colors.tertiary}10 100%)`
             },
             {
-              title: 'Pencapaian Target',
-              value: formatNumber(totalPencapaian), // Changed from percentage to Rupiah
-              icon: Target,
-              gradient: `linear-gradient(135deg, ${colors.accent1} 0%, ${colors.accent2} 100%)`,
-              bgGradient: `linear-gradient(135deg, ${colors.accent1}15 0%, ${colors.accent2}10 100%)`
-            },
-            {
-              title: 'Progress ke 10x Target',
+              title: 'Progress ke Target',
+              // show percentage progress (growth) where 100% means pencapaian == target
               value: `${averageGrowth.toFixed(1)}%`,
               icon: averageGrowth >= 100 ? Award : (averageGrowth > 0 ? TrendingUp : TrendingDown),
               gradient: averageGrowth >= 100
@@ -626,6 +621,14 @@ const LaporanLaba = () => {
                 : averageGrowth > 0
                   ? `linear-gradient(135deg, ${colors.warning}15 0%, #fbbf2410 100%)`
                   : `linear-gradient(135deg, ${colors.danger}15 0%, #f8717110 100%)`
+            },
+            {
+              title: 'Progress Pencapaian',
+              // remaining amount to reach target: target - pencapaian (show 0 if already met/exceeded)
+              value: formatNumber(Math.max((salesData && salesData.length > 0 ? salesData[0].target : 0) - totalPencapaian, 0)),
+              icon: DollarSign,
+              gradient: `linear-gradient(135deg, ${colors.accent1} 0%, ${colors.accent2} 100%)`,
+              bgGradient: `linear-gradient(135deg, ${colors.accent1}15 0%, ${colors.accent2}10 100%)`
             }
           ].map((stat, index) => (
             <div key={index} style={{
