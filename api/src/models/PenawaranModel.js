@@ -317,8 +317,13 @@ export class PenawaranModel {
         }
 
         if (currentRecord && currentRecord.id_user) {
-          updateData.id_user = parseInt(currentRecord.id_user, 10);
-          console.log("🔐 Preserving existing id_user:", updateData.id_user);
+          // Only preserve existing id_user when caller did not explicitly provide id_user
+          if (typeof updateData.id_user === 'undefined' || updateData.id_user === null) {
+            updateData.id_user = parseInt(currentRecord.id_user, 10);
+            console.log("🔐 Preserving existing id_user:", updateData.id_user);
+          } else {
+            console.log("🔁 id_user provided in update payload, will reassign to:", updateData.id_user);
+          }
         } else {
           console.error(
             "❌ Current record not found or missing id_user for ID:",

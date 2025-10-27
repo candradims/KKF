@@ -26,8 +26,8 @@ router.get(
   PenawaranController.getPenawaranByStatus
 );
 
-// Rute yang dapat diakses oleh sales (untuk penawaran mereka sendiri) dan admin (untuk semua)
-router.post("/", salesOnly, PenawaranController.createPenawaran);
+// Rute untuk membuat penawaran — dapat diakses oleh sales (membuat untuk diri sendiri) dan admin (membuat untuk siapa saja)
+router.post("/", adminOrSales, PenawaranController.createPenawaran);
 router.put("/:id", adminOrSales, PenawaranController.updatePenawaran);
 router.delete("/:id", adminOrSales, PenawaranController.deletePenawaran);
 router.get("/:id/hasil", adminOrSales, PenawaranController.getHasilPenawaran);

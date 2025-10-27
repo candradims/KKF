@@ -427,7 +427,10 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     console.log("🔧 Edit: Layanan data from data_penawaran_layanan:", layananData);
     
     const initialData = {
-      sales: dataSource.rawData?.sales || dataSource.sales || dataSource.namaSales || "",
+      // Prefer numeric id_user from nested data_user if available; fall back to other fields (name) for compatibility
+      sales: (dataSource.rawData && dataSource.rawData.data_user && dataSource.rawData.data_user.id_user)
+        ? String(dataSource.rawData.data_user.id_user)
+        : (dataSource.rawData?.id_user || dataSource.sales || dataSource.namaSales || ""),
       tanggal: (dataSource.rawData?.tanggal_dibuat || dataSource.tanggal) ? new Date(dataSource.rawData?.tanggal_dibuat || dataSource.tanggal).toISOString().split('T')[0] : "",
       pelanggan: dataSource.namaPelanggan || dataSource.pelanggan || "",
       nomorKontrak: dataSource.nomorKontrak || "",
@@ -1649,7 +1652,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                         Pilih Sales
                       </option>
                       {salesOptions.map((s) => (
-                        <option key={s.id_user || s.id} value={s.nama_user}>
+                        <option key={s.id_user || s.id} value={s.id_user}>
                           {s.nama_user}
                         </option>
                       ))}

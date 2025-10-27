@@ -317,9 +317,9 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     console.log('🎭 useEffect triggered - isOpen:', isOpen);
     if (isOpen) {
       console.log('✅ isOpen is true, resetting form and loading layanan data...');
-      const userData = getUserData();
+  const userData = getUserData();
       setFormData({
-        sales: "",
+        sales: userData && userData.role_user === 'sales' ? String(userData.id_user) : "",
         tanggal: getTodayDate(),
         pelanggan: "",
         nomorKontrak: "",
@@ -658,7 +658,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     
     const userData = getUserData();
     setFormData({
-      sales: userData?.nama_user || "",
+      sales: userData && userData.role_user === 'sales' ? String(userData.id_user) : "",
       tanggal: getTodayDate(),
       pelanggan: "",
       nomorKontrak: "",
@@ -977,7 +977,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                     >
                       <option value="" disabled hidden>Pilih Sales </option>
                       {salesOptions.map((s) => (
-                        <option key={s.id_user || s.id} value={s.nama_user}>
+                        <option key={s.id_user || s.id} value={s.id_user}>
                           {s.nama_user}
                         </option>
                       ))}

@@ -198,4 +198,29 @@ export class UserModel {
       );
     }
   }
+
+  // Ambil pengguna berdasarkan nama (case-insensitive)
+  static async getUserByName(name) {
+    try {
+      if (!name) return null;
+      const search = name.trim();
+      const { data, error } = await supabase
+        .from("data_user")
+        .select(
+          "id_user, nama_user, tanggal, email_user, kata_sandi, role_user, target_nr, created_at, updated_at"
+        )
+        .ilike("nama_user", search)
+        .maybeSingle();
+
+      if (error) {
+        console.error("❌ Supabase error in getUserByName:", error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error("❌ Error in getUserByName:", error);
+      throw new Error(`Gagal mengambil pengguna berdasarkan nama: ${error.message}`);
+    }
+  }
 }

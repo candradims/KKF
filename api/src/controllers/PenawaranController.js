@@ -3,6 +3,7 @@ import { PenawaranLayananModel } from "../models/PenawaranLayananModel.js";
 import { PengeluaranModel } from "../models/PengeluaranModel.js";
 import { HasilPenawaranModel } from "../models/HasilPenawaranModel.js";
 import { LayananModel } from "../models/LayananModel.js";
+import { UserModel } from "../models/UserModel.js";
 
 // Helper function to calculate discounted tarif based on contract duration
 const calculateDiscountedTarif = (originalTarif, durasiKontrak) => {
@@ -154,12 +155,52 @@ export class PenawaranController {
         });
       }
 
+      // Build penawaran data; determine id_user depending on who is creating
       const penawaranData = {
         ...req.body,
-        id_user: req.user.id_user, // Set ID user dari user yang terautentikasi
         tanggal_dibuat:
           req.body.tanggal || new Date().toISOString().split("T")[0], // Set tanggal saat ini jika tidak ada
       };
+
+      // If creator is sales, use their id_user. If creator is admin and provided a sales name,
+      // resolve the sales name to id_user from data_user and set it on penawaranData.
+      if (req.user && req.user.role_user === "sales") {
+        penawaranData.id_user = req.user.id_user;
+      } else if (req.user && req.user.role_user === "admin") {
+        // Allow admin to assign penawaran to a specific sales user via `sales` field
+        if (req.body && req.body.sales) {
+          try {
+            const salesVal = String(req.body.sales).trim();
+            // If sales is numeric (id), use it directly
+            if (/^\d+$/.test(salesVal)) {
+              penawaranData.id_user = parseInt(salesVal, 10);
+            } else {
+              // Otherwise treat as name and lookup
+              const salesUser = await UserModel.getUserByName(salesVal);
+              if (!salesUser || !salesUser.id_user) {
+                return res.status(400).json({
+                  success: false,
+                  message: `Sales tidak ditemukan: ${salesVal}`,
+                });
+              }
+              penawaranData.id_user = salesUser.id_user;
+            }
+          } catch (err) {
+            console.error("❌ Error resolving sales user by value:", err);
+            return res.status(500).json({
+              success: false,
+              message: "Gagal memetakan Sales yang ditentukan",
+              error: err.message,
+            });
+          }
+        } else {
+          // If admin did not provide sales, fall back to admin's id (not typical) or null
+          penawaranData.id_user = req.user.id_user || null;
+        }
+      } else {
+        // Fallback to authenticated user id if present
+        penawaranData.id_user = req.user ? req.user.id_user : null;
+      }
 
       console.log("📋 Processed penawaran data:", penawaranData);
 
@@ -423,53 +464,50 @@ export class PenawaranController {
         );
       }
 
-      // Jika ada data pengeluaran lain-lain, simpan juga
-      console.log("🔍 Checking pengeluaran fields:", {
-        item: req.body.item,
-        keterangan: req.body.keterangan,
-        hasrat: req.body.hasrat,
-        jumlah: req.body.jumlah,
-      });
-
+      // Jika ada data pengeluaran lain-lain (array dari frontend), simpan semua
+      // Frontend mengirimkan `pengeluaranItems: [{ item, keterangan, hasrat, jumlah }, ...]`
       if (
-        req.body.item &&
-        req.body.keterangan &&
-        req.body.hasrat &&
-        req.body.jumlah &&
-        penawaranId
+        penawaranId &&
+        req.body.pengeluaranItems &&
+        Array.isArray(req.body.pengeluaranItems)
       ) {
-        console.log("💰 Saving pengeluaran data for penawaran:", penawaranId);
-
-        const pengeluaranData = {
-          id_penawaran: penawaranId,
-          item: req.body.item,
-          keterangan: req.body.keterangan,
-          harga_satuan: req.body.hasrat, // Mapping hasrat ke harga_satuan
-          jumlah: parseInt(req.body.jumlah),
-          // total_harga will be calculated by database as generated column
-        };
-
-        console.log("💰 Pengeluaran data to save:", pengeluaranData);
-
+        console.log(
+          "💰 Saving multiple pengeluaran items for penawaran:",
+          penawaranId
+        );
         try {
-          const pengeluaranResult = await PengeluaranModel.createPengeluaran(
-            pengeluaranData
-          );
-          console.log(
-            "✅ Pengeluaran data saved successfully:",
-            pengeluaranResult
-          );
-        } catch (pengeluaranError) {
-          console.error("⚠️ Error saving pengeluaran data:", pengeluaranError);
-          // Don't fail the whole request if pengeluaran fails, just log it
+          for (let i = 0; i < req.body.pengeluaranItems.length; i++) {
+            const p = req.body.pengeluaranItems[i];
+            if (!p || !p.item || !p.hasrat || !p.jumlah) {
+              console.log(
+                `⚠️ Skipping pengeluaran #${i + 1} - incomplete fields`,
+                p
+              );
+              continue;
+            }
+
+            const pengeluaranData = {
+              id_penawaran: penawaranId,
+              item: p.item,
+              keterangan: p.keterangan || "",
+              harga_satuan: p.harga_satuan || p.hasrat,
+              jumlah: parseInt(p.jumlah, 10),
+            };
+
+            console.log(`� Creating pengeluaran #${i + 1}:`, pengeluaranData);
+            try {
+              const pengeluaranResult =
+                await PengeluaranModel.createPengeluaran(pengeluaranData);
+              console.log(`✅ Pengeluaran #${i + 1} saved:`, pengeluaranResult);
+            } catch (err) {
+              console.error(`❌ Error saving pengeluaran #${i + 1}:`, err);
+            }
+          }
+        } catch (err) {
+          console.error("❌ Error processing pengeluaranItems:", err);
         }
       } else {
-        console.log(
-          "ℹ️ No pengeluaran data provided, incomplete fields, or no penawaran ID"
-        );
-        if (!penawaranId) {
-          console.log("❌ Missing penawaran ID");
-        }
+        console.log("ℹ️ No pengeluaranItems provided or penawaranId missing");
       }
 
       res.status(201).json({
@@ -574,7 +612,45 @@ export class PenawaranController {
         });
       }
 
-      updateData.id_user = existingPenawaran.id_user;
+      // Determine id_user for update:
+      // - sales can only keep/update their own penawaran (id_user unchanged)
+      // - admin may provide updateData.sales (nama_user) to reassign to a sales user
+      if (req.user && req.user.role_user === "sales") {
+        updateData.id_user = existingPenawaran.id_user;
+      } else if (req.user && req.user.role_user === "admin") {
+        if (updateData.sales) {
+          try {
+            const salesVal = String(updateData.sales).trim();
+            if (/^\d+$/.test(salesVal)) {
+              updateData.id_user = parseInt(salesVal, 10);
+            } else {
+              const salesUser = await UserModel.getUserByName(salesVal);
+              if (!salesUser || !salesUser.id_user) {
+                return res.status(400).json({
+                  success: false,
+                  message: `Sales tidak ditemukan: ${salesVal}`,
+                });
+              }
+              updateData.id_user = salesUser.id_user;
+            }
+          } catch (err) {
+            console.error(
+              "❌ Error resolving sales user by value during update:",
+              err
+            );
+            return res.status(500).json({
+              success: false,
+              message: "Gagal memetakan Sales yang ditentukan",
+              error: err.message,
+            });
+          }
+        } else {
+          // If admin didn't provide sales, keep existing assignment
+          updateData.id_user = existingPenawaran.id_user;
+        }
+      } else {
+        updateData.id_user = existingPenawaran.id_user;
+      }
 
       const requiredFields = ["pelanggan", "nomorKontrak", "durasiKontrak"];
       const missingFields = [];
@@ -1124,6 +1200,72 @@ export class PenawaranController {
       console.log(
         "ℹ️ Margin data migrated to data_penawaran_layanan.margin_percent"
       );
+
+      // Handle pengeluaranItems update: delete existing pengeluaran for this penawaran and recreate from provided array
+      try {
+        if (
+          updateData.pengeluaranItems &&
+          Array.isArray(updateData.pengeluaranItems)
+        ) {
+          console.log(
+            "🔁 Updating pengeluaran items for penawaran:",
+            penawaranId
+          );
+          try {
+            // Delete existing pengeluaran entries for this penawaran
+            await PengeluaranModel.deletePengeluaranByPenawaranId(penawaranId);
+            console.log(
+              "🗑️ Existing pengeluaran deleted for penawaran:",
+              penawaranId
+            );
+          } catch (delErr) {
+            console.error("⚠️ Failed to delete existing pengeluaran:", delErr);
+          }
+
+          for (let i = 0; i < updateData.pengeluaranItems.length; i++) {
+            const p = updateData.pengeluaranItems[i];
+            if (!p || !p.item || !p.hasrat || !p.jumlah) {
+              console.log(
+                `⚠️ Skipping pengeluaran update #${i + 1} - incomplete`,
+                p
+              );
+              continue;
+            }
+
+            const pengeluaranData = {
+              id_penawaran: penawaranId,
+              item: p.item,
+              keterangan: p.keterangan || "",
+              harga_satuan: p.harga_satuan || p.hasrat,
+              jumlah: parseInt(p.jumlah, 10),
+            };
+
+            try {
+              const created = await PengeluaranModel.createPengeluaran(
+                pengeluaranData
+              );
+              console.log(
+                `✅ Created pengeluaran #${
+                  i + 1
+                } for penawaran ${penawaranId}:`,
+                created
+              );
+            } catch (createErr) {
+              console.error(
+                `❌ Error creating pengeluaran #${i + 1}:`,
+                createErr
+              );
+            }
+          }
+        } else {
+          console.log("ℹ️ No pengeluaranItems provided in updateData");
+        }
+      } catch (pengeluaranUpdateErr) {
+        console.error(
+          "❌ Error processing pengeluaranItems during update:",
+          pengeluaranUpdateErr
+        );
+      }
 
       res.status(200).json({
         success: true,
