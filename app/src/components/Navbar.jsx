@@ -51,6 +51,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       setUserRole("admin");
     } else if (path.startsWith("/superadmin")) {
       setUserRole("superAdmin");
+    } else if (path.startsWith("/aktivasi")) {
+      setUserRole("aktivasi");
     }
   }, [location.pathname]);
 
@@ -75,6 +77,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       "/pengeluaran-lain-lain": "Pengeluaran Lain-lain",
       "/sales/pengeluaran-lain-lain": "Pengeluaran Lain-lain",
       "/login": "Login",
+      "/aktivasi/data-penawaran": "Data Penawaran", 
     };
 
     setPageTitle(routeTitles[location.pathname] || "Dashboard");  
@@ -111,6 +114,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       case "sales": return "Sales";
       case "admin": return "Admin";
       case "superAdmin": return "Super Admin";
+       case "aktivasi": return "Aktivasi";
       default: return "User";
     }
   };
