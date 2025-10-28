@@ -27,6 +27,9 @@ import SuperAdminDashboard from "./pages/superAdmin/Dashboard";
 import DataPenawaranSuperAdmin from "./pages/superAdmin/DataPenawaran/Index";
 import LaporanLabaSuperAdmin from "./pages/superAdmin/LaporanLabaa/Index";
 
+// Import pages Aktivasi
+import DataPenawaranAktivasi from "./pages/aktivasi/DataPenawaran/Index";
+
 function App() {
   return (
     <Router basename="/">
@@ -50,6 +53,9 @@ function App() {
           <Route path="/superAdmin/data-penawaran" element={<DataPenawaranSuperAdmin />} />
           <Route path="/superAdmin/laporan-laba" element={<LaporanLabaSuperAdmin />} />
 
+           {/* Aktivasi Routes */}
+          <Route path="/aktivasi/data-penawaran" element={<DataPenawaranAktivasi />} />
+          
           {/* General Routes */}
           <Route path="/dashboard" element={<SalesDashboard />} />
         </Route>
