@@ -23,6 +23,10 @@ const Sidebar = () => {
     userRole = "admin";
   } else if (path.startsWith("/superadmin")) {
     userRole = "superAdmin";
+  } else if (path.startsWith("/superadmin")) {
+    userRole = "superAdmin";
+  } else if (path.startsWith("/aktivasi")) {
+    userRole = "aktivasi";
   }
   
   const isActive = (path) => location.pathname === path;
@@ -128,13 +132,24 @@ const Sidebar = () => {
     }
   ];
 
+  const aktivasiMenuItems = [
+    {
+      title: "Data Penawaran",
+      path: "/aktivasi/data-penawaran",
+      icon: <BuildIcon />,
+      color: colors.tertiary
+    }
+  ];
+
   // Pilih menu items berdasarkan role
   let menuItems = adminMenuItems;
     if (userRole === "sales") {
       menuItems = salesMenuItems;
     } else if (userRole === "superAdmin") {
       menuItems = superAdminMenuItems;
-    }
+    } else if (userRole === "aktivasi") {
+      menuItems = aktivasiMenuItems;
+  }
 
   const sidebarStyle = {
     height: '100vh',
