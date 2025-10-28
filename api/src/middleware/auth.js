@@ -114,3 +114,6 @@ export const salesOnly = authorize(["sales"]);
 
 // Middleware untuk admin dan sales
 export const adminOrSales = authorize(["admin", "sales", "superAdmin"]);
+
+// Middleware khusus untuk SuperAdmin saja
+export const superAdminOnly = authorize(["superAdmin"]);

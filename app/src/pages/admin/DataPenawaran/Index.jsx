@@ -83,6 +83,10 @@ const Index = () => {
   // State untuk focused field
   const [focusedField, setFocusedField] = useState('');
 
+  // Current user info and role check
+  const currentUser = getUserData();
+  const isSuperAdmin = currentUser?.role_user === 'superAdmin';
+
   const colors = {
     primary: '#035b71',
     secondary: '#00bfca',
@@ -467,8 +471,14 @@ const Index = () => {
     }
   };
 
-  // Handler untuk status change
+  // Handler untuk status change (hanya untuk SuperAdmin)
   const handleStatusClick = (item) => {
+    const user = getUserData();
+    if (!user || user.role_user !== 'superAdmin') {
+      // Non-superAdmin tidak boleh membuka modal status
+      return;
+    }
+
     setSelectedStatusItem(item);
     setNewStatus(item.status);
     setStatusCatatan('');
@@ -1581,27 +1591,33 @@ const Index = () => {
                             color: colors.gray700,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
-                            <button
-                              onClick={() => handleStatusClick(item)}
-                              style={{
-                                ...getStatusStyle(item.status),
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                outline: 'none',
-                                fontWeight: '600'
-                              }}
-                              onMouseOver={(e) => {
-                                e.target.style.opacity = '0.8';
-                                e.target.style.transform = 'scale(1.02)';
-                              }}
-                              onMouseOut={(e) => {
-                                e.target.style.opacity = '1';
-                                e.target.style.transform = 'scale(1)';
-                              }}
-                              title="Klik untuk mengubah status"
-                            >
-                              {item.status}
-                            </button>
+                            {isSuperAdmin ? (
+                              <button
+                                onClick={() => handleStatusClick(item)}
+                                style={{
+                                  ...getStatusStyle(item.status),
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s',
+                                  outline: 'none',
+                                  fontWeight: '600'
+                                }}
+                                onMouseOver={(e) => {
+                                  e.target.style.opacity = '0.8';
+                                  e.target.style.transform = 'scale(1.02)';
+                                }}
+                                onMouseOut={(e) => {
+                                  e.target.style.opacity = '1';
+                                  e.target.style.transform = 'scale(1)';
+                                }}
+                                title="Klik untuk mengubah status"
+                              >
+                                {item.status}
+                              </button>
+                            ) : (
+                              <div style={{ ...getStatusStyle(item.status), cursor: 'default' }}>
+                                {item.status}
+                              </div>
+                            )}
                           </td>
                           <td style={{
                             padding: '20px 16px',
@@ -2070,7 +2086,7 @@ const Index = () => {
 
         {/* Status Change Modal */}
         <AnimatePresence>
-          {showStatusModal && (
+          {showStatusModal && isSuperAdmin && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
