@@ -1216,6 +1216,9 @@ const Login = () => {
                   <option value="sales" style={{ backgroundColor: colors.dark, color: 'white' }}>
                     💼 Sales
                   </option>
+                  <option value="aktivasi" style={{ backgroundColor: colors.dark, color: 'white' }}>
+                    ⚡ Aktivasi
+                  </option>
                 </select>
                 <div style={{
                   position: 'absolute',
@@ -1508,6 +1511,7 @@ const Login = () => {
                 if (formData.role === 'sales') navigate('/sales/dashboard');
                 else if (formData.role === 'admin') navigate('/admin/dashboard');
                 else if (formData.role === 'superAdmin') navigate('/superAdmin/dashboard');
+                else if (formData.role === 'aktivasi') navigate('/aktivasi/data-penawaran');
               }}
               style={{
                 padding: '1rem 2.5rem',
