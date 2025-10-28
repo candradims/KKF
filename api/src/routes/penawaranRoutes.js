@@ -5,6 +5,7 @@ import {
   adminOnly,
   salesOnly,
   adminOrSales,
+  superAdminOnly,
 } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -38,7 +39,8 @@ router.post(
 );
 
 // Rute yang hanya dapat diakses oleh admin
-router.put("/:id/status", adminOnly, PenawaranController.updateStatus);
+// Hanya SuperAdmin sekarang yang dapat mengubah status penawaran
+router.put("/:id/status", superAdminOnly, PenawaranController.updateStatus);
 router.put("/:id/discount", adminOnly, PenawaranController.updateDiscount);
 
 export default router;
