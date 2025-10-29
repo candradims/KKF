@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, User, Mail, Lock, Shield, Target, TrendingUp } from 'lucide-react';
+import { X, Check, User, Mail, Lock, Shield, Target, TrendingUp, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
@@ -15,6 +15,7 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [focusedField, setFocusedField] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Color palette
   const colors = {
@@ -194,6 +195,20 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
     color: focusedField === fieldName ? colors.secondary : colors.primary,
     transition: 'color 0.3s ease',
     zIndex: 1
+  });
+
+  const rightIconContainerStyle = (fieldName) => ({
+    position: 'absolute',
+    right: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: focusedField === fieldName ? colors.secondary : colors.primary,
+    transition: 'color 0.3s ease',
+    zIndex: 2,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   });
 
   return (
@@ -469,15 +484,25 @@ const EditData = ({ isOpen, onClose, onUpdate, initialData }) => {
                       <Lock size={18} />
                     </div>
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       name="password"
                       placeholder="Ubah kata sandi..."
                       value={formData.password}
                       onChange={handleChange}
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField('')}
-                      style={inputStyle('password')}
+                      style={{ ...inputStyle('password'), paddingRight: '48px' }}
                     />
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                      onClick={() => setShowPassword(prev => !prev)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowPassword(prev => !prev); }}
+                      style={rightIconContainerStyle('password')}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </div>
                   </div>
                 </motion.div>
 
