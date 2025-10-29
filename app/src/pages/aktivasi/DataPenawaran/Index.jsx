@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Filter, Calendar, RotateCcw } from 'lucide-react';
+import { Eye, Filter, Calendar, RotateCcw, Search } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,6 +43,7 @@ const formatTanggal = (tanggal) => {
 const Index = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetailData, setSelectedDetailData] = useState(null);
@@ -139,6 +140,7 @@ const Index = () => {
               namaPelanggan: item.nama_pelanggan,
               namaSales: item.data_user?.nama_user || '-',
               sales: item.data_user?.nama_user || '-',
+              namaPTL: item.nama_ptl || '-',
               nomorKontrak: item.nomor_kontrak,
               kontrakKe: item.kontrak_tahun,
               referensi: item.wilayah_hjt,
@@ -160,6 +162,7 @@ const Index = () => {
               namaPelanggan: item.nama_pelanggan || '-',
               namaSales: '-',
               sales: '-',
+              namaPTL: '-',
               nomorKontrak: item.nomor_kontrak || '-',
               kontrakKe: item.kontrak_tahun || '-',
               referensi: item.wilayah_hjt || '-',
@@ -194,7 +197,38 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const filteredData = penawaranData;
+  // Filter data berdasarkan search term dan filter lainnya
+  const filteredData = penawaranData.filter(item => {
+    // Search filter - mencari di semua kolom yang relevan
+    const matchesSearch = !searchTerm || 
+      item.namaPelanggan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.namaSales.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.namaPTL.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.nomorKontrak.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.referensi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.status.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Date filter
+    let matchesDate = true;
+    if (filterDate) {
+      const filterDateObj = new Date(filterDate);
+      
+      let itemDateObj;
+      if (item.rawData?.tanggal_dibuat) {
+        itemDateObj = new Date(item.rawData.tanggal_dibuat);
+      } else {
+        const [day, month, year] = item.tanggal.split('-');
+        itemDateObj = new Date(`${year}-${month}-${day}`);
+      }
+      
+      filterDateObj.setHours(0, 0, 0, 0);
+      itemDateObj.setHours(0, 0, 0, 0);
+      
+      matchesDate = itemDateObj.getTime() === filterDateObj.getTime();
+    }
+
+    return matchesSearch && matchesDate;
+  });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -217,6 +251,14 @@ const Index = () => {
     }
   };
 
+  // Handler untuk refresh/reset filter
+  const handleRefresh = () => {
+    setFilterDate('');
+    setFilterStatus('');
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
   // Handler untuk detail data
   const handleDetailData = (item) => {
     setSelectedDetailData(item);
@@ -228,51 +270,6 @@ const Index = () => {
     setSelectedDetailData(null);
   };
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'Menunggu':
-        return {
-          backgroundColor: '#FEF3C7',
-          color: '#92400E',
-          border: '2px solid #F59E0B',
-          padding: '4px 8px',
-          borderRadius: '12px',
-          fontSize: '12px',
-          fontWeight: '500'
-        };
-      case 'Disetujui':
-        return {
-          backgroundColor: '#D1FAE5',
-          color: '#065F46',
-          border: '2px solid #10B981',
-          padding: '4px 8px',
-          borderRadius: '12px',
-          fontSize: '12px',
-          fontWeight: '500'
-        };
-      case 'Ditolak':
-        return {
-          backgroundColor: '#FEE2E2',
-          color: '#991B1B',
-          border: '2px solid #EF4444',
-          padding: '4px 8px',
-          borderRadius: '12px',
-          fontSize: '12px',
-          fontWeight: '500'
-        };
-      default:
-        return {
-          backgroundColor: '#F3F4F6',
-          color: '#374151',
-          border: '2px solid #9CA3AF',
-          padding: '4px 8px',
-          borderRadius: '12px',
-          fontSize: '12px',
-          fontWeight: '500'
-        };
-    }
-  };
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -281,6 +278,27 @@ const Index = () => {
       fontFamily: "'Open Sans', sans-serif !important",
       position: 'relative'
     }}>
+      
+      <style>
+      {`
+        .search-input::placeholder {
+          color: ${colors.gray500};
+          opacity: 1;
+          font-family: 'Open Sans', sans-serif;
+        }
+        
+        .search-input::-ms-input-placeholder {
+          color: ${colors.gray500};
+          font-family: 'Open Sans', sans-serif;
+        }
+        
+        .search-input::-webkit-input-placeholder {
+          color: ${colors.gray500};
+          font-family: 'Open Sans', sans-serif;
+        }
+      `}
+      </style>
+
       {/* Background Pattern */}
       <div style={{
         position: 'absolute',
@@ -510,6 +528,50 @@ const Index = () => {
                 alignItems: 'end',
                 position: 'relative',
               }}>
+                {/* Search Filter */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}>
+                    <Search size={16} />
+                    Cari Penawaran
+                  </label>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Cari sesuatu..."
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: `1px solid ${colors.primary}`,
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'all 0.3s ease',
+                      backgroundColor: colors.white,
+                      color: colors.gray700,
+                      fontFamily: "'Open Sans', sans-serif !important",
+                    }}
+                    className="search-input"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.secondary;
+                      e.target.style.boxShadow = `0 0 0 3px ${colors.secondary}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = colors.primary;
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
                 {/* Filter by Date */}
                 <div>
                   <label style={{
@@ -551,48 +613,10 @@ const Index = () => {
                   />
                 </div>
 
-                {/* Filter by Status */}
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    <Filter size={16} />
-                    Filter by Status
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle('filterStatus')}>
-                      <Filter size={18} />
-                    </div>
-                    <select
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                      onFocus={() => setFocusedField('filterStatus')}
-                      onBlur={() => setFocusedField('')}
-                      style={inputStyle('filterStatus')}
-                    >
-                      <option value="">Semua Status</option>
-                      <option value="Menunggu">Menunggu</option>
-                      <option value="Disetujui">Disetujui</option>
-                      <option value="Ditolak">Ditolak</option>
-                    </select>
-                  </div>
-                </div>
-
                 {/* Refresh Button */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'end' }}>
                   <button
-                    onClick={() => {
-                      setFilterDate('');
-                      setFilterStatus('');
-                      setCurrentPage(1);
-                    }}
+                    onClick={handleRefresh}
                     style={{
                       background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
                       color: 'white',
@@ -667,31 +691,34 @@ const Index = () => {
                 <table style={{
                   width: '100%',
                   borderCollapse: 'separate',
-                  borderSpacing: 0
+                  borderSpacing: 0,
+                  tableLayout: 'fixed' // Menggunakan fixed layout untuk distribusi yang konsisten
                 }}>
                   <thead>
                     <tr style={{
                       background: `linear-gradient(135deg, ${colors.light}60 0%, ${colors.gray100} 100%)`
                     }}>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '20px 12px',
                         textAlign: 'center',
                         fontSize: '14px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '80px'
+                        width: '60px', // Lebih kecil untuk nomor
+                        minWidth: '60px'
                       }}>
                         No.
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '20px 12px',
                         textAlign: 'left',
                         fontSize: '14px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '140px'
+                        width: '120px', // Lebar tetap untuk tanggal
+                        minWidth: '120px'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <Calendar size={16} />
@@ -699,93 +726,50 @@ const Index = () => {
                         </div>
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '20px 12px',
                         textAlign: 'left',
                         fontSize: '14px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
+                        width: '25%', // Lebar fleksibel 25%
+                        minWidth: '200px'
                       }}>
                         Nama Pelanggan
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '20px 12px',
                         textAlign: 'left',
                         fontSize: '14px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
+                        width: '20%', // Lebar fleksibel 20%
+                        minWidth: '150px'
                       }}>
                         Sales
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '20px 12px',
                         textAlign: 'left',
                         fontSize: '14px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
+                        width: '25%', // Lebar fleksibel 25%
+                        minWidth: '200px'
                       }}>
-                        Nomor Kontrak
+                        Nama PTL
                       </th>
                       <th style={{
-                        padding: '20px 16px',
-                        textAlign: 'left',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        borderBottom: `2px solid ${colors.primary}`,
-                      }}>
-                        Kontrak Ke-
-                      </th>
-                      <th style={{
-                        padding: '20px 16px',
-                        textAlign: 'left',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        borderBottom: `2px solid ${colors.primary}`,
-                      }}>
-                        Referensi
-                      </th>
-                      <th style={{
-                        padding: '20px 16px',
-                        textAlign: 'left',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        borderBottom: `2px solid ${colors.primary}`,
-                      }}>
-                        Discount
-                      </th>
-                      <th style={{
-                        padding: '20px 16px',
-                        textAlign: 'left',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        borderBottom: `2px solid ${colors.primary}`,
-                      }}>
-                        Durasi Kontrak
-                      </th>
-                      <th style={{
-                        padding: '20px 16px',
-                        textAlign: 'left',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        borderBottom: `2px solid ${colors.primary}`,
-                      }}>
-                        Status
-                      </th>
-                      <th style={{
-                        padding: '20px 16px',
+                        padding: '20px 12px',
                         textAlign: 'center',
                         fontSize: '14px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '100px'
+                        width: '100px', // Lebar tetap untuk aksi
+                        minWidth: '100px'
                       }}>
                         Aksi
                       </th>
@@ -796,7 +780,7 @@ const Index = () => {
                     {currentData.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="11"
+                          colSpan="6"
                           style={{
                             padding: '60px 20px',
                             textAlign: 'center',
@@ -840,12 +824,13 @@ const Index = () => {
                           }}
                         >
                           <td style={{
-                            padding: '20px 16px',
+                            padding: '20px 12px',
                             textAlign: 'center',
                             fontSize: '14px',
                             fontWeight: '600',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
+                            verticalAlign: 'middle'
                           }}>
                             <div style={{
                               width: '32px',
@@ -865,10 +850,11 @@ const Index = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
+                            padding: '20px 12px',
                             fontSize: '14px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
+                            verticalAlign: 'middle'
                           }}>
                             <div style={{
                               display: 'flex',
@@ -879,15 +865,18 @@ const Index = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
+                            padding: '20px 12px',
                             fontSize: '14px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
+                            verticalAlign: 'middle',
+                            wordWrap: 'break-word'
                           }}>
                             <div style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '12px'
+                              gap: '12px',
+                              minHeight: '40px'
                             }}>
                               <div style={{
                                 width: '40px',
@@ -900,12 +889,17 @@ const Index = () => {
                                 color: 'white',
                                 fontSize: '16px',
                                 fontWeight: '700',
-                                boxShadow: `0 4px 12px ${colors.success}25`
+                                boxShadow: `0 4px 12px ${colors.success}25`,
+                                flexShrink: 0
                               }}>
                                 {item.namaPelanggan.charAt(0).toUpperCase()}
                               </div>
-                              <div>
-                                <div style={{ fontWeight: '600', marginBottom: '2px' }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ 
+                                  fontWeight: '600', 
+                                  marginBottom: '2px',
+                                  wordBreak: 'break-word'
+                                }}>
                                   {item.namaPelanggan}
                                 </div>
                                 <div style={{ 
@@ -918,10 +912,12 @@ const Index = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
+                            padding: '20px 12px',
                             fontSize: '14px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
+                            verticalAlign: 'middle',
+                            wordWrap: 'break-word'
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
@@ -930,16 +926,20 @@ const Index = () => {
                               fontSize: '13px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
-                              display: 'inline-block'
+                              display: 'inline-block',
+                              maxWidth: '100%',
+                              wordBreak: 'break-word'
                             }}>
                               {item.namaSales}
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
+                            padding: '20px 12px',
                             fontSize: '14px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
+                            verticalAlign: 'middle',
+                            wordWrap: 'break-word'
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
@@ -948,102 +948,18 @@ const Index = () => {
                               fontSize: '13px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
-                              display: 'inline-block'
+                              display: 'inline-block',
+                              maxWidth: '100%',
+                              wordBreak: 'break-word'
                             }}>
-                              {item.nomorKontrak}
+                              {item.namaPTL}
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
-                            color: colors.primary,
-                            borderBottom: `2px solid ${colors.gray200}`,
-                          }}>
-                            <div style={{
-                              background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontFamily: "'Open Sans', sans-serif !important",
-                              border: `1px solid ${colors.primary}`,
-                              display: 'inline-block'
-                            }}>
-                              {item.kontrakKe}
-                            </div>
-                          </td>
-                          <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
-                            color: colors.primary,
-                            borderBottom: `2px solid ${colors.gray200}`,
-                          }}>
-                            <div style={{
-                              background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontFamily: "'Open Sans', sans-serif !important",
-                              border: `1px solid ${colors.primary}`,
-                              display: 'inline-block'
-                            }}>
-                              {item.referensi}
-                            </div>
-                          </td>
-                          <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
-                            color: colors.gray700,
-                            borderBottom: `2px solid ${colors.gray200}`,
-                          }}>
-                            <div style={{
-                              background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontFamily: "'Open Sans', sans-serif !important",
-                              border: `1px solid ${colors.primary}`,
-                              display: 'inline-block'
-                            }}>
-                              {convertDiscountToPercentage(item.diskon)}
-                            </div>
-                          </td>
-                          <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
-                            color: colors.primary,
-                            borderBottom: `2px solid ${colors.gray200}`,
-                          }}>
-                            <div style={{
-                              background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontFamily: "'Open Sans', sans-serif !important",
-                              border: `1px solid ${colors.primary}`,
-                              display: 'inline-block'
-                            }}>
-                              {item.durasi} tahun
-                            </div>
-                          </td>
-                          <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
-                            color: colors.gray700,
-                            borderBottom: `2px solid ${colors.gray200}`,
-                          }}>
-                            <div
-                              style={{
-                                ...getStatusStyle(item.status),
-                                display: 'inline-block'
-                              }}
-                            >
-                              {item.status}
-                            </div>
-                          </td>
-                          <td style={{
-                            padding: '20px 16px',
+                            padding: '20px 12px',
                             textAlign: 'center',
                             borderBottom: `2px solid ${colors.gray200}`,
+                            verticalAlign: 'middle'
                           }}>
                             <div style={{
                               display: 'flex',
