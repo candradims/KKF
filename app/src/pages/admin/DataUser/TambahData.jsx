@@ -14,7 +14,8 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [focusedField, setFocusedField] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  // showPassword === true means the password is hidden (EyeOff shown)
+  const [showPassword, setShowPassword] = useState(true);
 
   // Color palette
   const colors = {
@@ -401,7 +402,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                       <Lock size={18} />
                     </div>
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? 'password' : 'text'}
                       name="password"
                       placeholder="Minimal 8 karakter"
                       value={formData.password}
@@ -415,7 +416,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                     <div
                       role="button"
                       tabIndex={0}
-                      aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                      aria-label={showPassword ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi'}
                       onClick={() => setShowPassword(prev => !prev)}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowPassword(prev => !prev); }}
                       style={rightIconContainerStyle('password')}
