@@ -443,6 +443,7 @@ const TambahData = ({ isOpen, onClose, onSave }) => {
                       <option value="superAdmin">👑 Super Admin</option>
                       <option value="admin">👨‍💼 Admin</option>
                       <option value="sales">💼 Sales</option>
+                      <option value="aktivasi">⚡ Aktivasi</option>
                     </select>
                   </div>
                 </motion.div>

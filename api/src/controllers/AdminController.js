@@ -36,12 +36,12 @@ export class AdminController {
         });
       }
 
-      // Validasi role
-      const validRoles = ["superAdmin", "admin", "sales"];
+      // Validasi role (tambahkan 'aktivasi')
+      const validRoles = ["superAdmin", "admin", "sales", "aktivasi"];
       if (!validRoles.includes(role_user)) {
         return res.status(400).json({
           success: false,
-          message: "Role harus superAdmin, admin, atau sales",
+          message: "Role harus superAdmin, admin, sales, atau aktivasi",
         });
       }
 
@@ -132,12 +132,12 @@ export class AdminController {
       }
 
       if (role_user) {
-        // Validasi role
-        if (!["superAdmin", "admin", "sales"].includes(role_user)) {
+        // Validasi role (tambahkan 'aktivasi')
+        if (!["superAdmin", "admin", "sales", "aktivasi"].includes(role_user)) {
           console.log("❌ Invalid role:", role_user);
           return res.status(400).json({
             success: false,
-            message: "Role harus superAdmin, admin, atau sales",
+            message: "Role harus superAdmin, admin, sales, atau aktivasi",
           });
         }
         updateData.role_user = role_user;
@@ -249,10 +249,10 @@ export class AdminController {
     try {
       const { role } = req.params;
 
-      if (!["superAdmin", "admin", "sales"].includes(role)) {
+      if (!["superAdmin", "admin", "sales", "aktivasi"].includes(role)) {
         return res.status(400).json({
           success: false,
-          message: "Role harus superAdmin, admin, atau sales",
+          message: "Role harus superAdmin, admin, sales, atau aktivasi",
         });
       }
 
@@ -282,7 +282,7 @@ export class AdminController {
   static async importUsers(req, res) {
     try {
       console.log("📨 Received import users request");
-      
+
       const { users } = req.body;
 
       // Validasi input
@@ -295,29 +295,30 @@ export class AdminController {
 
       const results = {
         success: [],
-        failed: []
+        failed: [],
       };
 
       // Process each user
       for (const userData of users) {
         try {
-          const { nama_user, email_user, kata_sandi, role_user, target_nr } = userData;
+          const { nama_user, email_user, kata_sandi, role_user, target_nr } =
+            userData;
 
           // Validasi field wajib
           if (!nama_user || !email_user || !kata_sandi || !role_user) {
             results.failed.push({
               user: userData,
-              error: "Nama, email, kata sandi, dan role wajib diisi"
+              error: "Nama, email, kata sandi, dan role wajib diisi",
             });
             continue;
           }
 
-          // Validasi role
-          const validRoles = ["superAdmin", "admin", "sales"];
+          // Validasi role (tambahkan 'aktivasi')
+          const validRoles = ["superAdmin", "admin", "sales", "aktivasi"];
           if (!validRoles.includes(role_user)) {
             results.failed.push({
               user: userData,
-              error: "Role harus superAdmin, admin, atau sales"
+              error: "Role harus superAdmin, admin, sales, atau aktivasi",
             });
             continue;
           }
@@ -327,7 +328,7 @@ export class AdminController {
           if (existingUser) {
             results.failed.push({
               user: userData,
-              error: "Pengguna dengan email ini sudah ada"
+              error: "Pengguna dengan email ini sudah ada",
             });
             continue;
           }
@@ -338,7 +339,7 @@ export class AdminController {
             email_user,
             kata_sandi,
             role_user,
-            target_nr: role_user === 'sales' ? (target_nr || null) : null,
+            target_nr: role_user === "sales" ? target_nr || null : null,
           });
 
           if (!newUser || newUser.length === 0) {
@@ -350,14 +351,13 @@ export class AdminController {
           delete userResponse.kata_sandi;
 
           results.success.push(userResponse);
-          
-          console.log(`✅ User imported successfully: ${email_user}`);
 
+          console.log(`✅ User imported successfully: ${email_user}`);
         } catch (error) {
           console.error(`❌ Error importing user:`, error);
           results.failed.push({
             user: userData,
-            error: error.message
+            error: error.message,
           });
         }
       }
@@ -367,28 +367,29 @@ export class AdminController {
         message: `Import selesai. Berhasil: ${results.success.length}, Gagal: ${results.failed.length}`,
         data: {
           success: results.success,
-          failed: results.failed
-        }
+          failed: results.failed,
+        },
       };
 
       if (results.success.length === 0 && results.failed.length > 0) {
         return res.status(400).json({
           success: false,
           message: "Semua data gagal diimport",
-          data: response.data
+          data: response.data,
         });
       }
 
       res.status(201).json(response);
-
     } catch (error) {
       console.error("❌ Error in importUsers:", error);
       res.status(500).json({
         success: false,
         message: "Gagal mengimpor data pengguna",
-        error: process.env.NODE_ENV === "development" ? error.message : "Internal server error",
+        error:
+          process.env.NODE_ENV === "development"
+            ? error.message
+            : "Internal server error",
       });
     }
   }
-
 }

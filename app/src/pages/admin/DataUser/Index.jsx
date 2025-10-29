@@ -62,6 +62,7 @@ const Index = () => {
           case 'superAdmin': return 'Super Admin';
           case 'admin': return 'Admin';
           case 'sales': return 'Sales';
+          case 'aktivasi': return 'Aktivasi';
           default: return role;
         }
       };
@@ -238,6 +239,7 @@ const Index = () => {
           case 'Super Admin': return 'superAdmin';
           case 'Admin': return 'admin';
           case 'Sales': return 'sales';
+          case 'Aktivasi': return 'aktivasi';
           default: return displayRole;
         }
       };

@@ -288,7 +288,7 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                     {formData.role === 'superAdmin' && '👑 Super Admin'}
                     {formData.role === 'admin' && '👨‍💼 Admin'}
                     {formData.role === 'sales' && '💼 Sales'}
-                    {!['superAdmin', 'admin', 'sales'].includes(formData.role) && formData.role}
+                    {!['superAdmin', 'admin', 'sales', 'aktivasi'].includes(formData.role) && formData.role}
                   </div>
                 </div>
 

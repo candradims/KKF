@@ -378,7 +378,7 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
         user.nama_user && 
         user.email_user && 
         user.role_user &&
-        ['superAdmin', 'admin', 'sales'].includes(user.role_user)
+        ['superAdmin', 'admin', 'sales', 'aktivasi'].includes(user.role_user)
       );
       
       console.log('✅ Valid users for import:', validUsers);
@@ -394,8 +394,9 @@ const ImportData = ({ isOpen, onClose, onImport }) => {
   const validateAndNormalizeUsers = (users) => {
     return users.map(user => {
       let normalizedRole = user.role_user.toLowerCase().trim();
-      if (normalizedRole === 'superadmin') normalizedRole = 'superAdmin';
-      if (normalizedRole === 'administrator') normalizedRole = 'admin';
+  if (normalizedRole === 'superadmin') normalizedRole = 'superAdmin';
+  if (normalizedRole === 'administrator') normalizedRole = 'admin';
+  if (normalizedRole === 'aktivasi' || normalizedRole === 'aktiv') normalizedRole = 'aktivasi';
       
       const validatedUser = {
         nama_user: user.nama_user.trim(),
