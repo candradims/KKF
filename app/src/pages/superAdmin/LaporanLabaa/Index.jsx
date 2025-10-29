@@ -148,14 +148,15 @@ const LaporanLaba = () => {
           const pencapaian = data.totalPencapaian;
           const revenue = data.totalRevenue;
 
-          // NEW LOGIC: Target tercapai jika Pencapaian >= Target × 10
-          const targetMultiplier = 10;
-          const targetFull = target * targetMultiplier; // Target × 10
-          
-          // Growth calculation: percentage toward 10x target
+          // NEW LOGIC: Target tercapai jika Pencapaian >= Target (1x)
+          const targetMultiplier = 1; // sekarang menggunakan 1x target
+          const targetFull = target * targetMultiplier; // Target × 1 (sama dengan Target)
+
+          // Growth calculation: percentage toward target (1x)
+          // Growth 100% ketika pencapaian sama dengan target
           const growth = targetFull > 0 ? (pencapaian / targetFull) * 100 : 0;
-          
-          // Status: Tercapai jika Pencapaian >= Target × 10
+
+          // Status: Tercapai jika Pencapaian >= Target
           // IMPORTANT: If no data at all (pencapaian = 0), status should be "Belum Tercapai"
           const isAchieved = pencapaian > 0 && pencapaian >= targetFull;
 
@@ -163,10 +164,10 @@ const LaporanLaba = () => {
 
           console.log(`🎯 [SUPER ADMIN LAPORAN LABA] Sales: ${data.nama}`);
           console.log(`   - Target: Rp ${target.toLocaleString('id-ID')}`);
-          console.log(`   - Target Full (10x): Rp ${targetFull.toLocaleString('id-ID')}`);
+          console.log(`   - Target Full (1x): Rp ${targetFull.toLocaleString('id-ID')}`);
           console.log(`   - Revenue: Rp ${revenue.toLocaleString('id-ID')}`);
           console.log(`   - Pencapaian: Rp ${pencapaian.toLocaleString('id-ID')}`);
-          console.log(`   - Growth (to 10x): ${growth.toFixed(1)}%`);
+          console.log(`   - Growth (to target): ${growth.toFixed(1)}%`);
           console.log(`   - Status: ${isAchieved ? 'TERCAPAI' : 'BELUM TERCAPAI'}`);
           console.log(`   - Penawaran count: ${data.penawaranCount}`);
 
@@ -176,9 +177,9 @@ const LaporanLaba = () => {
             penawaran: Math.round(revenue), // Revenue from profit_dari_hjt_excl_ppn
             pencapaian: Math.round(pencapaian), // From total_per_bulan_harga_final_sebelum_ppn
             target: Math.round(target), // From data_user.target_nr
-            targetFull: Math.round(targetFull), // Target × 10
+            targetFull: Math.round(targetFull), // Target × 1 (same as target)
             komisi: Math.round(komisi),
-            growth: parseFloat(growth.toFixed(1)), // Progress to 10x target
+            growth: parseFloat(growth.toFixed(1)), // Progress to target
             lastMonth: 0, // Set to 0 as we don't have separate historical data for previous year
             achievement: parseFloat(growth.toFixed(1)),
             isAchieved: isAchieved, // Status tercapai atau belum
@@ -225,7 +226,8 @@ const LaporanLaba = () => {
       pencapaian: sales.pencapaian || 0,  // ✅ Real Pencapaian from total_per_bulan_harga_final_sebelum_ppn
       target: sales.target,               // ✅ Real Target from data_user.target_nr
       komisi: sales.komisi,
-      achievement: sales.target > 0 ? (sales.penawaran / sales.target) * 100 : 0,
+      // Achievement now computed from pencapaian vs target (1x)
+      achievement: sales.target > 0 ? (sales.pencapaian / sales.target) * 100 : 0,
       growth: sales.growth || 0,
       lastMonth: sales.lastMonth || 0
     }))
@@ -263,8 +265,8 @@ const LaporanLaba = () => {
     ? salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0)
     : 0;
   
-  // NEW: Achievement rate based on 10x target logic (same as admin page)
-  // Status tercapai jika Pencapaian >= Target × 10
+  // NEW: Achievement rate based on target (1x)
+  // Status tercapai jika Pencapaian >= Target
   const achievementRate = selectedYearSales === '2025' && salesData.length > 0 
     ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 
     : 0;
@@ -280,8 +282,8 @@ const LaporanLaba = () => {
   console.log('  - Total Revenue:', totalRevenue.toLocaleString('id-ID'));
   console.log('  - Total Pencapaian:', totalPencapaian.toLocaleString('id-ID'));
   console.log('  - Total Komisi:', totalKomisi.toLocaleString('id-ID'));
-  console.log('  - Achievement Rate (10x logic):', achievementRate.toFixed(2) + '%');
-  console.log('  - Average Growth (to 10x target):', averageGrowth.toFixed(2) + '%');
+  console.log('  - Achievement Rate:', achievementRate.toFixed(2) + '%');
+  console.log('  - Average Growth:', averageGrowth.toFixed(2) + '%');
 
   const formatNumber = (num) => {
     return 'Rp ' + Math.abs(num).toLocaleString('id-ID') + ',-';
