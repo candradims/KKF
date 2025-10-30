@@ -57,7 +57,6 @@ export class LayananController {
         satuan,
         backbone,
         port,
-        tarif_akses,
         tarif,
       } = req.body;
 
@@ -76,7 +75,6 @@ export class LayananController {
         satuan,
         backbone: backbone || 0.0,
         port: port || 0.0,
-        tarif_akses: tarif_akses || 0.0,
         tarif: tarif || 0.0,
       });
 
@@ -207,7 +205,6 @@ export class LayananController {
             satuan,
             backbone,
             port,
-            tarif_akses,
             tarif,
           } = layananData;
 
@@ -244,7 +241,6 @@ export class LayananController {
             satuan,
             backbone: backbone || 0,
             port: port || 0,
-            tarif_akses: tarif_akses || 0,
             tarif: tarif || 0,
           });
 
