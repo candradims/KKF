@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Plus, Calculator, Check, User, FileText, ClipboardList, BarChart3, DollarSign, Package, Settings } from "lucide-react";
+import { X, Plus, Calculator, Check, User, FileText, ClipboardList, BarChart3, DollarSign, Package, Settings, MapPin } from "lucide-react";
 import { getUserData, getAuthHeaders, adminAPI } from '../../../utils/api';
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -236,6 +236,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     sales: "",
     tanggal: "",
     pelanggan: "",
+    lokasiPelanggan: "",
     nomorKontrak: "",
     kontrakTahunKe: "",
     referensiHJT: "",
@@ -433,6 +434,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
         : (dataSource.rawData?.id_user || dataSource.sales || dataSource.namaSales || ""),
       tanggal: (dataSource.rawData?.tanggal_dibuat || dataSource.tanggal) ? new Date(dataSource.rawData?.tanggal_dibuat || dataSource.tanggal).toISOString().split('T')[0] : "",
       pelanggan: dataSource.namaPelanggan || dataSource.pelanggan || "",
+      lokasiPelanggan: dataSource.lokasiPelanggan || dataSource.lokasi_pelanggan || dataSource.rawData?.lokasi_pelanggan || "", 
       nomorKontrak: dataSource.nomorKontrak || "",
       kontrakTahunKe: dataSource.kontrakKe || dataSource.kontrakTahunKe || "",
       referensiHJT: dataSource.referensi || dataSource.referensiHJT || "",
@@ -1125,12 +1127,13 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
     }
 
     // Validasi form - field penawaran utama yang wajib
-    const requiredMainFields = ['pelanggan', 'nomorKontrak', 'durasiKontrak', 'referensiHJT'];
+    const requiredMainFields = ['pelanggan', 'lokasiPelanggan', 'nomorKontrak', 'durasiKontrak', 'referensiHJT'];
     const missingMainFields = requiredMainFields.filter(field => !formData[field]);
     
     if (missingMainFields.length > 0) {
       const fieldNames = {
         'pelanggan': 'Pelanggan',
+        'lokasiPelanggan': 'Lokasi Pelanggan',
         'nomorKontrak': 'Nomor Kontrak',
         'durasiKontrak': 'Durasi Kontrak',
         'referensiHJT': 'Referensi HJT',
@@ -1269,6 +1272,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       sales: "",
       tanggal: "",
       pelanggan: "",
+      lokasiPelanggan: "",
       nomorKontrak: "",
       kontrakTahunKe: "",
       referensiHJT: "",
@@ -1312,6 +1316,7 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       sales: "",
       tanggal: "",
       pelanggan: "",
+      lokasiPelanggan: "",
       nomorKontrak: "",
       kontrakTahunKe: "",
       referensiHJT: "",
@@ -1693,6 +1698,43 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
                       onFocus={() => setFocusedField('pelanggan')}
                       onBlur={() => setFocusedField('')}
                       style={inputStyle('pelanggan')}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Lokasi Pelanggan */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Lokasi Pelanggan *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('lokasiPelanggan')}>
+                      <MapPin size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="lokasiPelanggan"
+                      value={formData.lokasiPelanggan}
+                      onChange={handleInputChange}
+                      disabled={isSaving}
+                      placeholder="Masukkan lokasi pelanggan"
+                      required
+                      onFocus={() => setFocusedField('lokasiPelanggan')}
+                      onBlur={() => setFocusedField('')}
+                      style={inputStyle('lokasiPelanggan')}
                     />
                   </div>
                 </motion.div>
