@@ -10,7 +10,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
     satuan: "",
     backbone: "",
     port: "",
-    tarifAkses: "",
     tarif: "",
   });
 
@@ -131,7 +130,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       satuan: "",
       backbone: "",
       port: "",
-      tarifAkses: "",
       tarif: "",
     });
     setShowCustomLayanan(false);
@@ -147,7 +145,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
       satuan: "",
       backbone: "",
       port: "",
-      tarifAkses: "",
       tarif: "",
     });
     setShowCustomLayanan(false);
@@ -619,44 +616,6 @@ const TambahLayanan = ({ isOpen, onClose, onSave }) => {
                       required
                       min={0}
                       style={inputStyle('port')}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Input Tarif Akses */}
-                <motion.div 
-                  whileHover={{ y: -2 }}
-                  style={{
-                    marginBottom: "24px",
-                    position: "relative"
-                  }}
-                >
-                  <label style={{
-                    display: "block",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: colors.primary,
-                    marginBottom: "8px",
-                    letterSpacing: "0.02em"
-                  }}>
-                    Tarif Akses *
-                  </label>
-                  <div style={{ position: "relative" }}>
-                    <div style={iconContainerStyle('tarifAkses')}>
-                      <DollarSign size={18} />
-                    </div>
-                    <input
-                      name="tarifAkses"
-                      type="number"
-                      placeholder="Tarif Akses"
-                      value={formData.tarifAkses}
-                      onChange={handleChange}
-                      onFocus={() => setFocusedField('tarifAkses')}
-                      onBlur={() => setFocusedField('')}
-                      required
-                      min={0}
-                      step="0.01"
-                      style={inputStyle('tarifAkses')}
                     />
                   </div>
                 </motion.div>
