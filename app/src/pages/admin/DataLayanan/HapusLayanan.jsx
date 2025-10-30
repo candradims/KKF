@@ -11,7 +11,6 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
     satuan: "",
     backbone: "",
     port: "",
-    tarifAkses: "",
     tarif: "",
   });
 
@@ -482,37 +481,6 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
                       type="text"
                       name="port"
                       value={formData.port || '-'}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Tarif Akses Field */}
-                <motion.div 
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Tarif Akses
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <DollarSign size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="tarifAkses"
-                      value={formatCurrency(formData.tarifAkses)}
                       readOnly
                       style={inputStyle}
                     />
