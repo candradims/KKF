@@ -64,7 +64,6 @@ const Index = () => {
         satuan: item.satuan,
         backbone: item.backbone?.toString() || '0',
         port: item.port?.toString() || '0',
-        tarifAkses: item.tarif_akses?.toString() || '0',
         tarif: item.tarif?.toString() || '0'
       }));
 
@@ -101,7 +100,6 @@ const Index = () => {
           satuan: newData.satuan,
           backbone: parseFloat(newData.backbone) || 0,
           port: parseFloat(newData.port) || 0,
-          tarif_akses: parseFloat(newData.tarifAkses) || 0,
           tarif: parseFloat(newData.tarif) || 0,
         }),
       });
@@ -152,7 +150,6 @@ const Index = () => {
           satuan: updatedData.satuan,
           backbone: parseFloat(updatedData.backbone) || 0,
           port: parseFloat(updatedData.port) || 0,
-          tarif_akses: parseFloat(updatedData.tarifAkses) || 0,
           tarif: parseFloat(updatedData.tarif) || 0,
         }),
       });
@@ -795,16 +792,6 @@ const Index = () => {
                     color: colors.primary,
                     borderBottom: `2px solid #035b71 `,
                   }}>
-                    Tarif Akses
-                  </th>
-                  <th style={{
-                    padding: '20px 16px',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    fontWeight: '700',
-                    color: colors.primary,
-                    borderBottom: `2px solid #035b71 `,
-                  }}>
                     Tarif
                   </th>
                   <th style={{
@@ -1014,24 +1001,6 @@ const Index = () => {
                           display: 'inline-block'
                         }}>
                           {item.port}
-                        </div>
-                      </td>
-                      <td style={{
-                        padding: '20px 16px',
-                        fontSize: '14px',
-                        color: colors.primary,
-                        borderBottom: `2px solid #035b71 `,
-                      }}>
-                        <div style={{
-                          background: `${colors.gray100}`,
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          fontSize: '13px',
-                          fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.primary}`,
-                          display: 'inline-block'
-                        }}>
-                          {item.tarifAkses}
                         </div>
                       </td>
                       <td style={{
