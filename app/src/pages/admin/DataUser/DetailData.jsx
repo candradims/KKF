@@ -78,27 +78,28 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
               fontFamily: "'Open Sans', sans-serif !important"
             }}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0, rotate: [0, 0.5, -0.5, 0]}}
-              exit={{ scale: 0.9, opacity: 0, y: 50 }}
-              transition={{
-                duration: 0.5,
-                ease: [0.4, 0, 0.2, 1]
-              }}
-              style={{
-                background: '#e7f3f5ff',
-                borderRadius: '32px',
-                width: '100%',
-                maxWidth: '900px',
-                padding: '20px',
-                boxShadow: `
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0, rotate: [0, 0.5, -0.5, 0]}}
+                exit={{ scale: 0.9, opacity: 0, y: 50 }}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.4, 0, 0.2, 1]
+                }}
+                style={{
+                  background: '#e7f3f5ff',
+                  borderRadius: '32px',
+                  width: '100%',
+                  maxWidth: '900px',
+                  padding: '20px',
+                  boxShadow: `
                   0 12px 30px rgba(0, 0, 0, 0.12), 
                   0 4px 12px rgba(0, 0, 0, 0.08)`,
-                border: '1px solid rgba(255, 255, 255, 0.6)',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
+                  border: '1px solid rgba(255, 255, 255, 0.6)',
+                  position: 'relative',
+                  maxHeight: '90vh',
+                  overflowY: 'auto',
+                }}
             >
               {/* Decorative highlight */}
               <div style={{
@@ -191,12 +192,13 @@ const DetailData = ({ isOpen, onClose, initialData }) => {
                 style={{
                   background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
                   borderRadius: '20px',
-                  padding: '40px',
+                  padding: '24px',
                   margin: '0 32px 32px',
                   border: `1px solid rgba(0, 192, 202, 0.68)`,
                   position: 'relative'
                 }}
               >
+                {/* Content (scroll handled by outer modal container) */}
                 {/* Input Nama */}
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{
