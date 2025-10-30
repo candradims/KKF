@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Eye, RotateCcw, Filter, Calendar, Check, X, Settings, Tag } from 'lucide-react';
+import { Eye, RotateCcw, Filter, Calendar, Check, X, Settings, Tag, MapPin } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -142,7 +142,7 @@ const Index = () => {
         // Transform data dari API ke format yang digunakan di frontend - sama seperti Admin
         const transformedData = result.data.map(item => {
           try {
-            console.log("🔧 Transforming item:", item.id_penawaran, "diskon:", item.diskon);
+            console.log("🔧 Transforming item:", item.id_penawaran, "diskon:", item.diskon, "lokasi:", item.lokasi_pelanggan);
             
             // Format tanggal dari DD/MM/YYYY ke DD-MM-YYYY
             const originalDate = new Date(item.tanggal_dibuat).toLocaleDateString('id-ID');
@@ -153,6 +153,7 @@ const Index = () => {
               id_penawaran: item.id_penawaran,
               tanggal: formattedTanggal,
               namaPelanggan: item.nama_pelanggan,
+              lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: item.data_user?.nama_user || '-',
               sales: item.data_user?.nama_user || '-',
               nomorKontrak: item.nomor_kontrak,
@@ -165,7 +166,7 @@ const Index = () => {
               actions: ['view'],
               rawData: item
             };
-            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount);
+            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount, "lokasi:", transformedItem.lokasiPelanggan);
             return transformedItem;
           } catch (itemError) {
             console.error('❌ Error transforming item:', item, itemError);
@@ -174,6 +175,7 @@ const Index = () => {
               id_penawaran: item.id_penawaran || 'unknown',
               tanggal: '-',
               namaPelanggan: item.nama_pelanggan || '-',
+              lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: '-',
               sales: '-',
               nomorKontrak: item.nomor_kontrak || '-',
@@ -841,6 +843,19 @@ const Index = () => {
                       }}>
                         Nama Pelanggan
                       </th>
+                      {/* Lokasi Pelanggan */}
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          Lokasi Pelanggan
+                        </div>
+                      </th>
                       <th style={{
                         padding: '20px 16px',
                         textAlign: 'left',
@@ -929,7 +944,7 @@ const Index = () => {
                     {currentData.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="11"
+                          colSpan="12"
                           style={{
                             padding: '60px 20px',
                             textAlign: 'center',
@@ -1047,6 +1062,32 @@ const Index = () => {
                                 }}>
                                   Pelanggan
                                 </div>
+                              </div>
+                            </div>
+                          </td>
+                          {/* Lokasi Pelanggan */}
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}>
+                              <MapPin size={16} color={colors.tertiary} />
+                              <div style={{
+                                 background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                              }}>
+                                {item.lokasiPelanggan}
                               </div>
                             </div>
                           </td>
