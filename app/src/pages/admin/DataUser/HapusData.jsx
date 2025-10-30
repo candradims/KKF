@@ -126,7 +126,7 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
               fontFamily: "'Open Sans', sans-serif !important"
             }}
           >
-            <motion.div
+              <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 50 }}
               animate={{ 
                 scale: 1, 
@@ -150,7 +150,8 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
                   0 4px 12px rgba(0, 0, 0, 0.08)`,
                 border: '1px solid rgba(255, 255, 255, 0.6)',
                 position: 'relative',
-                overflow: 'hidden',
+                maxHeight: '90vh',
+                overflowY: 'auto',
               }}
             >
               {/* Decorative highlight */}
@@ -271,12 +272,13 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
                 style={{
                   background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
                   borderRadius: '20px',
-                  padding: '40px',
+                  padding: '24px',
                   margin: '0 32px 32px',
                   border: `1px solid rgba(0, 192, 202, 0.68)`,
                   position: 'relative'
                 }}
               >
+                {/* Content (scroll handled by outer modal container) */}
                 {/* Nama Field */}
                 <motion.div 
                   style={{
