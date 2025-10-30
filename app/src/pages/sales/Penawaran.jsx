@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Edit2, Trash2, Plus, RotateCcw, Download, Filter, Calendar, Check, X } from 'lucide-react';
+import { Eye, Edit2, Trash2, Plus, RotateCcw, Download, Filter, Calendar, Check, X, MapPin } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Tambah from './crud-penawaran/Tambah';
@@ -98,6 +98,7 @@ const Penawaran = () => {
               id_penawaran: item.id_penawaran,
               tanggal: new Date(item.tanggal_dibuat).toLocaleDateString('id-ID'),
               namaPelanggan: item.nama_pelanggan,
+              lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: item.data_user?.nama_user || "-",
               sales: item.data_user?.nama_user || "-",
               nomorKontrak: item.nomor_kontrak,
@@ -117,6 +118,7 @@ const Penawaran = () => {
               id_penawaran: item.id_penawaran || 'unknown',
               tanggal: '-',
               namaPelanggan: item.nama_pelanggan || '-',
+              lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: '-',
               sales: '-',
               nomorKontrak: item.nomor_kontrak || '-',
@@ -255,6 +257,7 @@ const Penawaran = () => {
       const apiData = {
         tanggal: formatDate(updatedData.tanggal),
         pelanggan: updatedData.pelanggan,
+        lokasi_pelanggan: updatedData.lokasiPelanggan,
         nomorKontrak: updatedData.nomorKontrak,
         kontrakTahunKe: updatedData.kontrakTahunKe,
         referensiHJT: updatedData.referensiHJT,
@@ -786,6 +789,7 @@ const Penawaran = () => {
         const basicInfo = [
           ['Tanggal', `: ${item.tanggal || '-'}`],
           ['Nama Pelanggan', `: ${item.namaPelanggan || '-'}`],
+          ['Lokasi Pelanggan', `: ${item.lokasiPelanggan || '-'}`],
           ['Nomor Kontrak/BAKB', `: ${item.nomorKontrak || '-'}`],
           ['Kontrak Tahun ke-', `: ${item.kontrakKe || '-'}`],
           ['Referensi HJT', `: ${item.referensi || '-'}`],
@@ -1728,6 +1732,19 @@ const Penawaran = () => {
                       }}>
                         Nama Pelanggan
                       </th>
+                      {/* Lokasi Pelanggan */}
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          Lokasi Pelanggan
+                        </div>
+                      </th>
                       <th style={{
                         padding: '20px 16px',
                         textAlign: 'left',
@@ -1806,7 +1823,7 @@ const Penawaran = () => {
                     {currentData.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="11"
+                          colSpan="12" 
                           style={{
                             padding: '60px 20px',
                             textAlign: 'center',
@@ -1942,6 +1959,32 @@ const Penawaran = () => {
                                 }}>
                                   Pelanggan
                                 </div>
+                              </div>
+                            </div>
+                          </td>
+                          {/* Lokasi Pelanggan */}
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}>
+                              <MapPin size={16} color={colors.tertiary} />
+                              <div style={{
+                                 background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                              }}>
+                                {item.lokasiPelanggan}
                               </div>
                             </div>
                           </td>
