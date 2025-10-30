@@ -11,7 +11,6 @@ const DetailLayanan = ({ isOpen, onClose, initialData }) => {
     satuan: "",
     backbone: "",
     port: "",
-    tarifAkses: "",
     tarif: "",
   });
 
@@ -355,29 +354,6 @@ const DetailLayanan = ({ isOpen, onClose, initialData }) => {
                   }}>
                     <Cpu size={18} style={{ marginRight: '12px' }} />
                     {formData.port}
-                  </div>
-                </div>
-
-                {/* Field: Tarif Akses */}
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    display: 'block'
-                  }}>Tarif Akses</label>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(3, 91, 113, 0.3)',
-                    backgroundColor: '#f0f4f5',
-                    color: colors.primary
-                  }}>
-                    <DollarSign size={18} style={{ marginRight: '12px' }} />
-                    {formatCurrency(formData.tarifAkses)}
                   </div>
                 </div>
 
