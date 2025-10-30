@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Filter, Calendar, RotateCcw, Search } from 'lucide-react';
+import { Eye, Filter, Calendar, RotateCcw, Search, MapPin } from 'lucide-react';
 import Detail from './Detail';
 import { penawaranAPI, getUserData } from '../../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -128,7 +128,7 @@ const Index = () => {
       if (result.success) {
         const transformedData = result.data.map(item => {
           try {
-            console.log("🔧 Transforming item:", item.id_penawaran, "diskon:", item.diskon);
+            console.log("🔧 Transforming item:", item.id_penawaran, "diskon:", item.diskon, "lokasi:", item.lokasi_pelanggan);
             
             const originalDate = new Date(item.tanggal_dibuat).toLocaleDateString('id-ID');
             const formattedTanggal = formatTanggal(originalDate);
@@ -138,6 +138,7 @@ const Index = () => {
               id_penawaran: item.id_penawaran,
               tanggal: formattedTanggal,
               namaPelanggan: item.nama_pelanggan,
+              lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: item.data_user?.nama_user || '-',
               sales: item.data_user?.nama_user || '-',
               namaPTL: item.nama_ptl || '-',
@@ -151,7 +152,7 @@ const Index = () => {
               actions: ['view'],
               rawData: item
             };
-            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount);
+            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount, "lokasi:", transformedItem.lokasiPelanggan);
             return transformedItem;
           } catch (itemError) {
             console.error('❌ Error transforming item:', item, itemError);
@@ -160,6 +161,7 @@ const Index = () => {
               id_penawaran: item.id_penawaran || 'unknown',
               tanggal: '-',
               namaPelanggan: item.nama_pelanggan || '-',
+              lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: '-',
               sales: '-',
               namaPTL: '-',
@@ -202,6 +204,7 @@ const Index = () => {
     // Search filter - mencari di semua kolom yang relevan
     const matchesSearch = !searchTerm || 
       item.namaPelanggan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.lokasiPelanggan.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.namaSales.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.namaPTL.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.nomorKontrak.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -692,7 +695,7 @@ const Index = () => {
                   width: '100%',
                   borderCollapse: 'separate',
                   borderSpacing: 0,
-                  tableLayout: 'fixed' // Menggunakan fixed layout untuk distribusi yang konsisten
+                  tableLayout: 'fixed'
                 }}>
                   <thead>
                     <tr style={{
@@ -705,7 +708,7 @@ const Index = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '60px', // Lebih kecil untuk nomor
+                        width: '60px',
                         minWidth: '60px'
                       }}>
                         No.
@@ -717,7 +720,7 @@ const Index = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '120px', // Lebar tetap untuk tanggal
+                        width: '120px',
                         minWidth: '120px'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -732,10 +735,26 @@ const Index = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '25%', // Lebar fleksibel 25%
-                        minWidth: '200px'
+                        width: '20%',
+                        minWidth: '180px'
                       }}>
                         Nama Pelanggan
+                      </th>
+                      {/* Lokasi Pelanggan */}
+                      <th style={{
+                        padding: '20px 12px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                        width: '15%',
+                        minWidth: '150px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <MapPin size={16} />
+                          Lokasi Pelanggan
+                        </div>
                       </th>
                       <th style={{
                         padding: '20px 12px',
@@ -744,8 +763,8 @@ const Index = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '20%', // Lebar fleksibel 20%
-                        minWidth: '150px'
+                        width: '15%',
+                        minWidth: '120px'
                       }}>
                         Sales
                       </th>
@@ -756,8 +775,8 @@ const Index = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '25%', // Lebar fleksibel 25%
-                        minWidth: '200px'
+                        width: '15%',
+                        minWidth: '150px'
                       }}>
                         Nama PTL
                       </th>
@@ -768,7 +787,7 @@ const Index = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '100px', // Lebar tetap untuk aksi
+                        width: '100px',
                         minWidth: '100px'
                       }}>
                         Aksi
@@ -780,7 +799,7 @@ const Index = () => {
                     {currentData.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="6"
+                          colSpan="7"
                           style={{
                             padding: '60px 20px',
                             textAlign: 'center',
@@ -908,6 +927,36 @@ const Index = () => {
                                 }}>
                                   Pelanggan
                                 </div>
+                              </div>
+                            </div>
+                          </td>
+                          {/* Lokasi Pelanggan */}
+                          <td style={{
+                            padding: '20px 12px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                            verticalAlign: 'middle',
+                            wordWrap: 'break-word'
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}>
+                              <MapPin size={16} color={colors.tertiary} />
+                              <div style={{
+                                background: `${colors.gray100}`,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                fontSize: '13px',
+                                fontFamily: "'Open Sans', sans-serif !important",
+                                border: `1px solid ${colors.primary}`,
+                                display: 'inline-block',
+                                maxWidth: '100%',
+                                wordBreak: 'break-word'
+                              }}>
+                                {item.lokasiPelanggan}
                               </div>
                             </div>
                           </td>
