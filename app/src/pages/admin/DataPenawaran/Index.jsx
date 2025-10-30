@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Edit2, Trash2, Plus, RotateCcw, Filter, Calendar, Check, X, Settings, Tag, DollarSign } from 'lucide-react';
+import { Eye, Edit2, Trash2, Plus, RotateCcw, Filter, Calendar, Check, X, Settings, Tag, DollarSign, MapPin } from 'lucide-react';
 import Detail from './Detail';
 import Tambah from './Tambah';
 import Edit from './Edit';
@@ -172,6 +172,7 @@ const Index = () => {
               id_penawaran: item.id_penawaran,
               tanggal: formattedTanggal,
               namaPelanggan: item.nama_pelanggan,
+              lokasiPelanggan: item.lokasi_pelanggan || '-', // Tambah kolom lokasi pelanggan
               namaSales: item.data_user?.nama_user || '-',
               sales: item.data_user?.nama_user || '-',
               nomorKontrak: item.nomor_kontrak,
@@ -184,7 +185,7 @@ const Index = () => {
               actions: ['view', 'edit', 'delete'],
               rawData: item
             };
-            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount);
+            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount, "lokasi:", transformedItem.lokasiPelanggan);
             return transformedItem;
           } catch (itemError) {
             console.error('❌ Error transforming item:', item, itemError);
@@ -193,6 +194,7 @@ const Index = () => {
               id_penawaran: item.id_penawaran || 'unknown',
               tanggal: '-',
               namaPelanggan: item.nama_pelanggan || '-',
+              lokasiPelanggan: item.lokasi_pelanggan || '-', // Tambah kolom lokasi pelanggan
               namaSales: '-',
               sales: '-',
               nomorKontrak: item.nomor_kontrak || '-',
@@ -388,6 +390,7 @@ const Index = () => {
       const apiData = {
         tanggal: formatDate(updatedData.tanggal),
         pelanggan: updatedData.pelanggan,
+        lokasi_pelanggan: updatedData.lokasiPelanggan, // Tambah lokasi pelanggan
         nomorKontrak: updatedData.nomorKontrak,
         kontrakTahunKe: updatedData.kontrakTahunKe,
         referensiHJT: updatedData.referensiHJT,
@@ -395,8 +398,7 @@ const Index = () => {
         discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0',
         total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0,
         selectedLayananId: updatedData.selectedLayananId,
-        hjtWilayah: updatedData.hjtWilayah
-        ,
+        hjtWilayah: updatedData.hjtWilayah,
         // Include layananItems and pengeluaranItems so backend can update them
         layananItems: updatedData.layananItems || [],
         pengeluaranItems: updatedData.pengeluaranItems || []
@@ -1250,6 +1252,19 @@ const Index = () => {
                       }}>
                         Nama Pelanggan
                       </th>
+                      {/* Kolom Lokasi Pelanggan Baru */}
+                      <th style={{
+                        padding: '20px 16px',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `2px solid ${colors.primary}`,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          Lokasi Pelanggan
+                        </div>
+                      </th>
                       <th style={{
                         padding: '20px 16px',
                         textAlign: 'left',
@@ -1338,7 +1353,7 @@ const Index = () => {
                     {currentData.length === 0 ? (
                       <tr>
                         <td
-                          colSpan="11"
+                          colSpan="12"
                           style={{
                             padding: '60px 20px',
                             textAlign: 'center',
@@ -1456,6 +1471,32 @@ const Index = () => {
                                 }}>
                                   Pelanggan
                                 </div>
+                              </div>
+                            </div>
+                          </td>
+                          {/* Kolom Lokasi Pelanggan Baru */}
+                          <td style={{
+                            padding: '20px 16px',
+                            fontSize: '14px',
+                            color: colors.primary,
+                            borderBottom: `2px solid ${colors.gray200}`,
+                          }}>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px'
+                            }}>
+                              <MapPin size={16} color={colors.tertiary} />
+                              <div style={{
+                                 background: `${colors.gray100}`,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontFamily: "'Open Sans', sans-serif !important",
+                              border: `1px solid ${colors.primary}`,
+                              display: 'inline-block'
+                              }}>
+                                {item.lokasiPelanggan}
                               </div>
                             </div>
                           </td>
