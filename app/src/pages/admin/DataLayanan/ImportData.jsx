@@ -32,7 +32,6 @@ const ImportLayanan = ({ isOpen, onClose, onImport }) => {
         satuan: 'Mbps',
         backbone: 1000000,
         port: 500000,
-        tarif_akses: 2000000,
         tarif: 3000000
       },
       {
@@ -42,7 +41,6 @@ const ImportLayanan = ({ isOpen, onClose, onImport }) => {
         satuan: 'Mbps',
         backbone: 500000,
         port: 250000,
-        tarif_akses: 1000000,
         tarif: 1500000
       },
       {
@@ -52,7 +50,6 @@ const ImportLayanan = ({ isOpen, onClose, onImport }) => {
         satuan: 'Mbps',
         backbone: 2000000,
         port: 1000000,
-        tarif_akses: 5000000,
         tarif: 7000000
       }
     ];
@@ -73,7 +70,6 @@ const ImportLayanan = ({ isOpen, onClose, onImport }) => {
       { wch: 10 },  // satuan
       { wch: 15 },  // backbone
       { wch: 15 },  // port
-      { wch: 15 },  // tarif_akses
       { wch: 15 }   // tarif
     ];
     
@@ -114,7 +110,7 @@ const ImportLayanan = ({ isOpen, onClose, onImport }) => {
         if (!worksheet[cellAddress]) continue;
         
         // Format angka untuk kolom harga
-        const isPriceColumn = col >= 4 && col <= 7; // backbone, port, tarif_akses, tarif
+        const isPriceColumn = col >= 4 && col <= 7; // backbone, port, tarif
         if (isPriceColumn && worksheet[cellAddress].v) {
           worksheet[cellAddress].z = '#,##0';
         }
@@ -152,7 +148,7 @@ const ImportLayanan = ({ isOpen, onClose, onImport }) => {
   // Template CSV untuk Layanan
   const downloadCSVTemplate = () => {
     const csvContent = [
-      'nama_layanan,jenis_layanan,wilayah_hjt,satuan,backbone,port,tarif_akses,tarif',
+      'nama_layanan,jenis_layanan,wilayah_hjt,satuan,backbone,port,tarif',
       'Internet Dedicated,Dedicated,Jakarta,Mbps,1000000,500000,2000000,3000000',
       'Internet Broadband,Broadband,Surabaya,Mbps,500000,250000,1000000,1500000',
       'VPN IPLC,IPLC,Bali,Mbps,2000000,1000000,5000000,7000000'
@@ -256,7 +252,6 @@ const parseExcel = (file) => {
             // ⚠️ PERBAIKAN: Ganti this.parseNumber dengan parseNumber ⚠️
             backbone: parseNumber(row.backbone || rowLower.backbone || 0),
             port: parseNumber(row.port || rowLower.port || 0),
-            tarif_akses: parseNumber(row.tarif_akses || row.tarif_akses || rowLower.tarif_akses || 0),
             tarif: parseNumber(row.tarif || rowLower.tarif || 0)
           };
           
@@ -342,8 +337,6 @@ const parseExcel = (file) => {
                 row.backbone = parseNumber(value);
               } else if (header.includes('port')) {
                 row.port = parseNumber(value);
-              } else if (header.includes('tarif_akses') || header.includes('tarifakses')) {
-                row.tarif_akses = parseNumber(value);
               } else if (header.includes('tarif') && !header.includes('akses')) {
                 row.tarif = parseNumber(value);
               }
@@ -416,7 +409,6 @@ const parseExcel = (file) => {
         satuan: item.satuan.trim(),
         backbone: parseNumber(item.backbone),
         port: parseNumber(item.port),
-        tarif_akses: parseNumber(item.tarif_akses),
         tarif: parseNumber(item.tarif)
       };
     });
@@ -449,7 +441,7 @@ const parseExcel = (file) => {
           Tidak ada data yang valid. Pastikan:
           1. File memiliki header yang benar
           2. Kolom nama_layanan, jenis_layanan, wilayah_hjt, dan satuan terisi
-          3. Format angka untuk backbone, port, tarif_akses, dan tarif valid
+          3. Format angka untuk backbone, porte, dan tarif valid
         `);
         setIsLoading(false);
         return;
