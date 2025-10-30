@@ -61,7 +61,6 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
     satuan: '',
     backbone: '',
     port: '',
-    tarifAkses: '',
     tarif: ''
   });
 
@@ -82,7 +81,6 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
         initialData.satuan !== formData.satuan ||
         initialData.backbone !== formData.backbone ||
         initialData.port !== formData.port ||
-        initialData.tarifAkses !== formData.tarifAkses ||
         initialData.tarif !== formData.tarif
       );
     };
@@ -178,7 +176,6 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
         satuan: initialData.satuan || '',
         backbone: initialData.backbone || '',
         port: initialData.port || '',
-        tarifAkses: initialData.tarifAkses || '',
         tarif: initialData.tarif || ''
       });
       setHasChanges(false);
@@ -236,7 +233,6 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
         satuan: formData.satuan,
         backbone: formData.backbone,
         port: formData.port,
-        tarifAkses: formData.tarifAkses,
         tarif: formData.tarif
       };
 
@@ -752,43 +748,6 @@ const EditLayanan = ({ isOpen, onClose, onSave, initialData }) => {
                       placeholder="Masukkan port"
                       min="0"
                       style={inputStyle('port')}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Tarif Akses Field */}
-                <motion.div 
-                  whileHover={{ y: -2 }}
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Tarif Akses
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle('tarifAkses')}>
-                      <DollarSign size={18} />
-                    </div>
-                    <input
-                      type="number"
-                      name="tarifAkses"
-                      value={formData.tarifAkses}
-                      onChange={handleInputChange}
-                      onFocus={() => setFocusedField('tarifAkses')}
-                      onBlur={() => setFocusedField('')}
-                      placeholder="Masukkan tarif akses"
-                      min="0"
-                      step="0.01"
-                      style={inputStyle('tarifAkses')}
                     />
                   </div>
                 </motion.div>
