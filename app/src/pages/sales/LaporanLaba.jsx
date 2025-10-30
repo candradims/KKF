@@ -22,7 +22,7 @@ import {
 import { penawaranAPI, getUserData } from '../../utils/api';
 
 const LaporanLaba = () => {
-  const [selectedYearSales, setSelectedYearSales] = useState('2025');
+  // Year selection removed — view fixed to 2025
   const [salesData, setSalesData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -440,41 +440,28 @@ const LaporanLaba = () => {
     loadRevenueData();
   }, []);
 
-  // Filter data berdasarkan tahun yang dipilih
-  const filteredMonthlyData = selectedYearSales === '2025' ? monthlyData.filter(item => {
-    // For demo purposes, we'll use the current year data
-    return true;
-  }) : [];
+  // Year fixed to 2025 — use all monthly data
+  const filteredMonthlyData = monthlyData;
 
   // Get current month data for stats
   const currentMonth = new Date().getMonth();
   const currentMonthData = filteredMonthlyData.find(item => item.month === currentMonth + 1) || filteredMonthlyData[0];
 
-  // Hitung statistik - UPDATED: Only show data for 2025
-  const totalRevenue = selectedYearSales === '2025' 
-    ? (totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0))
-    : 0;
-    
-  const totalKomisi = selectedYearSales === '2025'
-    ? salesData.reduce((sum, sales) => sum + sales.komisi, 0)
-    : 0;
-    
-  const totalPencapaian = selectedYearSales === '2025'
-    ? (nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0))
-    : 0;
-  
+  // Hitung statistik (year fixed to 2025)
+  const totalRevenue = totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
+
+  const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
+
+  const totalPencapaian = nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0);
+
   // NEW: Achievement rate based on target (1x)
   // Status tercapai jika Pencapaian >= Target
-  const achievementRate = selectedYearSales === '2025' && salesData.length > 0 
-    ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 
-    : 0;
-  
-  const averageGrowth = selectedYearSales === '2025' && salesData.length > 0
-    ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length
-    : 0;
+  const achievementRate = salesData.length > 0 ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 : 0;
+
+  const averageGrowth = salesData.length > 0 ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length : 0;
   
   console.log('📊 [LAPORAN LABA] Display Statistics:');
-  console.log('  - Selected Year:', selectedYearSales);
+  console.log('  - Year fixed to: 2025');
   console.log('  - Total Revenue (from profit):', totalRevenue.toLocaleString('id-ID'));
   console.log('  - Total Pencapaian (from total_per_bulan):', totalPencapaian.toLocaleString('id-ID'));
   console.log('  - Total Komisi:', totalKomisi.toLocaleString('id-ID'));
@@ -531,7 +518,6 @@ const LaporanLaba = () => {
   };
 
   const handleRefresh = () => {
-    setSelectedYearSales('2025');
     setActiveChart('performance');
     loadRevenueData();
   };
@@ -722,66 +708,7 @@ const LaporanLaba = () => {
             flexWrap: 'wrap',
             gap: '20px'
           }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'flex-start',
-              gap: '40px',
-              flexWrap: 'wrap',
-            }}>
-              {/* Tahun Filter */}
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '14px',
-                  fontWeight: '700',
-                  color: colors.primary,
-                  marginBottom: '8px',
-                  height: '24px'
-                }}>
-                  <Calendar size={16} />
-                  Tahun
-                </label>
-                <div style={{ position: 'relative', minWidth: '140px' }}>
-                  <select
-                    value={selectedYearSales}
-                    onChange={(e) => setSelectedYearSales(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '14px 20px',
-                      paddingRight: '45px',
-                      border: `2px solid ${colors.primary}`,
-                      borderRadius: '12px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      outline: 'none',
-                      transition: 'all 0.3s ease',
-                      backgroundColor: colors.white,
-                      color: colors.gray700,
-                      cursor: 'pointer',
-                      appearance: 'none'
-                    }}
-                  >
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                  </select>
-                  <div style={{
-                    position: 'absolute',
-                    right: '16px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    pointerEvents: 'none',
-                    color: colors.primary
-                  }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '40px', flexWrap: 'wrap' }}>
               {/* Chart Type Tabs */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <label style={{
@@ -828,7 +755,7 @@ const LaporanLaba = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Refresh Button */}
             <div style={{ 
               display: 'flex', 
@@ -928,11 +855,11 @@ const LaporanLaba = () => {
               fontWeight: '700',
               color: colors.success
             }}> 
-              Tahun {selectedYearSales}
+              Tahun 2025
             </div>
           </div>
           
-          <div style={{ height: '500px' }}>
+    <div style={{ height: '500px' }}>
             {isLoading ? (
               <div style={{
                 display: 'flex',
@@ -983,7 +910,7 @@ const LaporanLaba = () => {
                   textAlign: 'center',
                   maxWidth: '400px'
                 }}>
-                  Belum ada data performa untuk tahun {selectedYearSales}. Data performa hanya tersedia untuk tahun 2025.
+                  Belum ada data performa untuk tahun 2025. Data performa hanya tersedia untuk tahun 2025.
                 </div>
               </div>
             ) : (
@@ -1063,7 +990,7 @@ const LaporanLaba = () => {
             borderRadius: '50%',
             transform: 'translate(-30%, -30%)'
           }} />
-          
+
           <h3 style={{
             fontSize: '24px',
             fontWeight: '800',
@@ -1071,8 +998,7 @@ const LaporanLaba = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            marginBottom: '24px',
-            position: 'relative'
+            margin: 0
           }}>
             <div style={{
               padding: '8px',
@@ -1111,7 +1037,7 @@ const LaporanLaba = () => {
                   textAlign: 'center',
                   maxWidth: '400px'
                 }}>
-                  Belum ada data performa untuk tahun {selectedYearSales}. Data hanya tersedia untuk tahun 2025.
+                  Belum ada data performa untuk tahun 2025. Data hanya tersedia untuk tahun 2025.
                 </div>
               </div>
             ) : (

@@ -71,7 +71,6 @@ export class LayananModel {
           satuan: layananData.satuan,
           backbone: layananData.backbone || 0,
           port: layananData.port || 0,
-          tarif_akses: layananData.tarif_akses || 0,
           tarif: layananData.tarif || 0,
         })
         .select();
