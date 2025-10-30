@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle, Check, User, FileText, BarChart3, Settings, Package, DollarSign, Calculator, ClipboardList } from 'lucide-react';
+import { X, AlertTriangle, Check, User, FileText, BarChart3, Settings, Package, DollarSign, Calculator, ClipboardList, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getUserData, getAuthHeaders } from '../../../utils/api';
 
@@ -14,6 +14,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
     sales: '',
     tanggal: '',
     pelanggan: '',
+    lokasiPelanggan: '', 
     nomorKontrak: '',
     kontrakTahunKe: '',
     referensiHJT: '',
@@ -49,6 +50,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
         sales: deleteData.rawData?.sales || deleteData.sales || deleteData.namaSales || '',
         tanggal: formattedTanggal,
         pelanggan: deleteData.namaPelanggan || deleteData.pelanggan || '',
+        lokasiPelanggan: deleteData.rawData?.lokasi_pelanggan || deleteData.lokasiPelanggan || '', 
         nomorKontrak: deleteData.nomorKontrak || '',
         kontrakTahunKe: deleteData.kontrakKe || deleteData.kontrakTahunKe || '',
         referensiHJT: deleteData.referensi || deleteData.referensiHJT || '',
@@ -166,6 +168,13 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
       if (result.success && result.data && result.data.data_penawaran_layanan) {
         console.log("✅ Hapus: Setting layanan data:", result.data.data_penawaran_layanan);
         setLayananData(result.data.data_penawaran_layanan);
+        
+        if (result.data.lokasi_pelanggan) {
+          setFormData(prev => ({
+            ...prev,
+            lokasiPelanggan: result.data.lokasi_pelanggan
+          }));
+        }
       } else {
         console.log("📝 Hapus: No layanan data in API response");
         setLayananData([]);
@@ -242,6 +251,7 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
       sales: '',
       tanggal: '',
       pelanggan: '',
+      lokasiPelanggan: '',
       nomorKontrak: '',
       kontrakTahunKe: '',
       referensiHJT: '',
@@ -579,6 +589,37 @@ const Hapus = ({ isOpen, onClose, onConfirm, deleteData }) => {
                       type="text"
                       name="pelanggan"
                       value={formData.pelanggan}
+                      readOnly
+                      style={inputStyle}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Lokasi Pelanggan */}
+                <motion.div 
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Lokasi Pelanggan
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle}>
+                      <MapPin size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="lokasiPelanggan"
+                      value={formData.lokasiPelanggan}
                       readOnly
                       style={inputStyle}
                     />
