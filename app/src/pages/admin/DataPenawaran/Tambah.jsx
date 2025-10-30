@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Plus, Calculator, Check, User, FileText, ClipboardList, BarChart3, DollarSign, Package, Settings } from "lucide-react";
+import { X, Plus, Calculator, Check, User, FileText, ClipboardList, BarChart3, DollarSign, Package, Settings, MapPin } from "lucide-react";
 import { getUserData, adminAPI } from "../../../utils/api";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -214,6 +214,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     sales: "",
     tanggal: getTodayDate(),
     pelanggan: "",
+    lokasiPelanggan: "",
     nomorKontrak: "",
     kontrakTahunKe: "",
     referensiHJT: "",
@@ -317,11 +318,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     console.log('🎭 useEffect triggered - isOpen:', isOpen);
     if (isOpen) {
       console.log('✅ isOpen is true, resetting form and loading layanan data...');
-  const userData = getUserData();
+      const userData = getUserData();
       setFormData({
         sales: userData && userData.role_user === 'sales' ? String(userData.id_user) : "",
         tanggal: getTodayDate(),
         pelanggan: "",
+        lokasiPelanggan: "",
         nomorKontrak: "",
         kontrakTahunKe: "",
         referensiHJT: "",
@@ -551,11 +553,12 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     return [...new Set(filtered.map(item => item.jenis_layanan))].filter(Boolean);
   };
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const requiredFields = [
       'pelanggan',
+      'lokasiPelanggan',
       'nomorKontrak',
       'durasiKontrak',
       'referensiHJT'
@@ -580,6 +583,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     if (missingFields.length > 0) {
       const fieldNames = {
         'pelanggan': 'Pelanggan',
+        'lokasiPelanggan': 'Lokasi Pelanggan',
         'nomorKontrak': 'Nomor Kontrak',
         'durasiKontrak': 'Durasi Kontrak',
         'referensiHJT': 'Referensi HJT'
@@ -624,6 +628,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     try {
       const dataToSend = {
         ...formData,
+        lokasi_pelanggan: formData.lokasiPelanggan,
         layananItems: layananItems,
         selectedLayananId: selectedLayanan?.id_layanan,
         satuan: formData.satuan,
@@ -652,6 +657,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       setIsSaving(false);
     }
   };
+
   // Reset form state completely
   const resetFormState = () => {
     console.log('🔄 Resetting form state...');
@@ -661,6 +667,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
       sales: userData && userData.role_user === 'sales' ? String(userData.id_user) : "",
       tanggal: getTodayDate(),
       pelanggan: "",
+      lokasiPelanggan: "",
       nomorKontrak: "",
       kontrakTahunKe: "",
       referensiHJT: "",
@@ -1018,6 +1025,43 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
                       onFocus={() => setFocusedField('pelanggan')}
                       onBlur={() => setFocusedField('')}
                       style={inputStyle('pelanggan')}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Lokasi Pelanggan */}
+                <motion.div 
+                  whileHover={{ y: -2 }}
+                  style={{
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}
+                >
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    marginBottom: '8px',
+                    letterSpacing: '0.02em'
+                  }}>
+                    Lokasi Pelanggan *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconContainerStyle('lokasiPelanggan')}>
+                      <MapPin size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      name="lokasiPelanggan"
+                      value={formData.lokasiPelanggan}
+                      onChange={handleInputChange}
+                      disabled={isSaving}
+                      placeholder="Masukkan lokasi pelanggan"
+                      required
+                      onFocus={() => setFocusedField('lokasiPelanggan')}
+                      onBlur={() => setFocusedField('')}
+                      style={inputStyle('lokasiPelanggan')}
                     />
                   </div>
                 </motion.div>
