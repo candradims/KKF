@@ -57,7 +57,9 @@ export class PenawaranController {
         req.user.role_user === "aktivasi"
       ) {
         // Admin dan SuperAdmin dapat melihat semua penawaran
-        console.log("👑 Admin/SuperAdmin/Aktivasi user - getting all penawaran");
+        console.log(
+          "👑 Admin/SuperAdmin/Aktivasi user - getting all penawaran"
+        );
         penawaran = await PenawaranModel.getAllPenawaran();
       } else {
         throw new Error("Role tidak dikenali");
@@ -1329,6 +1331,7 @@ export class PenawaranController {
       kontrakTahunKe: "kontrak_tahun",
       referensiHJT: "wilayah_hjt",
       durasiKontrak: "durasi_kontrak",
+      lokasiPelanggan: "lokasi_pelanggan",
       tanggal: "tanggal_dibuat",
       discount: "diskon",
     };

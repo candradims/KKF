@@ -144,6 +144,8 @@ export class PenawaranModel {
         durasi_kontrak: parseInt(
           penawaranData.durasi_kontrak || penawaranData.durasiKontrak || 12
         ),
+        lokasi_pelanggan:
+          penawaranData.lokasi_pelanggan || penawaranData.lokasiPelanggan || "",
         status: penawaranData.status || "Menunggu",
         // nama_sales akan diambil dari relasi data_user berdasarkan id_user
       };
@@ -283,6 +285,11 @@ export class PenawaranModel {
         );
       }
 
+      if (penawaranData.lokasiPelanggan || penawaranData.lokasi_pelanggan) {
+        updateData.lokasi_pelanggan =
+          penawaranData.lokasi_pelanggan || penawaranData.lokasiPelanggan;
+      }
+
       if (penawaranData.status) {
         updateData.status = penawaranData.status;
       }
@@ -318,11 +325,17 @@ export class PenawaranModel {
 
         if (currentRecord && currentRecord.id_user) {
           // Only preserve existing id_user when caller did not explicitly provide id_user
-          if (typeof updateData.id_user === 'undefined' || updateData.id_user === null) {
+          if (
+            typeof updateData.id_user === "undefined" ||
+            updateData.id_user === null
+          ) {
             updateData.id_user = parseInt(currentRecord.id_user, 10);
             console.log("🔐 Preserving existing id_user:", updateData.id_user);
           } else {
-            console.log("🔁 id_user provided in update payload, will reassign to:", updateData.id_user);
+            console.log(
+              "🔁 id_user provided in update payload, will reassign to:",
+              updateData.id_user
+            );
           }
         } else {
           console.error(
