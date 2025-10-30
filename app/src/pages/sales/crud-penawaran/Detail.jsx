@@ -677,6 +677,32 @@ const DetailPenawaran = ({ isOpen, onClose, detailData, refreshTrigger }) => {
                   }}
                 />
               </div>
+
+              {/* Lokasi Pelanggan */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <label style={{
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#374151',
+                  minWidth: '200px',
+                  textAlign: 'left'
+                }}>
+                  Lokasi Pelanggan
+                </label>
+                <input
+                  type="text"
+                  value={detailData?.lokasi_pelanggan || fullDetailData?.lokasi_pelanggan || '-'}
+                  readOnly
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    border: '1px solid #D1D5DB',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    backgroundColor: '#F9FAFB'
+                  }}
+                />
+              </div>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <label style={{
