@@ -8,6 +8,7 @@ import layananRoutes from "./src/routes/layananRoutes.js";
 import penawaranRoutes from "./src/routes/penawaranRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import pengeluaranRoutes from "./src/routes/pengeluaranRoutes.js";
+import aktivasiRoutes from "./src/routes/AktivasiRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -45,6 +46,7 @@ app.use("/api/layanan", layananRoutes);
 app.use("/api/penawaran", penawaranRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/pengeluaran", pengeluaranRoutes);
+app.use("/api/master-aktivasi", aktivasiRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

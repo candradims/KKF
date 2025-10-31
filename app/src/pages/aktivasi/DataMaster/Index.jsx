@@ -57,8 +57,10 @@ const Index = () => {
       const data = Array.isArray(result) ? result : result.data || [];
       
       const sanitizedData = data.map(item => ({
-        id: item.id_master || item.id,
-        date: formatDateToDDMMYYYY(item.tanggal) || item.date,
+        // support multiple possible id field names from DB/legacy
+        id: item.id_master_aktivasi || item.id_master || item.id,
+        // use created_at if available for date, otherwise keep any provided tanggal
+        date: formatDateToDDMMYYYY(item.created_at || item.tanggal) || item.date,
         service: item.service || '',
         satuan: item.satuan || '',
         harga_satuan: formatCurrency(item.harga_satuan) || '0',
@@ -66,7 +68,7 @@ const Index = () => {
         originalHargaSatuan: item.harga_satuan || 0,
         originalPemasangan: item.pemasangan || 0,
         actions: ['view', 'edit', 'delete'],
-        originalDate: item.tanggal 
+        originalDate: item.created_at || item.tanggal || null
       }));
 
       sanitizedData.sort((a, b) => new Date(a.originalDate) - new Date(b.originalDate));
@@ -175,8 +177,8 @@ const Index = () => {
         const addedData = result.data;
 
         const formattedData = {
-          id: addedData.id_master,
-          date: formatDateToDDMMYYYY(addedData.tanggal),
+          id: addedData.id_master_aktivasi || addedData.id_master || addedData.id,
+          date: formatDateToDDMMYYYY(addedData.created_at || addedData.tanggal),
           service: addedData.service,
           satuan: addedData.satuan,
           harga_satuan: formatCurrency(addedData.harga_satuan),
