@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getAuthHeaders, getUserData } from '../../../utils/api';
 import { Eye, Edit2, Trash2, Plus, FileSpreadsheet, RotateCcw, Search, Package, Filter, Calendar } from 'lucide-react';
 import TambahData from './Tambah';
 import EditData from './Edit';
@@ -63,10 +64,11 @@ const Index = () => {
         id: item.id_master_aktivasi || item.id_master || item.id,
         service: item.service || '',
         satuan: item.satuan || '',
+        // harga_satuan is numeric in the DB; display formatted currency
         harga_satuan: formatCurrency(item.harga_satuan) || '0',
         pemasangan: item.pemasangan || '0',
         originalHargaSatuan: item.harga_satuan || 0,
-        originalPemasangan: item.pemasangan || 0,
+        originalPemasangan: item.pemasangan || '',
         actions: ['view', 'edit', 'delete'],
       }));
       
@@ -129,19 +131,34 @@ const Index = () => {
     try {
       console.log("📝 Frontend - Creating new master data:", newData);
       
+      const parseNumberField = (val) => {
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return Math.floor(val);
+        if (typeof val === 'string') return parseInt(val.replace(/[^\d]/g, '')) || 0;
+        const n = Number(val);
+        return Number.isFinite(n) ? Math.floor(n) : 0;
+      };
+
       const requestBody = {
         service: newData.service,
         satuan: newData.satuan,
-        harga_satuan: parseInt(newData.harga_satuan.replace(/[^\d]/g, '')),
         pemasangan: newData.pemasangan,
+        harga_satuan: parseNumberField(newData.harga_satuan),
       };
 
       console.log("📝 Frontend - Final request body:", requestBody);
 
+      // Ensure user is authenticated and include auth headers
+      const userData = getUserData();
+      if (!userData) {
+        throw new Error('Pengguna belum terotentikasi');
+      }
+      const headers = getAuthHeaders();
+
       const response = await fetch('http://localhost:3000/api/master-aktivasi', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          ...headers
         },
         body: JSON.stringify(requestBody)
       });
@@ -190,19 +207,34 @@ const Index = () => {
         throw new Error("Data ID tidak ditemukan");
       }
 
+      const parseNumberField2 = (val) => {
+        if (val === null || val === undefined || val === '') return 0;
+        if (typeof val === 'number') return Math.floor(val);
+        if (typeof val === 'string') return parseInt(val.replace(/[^\d]/g, '')) || 0;
+        const n = Number(val);
+        return Number.isFinite(n) ? Math.floor(n) : 0;
+      };
+
       const updatePayload = {
         service: updatedData.service,
         satuan: updatedData.satuan,
-        harga_satuan: parseInt(updatedData.harga_satuan.replace(/[^\d]/g, '')),
         pemasangan: updatedData.pemasangan,
+        harga_satuan: parseNumberField2(updatedData.harga_satuan),
       };
 
       console.log("📝 Frontend - Final payload:", updatePayload);
 
+      // Ensure user is authenticated and include auth headers
+      const userData = getUserData();
+      if (!userData) {
+        throw new Error('Pengguna belum terotentikasi');
+      }
+      const headers = getAuthHeaders();
+
       const response = await fetch(`http://localhost:3000/api/master-aktivasi/${editingData.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          ...headers
         },
         body: JSON.stringify(updatePayload),
       });
@@ -236,10 +268,17 @@ const Index = () => {
     try {
       console.log("🗑️ Deleting master data with ID:", dataId);
       
+      // Ensure authenticated
+      const userData = getUserData();
+      if (!userData) {
+        throw new Error('Pengguna belum terotentikasi');
+      }
+      const headers = getAuthHeaders();
+
       const response = await fetch(`http://localhost:3000/api/master-aktivasi/${dataId}`, {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
+          ...headers
         },
       });
 

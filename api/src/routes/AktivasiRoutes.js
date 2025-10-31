@@ -1,6 +1,10 @@
 import express from "express";
 import { AktivasiController } from "../controllers/AktivasiController.js";
-import { authenticate, adminOnly, adminOrSales } from "../middleware/auth.js";
+import {
+  authenticate,
+  aktivasiOnly,
+  adminOrSales,
+} from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -10,10 +14,25 @@ router.get("/:id", AktivasiController.getAktivasiById);
 // Debug (dev only)
 router.get("/debug/raw", AktivasiController.getRawAktivasi);
 
-// Protected endpoints for admin
-router.post("/", adminOnly, AktivasiController.createAktivasi);
-router.put("/:id", adminOnly, AktivasiController.updateAktivasi);
-router.delete("/:id", adminOnly, AktivasiController.deleteAktivasi);
-router.post("/import", adminOnly, AktivasiController.importAktivasi);
+// Protected endpoints for admin (require authentication first)
+router.post("/", authenticate, aktivasiOnly, AktivasiController.createAktivasi);
+router.put(
+  "/:id",
+  authenticate,
+  aktivasiOnly,
+  AktivasiController.updateAktivasi
+);
+router.delete(
+  "/:id",
+  authenticate,
+  aktivasiOnly,
+  AktivasiController.deleteAktivasi
+);
+router.post(
+  "/import",
+  authenticate,
+  aktivasiOnly,
+  AktivasiController.importAktivasi
+);
 
 export default router;
