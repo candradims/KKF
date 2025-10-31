@@ -526,7 +526,7 @@ const Index = () => {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(20px, 1fr))',
                 gap: '24px',
                 alignItems: 'end',
                 position: 'relative',
@@ -588,7 +588,7 @@ const Index = () => {
                     gap: '6px'
                   }}>
                     <Calendar size={16} />
-                    Filter by Tanggal
+                    Filter By Tanggal
                   </label>
                   <input
                     type="date"
@@ -597,7 +597,7 @@ const Index = () => {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: `1px solid ${colors.primary}`,
+                      border: '1px solid #035b71',
                       borderRadius: '12px',
                       fontSize: '14px',
                       outline: 'none',
