@@ -628,7 +628,7 @@ const Index = () => {
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(20px, 1fr))',
                 gap: '24px',
                 alignItems: 'end',
                 position: 'relative',
@@ -646,7 +646,7 @@ const Index = () => {
                     gap: '6px'
                   }}>
                     <Calendar size={16} />
-                    Filter by Tanggal
+                    Filter By Tanggal
                   </label>
                   <input
                     type="date"
@@ -655,7 +655,7 @@ const Index = () => {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: `1px solid ${colors.primary}`,
+                      border: '1px solid #035b71',
                       borderRadius: '12px',
                       fontSize: '14px',
                       outline: 'none',
@@ -687,7 +687,7 @@ const Index = () => {
                     gap: '6px'
                   }}>
                     <Filter size={16} />
-                    Filter by Status
+                    Filter By Status
                   </label>
                   <select
                     value={filterStatus}
@@ -695,14 +695,19 @@ const Index = () => {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: `1px solid ${colors.primary}`,
+                      border: '1px solid #035b71',
                       borderRadius: '12px',
                       fontSize: '14px',
                       outline: 'none',
                       transition: 'all 0.3s ease',
                       backgroundColor: colors.white,
                       color: colors.gray700,
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23035b71' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                      backgroundSize: '16px'
                     }}
                     onFocus={(e) => {
                       e.target.style.borderColor = colors.secondary;
