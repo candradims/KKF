@@ -610,7 +610,7 @@ const Index = () => {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(20px, 1fr))',
             gap: '24px',
             alignItems: 'end',
             position: 'relative',
@@ -688,7 +688,11 @@ const Index = () => {
                   backgroundColor: colors.white,
                   color: colors.gray700,
                   cursor: 'pointer',
-                  
+                  appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23035b71' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 16px center',
+                  backgroundSize: '16px'
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = colors.secondary;
