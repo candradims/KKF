@@ -28,6 +28,7 @@ import DataPenawaranSuperAdmin from "./pages/superAdmin/DataPenawaran/Index";
 import LaporanLabaSuperAdmin from "./pages/superAdmin/LaporanLabaa/Index";
 
 // Import pages Aktivasi
+import DataMaster from "./pages/aktivasi/DataMaster/Index";
 import DataPenawaranAktivasi from "./pages/aktivasi/DataPenawaran/Index";
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path="/superAdmin/laporan-laba" element={<LaporanLabaSuperAdmin />} />
 
            {/* Aktivasi Routes */}
+            <Route path="/aktivasi/data-master" element={<DataMaster />} />
           <Route path="/aktivasi/data-penawaran" element={<DataPenawaranAktivasi />} />
           
           {/* General Routes */}
