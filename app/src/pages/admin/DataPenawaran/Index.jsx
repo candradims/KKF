@@ -1121,7 +1121,7 @@ const Index = () => {
                       onBlur={() => setFocusedField('')}
                       style={inputStyle('filterStatus')}
                     >
-                      <option value="">Semua Status</option>
+                      <option value="" disabled hidden>Semua Status</option>
                       <option value="Menunggu">Menunggu</option>
                       <option value="Disetujui">Disetujui</option>
                       <option value="Ditolak">Ditolak</option>
