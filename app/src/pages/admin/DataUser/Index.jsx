@@ -1231,12 +1231,6 @@ const Index = () => {
                           color: colors.gray500
                         }}>
                           <span>••••••••</span>
-                          <div style={{
-                            width: '6px',
-                            height: '6px',
-                            background: colors.success,
-                            borderRadius: '50%'
-                          }} />
                         </div>
                       </td>
                       <td style={{
@@ -1247,8 +1241,8 @@ const Index = () => {
                       }}>
                         <span style={{
                           ...getRoleBadgeStyle(user.role),
-                          padding: '6px 16px',
-                          borderRadius: '20px',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
                           fontSize: '12px',
                           fontWeight: '600',
                           display: 'inline-flex',
