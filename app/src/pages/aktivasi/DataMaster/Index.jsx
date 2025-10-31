@@ -7,8 +7,7 @@ import HapusData from './Hapus';
 import ImportData from './Import';
 
 const Index = () => {
-  const [filterService, setFilterService] = useState('');
-  const [filterDate, setFilterDate] = useState('');
+  const [filterSatuan, setFilterSatuan] = useState('');
   const [showTambahModal, setShowTambahModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingData, setEditingData] = useState(null);
@@ -19,7 +18,6 @@ const Index = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-
   const [masterData, setMasterData] = useState([]);
 
   const colors = {
@@ -55,23 +53,22 @@ const Index = () => {
       const result = await response.json();
       
       const data = Array.isArray(result) ? result : result.data || [];
-      
+
+      const sortedData = data.sort((a, b) => {
+      const idA = a.id_master_aktivasi || a.id_master || a.id;
+      const idB = b.id_master_aktivasi || b.id_master || b.id;
+        return idB - idA;
+      });
       const sanitizedData = data.map(item => ({
-        // support multiple possible id field names from DB/legacy
         id: item.id_master_aktivasi || item.id_master || item.id,
-        // use created_at if available for date, otherwise keep any provided tanggal
-        date: formatDateToDDMMYYYY(item.created_at || item.tanggal) || item.date,
         service: item.service || '',
         satuan: item.satuan || '',
         harga_satuan: formatCurrency(item.harga_satuan) || '0',
-        pemasangan: formatCurrency(item.pemasangan) || '0',
+        pemasangan: item.pemasangan || '0',
         originalHargaSatuan: item.harga_satuan || 0,
         originalPemasangan: item.pemasangan || 0,
         actions: ['view', 'edit', 'delete'],
-        originalDate: item.created_at || item.tanggal || null
       }));
-
-      sanitizedData.sort((a, b) => new Date(a.originalDate) - new Date(b.originalDate));
       
       setMasterData(sanitizedData);
     } catch (error) {
@@ -89,23 +86,6 @@ const Index = () => {
     }).format(amount).replace('Rp', 'Rp ');
   };
 
-  const formatDateToDDMMYYYY = (dateString) => {
-    if (!dateString) return '';
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString;
-      
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      
-      return `${day}-${month}-${year}`;
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return dateString;
-    }
-  };
 
   const handleOpenModal = () => {
     setShowTambahModal(true);
@@ -153,7 +133,7 @@ const Index = () => {
         service: newData.service,
         satuan: newData.satuan,
         harga_satuan: parseInt(newData.harga_satuan.replace(/[^\d]/g, '')),
-        pemasangan: parseInt(newData.pemasangan.replace(/[^\d]/g, ''))
+        pemasangan: newData.pemasangan,
       };
 
       console.log("📝 Frontend - Final request body:", requestBody);
@@ -178,11 +158,10 @@ const Index = () => {
 
         const formattedData = {
           id: addedData.id_master_aktivasi || addedData.id_master || addedData.id,
-          date: formatDateToDDMMYYYY(addedData.created_at || addedData.tanggal),
           service: addedData.service,
           satuan: addedData.satuan,
           harga_satuan: formatCurrency(addedData.harga_satuan),
-          pemasangan: formatCurrency(addedData.pemasangan),
+          pemasangan: addedData.pemasangan,
           actions: ['view', 'edit', 'delete']
         };
 
@@ -215,7 +194,7 @@ const Index = () => {
         service: updatedData.service,
         satuan: updatedData.satuan,
         harga_satuan: parseInt(updatedData.harga_satuan.replace(/[^\d]/g, '')),
-        pemasangan: parseInt(updatedData.pemasangan.replace(/[^\d]/g, ''))
+        pemasangan: updatedData.pemasangan,
       };
 
       console.log("📝 Frontend - Final payload:", updatePayload);
@@ -316,31 +295,15 @@ const Index = () => {
     // Search filter
     const matchesSearch = !searchTerm || 
       data.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      data.satuan.toLowerCase().includes(searchTerm.toLowerCase());
+      data.satuan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      data.harga_satuan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      data.pemasangan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      data.originalHargaSatuan.toString().includes(searchTerm);
 
     // Service filter
-    const matchesService = !filterService || data.service.toLowerCase().includes(filterService.toLowerCase());
+    const matchesService = !filterSatuan  || data.service.toLowerCase().includes(filterSatuan .toLowerCase());
 
-    // Date filter
-    let matchesDate = true;
-    if (filterDate) {
-      const filterDateObj = new Date(filterDate);
-      
-      let dataDateObj;
-      if (data.originalDate) {
-        dataDateObj = new Date(data.originalDate);
-      } else {
-        const [day, month, year] = data.date.split('-');
-        dataDateObj = new Date(`${year}-${month}-${day}`);
-      }
-      
-      filterDateObj.setHours(0, 0, 0, 0);
-      dataDateObj.setHours(0, 0, 0, 0);
-      
-      matchesDate = dataDateObj.getTime() === filterDateObj.getTime();
-    }
-
-    return matchesSearch && matchesService && matchesDate;
+    return matchesSearch && matchesService ;
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -365,31 +328,26 @@ const Index = () => {
   };
 
   const handleRefresh = () => {
-    setFilterService('');
-    setFilterDate('');
+    setFilterSatuan('');
     setSearchTerm('');
     setCurrentPage(1);
   };
 
-  const getServiceBadgeStyle = (service) => {
-    switch(service.toLowerCase()) {
-      case 'internet':
+  const getPemasanganBadgeStyle = (pemasangan) => {
+  const normalizedPemasangan = pemasangan ? pemasangan.toString().toLowerCase().trim() : '';
+  
+    switch(normalizedPemasangan) {
+      case 'konvensional':
         return {
           backgroundColor: `${colors.primary}15`,
           color: colors.primary,
           border: `1px solid ${colors.primary}`
         };
-      case 'tv':
+      case 'ftth':
         return {
-          backgroundColor: `${colors.tertiary}15`,
-          color: colors.tertiary,
-          border: `1px solid ${colors.tertiary}`
-        };
-      case 'telepon':
-        return {
-          backgroundColor: `${colors.success}15`,
-          color: colors.success,
-          border: `1px solid ${colors.success}`
+          backgroundColor: `${colors.secondary}15`,
+          color: colors.secondary,
+          border: `1px solid ${colors.secondary}`
         };
       default:
         return {
@@ -671,12 +629,12 @@ const Index = () => {
                 alignItems: 'center',
                 gap: '6px'
               }}>
-                <Package size={16} />
-                Filter By Service
+                <Filter size={16} />
+                Filter By Satuan
               </label>
               <select
-                value={filterService}
-                onChange={(e) => setFilterService(e.target.value)}
+                value={filterSatuan}
+                onChange={(e) => setFilterSatuan(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '12px 16px ',
@@ -703,10 +661,9 @@ const Index = () => {
                   e.target.style.boxShadow = 'none';
                 }}
               >
-                <option value="" disabled hidden>Semua Service</option>
-                <option value="internet">Internet</option>
-                <option value="tv">TV</option>
-                <option value="telepon">Telepon</option>
+                <option value="" disabled hidden>Semua Satuan</option>
+                <option value="internet">LOT</option>
+                <option value="tv">M</option>
               </select>
             </div>
             
@@ -936,7 +893,7 @@ const Index = () => {
                 {currentData.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="7"
+                      colSpan="6"
                       style={{
                         padding: '60px 20px',
                         textAlign: 'center',
@@ -1012,24 +969,9 @@ const Index = () => {
                       }}>
                         <div style={{
                           display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px'
+                          flexDirection: 'column',
+                          gap: '2px'
                         }}>
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
-                            borderRadius: '10px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: '16px',
-                            fontWeight: '700',
-                            boxShadow: `0 4px 12px ${colors.success}25`
-                          }}>
-                            {data.service.charAt(0).toUpperCase()}
-                          </div>
                           <div>
                             <div style={{ fontWeight: '600', marginBottom: '2px' }}>
                               {data.service}
@@ -1044,23 +986,14 @@ const Index = () => {
                         borderBottom: `2px solid #035b71`,
                       }}>
                         <span style={{
-                          ...getServiceBadgeStyle(data.service),
-                          padding: '6px 16px',
-                          borderRadius: '20px',
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px'
+                          background: `${colors.gray100}`,
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          fontSize: '13px',
+                          fontFamily: "'Open Sans', sans-serif !important",
+                          border: `1px solid ${colors.primary}`,
+                          display: 'inline-block'
                         }}>
-                          <div style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
-                            backgroundColor: 'currentColor'
-                          }} />
                           {data.satuan}
                         </span>
                       </td>
@@ -1071,15 +1004,13 @@ const Index = () => {
                         borderBottom: `2px solid #035b71`,
                       }}>
                         <div style={{
-                          background: `${colors.success}10`,
+                          background: `${colors.gray100}`,
                           padding: '8px 12px',
                           borderRadius: '8px',
                           fontSize: '13px',
                           fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.success}30`,
-                          display: 'inline-block',
-                          fontWeight: '600',
-                          color: colors.success
+                          border: `1px solid ${colors.primary}`,
+                          display: 'inline-block'
                         }}>
                           {data.harga_satuan}
                         </div>
@@ -1091,18 +1022,23 @@ const Index = () => {
                         borderBottom: `2px solid #035b71`,
                       }}>
                         <div style={{
-                          background: `${colors.tertiary}10`,
+                           ...getPemasanganBadgeStyle(data.pemasangan),
                           padding: '8px 12px',
                           borderRadius: '8px',
-                          fontSize: '13px',
-                          fontFamily: "'Open Sans', sans-serif !important",
-                          border: `1px solid ${colors.tertiary}30`,
+                          fontSize: '12px',
+                          fontWeight: '600',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '8px',
-                          fontWeight: '600',
-                          color: colors.tertiary
+                          gap: '6px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
                         }}>
+                          <div style={{
+                            width: '6px',
+                            height: '6px',
+                            background: colors.success,
+                            borderRadius: '50%'
+                          }} />
                           {data.pemasangan}
                         </div>
                       </td>
@@ -1545,7 +1481,6 @@ const Index = () => {
         <EditData
         isOpen={showEditModal}
         onClose={handleCloseEditModal}
-        onUpdate={handleUpdateData}
         initialData={editingData}
       />
       <DetailData
