@@ -278,6 +278,27 @@ export class AdminController {
     }
   }
 
+  // Ambil daftar role unik dari tabel data_user
+  static async getRoles(req, res) {
+    try {
+      // Use model to fetch distinct roles
+      const roles = await UserModel.getDistinctRoles();
+
+      res.status(200).json({
+        success: true,
+        message: "Daftar role berhasil diambil",
+        data: roles,
+      });
+    } catch (error) {
+      console.error("❌ Error in getRoles:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal mengambil daftar role",
+        error: error.message,
+      });
+    }
+  }
+
   // Import Data
   static async importUsers(req, res) {
     try {

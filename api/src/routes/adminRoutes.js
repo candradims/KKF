@@ -5,6 +5,7 @@ import { authenticate, adminOnly } from "../middleware/auth.js";
 const router = express.Router();
 
 // Rute manajemen pengguna
+router.get("/users/roles", AdminController.getRoles);
 router.get("/users", AdminController.getAllUsers);
 router.get("/users/:id", AdminController.getUserById);
 router.get("/users/role/:role", AdminController.getUsersByRole);

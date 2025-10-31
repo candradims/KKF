@@ -21,6 +21,7 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [usersData, setUsersData] = useState([]);
+  const [rolesOptions, setRolesOptions] = useState([]);
 
   const colors = {
     primary: '#035b71',
@@ -45,6 +46,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
   }, []);
 
   const fetchUsers = async () => {
@@ -85,6 +87,35 @@ const Index = () => {
       setUsersData(sanitizedUsers);
     } catch (error) {
       console.error("Gagal mengambil data pengguna:", error);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      // Try to use the admin roles endpoint
+      const response = await fetch('http://localhost:3000/api/admin/users/roles');
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const result = await response.json();
+      const rawRoles = Array.isArray(result) ? result : result.data || [];
+
+      // Reuse the display formatter used above
+      const formatRoleForDisplay = (role) => {
+        switch(role) {
+          case 'superAdmin': return 'Super Admin';
+          case 'admin': return 'Admin';
+          case 'sales': return 'Sales';
+          case 'aktivasi': return 'Aktivasi';
+          default: return role;
+        }
+      };
+
+      const displayRoles = Array.from(new Set(rawRoles.map(r => formatRoleForDisplay(r))));
+      setRolesOptions(displayRoles);
+    } catch (error) {
+      console.error('Gagal mengambil daftar role:', error);
+      // Fallback to hard-coded options if endpoint fails
+      setRolesOptions(['Super Admin', 'Admin', 'Sales', 'Aktivasi']);
     }
   };
   
@@ -751,10 +782,20 @@ const Index = () => {
                   e.target.style.boxShadow = 'none';
                 }}
               >
-                <option  value="" disabled hidden>-- Semua Role --</option>
-                <option value="Super Admin">Super Admin</option>
-                <option value="Admin">Admin</option>
-                <option value="Sales">Sales</option>
+                <option value="" disabled hidden>-- Semua Role --</option>
+                {rolesOptions && rolesOptions.length > 0 ? (
+                  rolesOptions.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))
+                ) : (
+                  // Fallback options
+                  <>
+                    <option value="Super Admin">Super Admin</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Aktivasi">Aktivasi</option>
+                  </>
+                )}
               </select>
             </div>
 

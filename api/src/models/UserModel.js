@@ -220,7 +220,32 @@ export class UserModel {
       return data;
     } catch (error) {
       console.error("❌ Error in getUserByName:", error);
-      throw new Error(`Gagal mengambil pengguna berdasarkan nama: ${error.message}`);
+      throw new Error(
+        `Gagal mengambil pengguna berdasarkan nama: ${error.message}`
+      );
+    }
+  }
+
+  // Ambil daftar role unik dari tabel data_user
+  static async getDistinctRoles() {
+    try {
+      const { data, error } = await supabase
+        .from("data_user")
+        .select("role_user");
+
+      if (error) {
+        console.error("❌ Supabase error in getDistinctRoles:", error);
+        throw error;
+      }
+
+      const roles = Array.isArray(data)
+        ? Array.from(new Set(data.map((r) => r.role_user).filter(Boolean)))
+        : [];
+
+      return roles;
+    } catch (error) {
+      console.error("❌ Error in getDistinctRoles:", error);
+      throw new Error(`Gagal mengambil daftar role: ${error.message}`);
     }
   }
 }

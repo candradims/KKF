@@ -219,6 +219,9 @@ export const adminAPI = {
   getUsersByRole: (role) =>
     apiRequest(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/role/${role}`),
 
+  // Get distinct roles from server
+  getRoles: () => apiRequest(`${API_CONFIG.ENDPOINTS.ADMIN.USERS}/roles`),
+
   // Create new user
   createUser: (data) =>
     apiRequest(API_CONFIG.ENDPOINTS.ADMIN.USERS, {
