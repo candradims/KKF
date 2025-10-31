@@ -78,6 +78,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
       "/sales/pengeluaran-lain-lain": "Pengeluaran Lain-lain",
       "/login": "Login",
       "/aktivasi/data-penawaran": "Data Penawaran", 
+      "/aktivasi/data-master": "Data Master", 
     };
 
     setPageTitle(routeTitles[location.pathname] || "Dashboard");  
