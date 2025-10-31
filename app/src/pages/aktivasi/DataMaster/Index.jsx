@@ -23,6 +23,10 @@ const Index = () => {
 
   const [masterData, setMasterData] = useState([]);
 
+  // Derived history lists for select options (unique values)
+  const satuanOptions = Array.from(new Set(masterData.map(d => d.satuan).filter(Boolean)));
+  const pemasanganOptions = Array.from(new Set(masterData.map(d => d.pemasangan).filter(Boolean)));
+
   const colors = {
     primary: '#035b71',
     secondary: '#00bfca',
@@ -1583,12 +1587,16 @@ const Index = () => {
         isOpen={showTambahModal}
         onClose={handleCloseModal}
         onSave={handleSaveData}
+        satuanOptions={satuanOptions}
+        pemasanganOptions={pemasanganOptions}
       />
-        <EditData
+      <EditData
         isOpen={showEditModal}
         onClose={handleCloseEditModal}
         onUpdate={handleUpdateData}
         initialData={editingData}
+        satuanOptions={satuanOptions}
+        pemasanganOptions={pemasanganOptions}
       />
       <DetailData
         isOpen={showDetailModal}
