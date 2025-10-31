@@ -138,6 +138,12 @@ const Sidebar = () => {
       path: "/aktivasi/data-penawaran",
       icon: <BuildIcon />,
       color: colors.tertiary
+    },
+    {
+      title: "Data Master",
+      path: "/aktivasi/data-master",
+      icon: <PeopleIcon />,
+      color: colors.tertiary
     }
   ];
 
