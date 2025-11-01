@@ -370,10 +370,10 @@ const Index = () => {
       data.pemasangan.toLowerCase().includes(searchTerm.toLowerCase()) ||
       data.originalHargaSatuan.toString().includes(searchTerm);
 
-    // Service filter
-    const matchesService = !filterSatuan  || data.service.toLowerCase().includes(filterSatuan .toLowerCase());
+    // Satuan filter (values come from DB column master_aktivasi.satuan)
+    const matchesSatuan = !filterSatuan || (data.satuan || '').toLowerCase().includes(filterSatuan.toLowerCase());
 
-    return matchesSearch && matchesService ;
+    return matchesSearch && matchesSatuan;
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -731,9 +731,13 @@ const Index = () => {
                   e.target.style.boxShadow = 'none';
                 }}
               >
-                <option value="" disabled hidden>Semua Satuan</option>
-                <option value="internet">LOT</option>
-                <option value="tv">M</option>
+                <option value="">Semua Satuan</option>
+                {satuanOptions.length === 0 && (
+                  <option value="" disabled>Tidak ada data</option>
+                )}
+                {satuanOptions.map((satuan, idx) => (
+                  <option key={idx} value={satuan}>{satuan}</option>
+                ))}
               </select>
             </div>
             
