@@ -33,16 +33,21 @@ const Edit = ({ isOpen, onClose, onUpdate, initialData, satuanOptions = [], pema
 
   // Remove Rupiah formatting to get plain number
   const unformatRupiah = (value) => {
-    return value.replace(/\./g, '');
+    if (value === null || value === undefined) return '';
+    return value.toString().replace(/\D/g, '');
   };
 
   // Load initial data
   useEffect(() => {
     if (initialData) {
+      // normalize hargaSatuan to plain digit string so parsing is reliable
+      const rawHarga = initialData.harga_satuan ?? initialData.hargaSatuan ?? '';
+      const hargaDigits = rawHarga === null || rawHarga === undefined ? '' : rawHarga.toString().replace(/\D/g, '');
+
       setFormData({
         service: initialData.service || '',
         satuan: initialData.satuan || '',
-        hargaSatuan: initialData.harga_satuan || initialData.hargaSatuan || '',
+        hargaSatuan: hargaDigits,
         pemasangan: initialData.pemasangan || ''
       });
     }
@@ -93,8 +98,21 @@ const Edit = ({ isOpen, onClose, onUpdate, initialData, satuanOptions = [], pema
         harga_satuan: parseInt(formData.hargaSatuan) || 0,
         pemasangan: formData.pemasangan
       };
-      
-      await onUpdate(dataToUpdate);
+      // Call parent onUpdate if provided, otherwise dispatch a global event as a fallback
+      if (typeof onUpdate === 'function') {
+        await onUpdate(dataToUpdate);
+      } else {
+        console.warn('Edit.jsx: onUpdate prop is not a function — dispatching fallback event aktivasi:update');
+        try {
+          // include the record id in the fallback event so parent can identify which row to update
+          const recordId = initialData?.id || initialData?.id_master || initialData?.id_master_aktivasi || null;
+          // include the whole initialData as fallback so parent can extract id if needed
+          window.dispatchEvent(new CustomEvent('aktivasi:update', { detail: { ...dataToUpdate, id: recordId, initialData } }));
+        } catch (err) {
+          console.error('Failed to dispatch aktivasi:update event', err);
+          throw new Error('onUpdate is not a function');
+        }
+      }
       setShowSuccessModal(true);
     } catch (err) {
       alert(`Terjadi kesalahan: ${err.message}`);
@@ -105,14 +123,14 @@ const Edit = ({ isOpen, onClose, onUpdate, initialData, satuanOptions = [], pema
 
   const hasChanges = () => {
     if (!initialData) return false;
-    
-    const initialHargaSatuan = initialData.harga_satuan || initialData.hargaSatuan || '';
+    const initialHargaSatuan = initialData.harga_satuan ?? initialData.hargaSatuan ?? '';
+    const initialHargaDigits = initialHargaSatuan === null || initialHargaSatuan === undefined ? '' : initialHargaSatuan.toString().replace(/\D/g, '');
     const initialPemasangan = initialData.pemasangan || '';
-    
+
     return (
-      formData.service !== initialData.service ||
-      formData.satuan !== initialData.satuan ||
-      formData.hargaSatuan !== initialHargaSatuan.toString() ||
+      formData.service !== (initialData.service || '') ||
+      formData.satuan !== (initialData.satuan || '') ||
+      formData.hargaSatuan !== initialHargaDigits ||
       formData.pemasangan !== initialPemasangan
     );
   };

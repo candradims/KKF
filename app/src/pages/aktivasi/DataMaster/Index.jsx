@@ -50,6 +50,22 @@ const Index = () => {
     fetchMasterData();
   }, []);
 
+  // Listen for fallback events from child components (in case onUpdate prop is missing after a merge)
+  useEffect(() => {
+    const onFallbackUpdate = async (e) => {
+      try {
+        console.log('🟡 Fallback update event received, detail:', e.detail);
+        await handleUpdateData(e.detail);
+      } catch (err) {
+        console.error('Fallback update failed:', err);
+        alert(`Gagal mengupdate data (fallback): ${err.message}`);
+      }
+    };
+
+    window.addEventListener('aktivasi:update', onFallbackUpdate);
+    return () => window.removeEventListener('aktivasi:update', onFallbackUpdate);
+  }, []);
+
   const fetchMasterData = async () => {
     try {
       const response = await fetch('http://localhost:3000/api/master-aktivasi');
@@ -102,6 +118,7 @@ const Index = () => {
   };
 
   const handleOpenEditModal = (data) => {
+    console.log('Opening Edit modal with data:', data);
     setEditingData(data);
     setShowEditModal(true);
   };
@@ -206,8 +223,10 @@ const Index = () => {
     try {
       console.log("📝 Frontend - Updating master data:", editingData);
       console.log("📝 Frontend - Update data received:", updatedData);
-      
-      if (!editingData || !editingData.id) {
+
+      // Accept id either from parent editingData state or from updatedData (fallback dispatched event)
+  const idToUse = (editingData && editingData.id) || updatedData.id || updatedData.id_master || updatedData.id_master_aktivasi || (updatedData.initialData && (updatedData.initialData.id || updatedData.initialData.id_master || updatedData.initialData.id_master_aktivasi));
+      if (!idToUse) {
         throw new Error("Data ID tidak ditemukan");
       }
 
@@ -219,12 +238,20 @@ const Index = () => {
         return Number.isFinite(n) ? Math.floor(n) : 0;
       };
 
+      const hargaCandidate =
+        (updatedData && (updatedData.harga_satuan ?? updatedData.hargaSatuan)) ||
+        (updatedData && updatedData.initialData && (updatedData.initialData.harga_satuan ?? updatedData.initialData.hargaSatuan ?? updatedData.initialData.originalHargaSatuan)) ||
+        (editingData && (editingData.originalHargaSatuan ?? editingData.harga_satuan)) ||
+        0;
+
       const updatePayload = {
-        service: updatedData.service,
-        satuan: updatedData.satuan,
-        pemasangan: updatedData.pemasangan,
-        harga_satuan: parseNumberField2(updatedData.harga_satuan),
+        service: updatedData.service ?? (editingData && editingData.service) ?? '',
+        satuan: updatedData.satuan ?? (editingData && editingData.satuan) ?? '',
+        pemasangan: updatedData.pemasangan ?? (editingData && editingData.pemasangan) ?? '',
+        harga_satuan: parseNumberField2(hargaCandidate),
       };
+
+      console.log('📝 Frontend - Resolved hargaCandidate:', hargaCandidate, '-> harga_satuan:', updatePayload.harga_satuan);
 
       console.log("📝 Frontend - Final payload:", updatePayload);
 
@@ -235,7 +262,7 @@ const Index = () => {
       }
       const headers = getAuthHeaders();
 
-      const response = await fetch(`http://localhost:3000/api/master-aktivasi/${editingData.id}`, {
+      const response = await fetch(`http://localhost:3000/api/master-aktivasi/${idToUse}`, {
         method: 'PUT',
         headers: {
           ...headers
