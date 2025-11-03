@@ -7,7 +7,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
     service: '',
     satuan: '',
     hargaSatuan: '',
-    pemasangan: '' // Kolom baru
+    pemasangan: '' 
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,7 +68,7 @@ const Tambah = ({ isOpen, onClose, onSave }) => {
         service: formData.service,
         satuan: formData.satuan,
         harga_satuan: parseInt(formData.hargaSatuan) || 0,
-        pemasangan: formData.pemasangan // Data baru
+        pemasangan: formData.pemasangan 
       };
       
       await onSave(dataToSave);
