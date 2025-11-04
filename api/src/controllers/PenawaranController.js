@@ -279,36 +279,27 @@ export class PenawaranController {
               layananDetail
             );
 
-            let tarifAksesTerbaru = layananDetail.tarif_akses;
+            // NEW FLOW: tarif_akses_terbaru depends on tarif_akses which is NULL initially
+            // tarif_akses will be set by aktivasi (Total RAB), so tarif_akses_terbaru is also NULL
+            let tarifAksesTerbaru = null;
             let tarifTerbaru = layananDetail.tarif;
 
             // Calculate discounted prices based on contract duration
             if (req.body.durasiKontrak) {
-              // If akses existing is "ya", set tarif akses terbaru to null
-              if (item.aksesExisting === "ya") {
-                tarifAksesTerbaru = null;
-                console.log(
-                  `🔒 Item ${
-                    i + 1
-                  }: Akses existing = 'ya', setting tarif akses terbaru to null`
-                );
-              } else {
-                tarifAksesTerbaru = calculateDiscountedTarif(
-                  layananDetail.tarif_akses,
-                  req.body.durasiKontrak
-                );
-                console.log(
-                  `💰 Item ${i + 1}: Calculated tarif akses terbaru:`,
-                  tarifAksesTerbaru
-                );
-              }
+              // tarif_akses_terbaru stays NULL because tarif_akses is NULL
+              // Only calculate tarif_terbaru from layanan.tarif
+              console.log(
+                `💰 Item ${
+                  i + 1
+                }: tarif_akses_terbaru = NULL (will be calculated by aktivasi after setting Total RAB)`
+              );
 
               tarifTerbaru = calculateDiscountedTarif(
                 layananDetail.tarif,
                 req.body.durasiKontrak
               );
               console.log(
-                `💰 Item ${i + 1}: Calculated tarif terbaru:`,
+                `💰 Item ${i + 1}: Calculated tarif_terbaru:`,
                 tarifTerbaru
               );
             }
@@ -408,6 +399,10 @@ export class PenawaranController {
 
             const hargaFinalValue = calculateHargaFinal();
 
+            // NEW FLOW: tarif_akses will be set by role aktivasi (Total RAB)
+            // Do NOT pull from data_layanan.tarif_akses (column removed from DB)
+            // When admin creates penawaran, tarif_akses should be NULL
+            // Aktivasi will later set the Total RAB value which becomes tarif_akses
             const layananData = {
               id_penawaran: penawaranId,
               id_layanan: layananDetail.id_layanan,
@@ -419,7 +414,9 @@ export class PenawaranController {
               satuan: layananDetail.satuan,
               backbone: layananDetail.backbone,
               port: layananDetail.port,
-              tarif_akses: layananDetail.tarif_akses,
+              // tarif_akses: Set to NULL initially, will be populated by aktivasi role
+              tarif_akses:
+                item.tarif_akses ?? item.tarifAkses ?? item.totalRAB ?? null,
               tarif: layananDetail.tarif,
               tarif_akses_terbaru: tarifAksesTerbaru,
               tarif_terbaru: tarifTerbaru,
@@ -773,37 +770,25 @@ export class PenawaranController {
             }
 
             // Calculate discounted tarif based on contract duration
+            // NEW FLOW: tarif_akses_terbaru should be NULL because tarif_akses is NULL
+            // It will be calculated by aktivasi after they set Total RAB
             let tarifAksesTerbaru = null;
             let tarifTerbaru = null;
 
-            const originalTarifAkses = layananResult.tarif_akses;
             const originalTarif = layananResult.tarif;
 
             console.log(`💰 Original tarif data for item ${i + 1}:`, {
-              originalTarifAkses,
               originalTarif,
               durasiKontrak: updateData.durasiKontrak,
               aksesExisting: item.aksesExisting,
             });
 
-            // If akses existing is "ya", set tarif akses terbaru to null
-            if (item.aksesExisting === "ya") {
-              tarifAksesTerbaru = null;
-              console.log(
-                `🔒 Item ${
-                  i + 1
-                }: Akses existing = 'ya', setting tarif akses terbaru to null`
-              );
-            } else {
-              tarifAksesTerbaru = calculateDiscountedTarif(
-                originalTarifAkses,
-                updateData.durasiKontrak
-              );
-              console.log(
-                `💰 Item ${i + 1}: Calculated tarif akses terbaru:`,
-                tarifAksesTerbaru
-              );
-            }
+            // tarif_akses_terbaru stays NULL (will be set by aktivasi)
+            console.log(
+              `� Item ${
+                i + 1
+              }: tarif_akses_terbaru = NULL (depends on Total RAB from aktivasi)`
+            );
 
             tarifTerbaru = calculateDiscountedTarif(
               originalTarif,
@@ -911,6 +896,10 @@ export class PenawaranController {
 
             const hargaFinalValue = calculateHargaFinal();
 
+            // NEW FLOW: tarif_akses will be set by role aktivasi (Total RAB)
+            // Do NOT pull from data_layanan.tarif_akses (column removed from DB)
+            // When admin updates penawaran, keep existing tarif_akses or set to NULL
+            // Aktivasi will set/update the Total RAB value which becomes tarif_akses
             const layananData = {
               id_penawaran: penawaranId,
               id_layanan: layananResult.id_layanan,
@@ -922,7 +911,9 @@ export class PenawaranController {
               satuan: layananResult.satuan,
               backbone: layananResult.backbone || null,
               port: layananResult.port || null,
-              tarif_akses: layananResult.tarif_akses || null,
+              // tarif_akses: Only use value from frontend (set by aktivasi), default to NULL
+              tarif_akses:
+                item.tarif_akses ?? item.tarifAkses ?? item.totalRAB ?? null,
               tarif: layananResult.tarif || null,
               tarif_akses_terbaru: tarifAksesTerbaru,
               tarif_terbaru: tarifTerbaru,
@@ -1000,7 +991,8 @@ export class PenawaranController {
           id_layanan = existingLayanan[0].id_layanan;
         }
 
-        let tarifAksesTerbaru = updateData.tarifAkses;
+        // NEW FLOW: Initialize tarif_akses_terbaru as NULL (will be set by aktivasi)
+        let tarifAksesTerbaru = null;
         let tarifTerbaru = updateData.tarif;
 
         try {
@@ -1010,33 +1002,19 @@ export class PenawaranController {
             console.log("📊 Fetched layanan detail for update:", layananDetail);
 
             if (layananDetail) {
-              const originalTarifAkses = layananDetail.tarif_akses;
               const originalTarif = layananDetail.tarif;
 
               console.log("💰 Original tarif data for update:", {
-                originalTarifAkses,
                 originalTarif,
                 durasiKontrak: updateData.durasiKontrak,
-                aksesExisting: updateData.aksesExisting,
               });
 
-              // Calculate discounted prices based on contract duration
-              // If akses existing is "ya", set tarif akses terbaru to null
-              if (updateData.aksesExisting === "ya") {
-                tarifAksesTerbaru = null;
-                console.log(
-                  "🔒 Akses existing = 'ya', setting tarif akses terbaru to null"
-                );
-              } else {
-                tarifAksesTerbaru = calculateDiscountedTarif(
-                  originalTarifAkses,
-                  updateData.durasiKontrak
-                );
-                console.log(
-                  "💰 Akses existing = 'tidak', calculated tarif akses terbaru:",
-                  tarifAksesTerbaru
-                );
-              }
+              // NEW FLOW: tarif_akses_terbaru stays NULL
+              // It depends on tarif_akses which is NULL until aktivasi sets Total RAB
+              tarifAksesTerbaru = null;
+              console.log(
+                "� tarif_akses_terbaru = NULL (will be set by aktivasi after Total RAB)"
+              );
 
               tarifTerbaru = calculateDiscountedTarif(
                 originalTarif,
@@ -1748,35 +1726,41 @@ export class PenawaranController {
               }
 
               // Calculate discounted tarif based on contract duration
-              let tarifAksesTerbaru = layananDetail.tarif_akses;
+              // NEW FLOW: Use tarif_akses_terbaru from data_penawaran_layanan table
+              // This value is already calculated and saved when aktivasi sets Total RAB
               let tarifTerbaru = layananDetail.tarif;
 
               if (existingPenawaran.durasi_kontrak) {
-                if (layanan.akses_existing === "ya") {
-                  tarifAksesTerbaru = null;
-                } else {
-                  tarifAksesTerbaru = calculateDiscountedTarif(
-                    layananDetail.tarif_akses,
-                    existingPenawaran.durasi_kontrak
-                  );
-                }
-
                 tarifTerbaru = calculateDiscountedTarif(
                   layananDetail.tarif,
                   existingPenawaran.durasi_kontrak
                 );
               }
 
-              // Calculate Harga Dasar
+              // Calculate Harga Dasar using tarif_akses_terbaru from database
               const backbone = parseFloat(layananDetail.backbone) || 0;
               const port = parseFloat(layananDetail.port) || 0;
               const tarifNTahun = parseFloat(tarifTerbaru) || 0;
               const kapasitas = parseFloat(layanan.kapasitas) || 0;
+              // Use tarif_akses_terbaru from data_penawaran_layanan, not from data_layanan
               const tarifAksesNTahun =
                 layanan.akses_existing === "ya"
                   ? 0
-                  : parseFloat(tarifAksesTerbaru) || 0;
+                  : parseFloat(layanan.tarif_akses_terbaru) || 0;
               const qty = parseInt(layanan.qty) || 0;
+
+              console.log(
+                `💰 Harga Dasar calculation for ${layanan.nama_layanan}:`,
+                {
+                  backbone,
+                  port,
+                  tarifNTahun,
+                  kapasitas,
+                  tarifAksesNTahun_from_db: layanan.tarif_akses_terbaru,
+                  qty,
+                  aksesExisting: layanan.akses_existing,
+                }
+              );
 
               const step1 = backbone + port + tarifNTahun;
               const step2 = step1 * kapasitas;
@@ -2076,6 +2060,163 @@ export class PenawaranController {
       res.status(500).json({
         success: false,
         message: "Gagal mengambil statistik dashboard",
+        error: error.message,
+      });
+    }
+  }
+
+  // Update tarif_akses by aktivasi (Total RAB)
+  static async updateTarifAksesByAktivasi(req, res) {
+    try {
+      const { id_penawaran_layanan } = req.params;
+      const { tarif_akses, nama_ptl, jenis_pemasangan, selected_services } =
+        req.body;
+
+      console.log("🔄 Aktivasi updating tarif_akses (Total RAB):", {
+        id_penawaran_layanan,
+        tarif_akses,
+        nama_ptl,
+        jenis_pemasangan,
+      });
+
+      // Validate inputs
+      if (!id_penawaran_layanan) {
+        return res.status(400).json({
+          success: false,
+          message: "ID penawaran layanan diperlukan",
+        });
+      }
+
+      if (tarif_akses === null || tarif_akses === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: "Tarif akses (Total RAB) diperlukan",
+        });
+      }
+
+      // Get the penawaran_layanan data to find the id_penawaran
+      const layananData = await PenawaranLayananModel.getPenawaranLayananById(
+        id_penawaran_layanan
+      );
+      if (!layananData) {
+        return res.status(404).json({
+          success: false,
+          message: "Data penawaran layanan tidak ditemukan",
+        });
+      }
+
+      // Get the main penawaran to get durasi_kontrak
+      const penawaranData = await PenawaranModel.getPenawaranById(
+        layananData.id_penawaran
+      );
+      if (!penawaranData) {
+        return res.status(404).json({
+          success: false,
+          message: "Data penawaran tidak ditemukan",
+        });
+      }
+
+      const durasiKontrak = penawaranData.durasi_kontrak;
+      console.log("📊 Durasi kontrak:", durasiKontrak);
+
+      // Calculate tarif_akses_terbaru using discount calculation
+      const tarifAksesTerbaru = calculateDiscountedTarif(
+        tarif_akses,
+        durasiKontrak
+      );
+
+      console.log("💰 Tarif calculation:");
+      console.log("  - Original tarif_akses (Total RAB):", tarif_akses);
+      console.log("  - Durasi kontrak:", durasiKontrak, "tahun");
+      console.log("  - Discounted tarif_akses_terbaru:", tarifAksesTerbaru);
+
+      // Recalculate harga_dasar_icon based on new tarif_akses_terbaru
+      // Get layanan detail for calculation
+      const layananDetail = await LayananModel.getLayananById(
+        layananData.id_layanan
+      );
+      if (!layananDetail) {
+        return res.status(404).json({
+          success: false,
+          message: "Data layanan tidak ditemukan",
+        });
+      }
+
+      // Calculate discounted tarif based on contract duration
+      let tarifTerbaru = calculateDiscountedTarif(
+        layananDetail.tarif,
+        durasiKontrak
+      );
+
+      // Calculate Harga Dasar: ((Backbone + Port + Tarif (n tahun)) × Kapasitas + Tarif Akses (n tahun)) × QTY
+      const backbone = parseFloat(layananDetail.backbone) || 0;
+      const port = parseFloat(layananDetail.port) || 0;
+      const tarifNTahun = parseFloat(tarifTerbaru) || 0;
+      const kapasitas = parseFloat(layananData.kapasitas) || 0;
+      const tarifAksesNTahun =
+        layananData.akses_existing === "ya"
+          ? 0
+          : parseFloat(tarifAksesTerbaru) || 0;
+      const qty = parseInt(layananData.qty) || 0;
+
+      const step1 = backbone + port + tarifNTahun;
+      const step2 = step1 * kapasitas;
+      const step3 = step2 + tarifAksesNTahun;
+      const hargaDasarIcon = step3 * qty;
+
+      console.log("💰 Recalculating Harga Dasar after tarif_akses update:", {
+        backbone,
+        port,
+        tarifNTahun,
+        kapasitas,
+        tarifAksesNTahun,
+        qty,
+        hargaDasarIcon,
+      });
+
+      // Calculate Harga Final: Harga Dasar + (Harga Dasar × Margin%)
+      const marginPercent = parseFloat(layananData.margin_percent) || 0;
+      const marginAmount = hargaDasarIcon * (marginPercent / 100);
+      const hargaFinalSebelumPPN = hargaDasarIcon + marginAmount;
+
+      console.log("💰 Recalculating Harga Final:", {
+        hargaDasarIcon,
+        marginPercent: `${marginPercent}%`,
+        marginAmount,
+        hargaFinalSebelumPPN,
+      });
+
+      // Update tarif_akses, tarif_akses_terbaru, harga_dasar_icon, and harga_final_sebelum_ppn
+      const updateData = {
+        tarif_akses: parseFloat(tarif_akses) || 0,
+        tarif_akses_terbaru: tarifAksesTerbaru || 0,
+        harga_dasar_icon: hargaDasarIcon || 0,
+        harga_final_sebelum_ppn: hargaFinalSebelumPPN || 0,
+        nama_ptl: nama_ptl || null,
+      };
+
+      console.log("💾 Updating data_penawaran_layanan:", updateData);
+
+      const result = await PenawaranLayananModel.updatePenawaranLayanan(
+        id_penawaran_layanan,
+        updateData
+      );
+
+      console.log(
+        "✅ Tarif akses and harga values updated successfully:",
+        result
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Total RAB (tarif akses) berhasil diperbarui",
+        data: result,
+      });
+    } catch (error) {
+      console.error("❌ Error in updateTarifAksesByAktivasi:", error);
+      res.status(500).json({
+        success: false,
+        message: "Gagal memperbarui tarif akses",
         error: error.message,
       });
     }

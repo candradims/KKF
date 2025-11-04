@@ -43,4 +43,11 @@ router.post(
 router.put("/:id/status", superAdminOnly, PenawaranController.updateStatus);
 router.put("/:id/discount", adminOnly, PenawaranController.updateDiscount);
 
+// Rute untuk aktivasi - update tarif_akses (Total RAB)
+router.put(
+  "/layanan/:id_penawaran_layanan/tarif-akses",
+  authenticate,
+  PenawaranController.updateTarifAksesByAktivasi
+);
+
 export default router;

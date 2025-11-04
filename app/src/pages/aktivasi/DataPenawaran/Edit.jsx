@@ -181,27 +181,33 @@ const Edit = ({
     setIsSubmitting(true);
     
     try {
+      // Aktivasi sets Total RAB which will be saved as tarif_akses
       const dataToSave = {
-        id_penawaran_layanan: layananData?.id,
+        tarif_akses: calculateTotalRAB(), // This is the Total RAB
         nama_ptl: formData.nama_ptl,
-        tarif_akses: calculateTotalRAB(),
         jenis_pemasangan: selectedPemasangan,
         selected_services: formData.services.filter(service => service.qty > 0)
       };
 
-      console.log("💾 Saving data:", dataToSave);
+      console.log("💾 Aktivasi saving Total RAB to tarif_akses:", dataToSave);
+      console.log("🔑 ID Penawaran Layanan:", layananData?.id);
 
-      const response = await fetch(`http://localhost:3000/api/penawaran-layanan/${layananData?.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders()
-        },
-        body: JSON.stringify(dataToSave)
-      });
+      // Use new endpoint: PUT /api/penawaran/layanan/:id/tarif-akses
+      const response = await fetch(
+        `http://localhost:3000/api/penawaran/layanan/${layananData?.id}/tarif-akses`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+          },
+          body: JSON.stringify(dataToSave)
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
@@ -209,12 +215,15 @@ const Edit = ({
       
       if (result.success) {
         setShowSuccessModal(true);
-        onSave(result.data);
+        if (typeof onSave === 'function') {
+          onSave(result.data);
+        }
       } else {
         throw new Error(result.message || 'Gagal menyimpan data');
       }
     } catch (error) {
       console.error('❌ Error saving data:', error);
+      alert(`Gagal menyimpan Total RAB: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }

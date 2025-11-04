@@ -30,6 +30,23 @@ export class PenawaranLayananModel {
     }
   }
 
+  // Ambil layanan penawaran berdasarkan ID layanan penawaran
+  static async getPenawaranLayananById(idPenawaranLayanan) {
+    try {
+      const { data, error } = await supabase
+        .from("data_penawaran_layanan")
+        .select("*")
+        .eq("id_penawaran_layanan", idPenawaranLayanan)
+        .single();
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      throw new Error(
+        `Gagal mengambil data layanan penawaran: ${error.message}`
+      );
+    }
+  }
+
   // Buat layanan penawaran baru
   static async createPenawaranLayanan(penawaranLayananData) {
     try {
