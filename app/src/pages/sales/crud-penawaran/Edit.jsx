@@ -3258,3 +3258,5 @@ const Edit = ({ isOpen, onClose, onSave, editData }) => {
       </>
     );
 };
+
+export default Edit;
