@@ -141,7 +141,6 @@ const Index = () => {
               lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: item.data_user?.nama_user || '-',
               sales: item.data_user?.nama_user || '-',
-              namaPTL: item.nama_ptl || '-',
               nomorKontrak: item.nomor_kontrak,
               kontrakKe: item.kontrak_tahun,
               referensi: item.wilayah_hjt,
@@ -164,7 +163,6 @@ const Index = () => {
               lokasiPelanggan: item.lokasi_pelanggan || '-',
               namaSales: '-',
               sales: '-',
-              namaPTL: '-',
               nomorKontrak: item.nomor_kontrak || '-',
               kontrakKe: item.kontrak_tahun || '-',
               referensi: item.wilayah_hjt || '-',
@@ -206,7 +204,6 @@ const Index = () => {
       item.namaPelanggan.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.lokasiPelanggan.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.namaSales.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.namaPTL.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.nomorKontrak.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.referensi.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.status.toLowerCase().includes(searchTerm.toLowerCase());
@@ -770,18 +767,6 @@ const Index = () => {
                       </th>
                       <th style={{
                         padding: '20px 12px',
-                        textAlign: 'left',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: colors.primary,
-                        borderBottom: `2px solid ${colors.primary}`,
-                        width: '15%',
-                        minWidth: '150px'
-                      }}>
-                        Nama PTL
-                      </th>
-                      <th style={{
-                        padding: '20px 12px',
                         textAlign: 'center',
                         fontSize: '14px',
                         fontWeight: '700',
@@ -980,28 +965,6 @@ const Index = () => {
                               wordBreak: 'break-word'
                             }}>
                               {item.namaSales}
-                            </div>
-                          </td>
-                          <td style={{
-                            padding: '20px 12px',
-                            fontSize: '14px',
-                            color: colors.primary,
-                            borderBottom: `2px solid ${colors.gray200}`,
-                            verticalAlign: 'middle',
-                            wordWrap: 'break-word'
-                          }}>
-                            <div style={{
-                              background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontFamily: "'Open Sans', sans-serif !important",
-                              border: `1px solid ${colors.primary}`,
-                              display: 'inline-block',
-                              maxWidth: '100%',
-                              wordBreak: 'break-word'
-                            }}>
-                              {item.namaPTL}
                             </div>
                           </td>
                           <td style={{
