@@ -32,6 +32,14 @@ const Edit = ({
     success: '#3fba8c',
   };
 
+  const hasValidServices = () => {
+    return formData.services.some(service => service.qty > 0);
+  };
+
+  const canSubmit = () => {
+    return hasValidServices() && !isSubmitting;
+  };
+
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -178,6 +186,17 @@ const Edit = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validasi sebelum submit
+    if (!hasValidServices()) {
+      alert('Harap isi minimal satu service dengan QTY lebih dari 0');
+      return;
+    }
+    
+    if (!canSubmit()) {
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -235,7 +254,6 @@ const Edit = ({
         jenisPemasangan: selectedPemasangan
       });
     }
-
     onClose();
   };
 
@@ -767,6 +785,29 @@ const Edit = ({
                       {formatCurrency(currentTotalRAB)}
                     </span>
                   </div>
+                  
+                  {/* Pesan validasi */}
+                  {!hasValidServices() && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{
+                        fontSize: '14px',
+                        color: '#e53e3e',
+                        margin: '8px 0 0 0',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                       ⚠️ {hasExistingData 
+                        ? 'Jika ingin mengubah Total RAB maka, Harap isi minimal satu service dengan QTY lebih dari 0'
+                        : 'Harap isi minimal satu service dengan QTY lebih dari 0'
+                      }
+                    </motion.p>
+                  )}
                 </div>
 
                 {/* Action Buttons */}
@@ -799,12 +840,14 @@ const Edit = ({
                   </motion.button>
                   
                   <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={canSubmit() ? { scale: 1.02, y: -2 } : {}}
+                    whileTap={canSubmit() ? { scale: 0.98 } : {}}
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={!canSubmit()}
                     style={{
-                      background: isSubmitting 
+                      background: !canSubmit() 
+                        ? `linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%)`
+                        : isSubmitting 
                         ? `linear-gradient(135deg, ${colors.accent2} 0%, ${colors.tertiary} 100%)`
                         : `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
                       color: '#ffffff',
@@ -813,14 +856,16 @@ const Edit = ({
                       borderRadius: '12px',
                       fontWeight: '600',
                       fontSize: '14px',
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                      boxShadow: `0 4px 20px rgba(0, 191, 202, 0.4)`,
+                      cursor: canSubmit() ? 'pointer' : 'not-allowed',
+                      boxShadow: canSubmit() 
+                        ? `0 4px 20px rgba(0, 191, 202, 0.4)`
+                        : 'none',
                       transition: 'all 0.3s ease',
                       letterSpacing: '0.02em',
-                      opacity: isSubmitting ? 0.8 : 1
+                      opacity: canSubmit() ? 1 : 0.6
                     }}
                   >
-                    Simpan Data
+                    {isSubmitting ? 'Menyimpan...' : 'Simpan Data'}
                   </motion.button>
                 </div>
               </motion.form>
