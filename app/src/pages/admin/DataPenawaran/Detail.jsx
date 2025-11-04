@@ -68,6 +68,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
 
             return {
               id: item.id_penawaran_layanan || index + 1,
+              namaPtl: item.nama_ptl || '-', 
               jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-',
               keterangan: item.detail_layanan || '-',
               kapasitas: item.kapasitas || '-',
@@ -352,6 +353,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
   const addTabelRow = () => {
     const newRow = {
       id: tabelPerhitungan.length + 1,
+      namaPtl: '', 
       jenisLayanan: '',
       keterangan: '',
       kapasitas: '',
@@ -737,6 +739,9 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F3F4F6' }}>
+                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
+                      Nama PTL
+                    </th>
                     <th rowSpan="2" style={{ padding: '12px 8px', border: '1px solid #E5E7EB', fontSize: '12px', fontWeight: '600' }}>
                       Detail Layanan
                     </th>
@@ -778,6 +783,14 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                 <tbody>
                   {tabelPerhitungan.map((row, index) => (
                     <tr key={row.id}>
+                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
+                        <input
+                          type="text"
+                          value={row.namaPtl}
+                          readOnly
+                          style={{ width: '100%', border: 'none', fontSize: '12px', backgroundColor: 'transparent' }}
+                        />
+                      </td>
                       <td style={{ padding: '8px 6px', border: '1px solid #E5E7EB', fontSize: '12px' }}>
                         <input
                           type="text"
