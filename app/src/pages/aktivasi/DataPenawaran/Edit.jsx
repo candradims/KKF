@@ -215,9 +215,6 @@ const Edit = ({
       
       if (result.success) {
         setShowSuccessModal(true);
-        if (typeof onSave === 'function') {
-          onSave(result.data);
-        }
       } else {
         throw new Error(result.message || 'Gagal menyimpan data');
       }
@@ -231,6 +228,14 @@ const Edit = ({
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+    if (onSave) {
+      onSave({
+        success: true,
+        totalRAB: calculateTotalRAB(),
+        jenisPemasangan: selectedPemasangan
+      });
+    }
+
     onClose();
   };
 
@@ -396,10 +401,7 @@ const Edit = ({
                   margin: '8px 0 0',
                   opacity: 0.8
                 }}>
-                  {hasExistingData 
-                    ? `Perbarui data layanan. Total RAB sebelumnya: ${formatCurrency(existingTotalRAB)}`
-                    : 'Lengkapi data layanan dan pilih service yang diperlukan'
-                  }
+                  Lengkapi data layanan dan pilih service yang diperlukan
                 </p>
               </motion.div>
 
@@ -818,7 +820,7 @@ const Edit = ({
                       opacity: isSubmitting ? 0.8 : 1
                     }}
                   >
-                    {isSubmitting ? 'Menyimpan...' : (hasExistingData ? 'Perbarui Data' : 'Simpan Data')}
+                    Simpan Data
                   </motion.button>
                 </div>
               </motion.form>
@@ -917,7 +919,7 @@ const Edit = ({
                   backgroundClip: 'text'
                 }}
               >
-                {hasExistingData ? 'Berhasil Diperbarui!' : 'Berhasil Disimpan!'}
+                {hasExistingData ? 'Berhasil!' : 'Berhasil!'}
               </motion.h3>
               
               <motion.p 
