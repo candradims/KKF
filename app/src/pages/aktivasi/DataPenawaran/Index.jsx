@@ -149,7 +149,10 @@ const Index = () => {
               durasi: item.durasi_kontrak,
               status: item.status || 'Menunggu',
               actions: ['view'],
-              rawData: item
+              rawData: item,
+              hasLayananWithoutTarifAkses: item.data_penawaran_layanan?.some(layanan => 
+                !layanan.tarif_akses || layanan.tarif_akses === 0
+              ) || false
             };
             console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount, "lokasi:", transformedItem.lokasiPelanggan);
             return transformedItem;
@@ -171,11 +174,12 @@ const Index = () => {
               durasi: item.durasi_kontrak || '-',
               status: 'Error',
               actions: ['view'],
-              rawData: item
+              rawData: item,
+              hasLayananWithoutTarifAkses: false
             };
           }
         });
-        
+        const filteredData = transformedData.filter(item => item.hasLayananWithoutTarifAkses);
         setPenawaranData(transformedData);
         console.log("✅ Data penawaran berhasil dimuat:", transformedData.length, "items");
       } else {
@@ -683,7 +687,7 @@ const Index = () => {
                   position: 'relative',
                   textShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}>
-                  Daftar Penawaran - Aktivasi
+                  Daftar Penawaran
                 </h3>
               </div>
 
