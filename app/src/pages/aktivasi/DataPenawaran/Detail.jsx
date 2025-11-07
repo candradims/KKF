@@ -91,10 +91,19 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
     setShowEditModal(true);
   };
 
-  const handleSaveEdit = (savedData) => {
-    console.log("Data berhasil disimpan:", savedData);
-    loadFullDetailData();
-    setShowEditModal(false);
+  const handleSaveEdit = async (savedData) => {
+    console.log("💾 Data berhasil disimpan:", savedData);
+    
+    await loadFullDetailData();
+    
+    if (savedData.shouldNavigateToIndex) {
+      console.log("🚀 All layanan have tarif_akses, navigating to Index");
+      setShowEditModal(false);
+      onClose();
+    } else {
+      console.log("📋 Some layanan still missing tarif_akses, staying in Detail");
+      setShowEditModal(false);
+    }
   };
 
   const handleCloseSuccessModal = () => {
