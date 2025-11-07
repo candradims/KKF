@@ -7,6 +7,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import BuildIcon from '@mui/icons-material/Build';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { HistoryIcon } from "lucide-react";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -139,12 +140,19 @@ const Sidebar = () => {
       icon: <BuildIcon />,
       color: colors.tertiary
     },
+        {
+      title: "Data Histori",
+      path: "/aktivasi/data-histori",
+      icon: <HistoryIcon />,
+      color: colors.tertiary
+    },
     {
       title: "Data Master",
       path: "/aktivasi/data-master",
       icon: <PeopleIcon />,
       color: colors.tertiary
-    }
+    },
+
   ];
 
   // Pilih menu items berdasarkan role
