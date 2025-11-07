@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Edit2, Trash2, Plus, RotateCcw, Download, Filter, Calendar, Check, X, MapPin } from 'lucide-react';
+import { Eye, Plus, RotateCcw, Download, Filter, Calendar, Check, X, MapPin } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import Tambah from './crud-penawaran/Tambah';
-import Edit from './crud-penawaran/Edit';
-import Hapus from './crud-penawaran/Hapus';
 import Detail from './crud-penawaran/Detail';
 import { penawaranAPI, getUserData } from '../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,13 +31,8 @@ const convertDiscountToPercentage = (discount) => {
 const Penawaran = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [showTambahModal, setShowTambahModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedEditData, setSelectedEditData] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetailData, setSelectedDetailData] = useState(null);
-  const [showHapusModal, setShowHapusModal] = useState(false);
-  const [selectedDeleteData, setSelectedDeleteData] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // State untuk data dari API
@@ -108,7 +100,7 @@ const Penawaran = () => {
               durasi: item.durasi_kontrak,
               targetIRR: item.target_irr || '0',
               status: item.status || 'Menunggu',
-              actions: ['view', 'edit', 'delete'],
+              actions: ['view'],
               rawData: item
             };
           } catch (itemError) {
@@ -190,403 +182,6 @@ const Penawaran = () => {
     }
   };
 
-  const handleTambahData = () => {
-    setShowTambahModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowTambahModal(false);
-  };
-
-  const handleEditData = (item) => {
-    const editData = {
-      ...item,
-      id: item.id || item.id_penawaran,
-      id_penawaran: item.id_penawaran || item.id
-    };
-    console.log('🖊️ Setting edit data:', editData);
-    setSelectedEditData(editData);
-    setShowEditModal(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setShowEditModal(false);
-    setSelectedEditData(null);
-  };
-
-  const handleSaveEditData = async (updatedData) => {
-    try {
-      const userData = getUserData();
-      if (!userData) {
-        alert('User tidak terautentikasi. Silakan login kembali.');
-        return;
-      }
-
-      console.log('🔄 Updating penawaran data:', updatedData);
-      console.log('💰 Margin data check:', {
-        marginPercent: updatedData.marginPercent,
-        marginType: typeof updatedData.marginPercent
-      });
-      
-      const penawaranId = selectedEditData.id_penawaran || selectedEditData.id;
-      
-      if (!penawaranId) {
-        alert('ID penawaran tidak ditemukan. Silakan coba lagi.');
-        return;
-      }
-
-      const formatDate = (dateString) => {
-        if (!dateString) return '';
-        
-        try {
-          if (dateString.includes('/')) {
-            const [day, month, year] = dateString.split('/');
-            const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
-            if (!isNaN(date.getTime())) {
-              return date.toISOString().split('T')[0];
-            }
-          }
-          return dateString;
-        } catch (error) {
-          console.error('❌ Error formatting date:', error);
-          return dateString;
-        }
-      };
-      
-      // Handle multiple layanan items or single layanan
-      const apiData = {
-        tanggal: formatDate(updatedData.tanggal),
-        pelanggan: updatedData.pelanggan,
-        lokasi_pelanggan: updatedData.lokasiPelanggan,
-        nomorKontrak: updatedData.nomorKontrak,
-        kontrakTahunKe: updatedData.kontrakTahunKe,
-        referensiHJT: updatedData.referensiHJT,
-        durasiKontrak: updatedData.durasiKontrak,
-        discount: updatedData.discount ? updatedData.discount.toString().replace('%', '').trim() : '0',
-        total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0,
-        selectedLayananId: updatedData.selectedLayananId,
-        hjtWilayah: updatedData.hjtWilayah,
-        namaLayanan: updatedData.namaLayanan, 
-        detailLayanan: updatedData.detailLayanan,
-        kapasitas: updatedData.kapasitas,
-        satuan: updatedData.satuan,
-        qty: updatedData.qty,
-        backbone: updatedData.backbone,
-        port: updatedData.port,
-        tarifAkses: updatedData.tarifAkses,
-        aksesExisting: updatedData.aksesExisting,
-        tarif: updatedData.tarif,
-        marginPercent: updatedData.marginPercent,
-        // Add multiple layanan items if available
-        layananItems: updatedData.layananItems || []
-      };
-
-      console.log('🔄 Multiple layanan items check:', {
-        hasLayananItems: Array.isArray(updatedData.layananItems),
-        layananItemsCount: updatedData.layananItems?.length || 0,
-        layananItems: updatedData.layananItems
-      });
-
-      const numericId = parseInt(penawaranId, 10);
-      
-      console.log('📤 Sending API data for ID:', numericId, apiData);
-      
-      // Additional debugging for layanan items
-      if (apiData.layananItems && apiData.layananItems.length > 0) {
-        console.log('🏷️ API data contains layanan items:', apiData.layananItems.map(item => ({
-          namaLayanan: item.namaLayanan,
-          marginPercent: item.marginPercent,
-          hargaDasar: item.hargaDasar,
-          hargaFinal: item.hargaFinal
-        })));
-      }
-
-      const cleanApiData = JSON.parse(JSON.stringify(apiData));
-      
-      const result = await penawaranAPI.update(numericId, cleanApiData);
-      console.log('📬 API Response:', result);
-      
-      if (result.success) {
-        // Handle multiple layanan items if available
-        const layananItems = updatedData.layananItems || [];
-        console.log('🏷️ Checking multiple layanan items:', layananItems);
-        
-        if (layananItems.length > 0) {
-          console.log('🏷️ Handling multiple layanan update for penawaran ID:', selectedEditData.id);
-          
-          try {
-            // Get existing layanan data
-            const getExistingLayananResult = await fetch(`http://localhost:3000/api/penawaran-layanan/penawaran/${selectedEditData.id}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-User-ID': userData.id_user.toString(),
-                'X-User-Role': userData.role_user,
-                'X-User-Email': userData.email_user
-              }
-            });
-            
-            if (getExistingLayananResult.ok) {
-              const existingLayananData = await getExistingLayananResult.json();
-              console.log('📋 Found existing layanan data:', existingLayananData);
-              
-              if (existingLayananData.success && existingLayananData.data && existingLayananData.data.length > 0) {
-                console.log(`🗑️ Deleting ${existingLayananData.data.length} existing layanan items`);
-                
-                const deleteLayananPromises = existingLayananData.data.map(async (existingItem) => {
-                  const deleteResult = await fetch(`http://localhost:3000/api/penawaran-layanan/${existingItem.id_penawaran_layanan}`, {
-                    method: 'DELETE',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'X-User-ID': userData.id_user.toString(),
-                      'X-User-Role': userData.role_user,
-                      'X-User-Email': userData.email_user
-                    }
-                  });
-                  console.log(`🗑️ Delete layanan result for item ${existingItem.id_penawaran_layanan}:`, deleteResult.ok);
-                  return deleteResult.ok;
-                });
-                
-                await Promise.all(deleteLayananPromises);
-                console.log(`✅ Successfully deleted existing layanan items`);
-              }
-            }
-            
-            // Create new layanan items
-            const layananPromises = layananItems.map(async (item, index) => {
-              const layananData = {
-                id_penawaran: selectedEditData.id,
-                nama_layanan: item.namaLayanan,
-                detail_layanan: item.detailLayanan,
-                kapasitas: item.kapasitas,
-                satuan: item.satuan,
-                qty: parseInt(item.qty) || 0,
-                backbone: item.backbone,
-                port: item.port,
-                tarif_akses: parseFloat(item.tarifAkses) || 0,
-                akses_existing: parseFloat(item.aksesExisting) || 0,
-                tarif: parseFloat(item.tarif) || 0,
-                margin_percent: parseFloat(item.marginPercent) || 0,
-                harga_dasar: parseFloat(item.hargaDasar) || 0,
-                harga_final_sebelum_ppn: parseFloat(item.hargaFinal) || 0
-              };
-              
-              console.log(`🏷️ Creating layanan item ${index + 1}:`, layananData);
-              
-              const layananResult = await fetch('http://localhost:3000/api/penawaran-layanan', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role_user,
-                  'X-User-Email': userData.email_user
-                },
-                body: JSON.stringify(layananData)
-              });
-              
-              const layananResponse = await layananResult.json();
-              console.log(`📋 Layanan item ${index + 1} create response:`, layananResponse);
-              
-              return {
-                success: layananResult.ok && layananResponse.success,
-                response: layananResponse,
-                item: item,
-                index: index + 1
-              };
-            });
-            
-            const layananResults = await Promise.all(layananPromises);
-            
-            const successLayananCount = layananResults.filter(r => r.success).length;
-            const failedLayananCount = layananResults.filter(r => !r.success).length;
-            
-            console.log(`✅ Layanan results: ${successLayananCount} successful, ${failedLayananCount} failed`);
-            
-            if (failedLayananCount > 0) {
-              const failedLayananItems = layananResults.filter(r => !r.success);
-              console.error('❌ Failed layanan items:', failedLayananItems);
-              // Alert removed - notification disabled
-            } else {
-              console.log('✅ All layanan items created successfully');
-            }
-            
-          } catch (layananError) {
-            console.error('❌ Error handling multiple layanan:', layananError);
-          }
-        }
-        
-        // Handle pengeluaran items
-        const pengeluaranItems = updatedData.pengeluaranItems || [];
-        console.log('💰 Checking multiple pengeluaran items:', pengeluaranItems);
-        
-        if (pengeluaranItems.length > 0) {
-          console.log('💰 Handling multiple pengeluaran update for penawaran ID:', selectedEditData.id);
-          
-          try {
-            const getExistingResult = await fetch(`http://localhost:3000/api/pengeluaran/penawaran/${selectedEditData.id}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-User-ID': userData.id_user.toString(),
-                'X-User-Role': userData.role_user,
-                'X-User-Email': userData.email_user
-              }
-            });
-            
-            if (getExistingResult.ok) {
-              const existingData = await getExistingResult.json();
-              console.log('📋 Found existing pengeluaran data:', existingData);
-              
-              if (existingData.success && existingData.data && existingData.data.length > 0) {
-                console.log(`🗑️ Deleting ${existingData.data.length} existing pengeluaran items`);
-                
-                const deletePromises = existingData.data.map(async (existingItem) => {
-                  const deleteResult = await fetch(`http://localhost:3000/api/pengeluaran/${existingItem.id_pengeluaran}`, {
-                    method: 'DELETE',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'X-User-ID': userData.id_user.toString(),
-                      'X-User-Role': userData.role_user,
-                      'X-User-Email': userData.email_user
-                    }
-                  });
-                  console.log(`🗑️ Delete result for item ${existingItem.id_pengeluaran}:`, deleteResult.ok);
-                  return deleteResult.ok;
-                });
-                
-                await Promise.all(deletePromises);
-                console.log(`✅ Successfully deleted existing pengeluaran items`);
-              }
-            }
-            
-            const pengeluaranPromises = pengeluaranItems.map(async (item, index) => {
-              const pengeluaranData = {
-                id_penawaran: selectedEditData.id,
-                item: item.item,
-                keterangan: item.keterangan,
-                hasrat: parseFloat(item.hasrat) || 0,
-                jumlah: parseInt(item.jumlah) || 0
-              };
-              
-              console.log(`💰 Creating pengeluaran item ${index + 1}:`, pengeluaranData);
-              
-              const pengeluaranResult = await fetch('http://localhost:3000/api/pengeluaran', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role_user,
-                  'X-User-Email': userData.email_user
-                },
-                body: JSON.stringify(pengeluaranData)
-              });
-              
-              const pengeluaranResponse = await pengeluaranResult.json();
-              console.log(`📋 Pengeluaran item ${index + 1} create response:`, pengeluaranResponse);
-              
-              return {
-                success: pengeluaranResult.ok && pengeluaranResponse.success,
-                response: pengeluaranResponse,
-                item: item,
-                index: index + 1
-              };
-            });
-            
-            const pengeluaranResults = await Promise.all(pengeluaranPromises);
-            
-            const successCount = pengeluaranResults.filter(r => r.success).length;
-            const failedCount = pengeluaranResults.filter(r => !r.success).length;
-            
-            console.log(`✅ Pengeluaran results: ${successCount} successful, ${failedCount} failed`);
-            
-            if (failedCount > 0) {
-              const failedItems = pengeluaranResults.filter(r => !r.success);
-              console.error('❌ Failed pengeluaran items:', failedItems);
-              alert(`${successCount} pengeluaran berhasil disimpan, ${failedCount} gagal disimpan.`);
-            } else {
-              console.log('✅ All pengeluaran items created successfully');
-            }
-            
-          } catch (pengeluaranError) {
-            console.error('❌ Error handling multiple pengeluaran:', pengeluaranError);
-          }
-        } else if (updatedData._hasExistingPengeluaran && updatedData._existingPengeluaranId) {
-          console.log('🗑️ Deleting existing pengeluaran (no new items)');
-          
-          try {
-            const deleteResult = await fetch(`http://localhost:3000/api/pengeluaran/${updatedData._existingPengeluaranId}`, {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-User-ID': userData.id_user.toString(),
-                'X-User-Role': userData.role_user,
-                'X-User-Email': userData.email_user
-              }
-            });
-            
-            if (deleteResult.ok) {
-              console.log('✅ Existing pengeluaran deleted successfully');
-            } else {
-              console.error('❌ Failed to delete existing pengeluaran');
-            }
-          } catch (deleteError) {
-            console.error('❌ Error deleting existing pengeluaran:', deleteError);
-          }
-        }
-        await fetchPenawaranData();
-        triggerDetailRefresh();
-        
-        // Recalculate Total/Bulan after successful update
-        try {
-          console.log('🔄 Recalculating Total/Bulan after update...');
-          const recalculateResponse = await fetch(`http://localhost:3000/api/penawaran/${numericId}/calculate`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-User-ID': userData.id_user.toString(),
-              'X-User-Role': userData.role_user,
-              'X-User-Email': userData.email_user
-            }
-          });
-          
-          if (recalculateResponse.ok) {
-            const recalculateResult = await recalculateResponse.json();
-            console.log('✅ Total/Bulan recalculated successfully:', recalculateResult);
-          } else {
-            console.warn('⚠️ Failed to recalculate Total/Bulan, but update was successful');
-          }
-        } catch (recalcError) {
-          console.error('❌ Error recalculating Total/Bulan:', recalcError);
-          console.warn('⚠️ Total/Bulan recalculation failed, but update was successful');
-        }
-        
-        setShowEditModal(false);
-        setSelectedEditData(null);
-      } else {
-        console.error('❌ API Error:', result.error);
-        alert(`Gagal memperbarui data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
-      }
-    } catch (error) {
-      console.error('❌ Error updating penawaran:', error);
-      console.error('❌ Error details:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-      
-      if (error.response?.status === 401) {
-        alert('Authentication data tidak valid. Silakan login kembali.');
-      } else if (error.response?.status === 403) {
-        alert('Anda tidak memiliki izin untuk melakukan aksi ini.');
-      } else if (error.response?.status === 500) {
-        alert('Terjadi kesalahan server. Silakan coba lagi.');
-      } else {
-        alert(`Terjadi kesalahan saat memperbarui data:\n${error.message}`);
-      }
-    }
-  };
-
   const handleDetailData = (item) => {
     setSelectedDetailData(item);
     setShowDetailModal(true);
@@ -599,143 +194,6 @@ const Penawaran = () => {
 
   const triggerDetailRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
-  };
-
-  const handleDeleteData = (item) => {
-    setSelectedDeleteData(item);
-    setShowHapusModal(true);
-  };
-
-  const handleCloseDeleteModal = () => {
-    setShowHapusModal(false);
-    setSelectedDeleteData(null);
-  };
-
-  const handleConfirmDelete = async (deleteData) => {
-    try {
-      const userData = getUserData();
-      if (!userData) {
-        alert('User tidak terautentikasi. Silakan login kembali.');
-        return;
-      }
-
-      console.log('🗑️ Deleting penawaran:', deleteData);
-      console.log('🔍 Delete data ID:', deleteData.id);
-
-      const result = await penawaranAPI.delete(deleteData.id);
-      
-      console.log('📬 Delete API Response:', result);
-      
-      if (result.success) {
-        await fetchPenawaranData();
-        setShowHapusModal(false);
-        setSelectedDeleteData(null);
-      } else {
-        console.error('❌ Delete API Error:', result.error);
-        alert(`Gagal menghapus data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
-      }
-    } catch (error) {
-      console.error('❌ Error deleting penawaran:', error);
-      alert(`Terjadi kesalahan saat menghapus data:\n${error.message}`);
-    }
-  };
-
-  const handleSaveData = async (newData) => {
-    try {
-      const userData = getUserData();
-      if (!userData) {
-        alert('User tidak terautentikasi. Silakan login kembali.');
-        return false;
-      }
-
-      console.log('💾 User data:', userData);
-      console.log('💾 Sending penawaran data:', newData);
-
-      const dataToSave = {
-        ...newData,
-        discount: convertDiscountToPercentage(newData.discount)
-      };
-
-      const result = await penawaranAPI.create(dataToSave);
-      
-      console.log('📬 API Response:', result);
-      
-      if (result.success) {
-        const pengeluaranItems = newData.pengeluaranItems || [];
-        console.log('💰 Checking multiple pengeluaran items for new penawaran:', pengeluaranItems);
-        
-        if (pengeluaranItems.length > 0 && result.data) {
-          const penawaranId = result.data.id_penawaran || result.data.id;
-          console.log('💰 Creating multiple pengeluaran for new penawaran ID:', penawaranId);
-          
-          try {
-            const pengeluaranPromises = pengeluaranItems.map(async (item, index) => {
-              const pengeluaranData = {
-                id_penawaran: penawaranId,
-                item: item.item,
-                keterangan: item.keterangan,
-                hasrat: parseFloat(item.hasrat) || 0,
-                jumlah: parseInt(item.jumlah) || 0
-              };
-              
-              console.log(`💰 Creating pengeluaran item ${index + 1}:`, pengeluaranData);
-              
-              const pengeluaranResult = await fetch('http://localhost:3000/api/pengeluaran', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-User-ID': userData.id_user.toString(),
-                  'X-User-Role': userData.role_user,
-                  'X-User-Email': userData.email_user
-                },
-                body: JSON.stringify(pengeluaranData)
-              });
-              
-              const pengeluaranResponse = await pengeluaranResult.json();
-              console.log(`📋 Pengeluaran item ${index + 1} create response:`, pengeluaranResponse);
-              
-              return {
-                success: pengeluaranResult.ok && pengeluaranResponse.success,
-                response: pengeluaranResponse,
-                item: item,
-                index: index + 1
-              };
-            });
-            
-            const pengeluaranResults = await Promise.all(pengeluaranPromises);
-            
-            const successCount = pengeluaranResults.filter(r => r.success).length;
-            const failedCount = pengeluaranResults.filter(r => !r.success).length;
-            
-            
-            if (failedCount > 0) {
-              const failedItems = pengeluaranResults.filter(r => !r.success);
-              console.error('❌ Failed pengeluaran items:', failedItems);
-            } else {
-              console.log('✅ All pengeluaran items created successfully');
-            }
-            
-          } catch (pengeluaranError) {
-            console.error('❌ Error handling multiple pengeluaran:', pengeluaranError);
-          }
-        }
-        
-        await fetchPenawaranData();
-        triggerDetailRefresh();
-        setShowTambahModal(false);
-        
-        return true;
-      } else {
-        console.error('❌ API Error:', result.error);
-        alert(`Gagal menyimpan data: ${result.message}\n\nDetail: ${result.error || 'Tidak ada detail error'}`);
-        return false;
-      }
-    } catch (error) {
-      console.error('❌ Error saving penawaran:', error);
-      console.error('❌ Error details:', error.message);
-      alert(`Terjadi kesalahan saat menyimpan data:\n${error.message}`);
-      return false;
-    }
   };
 
   // Fungsi untuk menutup modal sukses ekspor
@@ -1389,38 +847,6 @@ const Penawaran = () => {
               <Download size={16} />
               Export PDF
             </button>
-
-            {/* Tambah Data Button */}
-            <button
-              onClick={handleTambahData}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 20px',
-                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600',
-                transition: 'all 0.3s ease',
-                boxShadow: `0 4px 15px ${colors.secondary}30`,
-                whiteSpace: 'nowrap'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = `0 6px 20px ${colors.secondary}40`;
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = `0 4px 15px ${colors.secondary}30`;
-              }}
-            >
-              <Plus size={16} />
-              Tambah Data
-            </button>
           </div>
         </div>
 
@@ -1817,7 +1243,7 @@ const Penawaran = () => {
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '140px'
+                        width: '80px'
                       }}>
                         Aksi
                       </th>
@@ -2136,72 +1562,6 @@ const Penawaran = () => {
                                 title="View Details"
                               >
                                 <Eye size={16} />
-                              </button>
-                              
-                              {/* Edit Button */}
-                              <button
-                                onClick={() => handleEditData(item)}
-                                style={{
-                                  background: `linear-gradient(135deg, ${colors.success}15 0%, ${colors.success}25 100%)`,
-                                  color: colors.success,
-                                  padding: '8px',
-                                  borderRadius: '8px',
-                                  border: `1px solid ${colors.success}90`,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  transition: 'all 0.3s ease',
-                                  boxShadow: `0 2px 8px ${colors.success}20`
-                                }}
-                                onMouseOver={(e) => {
-                                  e.target.style.background = colors.success;
-                                  e.target.style.color = 'white';
-                                  e.target.style.transform = 'translateY(-2px)';
-                                  e.target.style.boxShadow = `0 4px 12px ${colors.success}40`;
-                                }}
-                                onMouseOut={(e) => {
-                                  e.target.style.background = `linear-gradient(135deg, ${colors.success}15 0%, ${colors.success}25 100%)`;
-                                  e.target.style.color = colors.success;
-                                  e.target.style.transform = 'translateY(0)';
-                                  e.target.style.boxShadow = `0 2px 8px ${colors.success}20`;
-                                }}
-                                title="Edit"
-                              >
-                                <Edit2 size={16} />
-                              </button>
-                              
-                              {/* Delete Button */}
-                              <button
-                                onClick={() => handleDeleteData(item)}
-                                style={{
-                                  background: `linear-gradient(135deg, #FEE2E215 0%, #FEE2E225 100%)`,
-                                  color: '#DC2626',
-                                  padding: '8px',
-                                  borderRadius: '8px',
-                                  border: `1px solid #EF444490`,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  transition: 'all 0.3s ease',
-                                  boxShadow: `0 2px 8px #FEE2E220`
-                                }}
-                                onMouseOver={(e) => {
-                                  e.target.style.background = '#DC2626';
-                                  e.target.style.color = 'white';
-                                  e.target.style.transform = 'translateY(-2px)';
-                                  e.target.style.boxShadow = `0 4px 12px #DC262640`;
-                                }}
-                                onMouseOut={(e) => {
-                                  e.target.style.background = `linear-gradient(135deg, #FEE2E215 0%, #FEE2E225 100%)`;
-                                  e.target.style.color = '#DC2626';
-                                  e.target.style.transform = 'translateY(0)';
-                                  e.target.style.boxShadow = `0 2px 8px #FEE2E220`;
-                                }}
-                                title="Delete"
-                              >
-                                <Trash2 size={16} />
                               </button>
                             </div>
                           </td>
@@ -2529,32 +1889,12 @@ const Penawaran = () => {
           </>
         )}
 
-        {/* Modal Components*/}
-        <Tambah
-          isOpen={showTambahModal}
-          onClose={handleCloseModal}
-          onSave={handleSaveData}
-        />
-        
-        <Edit
-          isOpen={showEditModal}
-          onClose={handleCloseEditModal}
-          onSave={handleSaveEditData}
-          editData={selectedEditData}
-        />
-        
+        {/* Modal Components */}
         <Detail
           isOpen={showDetailModal}
           onClose={handleCloseDetailModal}
           detailData={selectedDetailData}
           refreshTrigger={refreshTrigger}
-        />
-        
-        <Hapus
-          isOpen={showHapusModal}
-          onClose={handleCloseDeleteModal}
-          onConfirm={handleConfirmDelete}
-          deleteData={selectedDeleteData}
         />
 
         {/* Modal Sukses Export PDF */}
