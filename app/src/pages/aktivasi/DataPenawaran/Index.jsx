@@ -126,12 +126,31 @@ const Index = () => {
       const result = await penawaranAPI.getAll();
       
       if (result.success) {
+        console.log("📦 Raw API response data:", result.data);
+        
         const transformedData = result.data.map(item => {
           try {
-            console.log("🔧 Transforming item:", item.id_penawaran, "diskon:", item.diskon, "lokasi:", item.lokasi_pelanggan);
+            console.log("🔧 Transforming item:", item.id_penawaran);
+            console.log("📊 Item data_penawaran_layanan:", item.data_penawaran_layanan);
+            console.log("🔍 Detail layanan:", item.data_penawaran_layanan?.map(l => ({
+              id: l.id_penawaran_layanan,
+              tarif_akses: l.tarif_akses,
+              nama_layanan: l.nama_layanan
+            })));
             
             const originalDate = new Date(item.tanggal_dibuat).toLocaleDateString('id-ID');
             const formattedTanggal = formatTanggal(originalDate);
+            
+            const layananWithoutTarifAkses = item.data_penawaran_layanan?.filter(layanan => 
+              !layanan.tarif_akses || layanan.tarif_akses === 0
+            ) || [];
+            
+            const hasLayananWithoutTarifAkses = layananWithoutTarifAkses.length > 0;
+            
+            console.log(`🔎 Item ${item.id_penawaran}:`);
+            console.log(`   - Total layanan: ${item.data_penawaran_layanan?.length || 0}`);
+            console.log(`   - Layanan tanpa tarif akses: ${layananWithoutTarifAkses.length}`);
+            console.log(`   - hasLayananWithoutTarifAkses: ${hasLayananWithoutTarifAkses}`);
             
             const transformedItem = {
               id: item.id_penawaran,
@@ -150,38 +169,29 @@ const Index = () => {
               status: item.status || 'Menunggu',
               actions: ['view'],
               rawData: item,
-              hasLayananWithoutTarifAkses: item.data_penawaran_layanan?.some(layanan => 
-                !layanan.tarif_akses || layanan.tarif_akses === 0
-              ) || false
+              hasLayananWithoutTarifAkses: hasLayananWithoutTarifAkses,
             };
-            console.log("🔧 Transformed item:", transformedItem.id, "tanggal:", transformedItem.tanggal, "diskon:", transformedItem.diskon, "display:", transformedItem.discount, "lokasi:", transformedItem.lokasiPelanggan);
+            
             return transformedItem;
           } catch (itemError) {
             console.error('❌ Error transforming item:', item, itemError);
-            return {
-              id: item.id_penawaran || 'unknown',
-              id_penawaran: item.id_penawaran || 'unknown',
-              tanggal: '-',
-              namaPelanggan: item.nama_pelanggan || '-',
-              lokasiPelanggan: item.lokasi_pelanggan || '-',
-              namaSales: '-',
-              sales: '-',
-              nomorKontrak: item.nomor_kontrak || '-',
-              kontrakKe: item.kontrak_tahun || '-',
-              referensi: item.wilayah_hjt || '-',
-              diskon: 0,
-              discount: '0%',
-              durasi: item.durasi_kontrak || '-',
-              status: 'Error',
-              actions: ['view'],
-              rawData: item,
-              hasLayananWithoutTarifAkses: false
-            };
+            return null;
           }
-        });
+        }).filter(item => item !== null);
+
         const filteredData = transformedData.filter(item => item.hasLayananWithoutTarifAkses);
-        setPenawaranData(transformedData);
-        console.log("✅ Data penawaran berhasil dimuat:", transformedData.length, "items");
+        
+        console.log("📈 Final filtering result:");
+        console.log(`   - Total data: ${transformedData.length}`);
+        console.log(`   - Filtered data: ${filteredData.length}`);
+        console.log(`   - Filtered items:`, filteredData.map(item => ({
+          id: item.id_penawaran,
+          hasLayananWithoutTarifAkses: item.hasLayananWithoutTarifAkses,
+          debug: item.debug
+        })));
+        
+        setPenawaranData(filteredData);
+        
       } else {
         throw new Error(result.message || 'Gagal memuat data penawaran');
       }
