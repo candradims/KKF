@@ -282,6 +282,7 @@ const Index = () => {
   const handleCloseDetailModal = () => {
     setShowDetailModal(false);
     setSelectedDetailData(null);
+    fetchPenawaranData();
   };
 
   return (
