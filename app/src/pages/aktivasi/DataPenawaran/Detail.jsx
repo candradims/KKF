@@ -49,14 +49,18 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
         
         // Load penawaran layanan data for table
         if (result.data.data_penawaran_layanan && result.data.data_penawaran_layanan.length > 0) {
-          const layananTableData = result.data.data_penawaran_layanan.map((item, index) => {
-            return {
-              id: item.id_penawaran_layanan || index + 1,
-              jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-',
-              keterangan: item.detail_layanan || '-',
-              namaPtl: item.nama_ptl || '-',
-              tarifAkses: item.tarif_akses || '-',
-            };
+        const layananWithoutTarifAkses = result.data.data_penawaran_layanan.filter(item => 
+          !item.tarif_akses || item.tarif_akses === 0
+        );
+        
+        const layananTableData = layananWithoutTarifAkses.map((item, index) => {
+          return {
+            id: item.id_penawaran_layanan || index + 1,
+            jenisLayanan: item.nama_layanan || item.data_layanan?.nama_layanan || '-',
+            keterangan: item.detail_layanan || '-',
+            namaPtl: item.nama_ptl || '-',
+            tarifAkses: item.tarif_akses || '-',
+          };
           });
           setTabelPerhitungan(layananTableData);
           console.log("✅ Table data loaded:", layananTableData);
