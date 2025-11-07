@@ -245,17 +245,76 @@ const Edit = ({
     }
   };
 
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    if (onSave) {
-      onSave({
-        success: true,
-        totalRAB: calculateTotalRAB(),
-        jenisPemasangan: selectedPemasangan
+  const checkAllLayananHaveTarifAkses = async (idPenawaran) => {
+    try {
+      console.log("🔍 Checking if all layanan have tarif_akses for penawaran:", idPenawaran);
+      
+      const response = await fetch(`http://localhost:3000/api/penawaran/${idPenawaran}`, {
+        method: 'GET',
+        headers: getAuthHeaders()
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const penawaranData = result.data;
+        const layananList = penawaranData.data_penawaran_layanan || [];
+        
+        console.log("📋 Layanan list:", layananList.map(l => ({
+          id: l.id_penawaran_layanan,
+          nama: l.nama_layanan,
+          tarif_akses: l.tarif_akses,
+          hasTarifAkses: l.tarif_akses && l.tarif_akses > 0
+        })));
+        
+        const allHaveTarifAkses = layananList.every(layanan => 
+          layanan.tarif_akses && layanan.tarif_akses > 0
+        );
+        
+        console.log(`✅ All layanan have tarif_akses: ${allHaveTarifAkses}`);
+        return allHaveTarifAkses;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("❌ Error checking layanan tarif_akses:", error);
+      return false;
     }
-    onClose();
   };
+
+  const handleCloseSuccessModal = async () => {
+    try {
+      const idPenawaran = penawaranData?.id_penawaran || penawaranData?.id;
+      const allLayananHaveTarifAkses = await checkAllLayananHaveTarifAkses(idPenawaran);
+      
+      console.log(`🎯 Navigation decision - All have tarif_akses: ${allLayananHaveTarifAkses}`);
+      
+      if (onSave) {
+        onSave({
+          success: true,
+          totalRAB: calculateTotalRAB(),
+          jenisPemasangan: selectedPemasangan,
+          shouldNavigateToIndex: allLayananHaveTarifAkses
+        });
+      }
+      
+    } catch (error) {
+      console.error("❌ Error in handleCloseSuccessModal:", error);
+      if (onSave) {
+        onSave({
+          success: true,
+          totalRAB: calculateTotalRAB(),
+          jenisPemasangan: selectedPemasangan,
+          shouldNavigateToIndex: false
+        });
+      }
+    }
+  };
+
 
   const handleCancel = () => {
     setFormData({
