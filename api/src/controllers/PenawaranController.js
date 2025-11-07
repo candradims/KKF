@@ -67,6 +67,31 @@ export class PenawaranController {
 
       console.log("✅ Retrieved penawaran:", penawaran?.length || 0, "records");
 
+      if (req.user.role_user === "aktivasi" && penawaran && penawaran.length > 0) {
+        console.log("🔍 Aktivasi role - loading layanan data for filtering");
+        
+        const penawaranWithLayanan = await Promise.all(
+          penawaran.map(async (item) => {
+            try {
+              const layananData = await PenawaranLayananModel.getPenawaranLayananByPenawaranId(item.id_penawaran);
+              return {
+                ...item,
+                data_penawaran_layanan: layananData || []
+              };
+            } catch (error) {
+              console.error(`❌ Error loading layanan for penawaran ${item.id_penawaran}:`, error);
+              return {
+                ...item,
+                data_penawaran_layanan: []
+              };
+            }
+          })
+        );
+
+        console.log("✅ Penawaran with layanan data loaded");
+        penawaran = penawaranWithLayanan;
+      }
+
       res.status(200).json({
         success: true,
         message: "Data penawaran berhasil diambil",
