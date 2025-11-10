@@ -174,6 +174,13 @@ const Import = ({ isOpen, onClose, onImport }) => {
     }
   };
 
+  // Helper function untuk parse number
+  const parseNumber = (value) => {
+    if (value === null || value === undefined || value === '') return 0;
+    const numValue = Number(String(value).replace(/[^\d]/g, ''));
+    return isNaN(numValue) ? 0 : numValue;
+  };
+
   // Fungsi parsing Excel
   const parseExcel = (file) => {
     return new Promise((resolve, reject) => {
@@ -228,29 +235,17 @@ const Import = ({ isOpen, onClose, onImport }) => {
                 rowLower.pemasangan || 
                 row['Pemasangan'] || row['pemasangan'] || '',
               
-              harga_satuan: null
+              harga_satuan: parseNumber(
+                row.harga_satuan || 
+                rowLower.harga_satuan || 
+                row['Harga Satuan'] || 
+                row['harga satuan'] ||
+                row.harga || 
+                rowLower.harga ||
+                row['Harga'] ||
+                0
+              )
             };
-
-            // Parse harga_satuan dari berbagai kemungkinan nama kolom
-            if (row.harga_satuan !== undefined && row.harga_satuan !== null && row.harga_satuan !== '') {
-              const numValue = Number(String(row.harga_satuan).replace(/[^\d]/g, ''));
-              mappedRow.harga_satuan = isNaN(numValue) ? null : numValue;
-            } else if (row.harga !== undefined && row.harga !== null && row.harga !== '') {
-              const numValue = Number(String(row.harga).replace(/[^\d]/g, ''));
-              mappedRow.harga_satuan = isNaN(numValue) ? null : numValue;
-            } else if (rowLower.harga_satuan !== undefined && rowLower.harga_satuan !== null && rowLower.harga_satuan !== '') {
-              const numValue = Number(String(rowLower.harga_satuan).replace(/[^\d]/g, ''));
-              mappedRow.harga_satuan = isNaN(numValue) ? null : numValue;
-            } else if (rowLower.harga !== undefined && rowLower.harga !== null && rowLower.harga !== '') {
-              const numValue = Number(String(rowLower.harga).replace(/[^\d]/g, ''));
-              mappedRow.harga_satuan = isNaN(numValue) ? null : numValue;
-            } else if (row['Harga Satuan'] !== undefined && row['Harga Satuan'] !== null && row['Harga Satuan'] !== '') {
-              const numValue = Number(String(row['Harga Satuan']).replace(/[^\d]/g, ''));
-              mappedRow.harga_satuan = isNaN(numValue) ? null : numValue;
-            } else if (row['harga satuan'] !== undefined && row['harga satuan'] !== null && row['harga satuan'] !== '') {
-              const numValue = Number(String(row['harga satuan']).replace(/[^\d]/g, ''));
-              mappedRow.harga_satuan = isNaN(numValue) ? null : numValue;
-            }
             
             console.log(`✅ Mapped row ${index}:`, mappedRow);
             return mappedRow;
@@ -281,62 +276,97 @@ const Import = ({ isOpen, onClose, onImport }) => {
       
       reader.onload = (e) => {
         try {
-          console.log('🔍 Starting CSV parsing...');
+          console.log('🔍 ========== CSV PARSING START ==========');
           const csvText = e.target.result;
+          console.log('📄 Raw CSV text:', csvText);
+          console.log('📄 CSV text length:', csvText.length);
           
-          // Filter out empty lines
-          const lines = csvText.split('\n')
-            .filter(line => {
-              const trimmed = line.trim();
-              return trimmed !== '' && !trimmed.startsWith('#');
-            });
+          // Remove BOM if present
+          const cleanedText = csvText.replace(/^\uFEFF/, '');
           
-          console.log('📄 CSV lines:', lines.length);
+          const lines = cleanedText.split('\n')
+            .map(line => line.trim())
+            .filter(line => line !== '' && !line.startsWith('#'));
+          
+          console.log('📄 Total CSV lines after filter:', lines.length);
+          console.log('📄 Lines:', lines);
           
           if (lines.length <= 1) {
+            console.error('❌ Not enough lines in CSV (need header + data)');
             resolve([]);
             return;
           }
           
-          // Parse header
-          const headers = lines[0].split(',').map(h => 
-            h.toLowerCase().trim().replace(/\s+/g, '_')
-          );
-          console.log('📝 CSV headers:', headers);
+          // Parse header - keep it simple
+          const headerLine = lines[0];
+          console.log('📝 Raw header line:', headerLine);
+          
+          const headers = headerLine.split(',').map(h => h.trim().toLowerCase());
+          console.log('📝 Parsed headers:', headers);
           
           const results = [];
           
           for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
+            const line = lines[i];
             if (!line) continue;
             
-            // Simple CSV parsing
-            const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-            const row = {};
+            console.log(`\n--- Processing row ${i} ---`);
+            console.log(`Raw line: "${line}"`);
+            
+            const values = line.split(',').map(v => v.trim());
+            console.log(`Values:`, values);
+            console.log(`Values count: ${values.length}, Headers count: ${headers.length}`);
+            
+            // Build row object by matching index
+            const row = {
+              service: '',
+              satuan: '',
+              pemasangan: '',
+              harga_satuan: 0
+            };
             
             headers.forEach((header, index) => {
               const value = values[index] || '';
+              console.log(`  [${index}] "${header}" = "${value}"`);
               
-              if (header.includes('service')) {
+              // Direct matching
+              if (header === 'service') {
                 row.service = value;
-              } else if (header.includes('satuan')) {
+                console.log(`    ✓ service = "${value}"`);
+              } else if (header === 'satuan') {
                 row.satuan = value;
-              } else if (header.includes('pemasangan')) {
+                console.log(`    ✓ satuan = "${value}"`);
+              } else if (header === 'pemasangan') {
                 row.pemasangan = value;
-              } else if (header.includes('harga')) {
-                const numValue = value ? Number(value.replace(/[^\d]/g, '')) : null;
-                row.harga_satuan = isNaN(numValue) ? null : numValue;
+                console.log(`    ✓ pemasangan = "${value}"`);
+              } else if (header === 'harga_satuan' || header === 'harga satuan') {
+                const parsed = parseNumber(value);
+                row.harga_satuan = parsed;
+                console.log(`    ✓ harga_satuan = "${value}" → ${parsed}`);
               }
             });
             
-            console.log(`📝 CSV Row ${i} parsed:`, row);
+            console.log(`Row ${i} final:`, JSON.stringify(row, null, 2));
             
-            if (row.service && row.satuan && row.pemasangan && row.harga_satuan) {
+            const isValid = row.service && row.satuan && row.harga_satuan > 0;
+            console.log(`Validation:`, {
+              hasService: !!row.service,
+              hasSatuan: !!row.satuan,
+              hasHargaSatuan: row.harga_satuan > 0,
+              isValid
+            });
+            
+            if (isValid) {
+              console.log(`✅ Row ${i} is VALID`);
               results.push(row);
+            } else {
+              console.log(`❌ Row ${i} is INVALID`);
             }
           }
           
-          console.log('✅ Final CSV results:', results);
+          console.log('\n========== CSV PARSING COMPLETE ==========');
+          console.log('✅ Total valid results:', results.length);
+          console.log('✅ Results:', JSON.stringify(results, null, 2));
           resolve(results);
           
         } catch (error) {
@@ -357,48 +387,48 @@ const Import = ({ isOpen, onClose, onImport }) => {
   // Fungsi utama untuk parse file
   const parseFileToServices = async (file) => {
     const fileExtension = file.name.split('.').pop().toLowerCase();
-    console.log('📁 Parsing file:', file.name, 'Type:', fileExtension);
+    console.log('\n� ========== PARSE FILE TO SERVICES START ==========');
+    console.log('📁 File name:', file.name);
+    console.log('📁 File type:', file.type);
+    console.log('📁 File extension:', fileExtension);
     
     try {
       let services = [];
       
       if (fileExtension === 'csv') {
+        console.log('📄 Processing as CSV file...');
         services = await parseCSV(file);
+        console.log('📄 CSV parsing returned:', services.length, 'items');
       } else if (['xlsx', 'xls'].includes(fileExtension)) {
+        console.log('📊 Processing as Excel file...');
         services = await parseExcel(file);
+        console.log('📊 Excel parsing returned:', services.length, 'items');
       } else {
         throw new Error('Format file tidak didukung');
       }
       
-      const validServices = services.filter(service => 
-        service.service && 
-        service.satuan && 
-        service.pemasangan &&
-        service.harga_satuan &&
-        service.harga_satuan > 0
-      );
+      console.log('📋 Services before filter:', services);
       
-      console.log('✅ Valid services for import:', validServices);
+      const validServices = services.filter(item => {
+        const isValid = item.service && item.satuan && item.harga_satuan && item.harga_satuan > 0;
+        console.log(`Filter check:`, {
+          service: item.service,
+          satuan: item.satuan,
+          harga_satuan: item.harga_satuan,
+          isValid
+        });
+        return isValid;
+      });
+      
+      console.log('========== PARSE FILE TO SERVICES COMPLETE ==========');
+      console.log('✅ Valid services count:', validServices.length);
+      console.log('✅ Valid services:', validServices);
       return validServices;
       
     } catch (error) {
       console.error('❌ Parse file error:', error);
       throw error;
     }
-  };
-
-  // Fungsi untuk validasi dan normalisasi data
-  const validateAndNormalizeServices = (services) => {
-    return services.map(service => {
-      const validatedService = {
-        service: service.service.trim(),
-        satuan: service.satuan.trim(),
-        pemasangan: service.pemasangan.trim(),
-        harga_satuan: service.harga_satuan && !isNaN(service.harga_satuan) ? parseInt(service.harga_satuan) : null
-      };
-      
-      return validatedService;
-    });
   };
 
   const handleImportClick = async () => {
@@ -409,44 +439,62 @@ const Import = ({ isOpen, onClose, onImport }) => {
       try {
         console.log("🚀 Starting import process...", file);
         
+        // Dapatkan authentication headers DULU sebelum parsing
+        const authHeaders = getAuthHeaders();
+        
+        // Validasi auth headers
+        if (!authHeaders['X-User-ID'] || !authHeaders['X-User-Role'] || !authHeaders['X-User-Email']) {
+          setError('Sesi login tidak ditemukan. Silakan login kembali.');
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log("🔐 Auth headers validated:", authHeaders);
+        
         // Parse file
         const services = await parseFileToServices(file);
         
-        console.log("📊 Services parsed:", services);
+        console.log("📊 Services parsed from parseFileToServices:", services);
+        console.log("📊 Services count:", services ? services.length : 0);
+        console.log("📊 Services data detail:", JSON.stringify(services, null, 2));
         
         if (!services || services.length === 0) {
+          console.error("❌ No services returned from parseFileToServices");
           setError('Tidak ada data yang valid ditemukan dalam file. Pastikan file memiliki data dengan format yang benar.');
           setIsLoading(false);
           return;
         }
 
-        // Validasi dan normalisasi data
-        const validServices = validateAndNormalizeServices(services);
-
-        if (validServices.length === 0) {
-          setError(`
-            Tidak ada data yang valid. Pastikan:
-            1. File memiliki header yang benar
-            2. Kolom service, satuan, pemasangan, dan harga_satuan terisi
-            3. Harga satuan harus angka positif
-            4. Format file sesuai template
-          `);
-          setIsLoading(false);
-          return;
-        }
+        // Validasi dan normalisasi data - services sudah ter-filter di parseFileToServices
+        // Jadi kita hanya perlu normalisasi saja
+        const validServices = services.map(service => ({
+          service: service.service.trim(),
+          satuan: service.satuan.trim(),
+          pemasangan: service.pemasangan ? service.pemasangan.trim() : '',
+          harga_satuan: service.harga_satuan && !isNaN(service.harga_satuan) ? parseInt(service.harga_satuan) : 0
+        }));
 
         console.log("✅ Valid services ready for import:", validServices);
+        console.log("✅ Valid services count:", validServices.length);
+        console.log("📤 Sending request with headers:", {
+          ...authHeaders,
+          'Content-Type': 'application/json'
+        });
 
         const response = await fetch('http://localhost:3000/api/master-aktivasi/import', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...authHeaders
           },
-          body: JSON.stringify({ services: validServices }),
+          body: JSON.stringify({ items: validServices }),
         });
+
+        console.log("📨 Response status:", response.status);
 
         if (!response.ok) {
           const errorText = await response.text();
+          console.error("❌ Server error response:", errorText);
           throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
 
@@ -474,6 +522,56 @@ const Import = ({ isOpen, onClose, onImport }) => {
       }
     } else {
       setError('Harap pilih file terlebih dahulu.');
+    }
+  };
+
+  // Fungsi untuk mendapatkan authentication headers
+  const getAuthHeaders = () => {
+    try {
+      console.log('🔍 Getting auth headers from localStorage...');
+      
+      // Coba berbagai key yang mungkin digunakan untuk menyimpan user data
+      const possibleKeys = ['userData', 'user', 'currentUser', 'authUser'];
+      let user = null;
+      
+      for (const key of possibleKeys) {
+        const data = localStorage.getItem(key);
+        if (data) {
+          console.log(`✅ Found user data in key: ${key}`);
+          try {
+            user = JSON.parse(data);
+            if (user && user.id_user && user.role_user && user.email_user) {
+              console.log('✅ Valid user data found:', {
+                id_user: user.id_user,
+                role_user: user.role_user,
+                email_user: user.email_user
+              });
+              break;
+            }
+          } catch (e) {
+            console.warn(`Failed to parse data from ${key}:`, e);
+          }
+        }
+      }
+      
+      if (!user || !user.id_user || !user.role_user || !user.email_user) {
+        console.error('❌ No valid user data found in localStorage');
+        console.log('📋 Available localStorage keys:', Object.keys(localStorage));
+        return {};
+      }
+      
+      const headers = {
+        'X-User-ID': String(user.id_user),
+        'X-User-Role': String(user.role_user),
+        'X-User-Email': String(user.email_user)
+      };
+      
+      console.log('✅ Auth headers prepared:', headers);
+      return headers;
+      
+    } catch (error) {
+      console.error('❌ Error getting auth headers:', error);
+      return {};
     }
   };
 
