@@ -376,7 +376,7 @@ const Dashboard = () => {
     <div style={{
       minHeight: '100vh',
       background: '#e7f3f5ff',
-      padding: '24px',
+      padding: '60px 48px 10px 48px'
     }}>
       <style>
       {`
@@ -407,35 +407,35 @@ const Dashboard = () => {
     </style>
       
       <div style={{
-        maxWidth: '1400px',
+        maxWidth: '1800px',
         margin: '0 auto'
       }}>
 
         {/* Header Section dengan Fokus Sales */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '24px',
-          marginBottom: '32px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '32px',
+          marginBottom: '48px'
         }}>
           {/* Card Total Penawaran */}
           <div style={{
             background: 'linear-gradient(135deg, #035b71 0%, #00a2b9 100%)',
-            borderRadius: '20px',
-            padding: '28px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'white',
-            boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
+            boxShadow: '0 25px 50px rgba(3, 91, 113, 0.2)',
             transition: 'all 0.3s ease',
             cursor: 'pointer',
             position: 'relative',
             overflow: 'hidden',
             animation: 'glow 3s ease-in-out infinite'
           }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-            e.currentTarget.style.boxShadow = '0 30px 50px rgba(3, 91, 113, 0.3)';
+            e.currentTarget.style.transform = 'translateY(-10px) scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 35px 60px rgba(3, 91, 113, 0.3)';
           }} onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0) scale(1)';
-            e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.2)';
+            e.currentTarget.style.boxShadow = '0 25px 50px rgba(3, 91, 113, 0.2)';
           }}>
             <div style={{
               display: 'flex',
@@ -448,44 +448,44 @@ const Dashboard = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '12px'
+                  gap: '16px',
+                  marginBottom: '16px'
                 }}>
                   <div style={{
-                    padding: '10px',
+                    padding: '14px',
                     background: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: '12px',
+                    borderRadius: '16px',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <Users style={{ width: '24px', height: '24px' }} />
+                    <Users style={{ width: '28px', height: '28px' }} />
                   </div>
                   <span style={{
-                    fontSize: '16px',
+                    fontSize: '18px',
                     fontWeight: '600',
                     opacity: '0.9'
                   }}>Total Penawaran</span>
                 </div>
                 <div style={{
-                  fontSize: '36px',
+                  fontSize: '42px',
                   fontWeight: 'bold',
-                  minHeight: '48px',
+                  minHeight: '56px',
                   display: 'flex',
                   alignItems: 'center'
                 }}>
                   {loadingData ? (
                     <div style={{
-                      width: '60px',
-                      height: '8px',
+                      width: '80px',
+                      height: '10px',
                       background: 'rgba(255, 255, 255, 0.3)',
-                      borderRadius: '4px',
+                      borderRadius: '5px',
                       overflow: 'hidden',
                       position: 'relative'
                     }}>
                       <div style={{
-                        width: '30px',
+                        width: '40px',
                         height: '100%',
                         background: 'rgba(255, 255, 255, 0.7)',
-                        borderRadius: '4px',
+                        borderRadius: '5px',
                         animation: 'loading 1.5s ease-in-out infinite',
                         position: 'absolute'
                       }} />
@@ -496,7 +496,7 @@ const Dashboard = () => {
               <div style={{
                 animation: 'float 3s ease-in-out infinite'
               }}>
-                <BarChart3 style={{ width: '48px', height: '48px', opacity: '0.8' }} />
+                <BarChart3 style={{ width: '56px', height: '56px', opacity: '0.8' }} />
               </div>
             </div>
           </div>
@@ -504,10 +504,10 @@ const Dashboard = () => {
          {/* Card Status Penawaran */}
         <div style={{
           background: 'linear-gradient(135deg, #035b71 0%, #00a2b9 100%)',
-          borderRadius: '20px',
-          padding: '28px',
+          borderRadius: '24px',
+          padding: '36px',
           color: 'white',
-          boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
+          boxShadow: '0 25px 50px rgba(3, 91, 113, 0.2)',
           transition: 'all 0.3s ease',
           cursor: 'pointer',
           position: 'relative',
@@ -524,19 +524,19 @@ const Dashboard = () => {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px'
+                gap: '16px',
+                marginBottom: '16px'
               }}>
                 <div style={{
-                  padding: '10px',
+                  padding: '14px',
                   background: 'rgba(255, 255, 255, 0.2)',
-                  borderRadius: '12px',
+                  borderRadius: '16px',
                   backdropFilter: 'blur(10px)'
                 }}>
-                  <Activity style={{ width: '24px', height: '24px' }} />
+                  <Activity style={{ width: '28px', height: '28px' }} />
                 </div>
                 <span style={{
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontWeight: '600',
                   opacity: '0.9'
                 }}>Status Penawaran</span>
@@ -546,9 +546,9 @@ const Dashboard = () => {
                     setShowStatusModal(true);
                   }}
                   style={{ 
-                    width: '20px', 
-                    height: '20px',
-                    marginLeft: '4px',
+                    width: '24px', 
+                    height: '24px',
+                    marginLeft: '8px',
                     opacity: '0.8',
                     cursor: 'pointer',
                     transition: 'all 0.2s'
@@ -556,26 +556,26 @@ const Dashboard = () => {
                 />
               </div>
               <div style={{
-                fontSize: '36px',
+                fontSize: '42px',
                 fontWeight: 'bold',
-                minHeight: '48px',
+                minHeight: '56px',
                 display: 'flex',
                 alignItems: 'center'
               }}>
                 {loadingData ? (
                   <div style={{
-                    width: '60px',
-                    height: '8px',
+                    width: '80px',
+                    height: '10px',
                     background: 'rgba(255, 255, 255, 0.3)',
-                    borderRadius: '4px',
+                    borderRadius: '5px',
                     overflow: 'hidden',
                     position: 'relative'
                   }}>
                     <div style={{
-                      width: '30px',
+                      width: '40px',
                       height: '100%',
                       background: 'rgba(255, 255, 255, 0.7)',
-                      borderRadius: '4px',
+                      borderRadius: '5px',
                       animation: 'loading 1.5s ease-in-out infinite',
                       position: 'absolute'
                     }} />
@@ -587,7 +587,7 @@ const Dashboard = () => {
               animation: 'float 3s ease-in-out infinite',
               animationDelay: '0.5s'
             }}>
-              <TrendingUp style={{ width: '48px', height: '48px', opacity: '0.8' }} />
+              <TrendingUp style={{ width: '56px', height: '56px', opacity: '0.8' }} />
             </div>
           </div>
         </div>
@@ -595,20 +595,20 @@ const Dashboard = () => {
           {/* Card Total Revenue */}
           <div style={{
             background: 'linear-gradient(135deg, #035b71 0%, #00a2b9 100%)',
-            borderRadius: '20px',
-            padding: '28px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'white',
-            boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
+            boxShadow: '0 25px 50px rgba(3, 91, 113, 0.2)',
             transition: 'all 0.3s ease',
             cursor: 'pointer',
             position: 'relative',
             overflow: 'hidden'
           }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-            e.currentTarget.style.boxShadow = '0 30px 50px rgba(3, 91, 113, 0.3)';
+            e.currentTarget.style.transform = 'translateY(-10px) scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 35px 60px rgba(3, 91, 113, 0.3)';
           }} onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0) scale(1)';
-            e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.2)';
+            e.currentTarget.style.boxShadow = '0 25px 50px rgba(3, 91, 113, 0.2)';
           }}>
             <div style={{
               display: 'flex',
@@ -621,27 +621,27 @@ const Dashboard = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '12px'
+                  gap: '16px',
+                  marginBottom: '16px'
                 }}>
                   <div style={{
-                    padding: '10px',
+                    padding: '14px',
                     background: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: '12px',
+                    borderRadius: '16px',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <DollarSign style={{ width: '24px', height: '24px' }} />
+                    <DollarSign style={{ width: '28px', height: '28px' }} />
                   </div>
                   <span style={{
-                    fontSize: '16px',
+                    fontSize: '18px',
                     fontWeight: '600',
                     opacity: '0.9'
                   }}>Total Revenue</span>
                 </div>
                 <div style={{
-                  fontSize: '28px',
+                  fontSize: '32px',
                   fontWeight: 'bold',
-                  minHeight: '48px',
+                  minHeight: '56px',
                   display: 'flex',
                   alignItems: 'center'
                 }}>
@@ -652,7 +652,7 @@ const Dashboard = () => {
                 animation: 'float 3s ease-in-out infinite',
                 animationDelay: '1s'
               }}>
-                <DollarSign style={{ width: '48px', height: '48px', opacity: '0.8' }} />
+                <DollarSign style={{ width: '56px', height: '56px', opacity: '0.8' }} />
               </div>
             </div>
           </div>
@@ -662,70 +662,69 @@ const Dashboard = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1fr',
-          gap: '32px',
-          marginBottom: '32px'
+          gap: '48px',
+          marginBottom: '48px'
         }}>
           
           {/* LEFT COLUMN */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '32px'
+            gap: '40px'
           }}>
             
             {/* Performa Sales */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '24px',
-              padding: '32px',
-              boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
+              background: 'white',
+              borderRadius: '28px',
+              padding: '40px',
+              boxShadow: '0 25px 50px rgba(3, 91, 113, 0.1)',
+              border: '1px solid rgba(3, 91, 113, 0.1)',
               transition: 'all 0.3s ease'
             }} onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 30px 60px rgba(3, 91, 113, 0.15)';
+              e.currentTarget.style.transform = 'translateY(-6px)';
+              e.currentTarget.style.boxShadow = '0 35px 70px rgba(3, 91, 113, 0.15)';
             }} onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.1)';
+              e.currentTarget.style.boxShadow = '0 25px 50px rgba(3, 91, 113, 0.1)';
             }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: '32px'
+                marginBottom: '40px'
               }}>
                 <h3 style={{
-                  fontSize: '20px',
+                  fontSize: '24px',
                   fontWeight: '700',
                   color: colors.primary,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '16px'
+                  gap: '20px'
                 }}>
                   <div style={{
-                    padding: '10px 10px 6px 10px',
+                    padding: '14px 14px 10px 14px',
                     background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                    borderRadius: '12px',
+                    borderRadius: '16px',
                     color: 'white'
                   }}>
-                    <Target size={20} />
+                    <Target size={24} />
                   </div>
                   Performa Sales
                 </h3>
                 <div style={{
-                  padding: '8px 16px',
+                  padding: '12px 20px',
                   background: 'rgba(3, 91, 113, 0.1)',
-                  borderRadius: '12px',
+                  borderRadius: '16px',
                   border: `1px solid ${colors.primary}30`,
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   color: colors.primary
                 }}>
                   Real-time
                 </div>
               </div>
-              <div style={{ height: '380px' }}>
+              <div style={{ height: '480px' }}>
                 {loadingRevenue ? (
                   <div style={{
                     display: 'flex',
@@ -733,20 +732,20 @@ const Dashboard = () => {
                     alignItems: 'center',
                     height: '100%',
                     flexDirection: 'column',
-                    gap: '16px'
+                    gap: '20px'
                   }}>
                     <div style={{
-                      width: '50px',
-                      height: '50px',
-                      border: `4px solid ${colors.primary}20`,
-                      borderTop: `4px solid ${colors.primary}`,
+                      width: '60px',
+                      height: '60px',
+                      border: `5px solid ${colors.primary}20`,
+                      borderTop: `5px solid ${colors.primary}`,
                       borderRadius: '50%',
                       animation: 'spin 1s linear infinite'
                     }} />
                     <p style={{
                       color: colors.primary,
                       fontWeight: '600',
-                      fontSize: '16px'
+                      fontSize: '18px'
                     }}>
                       Memuat data performa...
                     </p>
@@ -755,7 +754,7 @@ const Dashboard = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart 
                       data={totalRevenueData}
-                      margin={{ top: 20, right: 30, left: 40, bottom: 60 }}
+                      margin={{ top: 25, right: 35, left: 45, bottom: 70 }}
                     >
                       <CartesianGrid 
                         strokeDasharray="3 3" 
@@ -767,25 +766,26 @@ const Dashboard = () => {
                         dataKey="month" 
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 12, fill: colors.primary, fontWeight: '600' }}
+                        tick={{ fontSize: 14, fill: colors.primary, fontWeight: '600' }}
                         angle={-45}
                         textAnchor="end"
-                        height={60}
+                        height={70}
                       />
                       <YAxis 
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 12, fill: colors.primary, fontWeight: '600' }}
+                        tick={{ fontSize: 14, fill: colors.primary, fontWeight: '600' }}
                         tickFormatter={formatNumber}
-                        width={100}
+                        width={120}
                       />
                       <Tooltip 
                         contentStyle={{
                           backgroundColor: 'rgba(255, 255, 255, 0.95)',
                           border: `2px solid ${colors.primary}`,
-                          borderRadius: '12px',
-                          boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
-                          backdropFilter: 'blur(10px)'
+                          borderRadius: '16px',
+                          boxShadow: '0 25px 50px rgba(3, 91, 113, 0.2)',
+                          backdropFilter: 'blur(10px)',
+                          fontSize: '14px'
                         }}
                         formatter={(value, name, props) => {
                           const formattedValue = `Rp ${Math.round(value).toLocaleString('id-ID')}`;
@@ -801,33 +801,33 @@ const Dashboard = () => {
                       />
                       <Legend 
                         wrapperStyle={{ 
-                          paddingTop: '20px', 
-                          fontSize: '13px',
+                          paddingTop: '25px', 
+                          fontSize: '15px',
                           fontWeight: '600'
                         }}
                         iconType="rect"
-                        iconSize={12}
+                        iconSize={14}
                       />
                       <Bar 
                         dataKey="pencapaian" 
                         fill={colors.warning}
                         name="Pencapaian"
-                        radius={[8, 8, 0, 0]}
-                        barSize={24}
+                        radius={[10, 10, 0, 0]}
+                        barSize={28}
                       />
                       <Bar 
                         dataKey="totalProfit" 
                         fill={colors.primary}
                         name="Revenue"
-                        radius={[8, 8, 0, 0]}
-                        barSize={24}
+                        radius={[10, 10, 0, 0]}
+                        barSize={28}
                       />
                       <Line 
                         type="monotone" 
                         dataKey="target" 
                         stroke={colors.secondary}
-                        strokeWidth={3}
-                        dot={{ fill: colors.secondary, strokeWidth: 2, r: 5 }}
+                        strokeWidth={4}
+                        dot={{ fill: colors.secondary, strokeWidth: 2, r: 6 }}
                         strokeDasharray="5 5"
                         name="Target"
                       />
@@ -841,39 +841,38 @@ const Dashboard = () => {
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: '24px'
+              gap: '32px'
             }}>
               
               {/* Tren Revenue */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '20px',
-                padding: '24px',
-                boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                background: 'white',
+                borderRadius: '24px',
+                padding: '32px',
+                boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
+                border: '1px solid rgba(3, 91, 113, 0.1)',
                 transition: 'all 0.3s ease'
               }}>
                 <h4 style={{
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontWeight: '600',
                   color: colors.primary,
-                  marginBottom: '20px',
+                  marginBottom: '24px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px'
+                  gap: '12px'
                 }}>
                   <div style={{
-                    padding: '8px 8px 6px 6px',
+                    padding: '12px 12px 10px 10px',
                     background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     color: 'white'
                   }}>
-                    <TrendingUp size={18} />
+                    <TrendingUp size={20} />
                   </div>
                   Tren Revenue
                 </h4>
-                <div style={{ height: '200px' }}>
+                <div style={{ height: '250px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={totalRevenueData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(3, 91, 113, 0.1)" />
@@ -881,12 +880,12 @@ const Dashboard = () => {
                         dataKey="month" 
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 11, fill: colors.primary }}
+                        tick={{ fontSize: 12, fill: colors.primary }}
                       />
                       <YAxis 
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 11, fill: colors.primary }}
+                        tick={{ fontSize: 12, fill: colors.primary }}
                         tickFormatter={(value) => {
                           if (value >= 1000000000) return `${(value/1000000000).toFixed(1)}B`;
                           if (value >= 1000000) return `${(value/1000000).toFixed(1)}M`;
@@ -899,16 +898,17 @@ const Dashboard = () => {
                         contentStyle={{
                           backgroundColor: 'rgba(255, 255, 255, 0.95)',
                           border: `1px solid ${colors.primary}`,
-                          borderRadius: '8px'
+                          borderRadius: '12px',
+                          fontSize: '13px'
                         }}
                       />
                       <Line 
                         type="monotone" 
                         dataKey="totalProfit" 
                         stroke={colors.primary} 
-                        strokeWidth={3}
-                        dot={{ fill: colors.primary, strokeWidth: 2, r: 3 }}
-                        activeDot={{ r: 5, fill: colors.secondary }}
+                        strokeWidth={4}
+                        dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, fill: colors.secondary }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -917,41 +917,41 @@ const Dashboard = () => {
 
               {/* Tren Margin */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '20px',
-                padding: '24px',
-                boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                background: 'white',
+                borderRadius: '24px',
+                padding: '32px',
+                boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
+                border: '1px solid rgba(3, 91, 113, 0.1)',
                 transition: 'all 0.3s ease'
               }}>
                 <h4 style={{
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontWeight: '600',
                   color: colors.primary,
-                  marginBottom: '20px',
+                  marginBottom: '24px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px'
+                  gap: '12px'
                 }}>
                   <div style={{
-                    padding: '8px 8px 6px 6px',
+                    padding: '12px 12px 10px 10px',
                     background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     color: 'white'
                   }}>
-                    <Activity size={18} />
+                    <Activity size={20} />
                   </div>
                   Tren Margin
                 </h4>
-                <div style={{ height: '200px' }}>
+                <div style={{ height: '250px' }}>
                   {loadingMarginData ? (
                     <div style={{
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
                       height: '100%',
-                      color: colors.primary
+                      color: colors.primary,
+                      fontSize: '16px'
                     }}>
                       Loading...
                     </div>
@@ -963,12 +963,12 @@ const Dashboard = () => {
                           dataKey="month" 
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 11, fill: colors.primary }}
+                          tick={{ fontSize: 12, fill: colors.primary }}
                         />
                         <YAxis 
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 11, fill: colors.primary }}
+                          tick={{ fontSize: 12, fill: colors.primary }}
                           tickFormatter={(value) => `${value}%`}
                         />
                         <Tooltip 
@@ -976,15 +976,16 @@ const Dashboard = () => {
                           contentStyle={{
                             backgroundColor: 'rgba(255, 255, 255, 0.95)',
                             border: `1px solid ${colors.primary}`,
-                            borderRadius: '8px'
+                            borderRadius: '12px',
+                            fontSize: '13px'
                           }}
                         />
                         <Line 
                           type="monotone" 
                           dataKey="margin" 
                           stroke={colors.accent1} 
-                          strokeWidth={3}
-                          dot={{ fill: colors.accent1, strokeWidth: 2, r: 3 }}
+                          strokeWidth={4}
+                          dot={{ fill: colors.accent1, strokeWidth: 2, r: 4 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
@@ -998,46 +999,46 @@ const Dashboard = () => {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '32px'
+            gap: '40px'
           }}>
             
             {/* Pencapaian Target */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '20px',
-              padding: '24px',
-              boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
+              background: 'white',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
+              border: '1px solid rgba(3, 91, 113, 0.1)',
               transition: 'all 0.3s ease'
             }}>
               <h4 style={{
-                fontSize: '16px',
+                fontSize: '18px',
                 fontWeight: '600',
                 color: colors.primary,
-                marginBottom: '20px',
+                marginBottom: '24px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '12px'
               }}>
                 <div style={{
-                    padding: '10px 10px 6px 10px',
+                    padding: '14px 14px 10px 14px',
                     background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     color: 'white'
                 }}>
                   <Target size={20} />
                 </div>
                 Progress Target
               </h4>
-              <div style={{ height: '180px', marginBottom: '20px' }}>
+              <div style={{ height: '220px', marginBottom: '24px' }}>
                 {loadingRegionalRevenue ? (
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     height: '100%',
-                    color: colors.primary
+                    color: colors.primary,
+                    fontSize: '16px'
                   }}>
                     Loading...
                   </div>
@@ -1048,8 +1049,8 @@ const Dashboard = () => {
                         data={pencapaianChartData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
+                        innerRadius={60}
+                        outerRadius={100}
                         paddingAngle={2}
                         dataKey="value"
                       >
@@ -1062,21 +1063,21 @@ const Dashboard = () => {
                   </ResponsiveContainer>
                 )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {pencapaianChartData.map((item, index) => (
                   <div key={index} style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    fontSize: '14px',
-                    padding: '8px 12px',
+                    fontSize: '15px',
+                    padding: '12px 16px',
                     background: 'rgba(3, 91, 113, 0.05)',
-                    borderRadius: '8px'
+                    borderRadius: '12px'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
-                        width: '12px',
-                        height: '12px',
+                        width: '14px',
+                        height: '14px',
                         borderRadius: '50%',
                         backgroundColor: item.color
                       }} />
@@ -1085,10 +1086,10 @@ const Dashboard = () => {
                       </span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 'bold', color: colors.primary }}>
+                      <div style={{ fontWeight: 'bold', color: colors.primary, fontSize: '16px' }}>
                         {item.value}%
                       </div>
-                      <div style={{ fontSize: '12px', color: colors.primary, opacity: '0.7' }}>
+                      <div style={{ fontSize: '13px', color: colors.primary, opacity: '0.7' }}>
                         Rp {item.amount?.toLocaleString('id-ID')}
                       </div>
                     </div>
@@ -1099,42 +1100,41 @@ const Dashboard = () => {
 
             {/* Status Penawaran */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '20px',
-              padding: '24px',
-              boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
+              background: 'white',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
+              border: '1px solid rgba(3, 91, 113, 0.1)',
               transition: 'all 0.3s ease'
             }}>
               <h4 style={{
-                fontSize: '16px',
+                fontSize: '18px',
                 fontWeight: '600',
                 color: colors.primary,
-                marginBottom: '20px',
+                marginBottom: '24px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '12px'
               }}>
                 <div style={{
-                    padding: '8px 8px 6px 6px',
+                    padding: '12px 12px 10px 10px',
                     background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     color: 'white'
                 }}>                
-                  <PieChartIcon size={18} />
+                  <PieChartIcon size={20} />
                 </div>
                 Status Penawaran
               </h4>
-              <div style={{ height: '180px', marginBottom: '20px' }}>
+              <div style={{ height: '220px', marginBottom: '24px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={statusPenawaranData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
+                      innerRadius={60}
+                      outerRadius={100}
                       paddingAngle={2}
                       dataKey="value"
                     >
@@ -1146,27 +1146,27 @@ const Dashboard = () => {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {statusPenawaranData.map((item, index) => (
                   <div key={index} style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    fontSize: '14px',
-                    padding: '8px 12px',
+                    fontSize: '15px',
+                    padding: '12px 16px',
                     background: 'rgba(3, 91, 113, 0.05)',
-                    borderRadius: '8px'
+                    borderRadius: '12px'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
-                        width: '12px',
-                        height: '12px',
+                        width: '14px',
+                        height: '14px',
                         borderRadius: '50%',
                         backgroundColor: item.color
                       }} />
                       <span style={{ color: colors.primary }}>{item.name}</span>
                     </div>
-                    <span style={{ fontWeight: '600', color: colors.primary }}>
+                    <span style={{ fontWeight: '600', color: colors.primary, fontSize: '16px' }}>
                       {item.value}
                     </span>
                   </div>
@@ -1195,7 +1195,7 @@ const Dashboard = () => {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: '16px'
+            padding: '20px'
           }}
           onClick={() => setShowStatusModal(false)}
         >
@@ -1213,16 +1213,15 @@ const Dashboard = () => {
               ease: [0.4, 0, 0.2, 1]
             }}
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 250, 255, 0.98) 100%)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '20px',
-              padding: '20px',
-              maxWidth: '400px',
+              background: 'white',
+              borderRadius: '24px',
+              padding: '28px',
+              maxWidth: '480px',
               width: '100%',
-              maxHeight: '70vh',
+              maxHeight: '80vh',
               overflow: 'auto',
-              boxShadow: '0 32px 64px rgba(3, 91, 113, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.4)',
+              boxShadow: '0 40px 80px rgba(3, 91, 113, 0.3)',
+              border: '1px solid rgba(3, 91, 113, 0.2)',
               position: 'relative'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -1233,10 +1232,10 @@ const Dashboard = () => {
               position: 'absolute',
               top: 0,
               right: 0,
-              width: '60px',
-              height: '60px',
+              width: '80px',
+              height: '80px',
               background: `linear-gradient(135deg, ${colors.primary}20 0%, ${colors.secondary}20 100%)`,
-              borderRadius: '0 20px 0 50px',
+              borderRadius: '0 24px 0 60px',
               zIndex: 0
             }} />
             
@@ -1244,10 +1243,10 @@ const Dashboard = () => {
               position: 'absolute',
               bottom: 0,
               left: 0,
-              width: '50px',
-              height: '50px',
+              width: '60px',
+              height: '60px',
               background: `linear-gradient(135deg, ${colors.tertiary}15 0%, ${colors.accent1}15 100%)`,
-              borderRadius: '0 35px 0 20px',
+              borderRadius: '0 40px 0 24px',
               zIndex: 0
             }} />
 
@@ -1263,30 +1262,30 @@ const Dashboard = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: '20px',
-                  paddingBottom: '14px',
+                  marginBottom: '24px',
+                  paddingBottom: '18px',
                   borderBottom: `2px solid ${colors.primary}15`
                 }}
               >
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '14px'
                 }}>
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     style={{
-                      padding: '8px 10px 6px 10px',
+                      padding: '12px 14px 10px 14px',
                       background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-                      borderRadius: '10px',
-                      boxShadow: '0 8px 20px rgba(3, 91, 113, 0.3)'
+                      borderRadius: '14px',
+                      boxShadow: '0 12px 24px rgba(3, 91, 113, 0.3)'
                     }}
                   >
-                    <Activity style={{ width: '18px', height: '18px', color: 'white' }} />
+                    <Activity style={{ width: '22px', height: '22px', color: 'white' }} />
                   </motion.div>
                   <div>
                     <h2 style={{
-                      fontSize: '18px',
+                      fontSize: '22px',
                       fontWeight: '800',
                       background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
                       backgroundClip: 'text',
@@ -1297,10 +1296,10 @@ const Dashboard = () => {
                       Status Penawaran
                     </h2>
                     <p style={{
-                      fontSize: '12px',
+                      fontSize: '14px',
                       color: colors.primary,
                       opacity: '0.7',
-                      margin: '2px 0 0 0',
+                      margin: '4px 0 0 0',
                       fontWeight: '500'
                     }}>
                       Ringkasan lengkap status penawaran
@@ -1312,8 +1311,8 @@ const Dashboard = () => {
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowStatusModal(false)}
                   style={{
-                    padding: '6px',
-                    borderRadius: '8px',
+                    padding: '8px',
+                    borderRadius: '12px',
                     border: 'none',
                     background: 'rgba(3, 91, 113, 0.1)',
                     cursor: 'pointer',
@@ -1322,7 +1321,7 @@ const Dashboard = () => {
                     justifyContent: 'center'
                   }}
                 >
-                  <X style={{ width: '16px', height: '16px', color: colors.primary }} />
+                  <X style={{ width: '20px', height: '20px', color: colors.primary }} />
                 </motion.button>
               </motion.div>
 
@@ -1334,8 +1333,8 @@ const Dashboard = () => {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr',
-                  gap: '14px',
-                  marginBottom: '18px'
+                  gap: '18px',
+                  marginBottom: '24px'
                 }}
               >
                 {statusData.map((item, index) => {
@@ -1370,12 +1369,12 @@ const Dashboard = () => {
                       initial={{ x: -50, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.4 + (index * 0.1), duration: 0.5 }}
-                      whileHover={{ y: -3, scale: 1.02 }}
+                      whileHover={{ y: -4, scale: 1.02 }}
                       style={{
                         background: cardColor.gradient,
                         backdropFilter: 'blur(10px)',
-                        borderRadius: '14px',
-                        padding: '16px',
+                        borderRadius: '18px',
+                        padding: '20px',
                         border: `2px solid ${cardColor.border}`,
                         position: 'relative',
                         overflow: 'hidden',
@@ -1396,8 +1395,8 @@ const Dashboard = () => {
                           position: 'absolute',
                           top: '-30%',
                           right: '-30%',
-                          width: '60px',
-                          height: '60px',
+                          width: '80px',
+                          height: '80px',
                           background: `radial-gradient(circle, ${cardColor.iconBg}15 0%, transparent 70%)`,
                           borderRadius: '50%',
                         }}
@@ -1413,35 +1412,35 @@ const Dashboard = () => {
                         <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '12px'
+                          gap: '16px'
                         }}>
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: 5 }}
                             style={{
-                              padding: '14px 10px 6px 10px',
+                              padding: '16px 14px 12px 14px',
                               background: 'rgba(255, 255, 255, 0.9)',
-                              borderRadius: '10px',
-                              boxShadow: '0 6px 16px rgba(3, 91, 113, 0.1)',
+                              borderRadius: '14px',
+                              boxShadow: '0 8px 20px rgba(3, 91, 113, 0.1)',
                               border: `1px solid ${cardColor.iconBg}90`,
                             }}
                           >
                             <IconComponent style={{ 
-                              width: '18px',
-                              height: '18px',
+                              width: '22px',
+                              height: '22px',
                               color: cardColor.iconBg 
                             }} />
                           </motion.div>
                           <div>
                             <h3 style={{
-                              fontSize: '14px',
+                              fontSize: '16px',
                               fontWeight: '700',
                               color: colors.primary,
-                              margin: '0 0 3px 0'
+                              margin: '0 0 4px 0'
                             }}>
                               {item.status}
                             </h3>
                             <p style={{
-                              fontSize: '12px',
+                              fontSize: '14px',
                               color: colors.primary,
                               opacity: '0.6',
                               margin: 0,
@@ -1455,14 +1454,14 @@ const Dashboard = () => {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'flex-end',
-                          gap: '2px'
+                          gap: '4px'
                         }}>
                           <motion.span
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.6 + (index * 0.1), type: "spring", stiffness: 300 }}
                             style={{
-                              fontSize: '22px',
+                              fontSize: '26px',
                               fontWeight: '800',
                               color: cardColor.iconBg,
                               lineHeight: '1'
@@ -1485,8 +1484,8 @@ const Dashboard = () => {
                 style={{
                   background: `linear-gradient(135deg, ${colors.primary}05 0%, ${colors.secondary}05 100%)`,
                   backdropFilter: 'blur(10px)',
-                  borderRadius: '14px',
-                  padding: '16px',
+                  borderRadius: '18px',
+                  padding: '20px',
                   border: `2px solid ${colors.primary}25`,
                   textAlign: 'center'
                 }}
@@ -1495,10 +1494,10 @@ const Dashboard = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: '6px'
+                  marginBottom: '8px'
                 }}>
                   <span style={{
-                    fontSize: '13px',
+                    fontSize: '15px',
                     fontWeight: '600',
                     color: colors.primary,
                     opacity: '0.8'
@@ -1510,7 +1509,7 @@ const Dashboard = () => {
                     animate={{ scale: 1 }}
                     transition={{ delay: 0.9, type: "spring", stiffness: 300 }}
                     style={{
-                      fontSize: '18px',
+                      fontSize: '22px',
                       fontWeight: '800',
                       background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
                       backgroundClip: 'text',
@@ -1525,14 +1524,14 @@ const Dashboard = () => {
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px'
+                          gap: '6px'
                         }}
                       >
                         <div style={{
-                          width: '12px',
-                          height: '12px',
-                          border: `2px solid ${colors.primary}30`,
-                          borderTop: `2px solid ${colors.primary}`,
+                          width: '16px',
+                          height: '16px',
+                          border: `3px solid ${colors.primary}30`,
+                          borderTop: `3px solid ${colors.primary}`,
                           borderRadius: '50%',
                         }} />
                         Loading...
@@ -1552,8 +1551,8 @@ const Dashboard = () => {
                 style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
-                  gap: '16px',
-                  marginTop: '32px'
+                  gap: '20px',
+                  marginTop: '36px'
                 }}
               >
                 <motion.button
@@ -1564,12 +1563,12 @@ const Dashboard = () => {
                     background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
                     color: '#ffffff',
                     border: 'none',
-                    padding: '16px 32px',
-                    borderRadius: '12px',
+                    padding: '18px 36px',
+                    borderRadius: '14px',
                     fontWeight: '600',
-                    fontSize: '14px',
+                    fontSize: '15px',
                     cursor: 'pointer',
-                    boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                    boxShadow: `0 6px 20px rgba(3, 91, 113, 0.3)`,
                     letterSpacing: '0.02em'
                   }}
                 >
@@ -1580,6 +1579,16 @@ const Dashboard = () => {
           </motion.div>
         </motion.div>
       )}
+      <div style={{
+        textAlign: 'center',
+        padding: '30px 20px',
+        color: colors.primary,
+        fontSize: '14px',
+        opacity: 0.7,
+        marginTop: '40px'
+      }}>
+        © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System 
+      </div>
     </div>
   );
 };
