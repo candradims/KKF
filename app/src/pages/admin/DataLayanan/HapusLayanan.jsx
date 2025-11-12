@@ -99,28 +99,6 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
 
   return (
     <>
-      <style>
-        {`
-          .custom-scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(0, 191, 202, 0.3) transparent;
-          }
-          .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0, 191, 202, 0.1);
-            border-radius: 10px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(0, 191, 202, 0.3);
-            border-radius: 10px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 191, 202, 0.5);
-          }
-        `}
-      </style>
       <AnimatePresence>
         {isOpen && !showSuccessModal && (
           <motion.div
@@ -209,376 +187,376 @@ const HapusLayanan = ({ isOpen, onClose, onDelete, initialData }) => {
                 <X size={20} color={colors.primary} />
               </motion.button>
 
-              {/* Scrollable Container */}
-              <div className="custom-scrollbar" style={{
+              {/* Main Content Container */}
+              <div style={{
                 flex: 1,
                 overflow: 'auto',
                 padding: '20px'
               }}>
 
-              {/* Header */}
-              <motion.div 
-                initial={{ y: -30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                style={{
-                  padding: '40px 32px 20px',
-                  textAlign: 'center'
-                }}
-              >
-                <div style={{
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 20px',
-                  boxShadow: `0 10px 30px rgba(239, 68, 68, 0.3)`
-                }}>
-                  <AlertTriangle size={32} color="white" />
-                </div>
-                <h2 style={{
-                  fontSize: '32px',
-                  fontWeight: '700',
-                  background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  margin: 0,
-                  letterSpacing: '-0.02em'
-                }}>
-                  Hapus Layanan
-                </h2>
-                <p style={{
-                  color: colors.danger,
-                  fontSize: '16px',
-                  margin: '8px 0 0',
-                  opacity: 0.8,
-                  fontWeight: '600'
-                }}>
-                  Tindakan ini tidak dapat dibatalkan
-                </p>
-              </motion.div>
-
-              {/* Warning Message */}
-              <motion.div 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                style={{
-                  background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.1) 100%)',
-                  borderRadius: '16px',
-                  padding: '20px',
-                  margin: '0 32px 24px',
-                  border: `1px solid rgba(239, 68, 68, 0.3)`,
-                  textAlign: 'center'
-                }}
-              >
-                <p style={{
-                  color: colors.danger,
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  margin: 0,
-                  lineHeight: '1.5'
-                }}>
-                  Apakah Anda yakin ingin menghapus data layanan berikut?
-                </p>
-              </motion.div>
-
-              {/* Form */}
-              <motion.div 
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                style={{
-                  background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
-                  borderRadius: '20px',
-                  padding: '40px',
-                  margin: '0 32px 32px',
-                  border: `1px solid rgba(0, 192, 202, 0.68)`,
-                  position: 'relative'
-                }}
-              >
-                {/* Nama Layanan Field */}
+                {/* Header */}
                 <motion.div 
+                  initial={{ y: -30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
                   style={{
-                    marginBottom: '24px',
+                    padding: '40px 32px 20px',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 20px',
+                    boxShadow: `0 10px 30px rgba(239, 68, 68, 0.3)`
+                  }}>
+                    <AlertTriangle size={32} color="white" />
+                  </div>
+                  <h2 style={{
+                    fontSize: '32px',
+                    fontWeight: '700',
+                    background: `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    margin: 0,
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Hapus Layanan
+                  </h2>
+                  <p style={{
+                    color: colors.danger,
+                    fontSize: '16px',
+                    margin: '8px 0 0',
+                    opacity: 0.8,
+                    fontWeight: '600'
+                  }}>
+                    Tindakan ini tidak dapat dibatalkan
+                  </p>
+                </motion.div>
+
+                {/* Warning Message */}
+                <motion.div 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.1) 100%)',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    margin: '0 32px 24px',
+                    border: `1px solid rgba(239, 68, 68, 0.3)`,
+                    textAlign: 'center'
+                  }}
+                >
+                  <p style={{
+                    color: colors.danger,
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    margin: 0,
+                    lineHeight: '1.5'
+                  }}>
+                    Apakah Anda yakin ingin menghapus data layanan berikut?
+                  </p>
+                </motion.div>
+
+                {/* Form */}
+                <motion.div 
+                  initial={{ y: 30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(0, 191, 202, 0.03) 0%, rgba(3, 91, 113, 0.05) 100%)',
+                    borderRadius: '20px',
+                    padding: '40px',
+                    margin: '0 32px 32px',
+                    border: `1px solid rgba(0, 192, 202, 0.68)`,
                     position: 'relative'
                   }}
                 >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Nama Layanan
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <Package size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="namaLayanan"
-                      value={formData.namaLayanan || '-'}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Jenis Layanan Field */}
-                <motion.div 
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Jenis Layanan
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <Tag size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="jenisLayanan"
-                      value={formData.jenisLayanan || '-'}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* HJT Field */}
-                <motion.div 
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    HJT
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <MapPin size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="hjt"
-                      value={formData.hjt || '-'}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Satuan Field */}
-                <motion.div 
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Satuan
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <Cpu size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="satuan"
-                      value={formData.satuan || '-'}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Backbone Field */}
-                <motion.div 
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Backbone
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <Server size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="backbone"
-                      value={formData.backbone || '-'}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Port Field */}
-                <motion.div 
-                  style={{
-                    marginBottom: '24px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Port
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <Cpu size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="port"
-                      value={formData.port || '-'}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Tarif Field */}
-                <motion.div 
-                  style={{
-                    marginBottom: '32px',
-                    position: 'relative'
-                  }}
-                >
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: colors.primary,
-                    marginBottom: '8px',
-                    letterSpacing: '0.02em'
-                  }}>
-                    Tarif
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <div style={iconContainerStyle}>
-                      <DollarSign size={18} />
-                    </div>
-                    <input
-                      type="text"
-                      name="tarif"
-                      value={formatCurrency(formData.tarif)}
-                      readOnly
-                      style={inputStyle}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Action Buttons */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '16px',
-                  marginTop: '32px',
-                  paddingTop: '20px',
-                  borderTop: '1px solid rgba(0, 192, 202, 0.1)'
-                }}>
-                  <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="button"
-                    onClick={onClose}
+                  {/* Nama Layanan Field */}
+                  <motion.div 
                     style={{
-                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '16px 32px',
-                      borderRadius: '12px',
-                      fontWeight: '600',
+                      marginBottom: '24px',
+                      position: 'relative'
+                    }}
+                  >
+                    <label style={{
+                      display: 'block',
                       fontSize: '14px',
-                      cursor: 'pointer',
-                      boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
-                      transition: 'all 0.3s ease',
+                      fontWeight: '600',
+                      color: colors.primary,
+                      marginBottom: '8px',
                       letterSpacing: '0.02em'
-                    }}
-                  >
-                    Batal
-                  </motion.button>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="button"
-                    onClick={handleDeleteConfirm}
-                    disabled={isDeleting}
+                    }}>
+                      Nama Layanan
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconContainerStyle}>
+                        <Package size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="namaLayanan"
+                        value={formData.namaLayanan || '-'}
+                        readOnly
+                        style={inputStyle}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Jenis Layanan Field */}
+                  <motion.div 
                     style={{
-                      background: isDeleting 
-                        ? `linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)`
-                        : `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '16px 40px',
-                      borderRadius: '12px',
-                      fontWeight: '600',
-                      fontSize: '14px',
-                      cursor: isDeleting ? 'not-allowed' : 'pointer',
-                      boxShadow: isDeleting 
-                        ? 'none' 
-                        : `0 4px 20px rgba(239, 68, 68, 0.4)`,
-                      transition: 'all 0.3s ease',
-                      letterSpacing: '0.02em',
-                      opacity: isDeleting ? 0.8 : 1
+                      marginBottom: '24px',
+                      position: 'relative'
                     }}
                   >
-                    {isDeleting ? 'Menghapus...' : 'Hapus Data'}
-                  </motion.button>
-                </div>
-              </motion.div>
-              </div> {/* End of scrollable container */}
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: colors.primary,
+                      marginBottom: '8px',
+                      letterSpacing: '0.02em'
+                    }}>
+                      Jenis Layanan
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconContainerStyle}>
+                        <Tag size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="jenisLayanan"
+                        value={formData.jenisLayanan || '-'}
+                        readOnly
+                        style={inputStyle}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* HJT Field */}
+                  <motion.div 
+                    style={{
+                      marginBottom: '24px',
+                      position: 'relative'
+                    }}
+                  >
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: colors.primary,
+                      marginBottom: '8px',
+                      letterSpacing: '0.02em'
+                    }}>
+                      HJT
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconContainerStyle}>
+                        <MapPin size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="hjt"
+                        value={formData.hjt || '-'}
+                        readOnly
+                        style={inputStyle}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Satuan Field */}
+                  <motion.div 
+                    style={{
+                      marginBottom: '24px',
+                      position: 'relative'
+                    }}
+                  >
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: colors.primary,
+                      marginBottom: '8px',
+                      letterSpacing: '0.02em'
+                    }}>
+                      Satuan
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconContainerStyle}>
+                        <Cpu size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="satuan"
+                        value={formData.satuan || '-'}
+                        readOnly
+                        style={inputStyle}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Backbone Field */}
+                  <motion.div 
+                    style={{
+                      marginBottom: '24px',
+                      position: 'relative'
+                    }}
+                  >
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: colors.primary,
+                      marginBottom: '8px',
+                      letterSpacing: '0.02em'
+                    }}>
+                      Backbone
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconContainerStyle}>
+                        <Server size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="backbone"
+                        value={formData.backbone || '-'}
+                        readOnly
+                        style={inputStyle}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Port Field */}
+                  <motion.div 
+                    style={{
+                      marginBottom: '24px',
+                      position: 'relative'
+                    }}
+                  >
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: colors.primary,
+                      marginBottom: '8px',
+                      letterSpacing: '0.02em'
+                    }}>
+                      Port
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconContainerStyle}>
+                        <Cpu size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="port"
+                        value={formData.port || '-'}
+                        readOnly
+                        style={inputStyle}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Tarif Field */}
+                  <motion.div 
+                    style={{
+                      marginBottom: '32px',
+                      position: 'relative'
+                    }}
+                  >
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: colors.primary,
+                      marginBottom: '8px',
+                      letterSpacing: '0.02em'
+                    }}>
+                      Tarif
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconContainerStyle}>
+                        <DollarSign size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="tarif"
+                        value={formatCurrency(formData.tarif)}
+                        readOnly
+                        style={inputStyle}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Action Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '16px',
+                    marginTop: '32px',
+                    paddingTop: '20px',
+                    borderTop: '1px solid rgba(0, 192, 202, 0.1)'
+                  }}>
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={onClose}
+                      style={{
+                        background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '16px 32px',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                        boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                        transition: 'all 0.3s ease',
+                        letterSpacing: '0.02em'
+                      }}
+                    >
+                      Batal
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={handleDeleteConfirm}
+                      disabled={isDeleting}
+                      style={{
+                        background: isDeleting 
+                          ? `linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)`
+                          : `linear-gradient(135deg, ${colors.danger} 0%, ${colors.dangerLight} 100%)`,
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '16px 40px',
+                        borderRadius: '12px',
+                        fontWeight: '600',
+                        fontSize: '14px',
+                        cursor: isDeleting ? 'not-allowed' : 'pointer',
+                        boxShadow: isDeleting 
+                          ? 'none' 
+                          : `0 4px 20px rgba(239, 68, 68, 0.4)`,
+                        transition: 'all 0.3s ease',
+                        letterSpacing: '0.02em',
+                        opacity: isDeleting ? 0.8 : 1
+                      }}
+                    >
+                      {isDeleting ? 'Menghapus...' : 'Hapus Data'}
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           </motion.div>
         )}
