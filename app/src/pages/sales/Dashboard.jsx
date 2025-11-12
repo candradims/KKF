@@ -15,8 +15,9 @@ import {
   Legend,
   ComposedChart
 } from 'recharts';
-import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, BarChart3, X, Clock, CheckCircle, XCircle, ChevronDown, Target, Calendar, PieChart as PieChartIcon, Activity } from 'lucide-react';
 import { penawaranAPI, getUserData, getAuthHeaders } from '../../utils/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -34,48 +35,33 @@ const Dashboard = () => {
   const [marginTrendData, setMarginTrendData] = useState([]);
   const [loadingMarginData, setLoadingMarginData] = useState(true);
 
-  // Function to load penawaran data
+  // Load data functions (keep your existing functions)
   const loadPenawaranData = async () => {
     try {
       setLoadingData(true);
-      
-      // Get user data for filtering (if needed for sales person specific data)
       const userData = getUserData();
       if (!userData) {
         console.error('User data not found');
         return;
       }
 
-      // Fetch all penawaran data
       const response = await penawaranAPI.getAll();
-      
-      console.log('API Response received:', response);
       
       if (response && response.success && response.data) {
         const penawaranList = response.data;
-        console.log('Penawaran list:', penawaranList);
         
-        // Filter data for current sales person if role is sales
         let filteredData = penawaranList;
         if (userData.role_user === 'sales') {
-          // Filter penawaran created by current sales person
-          // Assuming there's a field like created_by or sales_id in the data
           const filtered = penawaranList.filter(item => 
             item.sales === userData.nama_user || 
             item.created_by === userData.id_user ||
             item.sales === userData.email_user
           );
-          
-          // For now, if no filtered data found, show all data for sales
-          // Later you can modify this logic based on your business requirements
           filteredData = filtered.length > 0 ? filtered : penawaranList;
-          console.log('Filtered data for sales:', filteredData);
         }
         
-        // Set total count
         setTotalPenawaran(filteredData.length);
         
-        // Count by status
         const counts = {
           menunggu: filteredData.filter(item => 
             item.status === 'Menunggu' || item.status === 'menunggu'
@@ -89,15 +75,6 @@ const Dashboard = () => {
         };
         
         setStatusCounts(counts);
-        
-        console.log('Dashboard data loaded:', {
-          total: filteredData.length,
-          statusCounts: counts,
-          userData: userData.role_user
-        });
-        
-      } else {
-        console.error('Failed to load penawaran data:', response);
       }
     } catch (error) {
       console.error('Error loading penawaran data:', error);
@@ -106,292 +83,9 @@ const Dashboard = () => {
     }
   };
 
-  // Function to load revenue data from profit_dari_hjt_excl_ppn
-  const loadRevenueData = async () => {
-    try {
-      setLoadingRevenue(true);
-      console.log('🔄 Starting revenue data calculation...');
-
-      // Get user data for filtering (sales only see their own data)
-      const userData = getUserData();
-      console.log('👤 User data:', userData);
-      
-      if (!userData) {
-        console.error('❌ User data not found for revenue calculation');
-        setTotalRevenueData([]);
-        return;
-      }
-
-      // Fetch all penawaran data for this sales person
-      console.log('📡 Fetching penawaran data...');
-      const response = await penawaranAPI.getAll();
-      console.log('📊 Penawaran API response:', response);
-      
-      if (response && response.success && response.data) {
-        const penawaranList = response.data;
-        console.log('� Found', penawaranList.length, 'penawaran records');
-
-        // Group revenue by month and calculate from profit_dari_hjt_excl_ppn
-        const monthlyRevenue = {};
-        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        
-        // Initialize all months with 0
-        monthNames.forEach(month => {
-          monthlyRevenue[month] = 0;
-        });
-
-        let totalProfit = 0;
-        let processedCount = 0;
-
-        // Process each penawaran to get profit data
-        for (const penawaran of penawaranList) {
-          console.log(`🔍 Processing penawaran ID: ${penawaran.id_penawaran}`);
-          
-          try {
-            // Try to calculate result first to ensure profit is calculated and stored
-            console.log(`🧮 Calculating result for penawaran ${penawaran.id_penawaran}`);
-            const calculateResponse = await fetch(`http://localhost:3000/api/penawaran/${penawaran.id_penawaran}/calculate-result`, {
-              method: 'POST',
-              headers: {
-                ...getAuthHeaders(),
-                'Content-Type': 'application/json'
-              }
-            });
-
-            if (calculateResponse.ok) {
-              console.log(`✅ Result calculated for penawaran ${penawaran.id_penawaran}`);
-            }
-
-            // Now get hasil penawaran data which contains profit_dari_hjt_excl_ppn
-            console.log(`📊 Fetching hasil for penawaran ${penawaran.id_penawaran}`);
-            const hasilResponse = await fetch(`http://localhost:3000/api/penawaran/${penawaran.id_penawaran}/hasil`, {
-              headers: getAuthHeaders()
-            });
-            
-            console.log(`📈 Hasil response status for ${penawaran.id_penawaran}:`, hasilResponse.status);
-            
-            if (hasilResponse.ok) {
-              const hasilData = await hasilResponse.json();
-              console.log(`💾 Hasil data for ${penawaran.id_penawaran}:`, hasilData);
-              
-              if (hasilData.success && hasilData.data) {
-                const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
-                console.log(`💰 Extracted profit for ${penawaran.id_penawaran}: ${profit}`);
-                
-                if (profit > 0) {
-                  totalProfit += profit;
-                  processedCount++;
-                  
-                  // Extract month from tanggal_dibuat
-                  if (penawaran.tanggal_dibuat) {
-                    const date = new Date(penawaran.tanggal_dibuat);
-                    const monthIndex = date.getMonth();
-                    const monthName = monthNames[monthIndex];
-                    
-                    monthlyRevenue[monthName] += profit;
-                    
-                    console.log(`� Added profit ${profit.toLocaleString('id-ID')} to ${monthName} (${date.toDateString()}) for penawaran ${penawaran.id_penawaran}`);
-                  } else {
-                    console.log(`⚠️ No tanggal_dibuat for penawaran ${penawaran.id_penawaran}`);
-                  }
-                } else {
-                  console.log(`ℹ️ Zero profit for penawaran ${penawaran.id_penawaran}`);
-                }
-              } else {
-                console.log(`⚠️ No valid hasil data for penawaran ${penawaran.id_penawaran}`);
-              }
-            } else {
-              console.log(`❌ Failed to fetch hasil for penawaran ${penawaran.id_penawaran}: ${hasilResponse.status}`);
-            }
-          } catch (error) {
-            console.error(`❌ Error processing penawaran ${penawaran.id_penawaran}:`, error);
-          }
-        }
-
-        // Convert to chart data format
-        const chartData = monthNames.map(month => ({
-          month,
-          value: Math.round(monthlyRevenue[month])
-        }));
-
-        console.log('📈 Final revenue summary:');
-        console.log('  - Total profit across all penawaran:', totalProfit);
-        console.log('  - Penawaran processed:', processedCount);
-        console.log('  - Monthly breakdown:', monthlyRevenue);
-        console.log('  - Chart data:', chartData);
-        
-        setTotalRevenueData(chartData);
-      } else {
-        console.log('❌ No valid penawaran data received');
-        setTotalRevenueData([]);
-      }
-    } catch (error) {
-      console.error('❌ Error loading revenue data:', error);
-      // Initialize with empty data if error
-      setTotalRevenueData([
-        { month: 'JAN', value: 0 },
-        { month: 'FEB', value: 0 },
-        { month: 'MAR', value: 0 },
-        { month: 'APR', value: 0 },
-        { month: 'MAY', value: 0 },
-        { month: 'JUN', value: 0 },
-        { month: 'JUL', value: 0 },
-        { month: 'AUG', value: 0 },
-        { month: 'SEP', value: 0 },
-        { month: 'OCT', value: 0 },
-        { month: 'NOV', value: 0 },
-        { month: 'DEC', value: 0 }
-      ]);
-    } finally {
-      setLoadingRevenue(false);
-    }
-  };
-
-  // NEW: Real revenue data function based on actual profit values
-  const loadRealRevenueData = async () => {
-    try {
-      setLoadingRevenue(true);
-      console.log('🔄 [REAL] Loading revenue from actual profit data...');
-
-      const response = await penawaranAPI.getAll();
-      
-      if (response && response.success && response.data) {
-        const penawaranList = response.data;
-        console.log('📋 [REAL] Processing', penawaranList.length, 'penawaran');
-
-        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        const monthlyRevenue = {};
-        
-        monthNames.forEach(month => {
-          monthlyRevenue[month] = 0;
-        });
-
-        let totalActualProfit = 0;
-
-        // Get real profit data from each penawaran
-        for (const penawaran of penawaranList) {
-          try {
-            console.log(`💰 [REAL] Fetching profit for penawaran ${penawaran.id_penawaran}`);
-            
-            const hasilResponse = await fetch(`http://localhost:3000/api/penawaran/${penawaran.id_penawaran}/hasil`, {
-              headers: getAuthHeaders()
-            });
-            
-            if (hasilResponse.ok) {
-              const hasilData = await hasilResponse.json();
-              
-              if (hasilData.success && hasilData.data) {
-                const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
-                
-                if (profit > 0) {
-                  console.log(`✅ [REAL] Found profit: ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
-                  totalActualProfit += profit;
-                  
-                  // Add to appropriate month
-                  if (penawaran.tanggal_dibuat) {
-                    const date = new Date(penawaran.tanggal_dibuat);
-                    const monthIndex = date.getMonth();
-                    const monthName = monthNames[monthIndex];
-                    monthlyRevenue[monthName] += profit;
-                  } else {
-                    // Current month if no date
-                    const currentMonth = monthNames[new Date().getMonth()];
-                    monthlyRevenue[currentMonth] += profit;
-                  }
-                } else {
-                  console.log(`⚠️ [REAL] Zero profit for penawaran ${penawaran.id_penawaran}`);
-                }
-              }
-            }
-          } catch (error) {
-            console.error(`❌ [REAL] Error processing ${penawaran.id_penawaran}:`, error);
-          }
-        }
-
-        const chartData = monthNames.map(month => ({
-          month,
-          value: Math.round(monthlyRevenue[month])
-        }));
-
-        console.log('📊 [REAL] FINAL RESULTS:');
-        console.log(`💰 Total Actual Profit: ${totalActualProfit.toLocaleString('id-ID')}`);
-        console.log('📅 Monthly distribution:', monthlyRevenue);
-        console.log('📈 Chart data:', chartData);
-
-        setTotalRevenueData(chartData);
-      }
-    } catch (error) {
-      console.error('❌ [REAL] Error loading real revenue data:', error);
-      setTotalRevenueData([]);
-    } finally {
-      setLoadingRevenue(false);
-    }
-  };
-
-  // Alternative simpler function to load revenue data
-  const loadRevenueDataSimple = async () => {
-    try {
-      setLoadingRevenue(true);
-      console.log('🔄 [Simple] Loading revenue data...');
-
-      const response = await penawaranAPI.getAll();
-      
-      if (response && response.success && response.data) {
-        const penawaranList = response.data;
-        console.log('📊 [Simple] Processing', penawaranList.length, 'penawaran');
-        console.log('📋 [Simple] Penawaran list:', penawaranList);
-
-        let totalRevenue = 0;
-        const monthlyData = {};
-        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-        
-        monthNames.forEach(month => {
-          monthlyData[month] = 0;
-        });
-
-        // For now, let's use a simple calculation based on sample data
-        // This will be replaced with real profit data once we confirm the API works
-        for (const penawaran of penawaranList) {
-          if (penawaran.tanggal_dibuat) {
-            const date = new Date(penawaran.tanggal_dibuat);
-            const monthIndex = date.getMonth();
-            const monthName = monthNames[monthIndex];
-            
-            // Temporary: Add 5000000 per penawaran for testing
-            // In production, this should be the actual profit value
-            const tempProfit = 5000000;
-            monthlyData[monthName] += tempProfit;
-            totalRevenue += tempProfit;
-            
-            console.log(`📅 [Simple] Added temp profit ${tempProfit} to ${monthName} for penawaran ${penawaran.id_penawaran}`);
-          }
-        }
-
-        const chartData = monthNames.map(month => ({
-          month,
-          value: monthlyData[month]
-        }));
-
-        console.log('📈 [Simple] Total revenue:', totalRevenue);
-        console.log('📊 [Simple] Chart data:', chartData);
-        
-        setTotalRevenueData(chartData);
-      }
-    } catch (error) {
-      console.error('❌ [Simple] Error loading revenue data:', error);
-      setTotalRevenueData([]);
-    } finally {
-      setLoadingRevenue(false);
-    }
-  };
-
-  // FINAL: Simple revenue data using proper API
   const loadFinalRevenueData = async () => {
     try {
       setLoadingRevenue(true);
-      console.log('🔄 [FINAL] Loading revenue using proper API...');
-
-      // Get current user data
       const currentUser = getUserData();
       if (!currentUser) {
         console.error('❌ No user data found');
@@ -403,8 +97,6 @@ const Dashboard = () => {
       
       if (response && response.success && response.data) {
         const penawaranList = response.data;
-        console.log('📋 [FINAL] Found', penawaranList.length, 'penawaran');
-
         const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
         const monthlyData = {};
         
@@ -418,12 +110,8 @@ const Dashboard = () => {
 
         let totalRevenue = 0;
 
-        // Process each penawaran to get profit and pencapaian
         for (const penawaran of penawaranList) {
           try {
-            console.log(`💰 [FINAL] Processing penawaran ${penawaran.id_penawaran}`);
-            
-            // Use the proper API function
             const hasilData = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
             if (hasilData && hasilData.success && hasilData.data) {
@@ -431,30 +119,23 @@ const Dashboard = () => {
               const pencapaian = parseFloat(hasilData.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
               
               if (profit > 0 || pencapaian > 0) {
-                console.log(`✅ [FINAL] Profit: ${profit.toLocaleString('id-ID')}, Pencapaian: ${pencapaian.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
                 totalRevenue += profit;
                 
-                // Add to appropriate month
                 if (penawaran.tanggal_dibuat) {
                   const date = new Date(penawaran.tanggal_dibuat);
                   const monthIndex = date.getMonth();
                   const monthName = monthNames[monthIndex];
                   monthlyData[monthName].totalProfit += profit;
                   monthlyData[monthName].pencapaian += pencapaian;
-                  console.log(`📅 [FINAL] Added to ${monthName}`);
                 } else {
-                  // Add to current month if no date
                   const currentMonth = monthNames[new Date().getMonth()];
                   monthlyData[currentMonth].totalProfit += profit;
                   monthlyData[currentMonth].pencapaian += pencapaian;
-                  console.log(`📅 [FINAL] Added to current month (${currentMonth})`);
                 }
               }
-            } else {
-              console.log(`⚠️ [FINAL] No hasil data for penawaran ${penawaran.id_penawaran}`);
             }
           } catch (error) {
-            console.error(`❌ [FINAL] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+            console.error(`Error processing penawaran ${penawaran.id_penawaran}:`, error);
           }
         }
 
@@ -465,77 +146,40 @@ const Dashboard = () => {
           target: Math.round(monthlyData[month].target)
         }));
 
-        console.log('📊 [FINAL] === REVENUE CALCULATION COMPLETE ===');
-        console.log(`💰 Total Revenue: Rp ${totalRevenue.toLocaleString('id-ID')}`);
-        console.log('📅 Monthly breakdown:', monthlyData);
-        console.log('📈 Chart data:', chartData);
-
         setTotalRevenueData(chartData);
-      } else {
-        console.log('❌ [FINAL] Failed to get penawaran data');
-        setTotalRevenueData([]);
       }
     } catch (error) {
-      console.error('❌ [FINAL] Error loading revenue data:', error);
+      console.error('Error loading revenue data:', error);
       setTotalRevenueData([]);
     } finally {
       setLoadingRevenue(false);
     }
   };
 
-  // Function to load regional revenue data based on HJT wilayah
   const loadRegionalRevenueData = async () => {
     try {
       setLoadingRegionalRevenue(true);
-      console.log('🗺️ [REGIONAL] Loading regional revenue data by HJT wilayah...');
-
       const response = await penawaranAPI.getAll();
       
       if (response && response.success && response.data) {
         const penawaranList = response.data;
-        console.log('📋 [REGIONAL] Processing', penawaranList.length, 'penawaran for regional analysis');
-        console.log('📋 [REGIONAL] Full penawaran list:', penawaranList);
-
-        // We'll compute total pencapaian across all penawaran and compare to user target
         let totalPencapaianAccumulated = 0;
-        let totalProfit = 0;
 
-        // Process each penawaran to get profit and pencapaian
         for (const penawaran of penawaranList) {
           try {
-            console.log(`🌍 [REGIONAL] Processing penawaran ${penawaran.id_penawaran}`);
-            console.log('📊 [REGIONAL] Penawaran data structure:', penawaran);
-            console.log('📍 [REGIONAL] Available fields:', Object.keys(penawaran));
-            console.log('📍 [REGIONAL] Checking wilayah fields:');
-            console.log('  - wilayah_hjt:', penawaran.wilayah_hjt);
-            console.log('  - referensiHJT:', penawaran.referensiHJT);
-            console.log('  - hjtWilayah:', penawaran.hjtWilayah);
-            console.log('  - wilayah:', penawaran.wilayah);
-            
-            // Get profit data
             const hasilData = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
             if (hasilData && hasilData.success && hasilData.data) {
-              const profit = parseFloat(hasilData.data.profit_dari_hjt_excl_ppn) || 0;
               const pencapaian = parseFloat(hasilData.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
-
-              // Accumulate totals
-              if (profit > 0) {
-                totalProfit += profit;
-              }
               if (pencapaian > 0) {
                 totalPencapaianAccumulated += pencapaian;
               }
-              console.log(`✅ [REGIONAL] Penawaran ${penawaran.id_penawaran} - profit: Rp ${profit.toLocaleString('id-ID')}, pencapaian: Rp ${pencapaian.toLocaleString('id-ID')}`);
-            } else {
-              console.log(`⚠️ [REGIONAL] No profit data for penawaran ${penawaran.id_penawaran}`);
             }
           } catch (error) {
-            console.error(`❌ [REGIONAL] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+            console.error(`Error processing penawaran ${penawaran.id_penawaran}:`, error);
           }
         }
 
-        // Prepare pie chart data showing percentage of total pencapaian toward target
         const userData = getUserData();
         const userTarget = (userData && userData.target_nr) ? parseFloat(userData.target_nr) : 0;
 
@@ -547,192 +191,120 @@ const Dashboard = () => {
             name: 'Tercapai',
             value: Math.round(achievedPercent * 10) / 10,
             amount: Math.round(totalPencapaianAccumulated),
-            color: '#10b981' // green
+            color: '#10b981'
           },
           {
             name: 'Belum Tercapai',
             value: Math.round(remainingPercent * 10) / 10,
             amount: Math.round(Math.max(userTarget - totalPencapaianAccumulated, 0)),
-            color: '#e5e7eb' // light gray
+            color: '#f59e0b'
           }
         ];
 
-        console.log('🗺️ [REGIONAL] === PENCAPAIAN ANALYSIS COMPLETE ===');
-        console.log(`🎯 Target (user): Rp ${userTarget.toLocaleString('id-ID')}`);
-        console.log(`💰 Total Pencapaian: Rp ${totalPencapaianAccumulated.toLocaleString('id-ID')}`);
-        console.log('📈 Chart data:', chartData);
-
         setRegionalRevenueData(chartData);
-      } else {
-        console.log('❌ [REGIONAL] Failed to get penawaran data');
-        setRegionalRevenueData([]);
       }
     } catch (error) {
-      console.error('❌ [REGIONAL] Error loading regional revenue data:', error);
+      console.error('Error loading regional revenue data:', error);
       setRegionalRevenueData([]);
     } finally {
       setLoadingRegionalRevenue(false);
     }
   };
 
-  // Function to load margin trend data from margin_dari_hjt
   const loadMarginTrendData = async () => {
     try {
       setLoadingMarginData(true);
-      console.log('🔍 [MARGIN] Loading margin trend data...');
-
       const response = await penawaranAPI.getAll();
       
       if (response.success && response.data && Array.isArray(response.data)) {
-        console.log(`📊 [MARGIN] Processing ${response.data.length} penawaran for margin data`);
-
-        // Initialize monthly margin accumulator
         const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
         const monthlyMargin = {};
         monthNames.forEach(month => {
           monthlyMargin[month] = 0;
         });
 
-        let totalAllMargin = 0;
-        let processedCount = 0;
-
-        // Process each penawaran
         for (const penawaran of response.data) {
           try {
-            console.log(`🔍 [MARGIN] Processing penawaran ${penawaran.id_penawaran}...`);
-            
             const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
             if (hasilResponse.success && hasilResponse.data) {
               const margin = parseFloat(hasilResponse.data.margin_dari_hjt) || 0;
               
               if (margin > 0) {
-                console.log(`💰 [MARGIN] Found margin: ${margin.toFixed(2)}% for penawaran ${penawaran.id_penawaran}`);
-                
-                // Get month from penawaran date
                 let monthName = null;
                 
                 if (penawaran.tanggal_penawaran) {
                   try {
-                    // Try different date formats
                     let date;
                     if (penawaran.tanggal_penawaran.includes('T')) {
-                      // ISO format: 2025-10-08T00:00:00.000Z
                       date = new Date(penawaran.tanggal_penawaran);
                     } else if (penawaran.tanggal_penawaran.includes('-')) {
-                      // Format: 2025-10-08 or 08-10-2025
                       const parts = penawaran.tanggal_penawaran.split('-');
                       if (parts[0].length === 4) {
-                        // YYYY-MM-DD
                         date = new Date(penawaran.tanggal_penawaran);
                       } else {
-                        // DD-MM-YYYY
                         date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
                       }
-                    } else if (penawaran.tanggal_penawaran.includes('/')) {
-                      // Format: DD/MM/YYYY or MM/DD/YYYY
-                      const parts = penawaran.tanggal_penawaran.split('/');
-                      // Assume DD/MM/YYYY format
-                      date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
                     } else {
                       date = new Date(penawaran.tanggal_penawaran);
                     }
                     
                     if (!isNaN(date.getTime())) {
                       monthName = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                      console.log(`📅 [MARGIN] Date: ${penawaran.tanggal_penawaran} -> Parsed: ${date.toDateString()} -> Month: ${monthName}`);
-                    } else {
-                      console.log(`⚠️ [MARGIN] Invalid date: ${penawaran.tanggal_penawaran}`);
                     }
                   } catch (dateError) {
-                    console.log(`⚠️ [MARGIN] Date parsing error for ${penawaran.tanggal_penawaran}:`, dateError);
+                    console.log(`Date parsing error:`, dateError);
                   }
                 }
                 
-                // If we couldn't parse the date, use current month
                 if (!monthName || !monthNames.includes(monthName)) {
                   const currentDate = new Date();
                   monthName = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                  console.log(`⚠️ [MARGIN] Using current month: ${monthName}`);
                 }
                 
-                // Add margin to the correct month (sum all margins for that month)
                 monthlyMargin[monthName] += margin;
-                console.log(`✅ [MARGIN] Added ${margin.toFixed(2)}% to ${monthName}, total now: ${monthlyMargin[monthName].toFixed(2)}%`);
-                
-                totalAllMargin += margin;
-                processedCount++;
-              } else {
-                console.log(`❌ [MARGIN] No valid margin found for penawaran ${penawaran.id_penawaran}`);
               }
-            } else {
-              console.log(`❌ [MARGIN] Failed to fetch hasil for penawaran ${penawaran.id_penawaran}`);
             }
           } catch (error) {
-            console.error(`❌ [MARGIN] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+            console.error(`Error processing penawaran:`, error);
           }
         }
 
-        // Convert to chart data format - show total margin per month, not average
         const chartData = monthNames.map(month => ({
           month,
-          margin: Math.round(monthlyMargin[month] * 100) / 100 // Round to 2 decimal places
+          margin: Math.round(monthlyMargin[month] * 100) / 100
         }));
 
-        console.log('📊 [MARGIN] Final margin summary:');
-        console.log('  - Total margin across all penawaran:', totalAllMargin.toFixed(2));
-        console.log('  - Penawaran processed:', processedCount);
-        console.log('  - Monthly totals:', monthlyMargin);
-        console.log('  - Chart data:', chartData);
-        
         setMarginTrendData(chartData);
-      } else {
-        console.log('❌ [MARGIN] No valid penawaran data received');
-        setMarginTrendData([]);
       }
     } catch (error) {
-      console.error('❌ [MARGIN] Error loading margin data:', error);
-      // Initialize with empty data if error
-      setMarginTrendData([
-        { month: 'JAN', margin: 0 },
-        { month: 'FEB', margin: 0 },
-        { month: 'MAR', margin: 0 },
-        { month: 'APR', margin: 0 },
-        { month: 'MAY', margin: 0 },
-        { month: 'JUN', margin: 0 },
-        { month: 'JUL', margin: 0 },
-        { month: 'AUG', margin: 0 },
-        { month: 'SEP', margin: 0 },
-        { month: 'OCT', margin: 0 },
-        { month: 'NOV', margin: 0 },
-        { month: 'DEC', margin: 0 }
-      ]);
+      console.error('Error loading margin data:', error);
+      setMarginTrendData([]);
     } finally {
       setLoadingMarginData(false);
     }
   };
 
-  // Load data on component mount
   useEffect(() => {
     loadPenawaranData();
-    // Delay revenue loading to ensure penawaran data is loaded first
     setTimeout(() => {
-      loadFinalRevenueData(); // Use FINAL version with proper API
-      loadRegionalRevenueData(); // Load regional revenue data
-      loadMarginTrendData(); // Load margin trend data
+      loadFinalRevenueData();
+      loadRegionalRevenueData();
+      loadMarginTrendData();
     }, 1000);
     
-    // Auto-refresh every 5 minutes
     const interval = setInterval(() => {
       loadPenawaranData();
       setTimeout(() => {
-        loadFinalRevenueData(); // Use FINAL version with proper API
-        loadRegionalRevenueData(); // Load regional revenue data
+        loadFinalRevenueData();
+        loadRegionalRevenueData();
       }, 1000);
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, []);  const colors = {
+  }, []);
+
+  const colors = {
     primary: '#035b71',
     secondary: '#00bfca',
     tertiary: '#00a2b9',
@@ -740,962 +312,866 @@ const Dashboard = () => {
     accent2: '#0090a8',
     success: '#3fba8c',
     warning: '#f59e0b',
+    gradientStart: '#035b71',
+    gradientEnd: '#00a2b9'
   };
 
-  // Data untuk status penawaran - now using dynamic data
   const statusData = [
-    { status: 'Menunggu', count: statusCounts.menunggu, icon: Clock, color: '#fce40bff' },
+    { status: 'Menunggu', count: statusCounts.menunggu, icon: Clock, color: '#f59e0b' },
     { status: 'Setuju', count: statusCounts.disetujui, icon: CheckCircle, color: '#3fba8c' },
     { status: 'Tidak Setuju', count: statusCounts.ditolak, icon: XCircle, color: '#EF4444' }
   ];
-  
-  // Data for individual sales person's target and achievement
-  // In real application, this would be dynamic based on logged-in user
-  // Using Ganjar's data as example
-  const mySalesData = [
-    { name: 'Target Saya', TargetNR: 4752631670, Achievement: Math.round(4752631670 * 0.1) }
-  ];
 
-
-
-  // Data untuk pie chart regional - now using real data from profit calculations
-  const regionalData = regionalRevenueData.length > 0 ? regionalRevenueData : [
-    { name: 'HJT JAWA-BALI', value: 0, color: colors.primary },
-    { name: 'HJT SUMATRA', value: 0, color: colors.secondary },
-    { name: 'HJT JABODETABEK', value: 0, color: colors.accent1 },
-    { name: 'HJT INTIM', value: 0, color: colors.tertiary },
-    { name: 'HJT KALIMANTAN', value: 0, color: colors.accent2 }
-  ];
-
-  // Data untuk pie chart status penawaran - now using dynamic data
   const statusPenawaranData = [
-    { name: 'Menunggu', value: statusCounts.menunggu, color: '#fce40bff' },
+    { name: 'Menunggu', value: statusCounts.menunggu, color: '#f59e0b' },
     { name: 'Disetujui', value: statusCounts.disetujui, color: '#3fba8c' },
     { name: 'Ditolak', value: statusCounts.ditolak, color: '#EF4444' }
   ];
 
-  const COLORS = [colors.primary, colors.secondary, colors.accent1, colors.tertiary, colors.accent2];
-  const STATUS_COLORS = ['#fce40bff', '#3fba8c', '#EF4444'];
-
-  // Use pencapaian chart data (achieved vs remaining) when available, otherwise fall back to regional HJT data
-  // Ensure 'Belum Tercapai' uses a yellow color (warning) instead of light gray
   const pencapaianChartData = (regionalRevenueData && regionalRevenueData.length > 0)
     ? regionalRevenueData.map(item => ({
         ...item,
-        color: item.name === 'Belum Tercapai' ? colors.warning : (item.color || colors.success)
+        color: item.name === 'Belum Tercapai' ? colors.warning : colors.success
       }))
-    : regionalData;
-
-  const renderCustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{
-          backgroundColor: 'white',
-          padding: '12px',
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
-        }}>
-          <p style={{ color: '#6b7280' }}>{`Month: ${label}`}</p>
-          {payload.map((entry, index) => {
-            // Add percentage symbol for margin data
-            const isMarginData = entry.dataKey.includes('margin');
-            const displayValue = isMarginData ? `${entry.value}%` : entry.value;
-            return (
-              <p key={index} style={{ color: colors.primary, fontWeight: '600' }}>
-                {`${entry.dataKey}: ${displayValue}`}
-              </p>
-            );
-          })}
-        </div>
-      );
-    }
-    return null;
-  };
+    : [];
 
   const formatNumber = (value) => {
     return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
   };
 
+  // Calculate current period values
+  const getCurrentPeriodValue = () => {
+    const currentDate = new Date();
+    const currentMonthShort = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    
+    let currentPeriodData = totalRevenueData.find(item => item.month === currentMonthShort);
+    
+    if (!currentPeriodData || currentPeriodData.totalProfit === 0) {
+      const monthsWithData = totalRevenueData
+        .filter(item => item.totalProfit > 0)
+        .reverse();
+      currentPeriodData = monthsWithData[0];
+    }
+    
+    return currentPeriodData ? currentPeriodData.totalProfit : 0;
+  };
+
+  const getCurrentMarginValue = () => {
+    const currentDate = new Date();
+    const currentMonthShort = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    
+    let currentMarginData = marginTrendData.find(item => item.month === currentMonthShort);
+    
+    if (!currentMarginData || currentMarginData.margin === 0) {
+      const monthsWithData = marginTrendData
+        .filter(item => item.margin > 0)
+        .reverse();
+      currentMarginData = monthsWithData[0];
+    }
+    
+    return currentMarginData ? currentMarginData.margin : 0;
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#e7f3f5ff',
+      background: '#e7f3f5ff',
       padding: '24px',
     }}>
       <style>
-        {`
-          @keyframes loading {
-            0% {
-              transform: translateX(-100%);
-            }
-            50% {
-              transform: translateX(200%);
-            }
-            100% {
-              transform: translateX(-100%);
-            }
+      {`
+        @keyframes loading {
+          0% { transform: translateX(-100%); }
+          50% { transform: translateX(200%); }
+          100% { transform: translateX(-100%); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-10px) translateX(10px); }
+        }
+        @keyframes glow {
+          0%, 100% { 
+            box-shadow: 0 0 20px rgba(3, 91, 113, 0.1);
+            opacity: 1;
           }
-        `}
-      </style>
+          50% { 
+            box-shadow: 0 0 30px rgba(3, 91, 113, 0.3);
+            opacity: 0.7;
+          }
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}
+    </style>
+      
       <div style={{
-        maxWidth: '80rem',
+        maxWidth: '1400px',
         margin: '0 auto'
       }}>
-        {/* Header Cards */}
+
+        {/* Header Section dengan Fokus Sales */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '24px',
           marginBottom: '32px'
         }}>
-          {/* Card 1 - Jumlah Total Penawaran */}
-          <div 
-            onClick={() => !loadingData && loadPenawaranData()}
-            title={loadingData ? "Loading..." : "Klik untuk refresh data"}
-            style={{
-            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
-            color: 'white',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: loadingData ? 'wait' : 'pointer'
-          }} onMouseEnter={(e) => {
-            if (!loadingData) {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-            }
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
-                }}>
-                  <Users style={{ width: '20px', height: '20px' }} />
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    opacity: '0.9'
-                  }}>Jumlah Total Penawaran</span>
-                </div>
-                <div style={{
-                  fontSize: '30px',
-                  fontWeight: 'bold',
-                  minHeight: '36px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  {loadingData ? (
-                    <div style={{
-                      width: '40px',
-                      height: '6px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}>
-                      <div style={{
-                        width: '20px',
-                        height: '100%',
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                        borderRadius: '3px',
-                        animation: 'loading 1.5s ease-in-out infinite',
-                        position: 'absolute'
-                      }} />
-                    </div>
-                  ) : totalPenawaran}
-                </div>
-              </div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
-              }}>
-                <BarChart3 style={{ width: '24px', height: '24px' }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2 - Status Penawaran */}
-          <div 
-            onClick={() => !loadingData && loadPenawaranData()}
-            title={loadingData ? "Loading..." : "Klik untuk refresh data"}
-            style={{
-            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
-            color: 'white',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: loadingData ? 'wait' : 'pointer'
-          }} onMouseEnter={(e) => {
-            if (!loadingData) {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-            }
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
-                }}>
-                  <TrendingUp style={{ width: '20px', height: '20px' }} />
-                  <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    opacity: '0.9'
-                  }}>Status Penawaran</span>
-                  <ChevronDown 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowStatusModal(true);
-                    }}
-                    style={{ 
-                      width: '16px', 
-                      height: '16px',
-                      marginLeft: '4px',
-                      opacity: '0.8',
-                      cursor: 'pointer',
-                      transition: 'opacity 0.2s'
-                    }} 
-                  />
-                </div>
-                <div style={{
-                  fontSize: '30px',
-                  fontWeight: 'bold',
-                  minHeight: '36px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  {loadingData ? (
-                    <div style={{
-                      width: '40px',
-                      height: '6px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                      borderRadius: '3px',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}>
-                      <div style={{
-                        width: '20px',
-                        height: '100%',
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                        borderRadius: '3px',
-                        animation: 'loading 1.5s ease-in-out infinite',
-                        position: 'absolute'
-                      }} />
-                    </div>
-                  ) : totalPenawaran}
-                </div>
-              </div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
-              }}>
-                <BarChart3 style={{ width: '24px', height: '24px' }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3 - Total Revenue */}
+          {/* Card Total Penawaran */}
           <div style={{
-            background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
+            background: 'linear-gradient(135deg, #035b71 0%, #00a2b9 100%)',
+            borderRadius: '20px',
+            padding: '28px',
             color: 'white',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: 'pointer'
+            boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
+            transition: 'all 0.3s ease',
+            cursor: 'pointer',
+            position: 'relative',
+            overflow: 'hidden',
+            animation: 'glow 3s ease-in-out infinite'
           }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+            e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 30px 50px rgba(3, 91, 113, 0.3)';
           }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+            e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.2)';
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
+              position: 'relative',
+              zIndex: 2
             }}>
               <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
+                  gap: '12px',
+                  marginBottom: '12px'
                 }}>
-                  <DollarSign style={{ width: '20px', height: '20px' }} />
+                  <div style={{
+                    padding: '10px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <Users style={{ width: '24px', height: '24px' }} />
+                  </div>
                   <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
+                    fontSize: '16px',
+                    fontWeight: '600',
                     opacity: '0.9'
-                  }}>Total Revenue</span>
+                  }}>Total Penawaran</span>
                 </div>
                 <div style={{
-                  fontSize: '24px',
-                  fontWeight: 'bold'
+                  fontSize: '36px',
+                  fontWeight: 'bold',
+                  minHeight: '48px',
+                  display: 'flex',
+                  alignItems: 'center'
                 }}>
-                  {loadingRevenue ? 'Loading...' : 
-                    (() => {
-                      const total = totalRevenueData.reduce((sum, item) => sum + (item.totalProfit || 0), 0);
-                      console.log('💰 Total Revenue Display Calculation:', {
-                        revenueData: totalRevenueData,
-                        total: total
-                      });
-                      return `Rp ${total.toLocaleString('id-ID')},-`;
-                    })()
-                  }
+                  {loadingData ? (
+                    <div style={{
+                      width: '60px',
+                      height: '8px',
+                      background: 'rgba(255, 255, 255, 0.3)',
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <div style={{
+                        width: '30px',
+                        height: '100%',
+                        background: 'rgba(255, 255, 255, 0.7)',
+                        borderRadius: '4px',
+                        animation: 'loading 1.5s ease-in-out infinite',
+                        position: 'absolute'
+                      }} />
+                    </div>
+                  ) : totalPenawaran}
                 </div>
               </div>
               <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
+                animation: 'float 3s ease-in-out infinite'
               }}>
-                <DollarSign style={{ width: '24px', height: '24px' }} />
+                <BarChart3 style={{ width: '48px', height: '48px', opacity: '0.8' }} />
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Sales Target Chart */}
+         {/* Card Status Penawaran */}
         <div style={{
-          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          marginBottom: '32px',
-          transition: 'transform 0.2s, box-shadow 0.2s',
-          border: '1px solid #035b71',
+          background: 'linear-gradient(135deg, #035b71 0%, #00a2b9 100%)',
+          borderRadius: '20px',
+          padding: '28px',
+          color: 'white',
+          boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer',
           position: 'relative',
           overflow: 'hidden'
-        }} onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-        }} onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-        }}>
+        }} onClick={() => !loadingData && setShowStatusModal(true)}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '24px'
+            position: 'relative',
+            zIndex: 2
           }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1f2937',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <div style={{
-                padding: '6px',
-                background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                borderRadius: '8px',
-                color: 'white'
-              }}>
-                <BarChart3 size={18} />
-              </div>
-              Analisis Performa
-            </h3>
-            <div style={{
-              padding: '6px 12px',
-              background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.tertiary}15 100%)`,
-              borderRadius: '8px',
-              border: `2px solid ${colors.success}30`,
-              fontSize: '13px',
-              fontWeight: '600',
-              color: colors.success
-            }}>
-              Tahun 2025
-            </div>
-          </div>
-          <div style={{ height: '340px', paddingLeft: '16px' }}>
-            {loadingRevenue ? (
+            <div>
               <div style={{
                 display: 'flex',
-                justifyContent: 'center',
                 alignItems: 'center',
-                height: '100%',
-                flexDirection: 'column',
-                gap: '12px'
+                gap: '12px',
+                marginBottom: '12px'
               }}>
                 <div style={{
-                  width: '40px',
-                  height: '40px',
-                  border: `3px solid ${colors.primary}20`,
-                  borderTop: `3px solid ${colors.primary}`,
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }} />
-                <p style={{
-                  color: colors.primary,
-                  fontWeight: '600',
-                  fontSize: '14px'
+                  padding: '10px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(10px)'
                 }}>
-                  Memuat data performa...
-                </p>
+                  <Activity style={{ width: '24px', height: '24px' }} />
+                </div>
+                <span style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  opacity: '0.9'
+                }}>Status Penawaran</span>
+                <ChevronDown 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowStatusModal(true);
+                  }}
+                  style={{ 
+                    width: '20px', 
+                    height: '20px',
+                    marginLeft: '4px',
+                    opacity: '0.8',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }} 
+                />
               </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart 
-                  data={totalRevenueData}
-                  margin={{ top: 20, right: 30, left: 40, bottom: 60 }}
-                >
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    stroke="#f0f0f0" 
-                    horizontal={true}
-                    vertical={false}
-                  />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 11, fill: '#666', fontWeight: '600' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 11, fill: '#666', fontWeight: '600' }}
-                    tickFormatter={formatNumber}
-                    width={100}
-                  />
-                  <Tooltip 
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div style={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            padding: '12px',
-                            border: '1px solid #035b71',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                          }}>
-                            <p style={{ 
-                              color: colors.primary, 
-                              fontWeight: 'bold', 
-                              marginBottom: '8px',
-                              fontSize: '14px'
-                            }}>{label}</p>
-                            {payload.map((entry, index) => (
-                              <div key={index} style={{ 
-                                marginBottom: '4px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                gap: '12px'
-                              }}>
-                                <span style={{ 
-                                  color: entry.color, 
-                                  fontWeight: '600',
-                                  fontSize: '12px'
-                                }}>
-                                  {entry.name}:
-                                </span>
-                                <span style={{ 
-                                  color: entry.color, 
-                                  fontWeight: 'bold',
-                                  fontSize: '12px'
-                                }}>
-                                  Rp {entry.value.toLocaleString('id-ID')}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Legend 
-                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
-                    iconType="rect"
-                    iconSize={10}
-                  />
-                  <Bar 
-                    dataKey="pencapaian" 
-                    fill={colors.warning}
-                    name="Pencapaian"
-                    radius={[4, 4, 0, 0]}
-                    barSize={20}
-                  />
-                  <Bar 
-                    dataKey="totalProfit" 
-                    fill={colors.primary}
-                    name="Revenue"
-                    radius={[4, 4, 0, 0]}
-                    barSize={20}
-                  />
-                  <Bar 
-                    dataKey="target" 
-                    fill={colors.tertiary}
-                    name="Target"
-                    radius={[4, 4, 0, 0]}
-                    barSize={20}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            )}
+              <div style={{
+                fontSize: '36px',
+                fontWeight: 'bold',
+                minHeight: '48px',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                {loadingData ? (
+                  <div style={{
+                    width: '60px',
+                    height: '8px',
+                    background: 'rgba(255, 255, 255, 0.3)',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    <div style={{
+                      width: '30px',
+                      height: '100%',
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      borderRadius: '4px',
+                      animation: 'loading 1.5s ease-in-out infinite',
+                      position: 'absolute'
+                    }} />
+                  </div>
+                ) : totalPenawaran}
+              </div>
+            </div>
+            <div style={{
+              animation: 'float 3s ease-in-out infinite',
+              animationDelay: '0.5s'
+            }}>
+              <TrendingUp style={{ width: '48px', height: '48px', opacity: '0.8' }} />
+            </div>
           </div>
         </div>
 
-        {/* Charts Section */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '24px',
-          marginBottom: '24px'
-        }}>
-          {/* Total Revenue Chart */}
+          {/* Card Total Revenue */}
           <div style={{
-            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            border: '1px solid #035b71',
+            background: 'linear-gradient(135deg, #035b71 0%, #00a2b9 100%)',
+            borderRadius: '20px',
+            padding: '28px',
+            color: 'white',
+            boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
+            transition: 'all 0.3s ease',
+            cursor: 'pointer',
             position: 'relative',
             overflow: 'hidden'
           }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+            e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+            e.currentTarget.style.boxShadow = '0 30px 50px rgba(3, 91, 113, 0.3)';
           }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+            e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.2)';
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '24px'
+              position: 'relative',
+              zIndex: 2
             }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1f2937'
-              }}>Tren Total Revenue</h3>
-            </div>
-            <div style={{ height: '320px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={totalRevenueData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#666' }}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#666' }}
-                    tickFormatter={(value) => {
-                      if (value >= 1000000000) {
-                        return `${(value / 1000000000).toFixed(1)}B`;
-                      } else if (value >= 1000000) {
-                        return `${(value / 1000000).toFixed(1)}M`;
-                      } else if (value >= 1000) {
-                        return `${(value / 1000).toFixed(1)}K`;
-                      }
-                      return value.toString();
-                    }}
-                  />
-                  <Tooltip 
-                    formatter={(value, name) => [`Rp ${value.toLocaleString('id-ID')}`, 'Total Profit']}
-                    labelFormatter={(label) => `Bulan: ${label}`}
-                    contentStyle={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      border: '1px solid #035b71',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="totalProfit" 
-                    stroke={colors.primary} 
-                    strokeWidth={3}
-                    dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: colors.secondary }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{
-              marginTop: '16px',
-              background: 'linear-gradient(135deg, #d7f2f5ff 100%, #f0faff 200%)',
-              borderRadius: '8px',
-              padding: '12px'
-            }}>
-              <div style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: colors.primary
-              }}>
-                {(() => {
-                  // Get current month value or latest month with data
-                  const currentDate = new Date();
-                  const currentMonthShort = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                  
-                  // First try to get current month's data
-                  let currentPeriodData = totalRevenueData.find(item => item.month === currentMonthShort);
-                  
-                  // If current month has no data, get the latest month with data
-                  if (!currentPeriodData || currentPeriodData.value === 0) {
-                    // Get all months with data in reverse order (latest first)
-                    const monthsWithData = totalRevenueData
-                      .filter(item => item.totalProfit > 0)
-                      .reverse();
-                    currentPeriodData = monthsWithData[0];
-                  }
-                  
-                  const value = currentPeriodData ? currentPeriodData.totalProfit : 0;
-                  return `Rp ${value.toLocaleString('id-ID')}`;
-                })()}
-              </div>
-              <div style={{
-                fontSize: '14px',
-                color: '#6b7280'
-              }}>Current Period Value</div>
-            </div>
-          </div>
-
-          {/* Total Revenue Pie Chart */}
-          <div style={{
-            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            border: '1px solid #035b71',
-            position: 'relative',
-            overflow: 'hidden'
-          }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1f2937',
-              marginBottom: '16px'
-            }}>Total Pencapaian</h3>
-            <div style={{ height: '192px', marginBottom: '16px' }}>
-              {loadingRegionalRevenue ? (
+              <div>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  fontSize: '14px',
-                  color: '#6b7280'
+                  gap: '12px',
+                  marginBottom: '12px'
                 }}>
-                  Loading regional data...
+                  <div style={{
+                    padding: '10px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <DollarSign style={{ width: '24px', height: '24px' }} />
+                  </div>
+                  <span style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    opacity: '0.9'
+                  }}>Total Revenue</span>
                 </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                        data={pencapaianChartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={80}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                        {pencapaianChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
-                        ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value, name, props) => [`${value}%`, name]}
-                      labelFormatter={(label) => `${label}`}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {loadingRegionalRevenue ? (
                 <div style={{
-                  fontSize: '14px',
-                  color: '#6b7280',
-                  textAlign: 'center',
-                  padding: '16px'
+                  fontSize: '28px',
+                  fontWeight: 'bold',
+                  minHeight: '48px',
+                  display: 'flex',
+                  alignItems: 'center'
                 }}>
-                  Loading HJT revenue breakdown...
+                  {loadingRevenue ? 'Loading...' : `Rp ${getCurrentPeriodValue().toLocaleString('id-ID')}`}
                 </div>
-              ) : (
-                pencapaianChartData.map((item, index) => (
+              </div>
+              <div style={{
+                animation: 'float 3s ease-in-out infinite',
+                animationDelay: '1s'
+              }}>
+                <DollarSign style={{ width: '48px', height: '48px', opacity: '0.8' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Charts Section */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: '32px',
+          marginBottom: '32px'
+        }}>
+          
+          {/* LEFT COLUMN */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px'
+          }}>
+            
+            {/* Performa Sales */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              transition: 'all 0.3s ease'
+            }} onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 30px 60px rgba(3, 91, 113, 0.15)';
+            }} onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.1)';
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '32px'
+              }}>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  color: colors.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px'
+                }}>
+                  <div style={{
+                    padding: '10px 10px 6px 10px',
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                    borderRadius: '12px',
+                    color: 'white'
+                  }}>
+                    <Target size={20} />
+                  </div>
+                  Performa Sales
+                </h3>
+                <div style={{
+                  padding: '8px 16px',
+                  background: 'rgba(3, 91, 113, 0.1)',
+                  borderRadius: '12px',
+                  border: `1px solid ${colors.primary}30`,
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: colors.primary
+                }}>
+                  Real-time
+                </div>
+              </div>
+              <div style={{ height: '380px' }}>
+                {loadingRevenue ? (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    flexDirection: 'column',
+                    gap: '16px'
+                  }}>
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      border: `4px solid ${colors.primary}20`,
+                      borderTop: `4px solid ${colors.primary}`,
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                    <p style={{
+                      color: colors.primary,
+                      fontWeight: '600',
+                      fontSize: '16px'
+                    }}>
+                      Memuat data performa...
+                    </p>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart 
+                      data={totalRevenueData}
+                      margin={{ top: 20, right: 30, left: 40, bottom: 60 }}
+                    >
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke="rgba(3, 91, 113, 0.1)" 
+                        horizontal={true}
+                        vertical={false}
+                      />
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: colors.primary, fontWeight: '600' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12, fill: colors.primary, fontWeight: '600' }}
+                        tickFormatter={formatNumber}
+                        width={100}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: `2px solid ${colors.primary}`,
+                          borderRadius: '12px',
+                          boxShadow: '0 20px 40px rgba(3, 91, 113, 0.2)',
+                          backdropFilter: 'blur(10px)'
+                        }}
+                        formatter={(value, name, props) => {
+                          const formattedValue = `Rp ${Math.round(value).toLocaleString('id-ID')}`;
+                          const labelMap = {
+                            'pencapaian': 'Pencapaian',
+                            'totalProfit': 'Revenue', 
+                            'target': 'Target'
+                          };
+                          
+                          return [formattedValue, labelMap[name] || name];
+                        }}
+                        labelFormatter={(label) => `Bulan: ${label}`}
+                      />
+                      <Legend 
+                        wrapperStyle={{ 
+                          paddingTop: '20px', 
+                          fontSize: '13px',
+                          fontWeight: '600'
+                        }}
+                        iconType="rect"
+                        iconSize={12}
+                      />
+                      <Bar 
+                        dataKey="pencapaian" 
+                        fill={colors.warning}
+                        name="Pencapaian"
+                        radius={[8, 8, 0, 0]}
+                        barSize={24}
+                      />
+                      <Bar 
+                        dataKey="totalProfit" 
+                        fill={colors.primary}
+                        name="Revenue"
+                        radius={[8, 8, 0, 0]}
+                        barSize={24}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="target" 
+                        stroke={colors.secondary}
+                        strokeWidth={3}
+                        dot={{ fill: colors.secondary, strokeWidth: 2, r: 5 }}
+                        strokeDasharray="5 5"
+                        name="Target"
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
+            {/* Tren Revenue & Margin */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '24px'
+            }}>
+              
+              {/* Tren Revenue */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '20px',
+                padding: '24px',
+                boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                transition: 'all 0.3s ease'
+              }}>
+                <h4 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: colors.primary,
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    padding: '8px 8px 6px 6px',
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                    borderRadius: '12px',
+                    color: 'white'
+                  }}>
+                    <TrendingUp size={18} />
+                  </div>
+                  Tren Revenue
+                </h4>
+                <div style={{ height: '200px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={totalRevenueData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(3, 91, 113, 0.1)" />
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: colors.primary }}
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 11, fill: colors.primary }}
+                        tickFormatter={(value) => {
+                          if (value >= 1000000000) return `${(value/1000000000).toFixed(1)}B`;
+                          if (value >= 1000000) return `${(value/1000000).toFixed(1)}M`;
+                          if (value >= 1000) return `${(value/1000).toFixed(1)}K`;
+                          return value;
+                        }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`Rp ${value.toLocaleString('id-ID')}`, 'Revenue']}
+                        contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: `1px solid ${colors.primary}`,
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="totalProfit" 
+                        stroke={colors.primary} 
+                        strokeWidth={3}
+                        dot={{ fill: colors.primary, strokeWidth: 2, r: 3 }}
+                        activeDot={{ r: 5, fill: colors.secondary }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Tren Margin */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '20px',
+                padding: '24px',
+                boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                transition: 'all 0.3s ease'
+              }}>
+                <h4 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: colors.primary,
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    padding: '8px 8px 6px 6px',
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                    borderRadius: '12px',
+                    color: 'white'
+                  }}>
+                    <Activity size={18} />
+                  </div>
+                  Tren Margin
+                </h4>
+                <div style={{ height: '200px' }}>
+                  {loadingMarginData ? (
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: '100%',
+                      color: colors.primary
+                    }}>
+                      Loading...
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={marginTrendData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(3, 91, 113, 0.1)" />
+                        <XAxis 
+                          dataKey="month" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: colors.primary }}
+                        />
+                        <YAxis 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 11, fill: colors.primary }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`${value}%`, 'Margin']}
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: `1px solid ${colors.primary}`,
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="margin" 
+                          stroke={colors.accent1} 
+                          strokeWidth={3}
+                          dot={{ fill: colors.accent1, strokeWidth: 2, r: 3 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px'
+          }}>
+            
+            {/* Pencapaian Target */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              padding: '24px',
+              boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              transition: 'all 0.3s ease'
+            }}>
+              <h4 style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: colors.primary,
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <div style={{
+                    padding: '10px 10px 6px 10px',
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                    borderRadius: '12px',
+                    color: 'white'
+                }}>
+                  <Target size={20} />
+                </div>
+                Progress Target
+              </h4>
+              <div style={{ height: '180px', marginBottom: '20px' }}>
+                {loadingRegionalRevenue ? (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    color: colors.primary
+                  }}>
+                    Loading...
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pencapaianChartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {pencapaianChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {pencapaianChartData.map((item, index) => (
                   <div key={index} style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    padding: '8px 12px',
+                    background: 'rgba(3, 91, 113, 0.05)',
+                    borderRadius: '8px'
                   }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px'
-                    }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <div style={{
                         width: '12px',
                         height: '12px',
                         borderRadius: '50%',
-                        backgroundColor: item.color || COLORS[index % COLORS.length]
+                        backgroundColor: item.color
                       }} />
-                      <div>
-                        <div style={{
-                          fontWeight: '600',
-                          color: '#1f2937'
-                        }}>{item.name}</div>
-                        {typeof item.amount !== 'undefined' && (
-                          <div style={{
-                            fontSize: '12px',
-                            color: '#6b7280'
-                          }}>
-                            Rp {item.amount.toLocaleString('id-ID')}
-                          </div>
-                        )}
+                      <span style={{ fontWeight: '600', color: colors.primary }}>
+                        {item.name}
+                      </span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 'bold', color: colors.primary }}>
+                        {item.value}%
+                      </div>
+                      <div style={{ fontSize: '12px', color: colors.primary, opacity: '0.7' }}>
+                        Rp {item.amount?.toLocaleString('id-ID')}
                       </div>
                     </div>
-                    <div style={{ fontWeight: '600', color: '#1f2937' }}>{item.value}%</div>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Charts Section */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '24px'
-        }}>
-          {/* Margin Trend Chart */}
-          <div style={{
-            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            border: '1px solid #035b71',
-            position: 'relative',
-            overflow: 'hidden'
-          }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '24px'
-            }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1f2937'
-              }}>Tren Margin Rata-Rata </h3>
-            </div>
-            <div style={{ height: '320px' }}>
-              {loadingMarginData ? (
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '100%',
-                  fontSize: '16px',
-                  color: '#6b7280'
-                }}>
-                  Loading margin data...
-                </div>
-              ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={marginTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#666' }}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: '#666' }}
-                    domain={[0, 'dataMax + 10']}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip 
-                    formatter={(value, name) => [`${value}%`, 'Margin Rate']}
-                    labelFormatter={(label) => `Bulan: ${label}`}
-                    contentStyle={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="margin" 
-                    stroke={colors.primary} 
-                    strokeWidth={3}
-                    dot={{ fill: colors.primary, strokeWidth: 2, r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-              )}
-            </div>
-            <div style={{
-              marginTop: '16px',
-              backgroundColor: '#cfefedff',
-              borderRadius: '8px',
-              padding: '12px'
-            }}>
-              <div style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: colors.primary
-              }}>
-                {(() => {
-                  // Get current month margin or latest month with data
-                  const currentDate = new Date();
-                  const currentMonthShort = currentDate.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-                  
-                  // First try to get current month's data
-                  let currentMarginData = marginTrendData.find(item => item.month === currentMonthShort);
-                  
-                  // If current month has no data, get the latest month with data
-                  if (!currentMarginData || currentMarginData.margin === 0) {
-                    // Get all months with data in reverse order (latest first)
-                    const monthsWithData = marginTrendData
-                      .filter(item => item.margin > 0)
-                      .reverse();
-                    currentMarginData = monthsWithData[0];
-                  }
-                  
-                  const margin = currentMarginData ? currentMarginData.margin : 0;
-                  return `${margin.toFixed(1)}%`;
-                })()}
+                ))}
               </div>
-              <div style={{
-                fontSize: '14px',
-                color: '#6b7280'
-              }}>Current Margin Rate</div>
             </div>
-          </div>
 
-          {/* Status Penawaran Pie Chart */}
-          <div style={{
-            background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            border: '1px solid #035b71',
-            position: 'relative',
-            overflow: 'hidden'
-          }} onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-          }} onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1f2937',
-              marginBottom: '16px'
-            }}>Status Penawaran</h3>
-            <div style={{ height: '192px', marginBottom: '16px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={statusPenawaranData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {statusPenawaranData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[index]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {statusPenawaranData.map((item, index) => (
-                <div key={index} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  fontSize: '14px'
-                }}>
-                  <div style={{
+            {/* Status Penawaran */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 250, 255, 0.9) 100%)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              padding: '24px',
+              boxShadow: '0 15px 30px rgba(3, 91, 113, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              transition: 'all 0.3s ease'
+            }}>
+              <h4 style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: colors.primary,
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <div style={{
+                    padding: '8px 8px 6px 6px',
+                    background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                    borderRadius: '12px',
+                    color: 'white'
+                }}>                
+                  <PieChartIcon size={18} />
+                </div>
+                Status Penawaran
+              </h4>
+              <div style={{ height: '180px', marginBottom: '20px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusPenawaranData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {statusPenawaranData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {statusPenawaranData.map((item, index) => (
+                  <div key={index} style={{
                     display: 'flex',
                     alignItems: 'center',
-                                       gap: '8px'
+                    justifyContent: 'space-between',
+                    fontSize: '14px',
+                    padding: '8px 12px',
+                    background: 'rgba(3, 91, 113, 0.05)',
+                    borderRadius: '8px'
                   }}>
-                    <div 
-                      style={{
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
                         width: '12px',
                         height: '12px',
                         borderRadius: '50%',
-                        backgroundColor: STATUS_COLORS[index]
-                      }}
-                    ></div>
-                    <span style={{ color: '#6b7280' }}>{item.name}</span>
+                        backgroundColor: item.color
+                      }} />
+                      <span style={{ color: colors.primary }}>{item.name}</span>
+                    </div>
+                    <span style={{ fontWeight: '600', color: colors.primary }}>
+                      {item.value}
+                    </span>
                   </div>
-                  <span style={{
-                    fontWeight: '600',
-                    color: '#1f2937'
-                  }}>{item.value}%</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -1703,158 +1179,406 @@ const Dashboard = () => {
 
       {/* Status Penawaran Modal */}
       {showStatusModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }} onClick={() => setShowStatusModal(false)}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '500px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflow: 'auto',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-          }} onClick={(e) => e.stopPropagation()}>
-            {/* Modal Header */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(3, 91, 113, 0.3)',
+            backdropFilter: 'blur(2px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px'
+          }}
+          onClick={() => setShowStatusModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 50 }}
+            animate={{ 
+              scale: 1, 
+              opacity: 1, 
+              y: 0,
+              rotate: [0, 0.5, -0.5, 0]
+            }}
+            exit={{ scale: 0.9, opacity: 0, y: 50 }}
+            transition={{
+              duration: 0.5,
+              ease: [0.4, 0, 0.2, 1]
+            }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 250, 255, 0.98) 100%)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              padding: '20px',
+              maxWidth: '400px',
+              width: '100%',
+              maxHeight: '70vh',
+              overflow: 'auto',
+              boxShadow: '0 32px 64px rgba(3, 91, 113, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            
+            {/* Background Decorative Elements */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '24px'
-            }}>
-              <h2 style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#1f2937'
-              }}>Detail Status Penawaran</h2>
-              <button
-                onClick={() => setShowStatusModal(false)}
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '60px',
+              height: '60px',
+              background: `linear-gradient(135deg, ${colors.primary}20 0%, ${colors.secondary}20 100%)`,
+              borderRadius: '0 20px 0 50px',
+              zIndex: 0
+            }} />
+            
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              width: '50px',
+              height: '50px',
+              background: `linear-gradient(135deg, ${colors.tertiary}15 0%, ${colors.accent1}15 100%)`,
+              borderRadius: '0 35px 0 20px',
+              zIndex: 0
+            }} />
+
+            {/* Modal Content */}
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              
+              {/* Modal Header */}
+              <motion.div 
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
                 style={{
-                  padding: '8px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor: '#f3f4f6',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '20px',
+                  paddingBottom: '14px',
+                  borderBottom: `2px solid ${colors.primary}15`
                 }}
               >
-                <X style={{ width: '20px', height: '20px', color: '#6b7280' }} />
-              </button>
-            </div>
-
-            {/* Status Cards */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
-            }}>
-              {statusData.map((item, index) => {
-                const IconComponent = item.icon;
-                return (
-                  <div key={index} style={{
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    style={{
+                      padding: '8px 10px 6px 10px',
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                      borderRadius: '10px',
+                      boxShadow: '0 8px 20px rgba(3, 91, 113, 0.3)'
+                    }}
+                  >
+                    <Activity style={{ width: '18px', height: '18px', color: 'white' }} />
+                  </motion.div>
+                  <div>
+                    <h2 style={{
+                      fontSize: '18px',
+                      fontWeight: '800',
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      margin: 0
+                    }}>
+                      Status Penawaran
+                    </h2>
+                    <p style={{
+                      fontSize: '12px',
+                      color: colors.primary,
+                      opacity: '0.7',
+                      margin: '2px 0 0 0',
+                      fontWeight: '500'
+                    }}>
+                      Ringkasan lengkap status penawaran
+                    </p>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowStatusModal(false)}
+                  style={{
+                    padding: '6px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'rgba(3, 91, 113, 0.1)',
+                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '20px',
-                    borderRadius: '12px',
-                    backgroundColor: `${item.color}20`, 
-                    border: `2px solid ${item.color}`,
-                    transition: 'box-shadow 0.2s, transform 0.2s'
-                  }} onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-                  }} onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px'
-                    }}>
+                    justifyContent: 'center'
+                  }}
+                >
+                  <X style={{ width: '16px', height: '16px', color: colors.primary }} />
+                </motion.button>
+              </motion.div>
+
+              {/* Status Cards Grid */}
+              <motion.div 
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '14px',
+                  marginBottom: '18px'
+                }}
+              >
+                {statusData.map((item, index) => {
+                  const IconComponent = item.icon;
+                  const cardColors = {
+                    menunggu: {
+                      gradient: `linear-gradient(135deg, ${colors.warning}15 0%, ${colors.warning}05 100%)`,
+                      border: `${colors.warning}90`,
+                      iconBg: colors.warning
+                    },
+                    setuju: {
+                      gradient: `linear-gradient(135deg, ${colors.success}15 0%, ${colors.success}05 100%)`,
+                      border: `${colors.success}90`,
+                      iconBg: colors.success
+                    },
+                    ditolak: {
+                      gradient: `linear-gradient(135deg, #EF444415 0%, #EF444405 100%)`,
+                      border: '#EF444490',
+                      iconBg: '#EF4444'
+                    }
+                  };
+                  
+                  const cardColor = {
+                    gradient: `linear-gradient(135deg, ${item.color}15 0%, ${item.color}05 100%)`,
+                    border: `${item.color}90`,
+                    iconBg: item.color
+                  };
+
+                  return (
+                    <motion.div 
+                      key={index}
+                      initial={{ x: -50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.4 + (index * 0.1), duration: 0.5 }}
+                      whileHover={{ y: -3, scale: 1.02 }}
+                      style={{
+                        background: cardColor.gradient,
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: '14px',
+                        padding: '16px',
+                        border: `2px solid ${cardColor.border}`,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {/* Animated Background Element */}
+                      <motion.div
+                        animate={{ 
+                          rotate: [0, 360],
+                          scale: [1, 1.2, 1]
+                        }}
+                        transition={{
+                          rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                          scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '-30%',
+                          right: '-30%',
+                          width: '60px',
+                          height: '60px',
+                          background: `radial-gradient(circle, ${cardColor.iconBg}15 0%, transparent 70%)`,
+                          borderRadius: '50%',
+                        }}
+                      />
+                      
                       <div style={{
-                        padding: '12px',
-                        borderRadius: '12px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        position: 'relative',
+                        zIndex: 1
                       }}>
-                        <IconComponent style={{ 
-                          width: '24px', 
-                          height: '24px', 
-                          color: item.color 
-                        }} />
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px'
+                        }}>
+                          <motion.div
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            style={{
+                              padding: '14px 10px 6px 10px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              borderRadius: '10px',
+                              boxShadow: '0 6px 16px rgba(3, 91, 113, 0.1)',
+                              border: `1px solid ${cardColor.iconBg}90`,
+                            }}
+                          >
+                            <IconComponent style={{ 
+                              width: '18px',
+                              height: '18px',
+                              color: cardColor.iconBg 
+                            }} />
+                          </motion.div>
+                          <div>
+                            <h3 style={{
+                              fontSize: '14px',
+                              fontWeight: '700',
+                              color: colors.primary,
+                              margin: '0 0 3px 0'
+                            }}>
+                              {item.status}
+                            </h3>
+                            <p style={{
+                              fontSize: '12px',
+                              color: colors.primary,
+                              opacity: '0.6',
+                              margin: 0,
+                              fontWeight: '500'
+                            }}>
+                              Total penawaran
+                            </p>
+                          </div>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: '2px'
+                        }}>
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.6 + (index * 0.1), type: "spring", stiffness: 300 }}
+                            style={{
+                              fontSize: '22px',
+                              fontWeight: '800',
+                              color: cardColor.iconBg,
+                              lineHeight: '1'
+                            }}
+                          >
+                            {item.count}
+                          </motion.span>
+                        </div>
                       </div>
-                      <div>
-                        <h3 style={{
-                          fontSize: '18px',
-                          fontWeight: '600',
-                          color: '#1f2937',
-                          marginBottom: '4px'
-                        }}>{item.status}</h3>
-                        <p style={{
-                          fontSize: '14px',
-                          color: '#6b7280'
-                        }}>Status penawaran</p>
-                      </div>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <span style={{
-                        fontSize: '28px',
-                        fontWeight: 'bold',
-                        color: item.color
-                      }}>{item.count}</span>
-                      <span style={{
-                        fontSize: '14px',
-                        color: '#6b7280'
-                      }}>items</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            {/* Modal Footer */}
-            <div style={{
-              marginTop: '24px',
-              padding: '16px',
-              backgroundColor: '#eff6ff',
-              borderRadius: '12px'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <span style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#1f2937'
-                }}>Total Penawaran:</span>
-                <span style={{
-                  fontSize: '24px',
-                  fontWeight: 'bold',
-                  color: colors.primary
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+
+              {/* Summary Footer */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+                style={{
+                  background: `linear-gradient(135deg, ${colors.primary}05 0%, ${colors.secondary}05 100%)`,
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '14px',
+                  padding: '16px',
+                  border: `2px solid ${colors.primary}25`,
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '6px'
                 }}>
-                  {loadingData ? '...' : statusData.reduce((total, item) => total + item.count, 0)}
-                </span>
-              </div>
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: colors.primary,
+                    opacity: '0.8'
+                  }}>
+                    Total Semua Penawaran:
+                  </span>
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.9, type: "spring", stiffness: 300 }}
+                    style={{
+                      fontSize: '18px',
+                      fontWeight: '800',
+                      background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >
+                    {loadingData ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <div style={{
+                          width: '12px',
+                          height: '12px',
+                          border: `2px solid ${colors.primary}30`,
+                          borderTop: `2px solid ${colors.primary}`,
+                          borderRadius: '50%',
+                        }} />
+                        Loading...
+                      </motion.div>
+                    ) : (
+                      totalPenawaran.toLocaleString('id-ID')
+                    )}
+                  </motion.span>
+                </div>
+              </motion.div>
+
+              {/* Action Buttons */}
+              <motion.div
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '16px',
+                  marginTop: '32px'
+                }}
+              >
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowStatusModal(false)}
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '16px 32px',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    boxShadow: `0 4px 15px rgba(3, 91, 113, 0.3)`,
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  Batal
+                </motion.button>
+              </motion.div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );
