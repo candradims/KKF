@@ -685,6 +685,7 @@ const Penawaran = () => {
       }} />
 
       <div style={{ 
+        flex: '1 0 auto',
         maxWidth: '1800px',
         margin: '0 auto', 
         position: 'relative',
@@ -1124,7 +1125,8 @@ const Penawaran = () => {
               overflow: 'hidden',
               boxShadow: `0 12px 40px ${colors.primary}08`,
               border: `2px solid ${colors.primary}`,
-              position: 'relative'
+              position: 'relative',
+              marginBottom: '249px'
             }}>
               {/* Table Header */}
               <div style={{
@@ -2113,11 +2115,13 @@ const Penawaran = () => {
       {/* Footer */}
       <div style={{
         textAlign: 'center',
-        padding: '40px 20px',
+        flexShrink: 0,
+        padding: '30px 20px',
         color: colors.primary,
-        fontSize: '16px', 
+        fontSize: '14px',
         opacity: 0.7,
-        marginTop: '60px'
+        marginTop: 'auto',
+        paddingTop: '80px'
       }}>
         © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System 
       </div>
