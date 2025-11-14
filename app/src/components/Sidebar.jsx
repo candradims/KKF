@@ -167,7 +167,7 @@ const Sidebar = () => {
 
   const sidebarStyle = {
     height: '100vh',
-    width: '270px',
+    width: '290px',
     background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
     display: 'flex',
     flexDirection: 'column',
@@ -190,7 +190,7 @@ const Sidebar = () => {
   const menuItemStyle = (item, index) => ({
     display: 'flex',
     alignItems: 'center',
-    padding: '15px 20px',
+    padding: '19px 20px',
     margin: '6px 12px',
     borderRadius: '12px',
     cursor: 'pointer',
@@ -200,7 +200,7 @@ const Sidebar = () => {
         ? 'rgba(255, 255, 255, 0.08)' 
         : 'transparent',
     color: 'white',
-    fontSize: '14px',
+    fontSize: '16px',
     fontWeight: isActive(item.path) ? '600' : '500',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     transform: hoveredItem === index ? 'translateX(4px)' : 'translateX(0)',
@@ -212,7 +212,7 @@ const Sidebar = () => {
 
   const iconStyle = (item, index) => ({
     marginRight: '15px',
-    fontSize: '22px',
+    fontSize: '24px',
     display: 'flex',
     alignItems: 'center',
     color: isActive(item.path) ? 'white' : hoveredItem === index ? item.color : 'rgba(255, 255, 255, 0.8)',
@@ -275,10 +275,10 @@ const Sidebar = () => {
             src={logoImage}
             alt="PLN Logo"
             style={{
-              width: '145px',
+              width: '160px',
               height: 'auto',
               objectFit: 'contain',
-              padding: '12px 16px',
+              padding: '11px 16px',
               borderRadius: '16px',
               backgroundColor: 'rgba(203, 235, 234, 0.95)',
               boxShadow: `
