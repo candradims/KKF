@@ -851,7 +851,8 @@ const Dashboard = () => {
                 padding: '32px',
                 boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
                 border: '1px solid rgba(3, 91, 113, 0.1)',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                height: '416px'
               }}>
                 <h4 style={{
                   fontSize: '18px',
@@ -872,7 +873,7 @@ const Dashboard = () => {
                   </div>
                   Tren Revenue
                 </h4>
-                <div style={{ height: '250px' }}>
+                <div style={{ height: '300px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={totalRevenueData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(3, 91, 113, 0.1)" />
@@ -922,7 +923,8 @@ const Dashboard = () => {
                 padding: '32px',
                 boxShadow: '0 20px 40px rgba(3, 91, 113, 0.1)',
                 border: '1px solid rgba(3, 91, 113, 0.1)',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                height: '416px'
               }}>
                 <h4 style={{
                   fontSize: '18px',
@@ -943,7 +945,7 @@ const Dashboard = () => {
                   </div>
                   Tren Margin
                 </h4>
-                <div style={{ height: '250px' }}>
+                <div style={{ height: '300px' }}>
                   {loadingMarginData ? (
                     <div style={{
                       display: 'flex',
@@ -1580,12 +1582,16 @@ const Dashboard = () => {
         </motion.div>
       )}
       <div style={{
+        bottom: '0',
+        left: '0',
+        right: '0',
         textAlign: 'center',
-        padding: '30px 20px',
+        padding: '8px 20px',
         color: colors.primary,
         fontSize: '14px',
         opacity: 0.7,
-        marginTop: '40px'
+        zIndex: 100,
+        backdropFilter: 'blur(5px)'
       }}>
         © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System 
       </div>
