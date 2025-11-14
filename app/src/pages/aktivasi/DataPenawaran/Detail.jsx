@@ -530,7 +530,7 @@ const DetailPenawaran = ({ isOpen, onClose, detailData }) => {
                                 }}
                                 onClick={() => handleEditClick(row.id)}
                               >
-                                Edit
+                                Tambah
                               </motion.button>
                             </td>
                           </tr>

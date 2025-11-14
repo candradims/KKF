@@ -470,7 +470,7 @@ const Edit = ({
                   margin: 0,
                   letterSpacing: '-0.02em'
                 }}>
-                  {hasExistingData ? 'Edit' : 'Tambah'} Layanan - {selectedPemasangan}
+                  {hasExistingData ? 'Edit' : 'Tambah'} Tarif Akses - {selectedPemasangan}
                 </h2>
                 <p style={{
                   color: colors.accent1,
