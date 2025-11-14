@@ -664,9 +664,11 @@ const Penawaran = () => {
     <div style={{
       minHeight: '100vh',
       background: '#e7f3f5ff',
-      padding: '24px',
+      padding: '60px 48px 10px 48px',
       fontFamily: "'Open Sans', sans-serif !important",
-      position: 'relative'
+      position: 'relative',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       {/* Background Pattern */}
       <div style={{
@@ -682,13 +684,18 @@ const Penawaran = () => {
         pointerEvents: 'none'
       }} />
 
-      <div style={{ maxWidth: '80rem', margin: '0 auto', position: 'relative' }}>
+      <div style={{ 
+        maxWidth: '1800px',
+        margin: '0 auto', 
+        position: 'relative',
+        width: '100%'
+      }}>
         {/* Header Section */}
         <div style={{ marginBottom: '32px' }}>
           {/* Stats Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '20px',
             marginBottom: '24px'
           }}>
@@ -697,15 +704,25 @@ const Penawaran = () => {
               background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
               borderRadius: '16px',
               padding: '20px',
-              boxShadow: `0 4px 20px ${colors.primary}10`,
-              border: `2px solid ${getCardBorderColor('total')}`,
+              boxShadow: `0 15px 30px ${colors.primary}20`,
+              border: `1.5px solid ${getCardBorderColor('total')}`,
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              height: 'auto',
+              minHeight: 'auto'
+            }} onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.3)';
+            }} onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.boxShadow = `0 15px 30px ${colors.primary}20`;
             }}>
               <div style={{
                 position: 'absolute',
-                top: '-10px',
-                right: '-10px',
+                top: '-8px',
+                right: '-8px',
                 width: '60px',
                 height: '60px',
                 background: `linear-gradient(135deg, ${colors.secondary}20 0%, ${colors.secondary}10 100%)`,
@@ -726,9 +743,9 @@ const Penawaran = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  boxShadow: `0 4px 12px ${colors.secondary}30`
+                  boxShadow: `0 3px 8px ${colors.secondary}30`
                 }}>
-                  <Filter size={24} />
+                  <Filter size={22} />
                 </div>
                 <div>
                   <p style={{
@@ -742,7 +759,8 @@ const Penawaran = () => {
                   <p style={{
                     fontSize: '14px',
                     color: colors.gray600,
-                    margin: 0
+                    margin: 0,
+                    fontWeight: '600'
                   }}>
                     Total Penawaran
                   </p>
@@ -755,15 +773,25 @@ const Penawaran = () => {
               background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
               borderRadius: '16px',
               padding: '20px',
-              boxShadow: `0 4px 20px ${colors.primary}10`,
-              border: `2px solid ${getCardBorderColor('filtered')}`,
+              boxShadow: `0 15px 30px ${colors.primary}20`,
+              border: `1.5px solid ${getCardBorderColor('filtered')}`,
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              height: 'auto',
+              minHeight: 'auto'
+            }} onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
+              e.currentTarget.style.boxShadow = '0 20px 40px rgba(3, 91, 113, 0.3)';
+            }} onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.boxShadow = `0 15px 30px ${colors.primary}20`;
             }}>
               <div style={{
                 position: 'absolute',
-                top: '-10px',
-                right: '-10px',
+                top: '-8px',
+                right: '-8px',
                 width: '60px',
                 height: '60px',
                 background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.success}10 100%)`,
@@ -784,9 +812,9 @@ const Penawaran = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  boxShadow: `0 4px 12px ${colors.success}30`
+                  boxShadow: `0 3px 8px ${colors.success}30`
                 }}>
-                  <Filter size={24} />
+                  <Filter size={22} />
                 </div>
                 <div>
                   <p style={{
@@ -800,53 +828,14 @@ const Penawaran = () => {
                   <p style={{
                     fontSize: '14px',
                     color: colors.gray600,
-                    margin: 0
+                    margin: 0,
+                    fontWeight: '600'
                   }}>
                     Data Terfilter
                   </p>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Action Buttons Section */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '16px',
-            alignItems: 'center'
-          }}>
-            {/* Export PDF Button */}
-            <button
-              onClick={handleExportPDF}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 20px',
-                background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '600',
-                transition: 'all 0.3s ease',
-                boxShadow: `0 4px 15px ${colors.primary}30`,
-                whiteSpace: 'nowrap'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = `0 6px 20px ${colors.primary}40`;
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = `0 4px 15px ${colors.primary}30`;
-              }}
-            >
-              <Download size={16} />
-              Export PDF
-            </button>
           </div>
         </div>
 
@@ -856,14 +845,29 @@ const Penawaran = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            height: '200px',
-            fontSize: '16px',
+            height: '300px',
+            fontSize: '18px',
             color: colors.gray600,
             background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
-            borderRadius: '16px',
-            border: `2px solid ${colors.primary}`
+            borderRadius: '24px',
+            border: `2px solid ${colors.primary}`,
+            marginBottom: '32px'
           }}>
-            Memuat data penawaran...
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                border: `4px solid ${colors.primary}20`,
+                borderTop: `4px solid ${colors.primary}`,
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
+              Memuat data penawaran...
+            </div>
           </div>
         )}
 
@@ -872,24 +876,26 @@ const Penawaran = () => {
           <div style={{
             backgroundColor: '#FEE2E2',
             border: '2px solid #EF4444',
-            borderRadius: '12px',
-            padding: '20px',
-            marginBottom: '24px',
+            borderRadius: '16px',
+            padding: '28px',
+            marginBottom: '32px',
             color: '#DC2626',
-            background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`
+            background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
+            fontSize: '16px'
           }}>
             <strong>Error:</strong> {error}
             <button 
               onClick={fetchPenawaranData}
               style={{
-                marginLeft: '16px',
-                padding: '10px 20px',
+                marginLeft: '20px',
+                padding: '12px 24px',
                 background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 cursor: 'pointer',
-                fontWeight: '600'
+                fontWeight: '600',
+                fontSize: '14px'
               }}
             >
               Coba Lagi
@@ -903,38 +909,39 @@ const Penawaran = () => {
             {/* Filter Section */}
             <div style={{
               background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
-              borderRadius: '20px',
-              padding: '28px',
-              boxShadow: `0 8px 32px ${colors.primary}08`,
-              border: `2px solid ${colors.primary}`,
+              borderRadius: '16px',
+              padding: '20px',
+              boxShadow: `0 15px 30px ${colors.primary}20`,
+              border: `1.5px solid ${colors.primary}`,
               marginBottom: '24px',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              minHeight: '120px'
             }}>
               {/* Decorative elements */}
               <div style={{
                 position: 'absolute',
-                top: '-20px',
-                left: '-20px',
-                width: '120px',
-                height: '120px',
+                top: '-10px',
+                left: '-10px',
+                width: '80px',
+                height: '80px',
                 background: `radial-gradient(circle, ${colors.secondary}10 0%, transparent 70%)`,
                 borderRadius: '50%'
               }} />
               <div style={{
                 position: 'absolute',
-                bottom: '-30px',
-                right: '-30px',
-                width: '150px',
-                height: '150px',
+                bottom: '-15px',
+                right: '-15px',
+                width: '100px',
+                height: '100px',
                 background: `radial-gradient(circle, ${colors.success}08 0%, transparent 70%)`,
                 borderRadius: '50%'
               }} />
 
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(20px, 1fr))',
-                gap: '24px',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '16px',
                 alignItems: 'end',
                 position: 'relative',
               }}>
@@ -950,7 +957,7 @@ const Penawaran = () => {
                     alignItems: 'center',
                     gap: '6px'
                   }}>
-                    <Calendar size={16} />
+                    <Calendar size={18} />
                     Filter By Tanggal
                   </label>
                   <input
@@ -959,8 +966,8 @@ const Penawaran = () => {
                     onChange={(e) => setFilterDate(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #035b71',
+                      padding: '10px 14px',
+                      border: `1.5px solid ${colors.primary}`,
                       borderRadius: '12px',
                       fontSize: '14px',
                       outline: 'none',
@@ -991,7 +998,7 @@ const Penawaran = () => {
                     alignItems: 'center',
                     gap: '6px'
                   }}>
-                    <Filter size={16} />
+                    <Filter size={18} />
                     Filter By Status
                   </label>
                   <select
@@ -999,8 +1006,8 @@ const Penawaran = () => {
                     onChange={(e) => setFilterStatus(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #035b71',
+                      padding: '10px 14px',
+                      border: `1.5px solid ${colors.primary}`,
                       borderRadius: '12px',
                       fontSize: '14px',
                       outline: 'none',
@@ -1011,7 +1018,7 @@ const Penawaran = () => {
                       appearance: 'none',
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23035b71' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
                       backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 16px center',
+                      backgroundPosition: 'right 14px center',
                       backgroundSize: '16px'
                     }}
                     onFocus={(e) => {
@@ -1030,7 +1037,7 @@ const Penawaran = () => {
                   </select>
                 </div>
 
-                {/* Refresh Button */}
+                {/* Reset Filter Button */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'end' }}>
                   <button
                     onClick={() => {
@@ -1041,7 +1048,7 @@ const Penawaran = () => {
                     style={{
                       background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
                       color: 'white',
-                      padding: '12px 20px',
+                      padding: '10px 18px',
                       borderRadius: '12px',
                       border: 'none',
                       fontSize: '14px',
@@ -1051,16 +1058,16 @@ const Penawaran = () => {
                       alignItems: 'center',
                       gap: '8px',
                       transition: 'all 0.3s ease',
-                      boxShadow: `0 4px 15px ${colors.primary}30`,
+                      boxShadow: `0 3px 8px ${colors.primary}30`,
                       whiteSpace: 'nowrap'
                     }}
                     onMouseOver={(e) => {
                       e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = `0 6px 20px ${colors.primary}40`;
+                      e.target.style.boxShadow = `0 5px 15px ${colors.primary}40`;
                     }}
                     onMouseOut={(e) => {
                       e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = `0 4px 15px ${colors.primary}30`;
+                      e.target.style.boxShadow = `0 3px 8px ${colors.primary}30`;
                     }}
                   >
                     <RotateCcw size={16} />
@@ -1069,10 +1076,51 @@ const Penawaran = () => {
               </div>
             </div>
 
+            {/* Action Buttons Section */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '16px',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              {/* Export PDF Button */}
+              <button
+                onClick={handleExportPDF}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '14px 29px',
+                  background: `linear-gradient(135deg, ${colors.tertiary} 0%, ${colors.accent1} 100%)`,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease',
+                  boxShadow: `0 3px 8px ${colors.primary}30`,
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = `0 5px 15px ${colors.primary}40`;
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = `0 3px 8px ${colors.primary}30`;
+                }}
+              >
+                <Download size={18} />
+                Ekspor PDF
+              </button>
+            </div>
+
             {/* Table Section */}
             <div style={{
               background: `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
-              borderRadius: '20px',
+              borderRadius: '24px',
               overflow: 'hidden',
               boxShadow: `0 12px 40px ${colors.primary}08`,
               border: `2px solid ${colors.primary}`,
@@ -1081,7 +1129,7 @@ const Penawaran = () => {
               {/* Table Header */}
               <div style={{
                 background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-                padding: '20px 24px',
+                padding: '24px 32px',
                 borderBottom: `1px solid ${colors.gray200}`,
                 position: 'relative',
                 overflow: 'hidden'
@@ -1098,7 +1146,7 @@ const Penawaran = () => {
                 }} />
                 <h3 style={{
                   color: colors.white,
-                  fontSize: '18px',
+                  fontSize: '20px',
                   fontWeight: '700',
                   margin: 0,
                   position: 'relative',
@@ -1119,34 +1167,34 @@ const Penawaran = () => {
                       background: `linear-gradient(135deg, ${colors.light}60 0%, ${colors.gray100} 100%)`
                     }}>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'center',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '80px'
+                        width: '100px'
                       }}>
                         No.
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '140px'
+                        width: '160px'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Calendar size={16} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Calendar size={18} />
                           Tanggal
                         </div>
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1154,9 +1202,9 @@ const Penawaran = () => {
                         Nama Sales
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1165,21 +1213,21 @@ const Penawaran = () => {
                       </th>
                       {/* Lokasi Pelanggan */}
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px', 
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           Lokasi Pelanggan
                         </div>
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1187,9 +1235,9 @@ const Penawaran = () => {
                         Nomor Kontrak/BAKB
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1197,9 +1245,9 @@ const Penawaran = () => {
                         Kontrak Ke-
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1207,9 +1255,9 @@ const Penawaran = () => {
                         Referensi
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1217,9 +1265,9 @@ const Penawaran = () => {
                         Discount
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1227,9 +1275,9 @@ const Penawaran = () => {
                         Durasi Kontrak (in thn)
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'left',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
@@ -1237,13 +1285,13 @@ const Penawaran = () => {
                         Status
                       </th>
                       <th style={{
-                        padding: '20px 16px',
+                        padding: '24px 20px',
                         textAlign: 'center',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '700',
                         color: colors.primary,
                         borderBottom: `2px solid ${colors.primary}`,
-                        width: '80px'
+                        width: '100px'
                       }}>
                         Aksi
                       </th>
@@ -1256,10 +1304,10 @@ const Penawaran = () => {
                         <td
                           colSpan="12" 
                           style={{
-                            padding: '60px 20px',
+                            padding: '80px 20px',
                             textAlign: 'center',
                             color: colors.gray500,
-                            fontSize: '16px',
+                            fontSize: '18px',
                             background: `linear-gradient(135deg, ${colors.gray50} 0%, ${colors.white} 100%)`
                           }}
                         >
@@ -1267,9 +1315,9 @@ const Penawaran = () => {
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '12px'
+                            gap: '16px'
                           }}>
-                            <Filter size={48} style={{ color: colors.gray300 }} />
+                            <Filter size={56} style={{ color: colors.gray300 }} />
                             <span>Tidak ada data yang ditemukan</span>
                           </div>
                         </td>
@@ -1298,23 +1346,23 @@ const Penawaran = () => {
                           }}
                         >
                           <td style={{
-                            padding: '20px 16px',
+                            padding: '24px 20px',
                             textAlign: 'center',
-                            fontSize: '14px',
+                            fontSize: '16px',
                             fontWeight: '600',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
-                              width: '32px',
-                              height: '32px',
+                              width: '40px',
+                              height: '40px',
                               background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-                              borderRadius: '8px',
+                              borderRadius: '10px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               color: 'white',
-                              fontSize: '12px',
+                              fontSize: '14px',
                               fontWeight: '700',
                               margin: '0 auto',
                               boxShadow: `0 2px 8px ${colors.secondary}30`
@@ -1323,30 +1371,30 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               display: 'flex',
                               flexDirection: 'column',
-                              gap: '2px'
+                              gap: '4px'
                             }}>
                               <span style={{ fontWeight: '600' }}>{item.tanggal}</span>
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontSize: '15px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
                               display: 'inline-block'
@@ -1355,37 +1403,37 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '12px'
+                              gap: '16px'
                             }}>
                               <div style={{
-                                width: '40px',
-                                height: '40px',
+                                width: '48px',
+                                height: '48px',
                                 background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
-                                borderRadius: '10px',
+                                borderRadius: '12px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 color: 'white',
-                                fontSize: '16px',
+                                fontSize: '18px',
                                 fontWeight: '700',
                                 boxShadow: `0 4px 12px ${colors.success}25`
                               }}>
                                 {item.namaPelanggan.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <div style={{ fontWeight: '600', marginBottom: '2px' }}>
+                                <div style={{ fontWeight: '600', marginBottom: '4px' }}>
                                   {item.namaPelanggan}
                                 </div>
                                 <div style={{ 
-                                  fontSize: '12px', 
+                                  fontSize: '14px',
                                   color: colors.gray500 
                                 }}>
                                   Pelanggan
@@ -1395,22 +1443,22 @@ const Penawaran = () => {
                           </td>
                           {/* Lokasi Pelanggan */}
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '8px'
+                              gap: '10px'
                             }}>
-                              <MapPin size={16} color={colors.tertiary} />
+                              <MapPin size={18} color={colors.tertiary} />
                               <div style={{
                                  background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontSize: '15px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
                               display: 'inline-block'
@@ -1420,16 +1468,16 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontSize: '15px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
                               display: 'inline-block'
@@ -1438,16 +1486,16 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontSize: '15px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
                               display: 'inline-block'
@@ -1456,16 +1504,16 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontSize: '15px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
                               display: 'inline-block'
@@ -1474,16 +1522,16 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.gray700,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontSize: '15px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
                               display: 'inline-block',
@@ -1493,16 +1541,16 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.primary,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
                             <div style={{
                               background: `${colors.gray100}`,
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontSize: '15px',
                               fontFamily: "'Open Sans', sans-serif !important",
                               border: `1px solid ${colors.primary}`,
                               display: 'inline-block'
@@ -1511,17 +1559,21 @@ const Penawaran = () => {
                             </div>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
-                            fontSize: '14px',
+                            padding: '24px 20px',
+                            fontSize: '16px',
                             color: colors.gray700,
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
-                            <span style={getStatusStyle(item.status)}>
+                            <span style={{
+                              ...getStatusStyle(item.status),
+                              fontSize: '14px',
+                              padding: '6px 12px'
+                            }}>
                               {item.status}
                             </span>
                           </td>
                           <td style={{
-                            padding: '20px 16px',
+                            padding: '24px 20px',
                             textAlign: 'center',
                             borderBottom: `2px solid ${colors.gray200}`,
                           }}>
@@ -1529,7 +1581,7 @@ const Penawaran = () => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              gap: '8px'
+                              gap: '10px'
                             }}>
                               {/* View Button */}
                               <button
@@ -1537,8 +1589,8 @@ const Penawaran = () => {
                                 style={{
                                   background: `linear-gradient(135deg, ${colors.secondary}15 0%, ${colors.secondary}25 100%)`,
                                   color: colors.secondary,
-                                  padding: '8px',
-                                  borderRadius: '8px',
+                                  padding: '10px',
+                                  borderRadius: '10px',
                                   border: `1px solid ${colors.tertiary}90`,
                                   cursor: 'pointer',
                                   display: 'flex',
@@ -1561,7 +1613,7 @@ const Penawaran = () => {
                                 }}
                                 title="View Details"
                               >
-                                <Eye size={16} />
+                                <Eye size={18} />
                               </button>
                             </div>
                           </td>
@@ -1574,26 +1626,26 @@ const Penawaran = () => {
 
               {/* Enhanced Pagination */}
               <div style={{
-                padding: '24px',
+                padding: '28px',
                 borderTop: `1px solid ${colors.gray200}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 background: `linear-gradient(135deg, ${colors.gray50} 0%, ${colors.white} 100%)`,
                 flexWrap: 'wrap',
-                gap: '16px'
+                gap: '20px'
               }}>
                 <div style={{
-                  fontSize: '14px',
+                  fontSize: '16px',
                   color: colors.gray600,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px'
+                  gap: '10px'
                 }}>
                   <div style={{
-                    padding: '6px 12px',
+                    padding: '8px 14px',
                     background: `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.tertiary}10 100%)`,
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     border: `1px solid ${colors.primary}`,
                     fontWeight: '600',
                     color: colors.primary
@@ -1605,26 +1657,26 @@ const Penawaran = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px'
+                  gap: '10px'
                 }}>
                   <button
                     onClick={handlePrevious}
                     disabled={currentPage === 1}
                     style={{
-                      padding: '10px 16px',
+                      padding: '12px 20px',
                       border: `2px solid ${currentPage === 1 ? colors.gray400 : colors.secondary}`,
-                      borderRadius: '10px',
+                      borderRadius: '12px',
                       background: currentPage === 1 
                         ? colors.gray100 
                         : `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`,
                       color: currentPage === 1 ? colors.gray400 : colors.secondary,
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
                       transition: 'all 0.3s ease',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '8px'
                     }}
                     onMouseOver={(e) => {
                       if (currentPage !== 1) {
@@ -1644,7 +1696,7 @@ const Penawaran = () => {
                     ← Previous
                   </button>
 
-                  <div style={{ display: 'flex', gap: '4px' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
                     {(() => {
                       const maxVisiblePages = 10;
                       let startPage, endPage;
@@ -1673,15 +1725,15 @@ const Penawaran = () => {
                             key={1}
                             onClick={() => handlePageChange(1)}
                             style={{
-                              width: '44px',
-                              height: '44px',
+                              width: '48px',
+                              height: '48px',
                               border: `2px solid ${1 === currentPage ? colors.secondary : colors.gray300}`,
-                              borderRadius: '10px',
+                              borderRadius: '12px',
                               background: 1 === currentPage 
                                 ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
                                 : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
                               color: 1 === currentPage ? 'white' : colors.gray600,
-                              fontSize: '14px',
+                              fontSize: '16px',
                               fontWeight: '700',
                               cursor: 'pointer',
                               transition: 'all 0.3s ease',
@@ -1716,13 +1768,13 @@ const Penawaran = () => {
                         if (startPage > 2) {
                           pages.push(
                             <span key="ellipsis1" style={{
-                              width: '44px',
-                              height: '44px',
+                              width: '48px',
+                              height: '48px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               color: colors.gray500,
-                              fontSize: '14px',
+                              fontSize: '16px',
                               fontWeight: '600'
                             }}>
                               ...
@@ -1739,15 +1791,15 @@ const Penawaran = () => {
                             key={page}
                             onClick={() => handlePageChange(page)}
                             style={{
-                              width: '44px',
-                              height: '44px',
+                              width: '48px',
+                              height: '48px',
                               border: `2px solid ${isCurrentPage ? colors.secondary : colors.gray300}`,
-                              borderRadius: '10px',
+                              borderRadius: '12px',
                               background: isCurrentPage 
                                 ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
                                 : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
                               color: isCurrentPage ? 'white' : colors.gray600,
-                              fontSize: '14px',
+                              fontSize: '16px',
                               fontWeight: '700',
                               cursor: 'pointer',
                               transition: 'all 0.3s ease',
@@ -1783,13 +1835,13 @@ const Penawaran = () => {
                         if (endPage < totalPages - 1) {
                           pages.push(
                             <span key="ellipsis2" style={{
-                              width: '44px',
-                              height: '44px',
+                              width: '48px',
+                              height: '48px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               color: colors.gray500,
-                              fontSize: '14px',
+                              fontSize: '16px',
                               fontWeight: '600'
                             }}>
                               ...
@@ -1802,15 +1854,15 @@ const Penawaran = () => {
                             key={totalPages}
                             onClick={() => handlePageChange(totalPages)}
                             style={{
-                              width: '44px',
-                              height: '44px',
+                              width: '48px',
+                              height: '48px',
                               border: `2px solid ${totalPages === currentPage ? colors.secondary : colors.gray300}`,
-                              borderRadius: '10px',
+                              borderRadius: '12px',
                               background: totalPages === currentPage 
                                 ? `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
                                 : `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50} 100%)`,
                               color: totalPages === currentPage ? 'white' : colors.gray600,
-                              fontSize: '14px',
+                              fontSize: '16px',
                               fontWeight: '700',
                               cursor: 'pointer',
                               transition: 'all 0.3s ease',
@@ -1851,20 +1903,20 @@ const Penawaran = () => {
                     onClick={handleNext}
                     disabled={currentPage === totalPages}
                     style={{
-                      padding: '10px 16px',
+                      padding: '12px 20px',
                       border: `2px solid ${currentPage === totalPages ? colors.gray400 : colors.secondary}`,
-                      borderRadius: '10px',
+                      borderRadius: '12px',
                       background: currentPage === totalPages 
                         ? colors.gray100 
                         : `linear-gradient(135deg, ${colors.white} 0%, ${colors.secondary}05 100%)`,
                       color: currentPage === totalPages ? colors.gray400 : colors.secondary,
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
                       transition: 'all 0.3s ease',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '8px'
                     }}
                     onMouseOver={(e) => {
                       if (currentPage !== totalPages) {
@@ -1932,13 +1984,13 @@ const Penawaran = () => {
                 }}
                 style={{
                   background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
-                  borderRadius: '24px',
-                  padding: '40px',
+                  borderRadius: '28px',
+                  padding: '48px',
                   textAlign: 'center',
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
                   position: 'relative',
                   width: '100%',
-                  maxWidth: '400px',
+                  maxWidth: '480px',
                   border: '1px solid rgba(255, 255, 255, 0.2)'
                 }}
               >
@@ -1950,9 +2002,9 @@ const Penawaran = () => {
                   style={{
                     background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                     borderRadius: '50%',
-                    width: '100px',
-                    height: '100px',
-                    margin: '0 auto 24px auto',
+                    width: '120px',
+                    height: '120px',
+                    margin: '0 auto 32px auto',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1965,8 +2017,8 @@ const Penawaran = () => {
                     transition={{ delay: 0.5, type: "spring", stiffness: 600, damping: 20 }}
                   >
                     <Check style={{ 
-                      width: '48px', 
-                      height: '48px', 
+                      width: '56px',
+                      height: '56px',
                       color: 'white',
                       strokeWidth: 3
                     }} />
@@ -1978,8 +2030,8 @@ const Penawaran = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                   style={{
-                    margin: '0 0 12px 0',
-                    fontSize: '24px',
+                    margin: '0 0 16px 0',
+                    fontSize: '28px',
                     fontWeight: '700',
                     background: `linear-gradient(135deg, ${colors.success} 0%, ${colors.tertiary} 100%)`,
                     WebkitBackgroundClip: 'text',
@@ -1995,8 +2047,8 @@ const Penawaran = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4, duration: 0.5 }}
                   style={{
-                    margin: '0 0 32px 0',
-                    fontSize: '16px',
+                    margin: '0 0 40px 0',
+                    fontSize: '18px',
                     color: colors.accent1,
                     lineHeight: '1.5',
                     opacity: 0.9
@@ -2016,9 +2068,9 @@ const Penawaran = () => {
                     background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
                     color: 'white',
                     border: 'none',
-                    borderRadius: '12px',
-                    padding: '16px 32px',
-                    fontSize: '16px',
+                    borderRadius: '16px',
+                    padding: '18px 36px',
+                    fontSize: '18px',
                     fontWeight: '600',
                     cursor: 'pointer',
                     boxShadow: `0 8px 25px rgba(63, 186, 140, 0.3)`,
@@ -2036,13 +2088,13 @@ const Penawaran = () => {
                   onClick={handleCloseExportSuccessModal}
                   style={{
                     position: 'absolute',
-                    top: '16px',
-                    right: '16px',
+                    top: '20px',
+                    right: '20px',
                     background: 'rgba(3, 91, 113, 0.1)',
                     border: 'none',
                     borderRadius: '50%',
-                    width: '36px',
-                    height: '36px',
+                    width: '44px',
+                    height: '44px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -2050,12 +2102,24 @@ const Penawaran = () => {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  <X size={18} color={colors.primary} />
+                  <X size={22} color={colors.primary} />
                 </motion.button>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        textAlign: 'center',
+        padding: '40px 20px',
+        color: colors.primary,
+        fontSize: '16px', 
+        opacity: 0.7,
+        marginTop: '60px'
+      }}>
+        © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System 
       </div>
     </div>
   );
