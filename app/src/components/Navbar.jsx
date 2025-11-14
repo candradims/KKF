@@ -139,12 +139,12 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          minHeight: '85px',
+          minHeight: '89px',
           boxShadow: '0 4px 20px rgba(3, 91, 113, 0.15)',
           position: 'fixed',                         
           top: 0,
-          left: isSidebarOpen ? '270px' : '0',
-          width: isSidebarOpen ? 'calc(100% - 270px)' : '100%',
+          left: isSidebarOpen ? '290px' : '0',
+          width: isSidebarOpen ? 'calc(100% - 290px)' : '100%',
           zIndex: 100,
           overflow: 'hidden',
           transition: 'all 0.3s ease',
@@ -199,7 +199,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             }}
           >
             <Menu style={{ 
-              fontSize: '22px', 
+              fontSize: '25px', 
               color: 'white',
               filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
             }} />
@@ -213,7 +213,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           }}>
             <div style={{
               width: '6px',
-              height: '32px',
+              height: '39px',
               background: `linear-gradient(180deg, ${colors.secondary} 0%, ${colors.success} 100%)`,
               borderRadius: '3px',
               boxShadow: '0 0 10px rgba(0, 191, 202, 0.5)'
@@ -243,7 +243,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           zIndex: 2
         }}>
           <div style={{
-            fontSize: '1.25rem',
+            fontSize: '1.29rem',
             fontWeight: '700',
             color: 'white',
             textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
@@ -252,7 +252,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             {formatTime(currentTime)}
           </div>
           <div style={{
-            fontSize: '0.8rem',
+            fontSize: '0.9rem',
             color: 'rgba(255, 255, 255, 0.8)',
             textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
             marginTop: '2px',
@@ -279,14 +279,14 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
               gap: '0.9rem',
               justifyContent: 'center',
               alignItems: 'center',
-              padding: '4px 0',
+              padding: '8px 0',
               borderRadius: '20px',
               background: 'rgba(255,255,255,0.12)',
               backdropFilter: 'blur(12px)',
               border: '1px solid rgba(255,255,255,0.25)',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              minWidth: '220px',
+              minWidth: '230px',
               boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
             }}
             onMouseOver={(e) => {
@@ -301,8 +301,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             {/* Avatar with Gradient Border + Status */}
             <div style={{
               position: 'relative',
-              width: '50px',
-              height: '45px',
+              width: '53px',
+              height: '46px',
               borderRadius: '50%',
               padding: '3px',
               background: `conic-gradient(${colors.secondary}, ${colors.success}, ${colors.accent2}, ${colors.secondary})`,
@@ -342,7 +342,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             {/* User Info */}
             <div style={{ minWidth: 0, overflow: 'hidden' }}>
               <div style={{
-                fontSize: '15px',
+                fontSize: '17px',
                 fontWeight: '700',
                 color: 'white',
                 marginBottom: '2px',
@@ -354,7 +354,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                 {userName}
               </div>
               <div style={{
-                fontSize: '15px',
+                fontSize: '16px',
                 color: 'rgba(255,255,255,0.85)',
                 letterSpacing: '0.3px',
                 whiteSpace: 'nowrap',
