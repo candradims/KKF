@@ -16,7 +16,7 @@ const MainLayout = () => {
       height: '100vh',
       margin: 0,
       padding: 0,
-      backgroundColor: '#F9FAFB',
+      backgroundColor: '#e7f3f5ff', 
       overflow: 'hidden'
     }}>
       {/* Sidebar */}
@@ -25,7 +25,7 @@ const MainLayout = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '250px',
+        width: '290px',
         height: '100vh',
         zIndex: 40,
         margin: 0,
@@ -55,7 +55,7 @@ const MainLayout = () => {
         flexDirection: 'column',
         flex: 1,
         width: '100%',
-        marginLeft: sidebarOpen ? '270px' : '0',
+        marginLeft: sidebarOpen ? '290px' : '0',
         transition: 'margin-left 0.3s ease',
         minHeight: '100vh'
       }}>
@@ -67,8 +67,7 @@ const MainLayout = () => {
           flex: 1,
           overflowY: 'auto',
           padding: '1.5rem',
-          background: '#e7f3f5ff',
-          marginTop: '72px'
+          marginTop: '89px'
         }}>
           <Outlet />
         </div>
