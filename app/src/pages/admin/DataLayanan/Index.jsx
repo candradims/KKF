@@ -633,7 +633,7 @@ const Index = () => {
             }}
           >
             <FileSpreadsheet size={16} />
-            Import Layanan
+            Impor Layanan
           </button>
           
           <button
