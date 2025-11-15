@@ -823,25 +823,25 @@ const Dashboard = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#e7f3f5ff',
-      padding: '24px'
+      background: '#e7f3f5ff',
+      padding: '60px 48px 10px 48px'
     }}>
       <div style={{
-        maxWidth: '80rem',
+        maxWidth: '1800px',
         margin: '0 auto'
       }}>
         {/* Header Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '24px',
-          marginBottom: '32px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '32px',
+          marginBottom: '48px'
         }}>
           {/* Card 1 - Jumlah Total Penawaran */}
           <div style={{
             background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
@@ -862,29 +862,35 @@ const Dashboard = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
+                  gap: '16px',
+                  marginBottom: '16px'
                 }}>
-                  <Users style={{ width: '20px', height: '20px' }} />
+                  <div style={{
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <Users style={{ width: '28px', height: '28px' }} />
+                  </div>
                   <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
+                    fontSize: '18px',
+                    fontWeight: '600',
                     opacity: '0.9'
                   }}>Jumlah Total Penawaran</span>
                 </div>
                 <div style={{
-                  fontSize: '30px',
-                  fontWeight: 'bold'
+                  fontSize: '42px',
+                  fontWeight: 'bold',
+                  minHeight: '56px',
+                  display: 'flex',
+                  alignItems: 'center'
                 }}>
                   {loading ? '...' : (dashboardStats?.totalPenawaran || 0)}
                 </div>
               </div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
-              }}>
-                <BarChart3 style={{ width: '24px', height: '24px' }} />
+              <div>
+                <BarChart3 style={{ width: '56px', height: '56px', opacity: '0.8' }} />
               </div>
             </div>
           </div>
@@ -892,8 +898,8 @@ const Dashboard = () => {
           {/* Card 2 - Status Penawaran */}
           <div style={{
             background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
@@ -914,13 +920,20 @@ const Dashboard = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
+                  gap: '16px',
+                  marginBottom: '16px'
                 }}>
-                  <TrendingUp style={{ width: '20px', height: '20px' }} />
+                  <div style={{
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <TrendingUp style={{ width: '28px', height: '28px' }} />
+                  </div>
                   <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
+                    fontSize: '18px',
+                    fontWeight: '600',
                     opacity: '0.9'
                   }}>Status Penawaran</span>
                   <ChevronDown 
@@ -956,8 +969,8 @@ const Dashboard = () => {
           {/* Card 3 - Total Revenue */}
           <div style={{
             background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
@@ -978,19 +991,29 @@ const Dashboard = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  marginBottom: '8px'
+                  gap: '16px',
+                  marginBottom: '16px'
                 }}>
-                  <DollarSign style={{ width: '20px', height: '20px' }} />
+                  <div style={{
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <DollarSign style={{ width: '28px', height: '28px' }} />
+                  </div>
                   <span style={{
-                    fontSize: '14px',
-                    fontWeight: '500',
+                    fontSize: '18px',
+                    fontWeight: '600',
                     opacity: '0.9'
                   }}>Total Revenue</span>
                 </div>
                 <div style={{
-                  fontSize: '24px',
-                  fontWeight: 'bold'
+                  fontSize: '42px',
+                  fontWeight: 'bold',
+                  minHeight: '56px',
+                  display: 'flex',
+                  alignItems: 'center'
                 }}>
                   {loadingRevenue ? 'Loading...' : (() => {
                     const totalRevenue = totalRevenueData.reduce((sum, item) => sum + (item.value || 0), 0);
@@ -998,12 +1021,8 @@ const Dashboard = () => {
                   })()}
                 </div>
               </div>
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                padding: '12px',
-                borderRadius: '8px'
-              }}>
-                <DollarSign style={{ width: '24px', height: '24px' }} />
+              <div>
+                <DollarSign style={{ width: '56px', height: '56px', opacity: '0.8' }} />
               </div>
             </div>
           </div>
@@ -1012,10 +1031,10 @@ const Dashboard = () => {
         {/* Analisis Performa Sales Chart */}
         <div style={{
           background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-          borderRadius: '12px',
-          padding: '24px',
+          borderRadius: '20px',
+          padding: '32px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          marginBottom: '32px',
+          marginBottom: '48px',
           transition: 'transform 0.2s, box-shadow 0.2s',
           border: '1px solid #035b71',
           position: 'relative',
@@ -1161,14 +1180,14 @@ const Dashboard = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1fr',
-          gap: '24px',
-          marginBottom: '24px'
+          gap: '32px',
+          marginBottom: '48px'
         }}>
           {/* Total Revenue Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',
@@ -1292,8 +1311,8 @@ const Dashboard = () => {
           {/* Total Profit Pie Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',
@@ -1394,13 +1413,13 @@ const Dashboard = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1fr',
-          gap: '24px'
+          gap: '32px'
         }}>
           {/* Margin Trend Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',
@@ -1518,8 +1537,8 @@ const Dashboard = () => {
           {/* Status Penawaran Pie Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',

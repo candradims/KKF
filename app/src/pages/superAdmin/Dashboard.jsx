@@ -863,25 +863,25 @@ const Dashboard = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#e7f3f5ff',
-      padding: '24px',
+      background: '#e7f3f5ff',
+      padding: '60px 48px 10px 48px',
     }}>
       <div style={{
-        maxWidth: '80rem',
+        maxWidth: '1800px',
         margin: '0 auto'
       }}>
         {/* Header Cards - Status Detail */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '24px',
-          marginBottom: '32px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '32px',
+          marginBottom: '48px'
         }}>
           {/* Card 1 - Ditolak */}
            <div style={{
             background: `linear-gradient(135deg, #EF4444 0%, #f87171 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
@@ -889,19 +889,26 @@ const Dashboard = () => {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                   <XCircle style={{ width: '20px', height: '20px' }} />
-                   <span style={{ fontSize: '14px', fontWeight: '500', opacity: '0.9' }}>Ditolak</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                   <div style={{
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <XCircle style={{ width: '28px', height: '28px' }} />
+                   </div>
+                   <span style={{ fontSize: '18px', fontWeight: '600', opacity: '0.9' }}>Ditolak</span>
                    <span style={{ marginLeft: '6px', cursor: 'pointer', opacity: 0.8 }} onClick={() => setShowDetailModal('ditolak')}>
                      <ChevronDown style={{ width: '18px', height: '18px' }} />
                    </span>
                 </div>
-                <div style={{ fontSize: '30px', fontWeight: 'bold' }}>
+                <div style={{ fontSize: '42px', fontWeight: 'bold', minHeight: '56px', display: 'flex', alignItems: 'center' }}>
                   {loading ? '...' : (dashboardStats?.statusStats?.ditolak || 0)}
                 </div>
               </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '8px' }}>
-                <XCircle style={{ width: '24px', height: '24px' }} />
+              <div>
+                <XCircle style={{ width: '56px', height: '56px', opacity: '0.8' }} />
               </div>
             </div>
           </div>
@@ -909,8 +916,8 @@ const Dashboard = () => {
           {/* Card 2 - Menunggu */}
           <div style={{
             background: `linear-gradient(135deg, #fce40bff 0%, #fde68a 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'black',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
@@ -918,19 +925,26 @@ const Dashboard = () => {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <Clock style={{ width: '20px', height: '20px', color: '#f59e42' }} />
-                  <span style={{ fontSize: '14px', fontWeight: '500', opacity: '0.9' }}>Menunggu</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                  <div style={{
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <Clock style={{ width: '28px', height: '28px', color: '#f59e42' }} />
+                  </div>
+                  <span style={{ fontSize: '18px', fontWeight: '600', opacity: '0.9' }}>Menunggu</span>
                   <span style={{ marginLeft: '6px', cursor: 'pointer', opacity: 0.8 }} onClick={() => setShowDetailModal('menunggu')}>
                     <ChevronDown style={{ width: '18px', height: '18px' }} />
                   </span>
                 </div>
-                <div style={{ fontSize: '30px', fontWeight: 'bold' }}>
+                <div style={{ fontSize: '42px', fontWeight: 'bold', minHeight: '56px', display: 'flex', alignItems: 'center' }}>
                   {loading ? '...' : (dashboardStats?.statusStats?.menunggu || 0)}
                 </div>
               </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '8px' }}>
-                <Clock style={{ width: '24px', height: '24px', color: '#f59e42' }} />
+              <div>
+                <Clock style={{ width: '56px', height: '56px', color: '#f59e42', opacity: '0.8' }} />
               </div>
             </div>
 
@@ -939,8 +953,8 @@ const Dashboard = () => {
           {/* Card 3 - Disetujui */}
           <div style={{
             background: `linear-gradient(135deg, #3fba8c 0%, #6ee7b7 100%)`,
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '24px',
+            padding: '36px',
             color: 'white',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
@@ -948,19 +962,26 @@ const Dashboard = () => {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <CheckCircle style={{ width: '20px', height: '20px' }} />
-                  <span style={{ fontSize: '14px', fontWeight: '500', opacity: '0.9' }}>Disetujui</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+                  <div style={{
+                    padding: '14px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <CheckCircle style={{ width: '28px', height: '28px' }} />
+                  </div>
+                  <span style={{ fontSize: '18px', fontWeight: '600', opacity: '0.9' }}>Disetujui</span>
                   <span style={{ marginLeft: '6px', cursor: 'pointer', opacity: 0.8 }} onClick={() => setShowDetailModal('disetujui')}>
                     <ChevronDown style={{ width: '18px', height: '18px' }} />
                   </span>
                 </div>
-                <div style={{ fontSize: '30px', fontWeight: 'bold' }}>
+                <div style={{ fontSize: '42px', fontWeight: 'bold', minHeight: '56px', display: 'flex', alignItems: 'center' }}>
                   {loading ? '...' : (dashboardStats?.statusStats?.disetujui || 0)}
                 </div>
               </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '8px' }}>
-                <CheckCircle style={{ width: '24px', height: '24px' }} />
+              <div>
+                <CheckCircle style={{ width: '56px', height: '56px', opacity: '0.8' }} />
               </div>
             </div>
 
@@ -970,10 +991,10 @@ const Dashboard = () => {
         {/* Analisis Performa Sales Chart */}
         <div style={{
           background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-          borderRadius: '12px',
-          padding: '24px',
+          borderRadius: '20px',
+          padding: '32px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          marginBottom: '32px',
+          marginBottom: '48px',
           transition: 'transform 0.2s, box-shadow 0.2s',
           border: '1px solid #035b71',
           position: 'relative',
@@ -1119,14 +1140,14 @@ const Dashboard = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1fr',
-          gap: '24px',
-          marginBottom: '24px'
+          gap: '32px',
+          marginBottom: '48px'
         }}>
           {/* Total Revenue Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',
@@ -1225,8 +1246,8 @@ const Dashboard = () => {
           {/* Total Profit Pie Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',
@@ -1327,13 +1348,13 @@ const Dashboard = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1fr',
-          gap: '24px'
+          gap: '32px'
         }}>
           {/* Margin Trend Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',
@@ -1428,8 +1449,8 @@ const Dashboard = () => {
           {/* Status Penawaran Pie Chart */}
           <div style={{
             background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-            borderRadius: '12px',
-            padding: '24px',
+            borderRadius: '20px',
+            padding: '32px',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: 'transform 0.2s, box-shadow 0.2s',
             border: '1px solid #035b71',
