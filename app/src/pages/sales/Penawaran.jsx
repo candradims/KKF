@@ -204,14 +204,22 @@ const Penawaran = () => {
   const handleExportPDF = async () => {
     try {
       console.log('Starting comprehensive PDF export...');
-      console.log('Filtered data:', filteredData);
+      
+      // Filter data - hanya export yang status "Disetujui"
+      const approvedData = filteredData.filter(item => item.status === 'Disetujui');
+      console.log('Filtered data (approved only):', approvedData);
+      
+      if (approvedData.length === 0) {
+        alert('Tidak ada data penawaran dengan status "Disetujui" untuk diekspor');
+        return;
+      }
       
       const doc = new jsPDF();
       const currentDate = new Date().toLocaleDateString('id-ID');
       
       // Process each penawaran data
-      for (let dataIndex = 0; dataIndex < filteredData.length; dataIndex++) {
-        const item = filteredData[dataIndex];
+      for (let dataIndex = 0; dataIndex < approvedData.length; dataIndex++) {
+        const item = approvedData[dataIndex];
         
         // Add new page for each penawaran except the first one
         if (dataIndex > 0) {
