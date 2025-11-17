@@ -710,7 +710,7 @@ const Dashboard = () => {
                   }}>
                     <Target size={24} />
                   </div>
-                  Performa Sales
+                  Performa Anda
                 </h3>
                 <div style={{
                   padding: '12px 20px',
