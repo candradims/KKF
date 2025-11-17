@@ -289,7 +289,7 @@ const Index = () => {
     <div style={{
       minHeight: '100vh',
       background: '#e7f3f5ff',
-      padding: '24px',
+      padding: '60px 48px 10px 48px',
       fontFamily: "'Open Sans', sans-serif !important",
       position: 'relative'
     }}>
@@ -328,13 +328,13 @@ const Index = () => {
         pointerEvents: 'none'
       }} />
 
-      <div style={{ maxWidth: '80rem', margin: '0 auto', position: 'relative' }}>
+      <div style={{ maxWidth: '1800px', margin: '0 auto', position: 'relative' }}>
         {/* Header Section */}
         <div style={{ marginBottom: '32px' }}>
           {/* Stats Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '20px',
             marginBottom: '24px'
           }}>
