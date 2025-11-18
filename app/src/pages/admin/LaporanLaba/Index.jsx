@@ -123,15 +123,26 @@ const LaporanLaba = () => {
             if (hasilResponse.success && hasilResponse.data) {
               const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
               const pencapaian = parseFloat(hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
+              const status = penawaran.status?.toLowerCase();
 
               console.log(`💰 [ADMIN LAPORAN LABA] Penawaran ${penawaran.id_penawaran} (Sales ID: ${salesId}):`);
+              console.log(`   - Status: ${status}`);
               console.log(`   - Revenue (profit): Rp ${profit.toLocaleString('id-ID')}`);
               console.log(`   - Pencapaian: Rp ${pencapaian.toLocaleString('id-ID')}`);
 
               const salesData = salesDataMap.get(salesId);
+              
+              // Target/Revenue tetap dihitung untuk semua status (termasuk ditolak)
               salesData.totalRevenue += profit;
-              salesData.totalPencapaian += pencapaian;
               salesData.penawaranCount += 1;
+
+              // Pencapaian hanya dihitung untuk status Menunggu dan Disetujui
+              if (status !== 'ditolak' && pencapaian > 0) {
+                salesData.totalPencapaian += pencapaian;
+                console.log(`   ✅ Pencapaian dihitung (status: ${status})`);
+              } else if (status === 'ditolak') {
+                console.log(`   ❌ Pencapaian tidak dihitung (status: ditolak)`);
+              }
 
               salesDataMap.set(salesId, salesData);
             }
