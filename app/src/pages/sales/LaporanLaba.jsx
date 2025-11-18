@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CircleDollarSign, TrendingUp, Users, Calendar, Filter, RotateCcw, DollarSign, UserCheck, Target, TrendingDown, Award, BarChart3, Activity } from 'lucide-react';
+import { CircleDollarSign, TrendingUp, Users, Calendar, Filter, RotateCcw, DollarSign, UserCheck, Target, TrendingDown, Award, BarChart3, Activity, PieChart, Download } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
+  PieChart as RechartsPieChart,
   Pie,
   Cell,
   AreaChart,
@@ -20,15 +20,16 @@ import {
   ReferenceLine
 } from 'recharts';
 import { penawaranAPI, getUserData } from '../../utils/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const LaporanLaba = () => {
-  // Year selection removed — view fixed to 2025
   const [salesData, setSalesData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeChart, setActiveChart] = useState('performance');
-  const [totalRevenueFromProfit, setTotalRevenueFromProfit] = useState(0); // NEW: State for real total revenue
-  const [nilaiPencapaian, setNilaiPencapaian] = useState(0); // NEW: State for nilai pencapaian from total_per_bulan_harga_final_sebelum_ppn
+  const [totalRevenueFromProfit, setTotalRevenueFromProfit] = useState(0);
+  const [nilaiPencapaian, setNilaiPencapaian] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const colors = {
     primary: '#035b71',
@@ -39,400 +40,193 @@ const LaporanLaba = () => {
     success: '#3fba8c',
     warning: '#f59e0b',
     danger: '#ef4444',
-    light: '#cbebea',
-    white: '#ffffff',
-    gray50: '#f8fafc',
-    gray100: '#f1f5f9',
-    gray200: '#e2e8f0',
-    gray300: '#cbd5e1',
-    gray400: '#94a3b8',
-    gray500: '#64748b',
-    gray600: '#475569',
-    gray700: '#334155',
-    gray800: '#1e293b',
-    gray900: '#0f172a',
-    gradient1: '#667eea',
-    gradient2: '#764ba2',
-    gradient3: '#f093fb',
-    gradient4: '#f5576c'
+    light: '#e7f3f5',
+    white: '#ffffff'
   };
 
-  // Month names in Indonesian
   const monthNames = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    'JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN',
+    'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES'
   ];
 
-  // NEW: Function to calculate pencapaian from total_per_bulan_harga_final_sebelum_ppn
   const calculatePencapaianFromDatabase = async (currentUser) => {
     try {
-      console.log('🎯 [PENCAPAIAN] ===== CALCULATING PENCAPAIAN FROM HASIL_PENAWARAN =====');
-      console.log('🎯 [PENCAPAIAN] Current User:', currentUser);
-      console.log('🎯 [PENCAPAIAN] User Name:', currentUser?.nama_user);
-      console.log('🎯 [PENCAPAIAN] User ID:', currentUser?.id_user);
-      
       const response = await penawaranAPI.getAll();
-      console.log('🎯 [PENCAPAIAN] API Response:', response);
       
       if (response.success && response.data && Array.isArray(response.data)) {
-        console.log(`🎯 [PENCAPAIAN] Total penawaran in database: ${response.data.length}`);
-        console.log('🎯 [PENCAPAIAN] All penawaran data:', response.data);
-        
         let totalPencapaian = 0;
-        let processedCount = 0;
-        let skippedCount = 0;
 
         for (const penawaran of response.data) {
           try {
-            console.log(`🔍 [PENCAPAIAN] Checking penawaran ${penawaran.id_penawaran}:`);
-            console.log(`   - nama_sales: "${penawaran.nama_sales}"`);
-            console.log(`   - current user: "${currentUser?.nama_user}"`);
-            console.log(`   - Match: ${penawaran.nama_sales === currentUser?.nama_user}`);
-            
-            // Filter by current user's name
             if (penawaran.nama_sales !== currentUser?.nama_user) {
-              skippedCount++;
-              console.log(`   ⏭️  Skipped (different user)`);
               continue;
             }
 
-            console.log(`   ✓ Processing penawaran for this user...`);
-
-            // Get hasil penawaran
             const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
-            console.log(`   📊 Hasil response for penawaran ${penawaran.id_penawaran}:`, hasilResponse);
             
             if (hasilResponse.success && hasilResponse.data) {
-              console.log(`   📊 Hasil data:`, hasilResponse.data);
-              console.log(`   📊 All keys in hasil data:`, Object.keys(hasilResponse.data));
+              const totalPerBulan = parseFloat(hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
               
-              // Get total_per_bulan_harga_final_sebelum_ppn
-              const totalPerBulan = hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn;
-              console.log(`   💰 total_per_bulan_harga_final_sebelum_ppn: ${totalPerBulan}`);
-              console.log(`   💰 Type: ${typeof totalPerBulan}`);
-              console.log(`   💰 Raw value:`, totalPerBulan);
-              
-              const totalPerBulanValue = parseFloat(totalPerBulan) || 0;
-              console.log(`   💰 Parsed value: ${totalPerBulanValue}`);
-              console.log(`   💰 Formatted: ${totalPerBulanValue.toLocaleString('id-ID')}`);
-              
-              if (totalPerBulanValue > 0) {
-                totalPencapaian += totalPerBulanValue;
-                processedCount++;
-                console.log(`   ✅ Added! Running total: Rp ${totalPencapaian.toLocaleString('id-ID')}`);
-              } else {
-                console.log(`   ⚠️  Zero or invalid value, not added`);
-                console.log(`   ⚠️  Check if hasil_penawaran table has data for this penawaran`);
+              if (totalPerBulan > 0) {
+                totalPencapaian += totalPerBulan;
               }
-            } else {
-              console.log(`   ⚠️  No hasil data found`);
-              console.log(`   ⚠️  hasilResponse:`, hasilResponse);
             }
           } catch (error) {
-            console.error(`❌ [PENCAPAIAN] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+            console.error(`Error processing penawaran ${penawaran.id_penawaran}:`, error);
           }
         }
 
-        console.log('🎯 [PENCAPAIAN] ===== CALCULATION COMPLETE =====');
-        console.log(`📊 [PENCAPAIAN] Total penawaran checked: ${response.data.length}`);
-        console.log(`⏭️  [PENCAPAIAN] Skipped (different user): ${skippedCount}`);
-        console.log(`✅ [PENCAPAIAN] Processed for this user: ${processedCount}`);
-        console.log(`💰 [PENCAPAIAN] FINAL Total Pencapaian: Rp ${totalPencapaian.toLocaleString('id-ID')}`);
-
-        console.log('💾 [PENCAPAIAN] Setting nilaiPencapaian state to:', totalPencapaian);
         setNilaiPencapaian(totalPencapaian);
         return totalPencapaian;
       }
-
-      console.log('❌ [PENCAPAIAN] No valid response data');
       return 0;
     } catch (error) {
-      console.error('❌ [PENCAPAIAN] Error calculating pencapaian:', error);
-      console.error('❌ [PENCAPAIAN] Error stack:', error.stack);
+      console.error('Error calculating pencapaian:', error);
       return 0;
     }
   };
 
-  // Function to load real revenue data from profit_dari_hjt_excl_ppn
+  // Load revenue data function (keep your existing logic)
   const loadRevenueData = async () => {
     try {
       setIsLoading(true);
-      console.log('🔍 [LAPORAN LABA] Loading revenue data for sales performance...');
-
       const response = await penawaranAPI.getAll();
       
       if (response.success && response.data && Array.isArray(response.data)) {
-        console.log(`📊 [LAPORAN LABA] Processing ${response.data.length} penawaran for sales performance`);
-
-        // Create maps to accumulate revenue by sales person and by month
         const salesRevenueMap = new Map();
         const monthlyRevenueMap = new Map();
-        const monthlyPencapaianMap = new Map(); // NEW: Map for pencapaian per month
+        const monthlyPencapaianMap = new Map();
         const salesTargetMap = new Map();
 
-        let processedCount = 0;
-        let totalRevenueAccumulated = 0; // NEW: Accumulate total revenue from all penawaran
-        let totalPencapaianAccumulated = 0; // NEW: Accumulate total pencapaian from total_per_bulan_harga_final_sebelum_ppn
+        let totalRevenueAccumulated = 0;
+        let totalPencapaianAccumulated = 0;
 
-        // Process each penawaran
         for (const penawaran of response.data) {
           try {
-            console.log(`🔍 [LAPORAN LABA] Processing penawaran ${penawaran.id_penawaran}...`);
-            
             const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
             if (hasilResponse.success && hasilResponse.data) {
               const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
               const totalPerBulan = parseFloat(hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
               
-              console.log(`💰 [LAPORAN LABA] Penawaran ${penawaran.id_penawaran}:`);
-              console.log(`   - profit_dari_hjt_excl_ppn: Rp ${profit.toLocaleString('id-ID')}`);
-              console.log(`   - total_per_bulan_harga_final_sebelum_ppn: Rp ${totalPerBulan.toLocaleString('id-ID')}`);
-              
               if (profit > 0) {
-                console.log(`💰 [LAPORAN LABA] Found profit: Rp ${profit.toLocaleString('id-ID')} for penawaran ${penawaran.id_penawaran}`);
-                
-                // NEW: Accumulate total revenue
                 totalRevenueAccumulated += profit;
                 
-                // NEW: Accumulate total pencapaian
                 if (totalPerBulan > 0) {
                   totalPencapaianAccumulated += totalPerBulan;
-                  console.log(`🎯 [LAPORAN LABA] Added pencapaian: Rp ${totalPerBulan.toLocaleString('id-ID')}`);
-                  console.log(`🎯 [LAPORAN LABA] Running pencapaian total: Rp ${totalPencapaianAccumulated.toLocaleString('id-ID')}`);
                 }
                 
-                // Get sales person name
-                const salesPerson = penawaran.nama_sales || penawaran.sales_person || 'Sales ' + (processedCount + 1);
-                
-                // Get month from tanggal_dibuat or created_at or use current month as fallback
+                const salesPerson = penawaran.nama_sales || penawaran.sales_person || 'Sales';
                 const dateString = penawaran.tanggal_dibuat || penawaran.created_at;
                 const createdAt = dateString ? new Date(dateString) : new Date();
-                const month = createdAt.getMonth() + 1; // 1-12
-                const monthKey = `${createdAt.getFullYear()}-${month.toString().padStart(2, '0')}`;
+                const month = createdAt.getMonth();
+                const monthKey = monthNames[month];
                 
-                console.log(`📅 [LAPORAN LABA] Date: ${dateString}, Month: ${month}, MonthKey: ${monthKey}`);
-                
-                // Accumulate revenue for this sales person
                 const currentRevenue = salesRevenueMap.get(salesPerson) || 0;
                 salesRevenueMap.set(salesPerson, currentRevenue + profit);
                 
-                // Accumulate revenue for this month
                 const currentMonthlyRevenue = monthlyRevenueMap.get(monthKey) || 0;
                 monthlyRevenueMap.set(monthKey, currentMonthlyRevenue + profit);
                 
-                // NEW: Accumulate pencapaian for this month
                 const currentMonthlyPencapaian = monthlyPencapaianMap.get(monthKey) || 0;
                 monthlyPencapaianMap.set(monthKey, currentMonthlyPencapaian + totalPerBulan);
-                console.log(`📊 [LAPORAN LABA] Monthly pencapaian for ${monthKey}: Rp ${(currentMonthlyPencapaian + totalPerBulan).toLocaleString('id-ID')}`);
                 
-                // Set target
                 if (!salesTargetMap.has(salesPerson)) {
                   salesTargetMap.set(salesPerson, profit * 1.2);
                 }
-                
-                processedCount++;
-              } else {
-                console.log(`⚠️ [LAPORAN LABA] Zero or no profit found for penawaran ${penawaran.id_penawaran}`);
               }
-            } else {
-              console.log(`⚠️ [LAPORAN LABA] No hasil data for penawaran ${penawaran.id_penawaran}`);
             }
           } catch (error) {
-            console.error(`❌ [LAPORAN LABA] Error processing penawaran ${penawaran.id_penawaran}:`, error);
+            console.error(`Error processing penawaran ${penawaran.id_penawaran}:`, error);
           }
         }
 
-        console.log('💰 [LAPORAN LABA] ===== REVENUE CALCULATION COMPLETE =====');
-        console.log(`💰 [LAPORAN LABA] Total Revenue from all penawaran: Rp ${totalRevenueAccumulated.toLocaleString('id-ID')}`);
-        console.log(`🎯 [LAPORAN LABA] Total Pencapaian from all penawaran: Rp ${totalPencapaianAccumulated.toLocaleString('id-ID')}`);
-        console.log(`📊 [LAPORAN LABA] Processed ${processedCount} penawaran with profit data`);
-        
-        // NEW: Set total revenue state
         setTotalRevenueFromProfit(totalRevenueAccumulated);
-        
-        // NEW: Set total pencapaian state
         setNilaiPencapaian(totalPencapaianAccumulated);
-        console.log(`💾 [LAPORAN LABA] Set nilaiPencapaian to: Rp ${totalPencapaianAccumulated.toLocaleString('id-ID')}`);
 
-        // Get logged-in user data BEFORE checking revenue
         const currentUser = getUserData();
         const userName = currentUser?.nama_user || currentUser?.name || 'Sales User';
         const userTargetNR = currentUser?.target_nr || null;
 
-        console.log('👤 [LAPORAN LABA] ===== USER INFO =====');
-        console.log('👤 [LAPORAN LABA] Logged-in user:', userName);
-        console.log('👤 [LAPORAN LABA] User role:', currentUser?.role_user);
-        console.log('🎯 [LAPORAN LABA] Target NR from database (data_user.target_nr):', userTargetNR);
-        console.log('🎯 [LAPORAN LABA] Pencapaian from accumulation:', totalPencapaianAccumulated);
-
-        // UPDATED: Create single aggregated sales data entry with logged-in user name
         const salesDataArray = [];
         
-        // Changed condition: Create entry if we have EITHER revenue OR pencapaian
         if (totalRevenueAccumulated > 0 || totalPencapaianAccumulated > 0) {
-          console.log('💰 [LAPORAN LABA] Total Revenue (actual):', totalRevenueAccumulated);
-          console.log('🎯 [LAPORAN LABA] Total Pencapaian (actual):', totalPencapaianAccumulated);
-          
-          // Use target from database if available, otherwise calculate default (20% above revenue)
           const target = userTargetNR && userTargetNR > 0 
             ? userTargetNR 
             : (totalRevenueAccumulated * 1.2);
           
-          console.log('🎯 [LAPORAN LABA] Final Target used:', target);
-          console.log('📊 [LAPORAN LABA] Target source:', userTargetNR && userTargetNR > 0 ? 'DATABASE (data_user.target_nr)' : 'CALCULATED (revenue * 1.2)');
-          
-          // NEW LOGIC: Target tercapai jika Pencapaian >= Target (1x)
-          const targetFull = target; // Target penuh = Target (1x)
-
-          // Growth calculation: 100% jika pencapaian sama dengan target
-          // Formula: (Pencapaian / Target) × 100
+          const targetFull = target;
           const growth = targetFull > 0 ? (totalPencapaianAccumulated / targetFull) * 100 : 0;
-
-          // Achievement rate based on target (1x)
-          const achievementRate = growth; // Same as growth
-
-          // Status: Tercapai jika Pencapaian >= Target
-          // IMPORTANT: If no data at all (pencapaian = 0), status should be "Belum Tercapai"
+          const achievementRate = growth;
           const isAchieved = totalPencapaianAccumulated > 0 && totalPencapaianAccumulated >= targetFull;
-          
-          const lastMonth = totalPencapaianAccumulated * 0.9; // Assume 90% of current
+          const lastMonth = totalPencapaianAccumulated * 0.9;
           const komisi = totalRevenueAccumulated * 0.1;
-
-          console.log('🎯 [LAPORAN LABA] ===== NEW TARGET LOGIC (1x) =====');
-          console.log('🎯 [LAPORAN LABA] Base Target:', target.toLocaleString('id-ID'));
-          console.log('🎯 [LAPORAN LABA] Target Full (1x):', targetFull.toLocaleString('id-ID'));
-          console.log('🎯 [LAPORAN LABA] Pencapaian:', totalPencapaianAccumulated.toLocaleString('id-ID'));
-          console.log('📈 [LAPORAN LABA] Growth (to target):', growth.toFixed(2) + '%');
-          console.log('📈 [LAPORAN LABA] Achievement Rate:', achievementRate.toFixed(2) + '%');
-          console.log('✅ [LAPORAN LABA] Status:', isAchieved ? 'TERCAPAI' : 'BELUM TERCAPAI');
-          console.log('💵 [LAPORAN LABA] Komisi (10%):', komisi.toLocaleString('id-ID'));
+          const sisaTarget = Math.max(targetFull - totalPencapaianAccumulated, 0);
 
           salesDataArray.push({
             id: 1,
-            nama: userName, // Use logged-in user's name from data_user.nama_user
-            penawaran: Math.round(totalRevenueAccumulated), // Revenue
-            pencapaian: Math.round(totalPencapaianAccumulated), // NEW: Pencapaian from total_per_bulan_harga_final_sebelum_ppn
-            target: Math.round(target), // Use target from database (data_user.target_nr)
-            targetFull: Math.round(targetFull), // NEW: Target full = Target × 10
+            nama: userName,
+            penawaran: Math.round(totalRevenueAccumulated),
+            pencapaian: Math.round(totalPencapaianAccumulated),
+            target: Math.round(target),
+            targetFull: Math.round(targetFull),
             komisi: Math.round(komisi),
-            growth: parseFloat(growth.toFixed(1)), // Growth based on target (100% when pencapaian == target)
+            growth: parseFloat(growth.toFixed(1)),
             lastMonth: Math.round(lastMonth),
             achievement: parseFloat(achievementRate.toFixed(1)),
-            isAchieved: isAchieved // NEW: Status tercapai atau belum
+            isAchieved: isAchieved,
+            sisaTarget: Math.round(sisaTarget)
           });
-          
-          console.log('✅ [LAPORAN LABA] Sales data created:', salesDataArray[0]);
         }
 
-        // Convert monthly data to array and fill missing months
         const monthlyDataArray = generateMonthlyData(monthlyRevenueMap, monthlyPencapaianMap, userTargetNR);
-
-        console.log('📊 [LAPORAN LABA] Final sales performance summary:');
-        console.log('  - Sales data entries:', salesDataArray.length);
-        console.log('  - Total revenue from salesData:', salesDataArray.reduce((sum, sales) => sum + sales.penawaran, 0).toLocaleString('id-ID'));
-        console.log('  - Monthly data points:', monthlyDataArray.length);
         
         setSalesData(salesDataArray);
         setMonthlyData(monthlyDataArray);
       } else {
-        console.log('❌ [LAPORAN LABA] No valid penawaran data received');
         setTotalRevenueFromProfit(0);
-        setNilaiPencapaian(0); // Reset pencapaian
-        const { salesData: fallbackSales, monthlyData: fallbackMonthly } = generateFallbackData();
+        setNilaiPencapaian(0);
         setSalesData(fallbackSales);
         setMonthlyData(fallbackMonthly);
       }
     } catch (error) {
-      console.error('❌ [LAPORAN LABA] Error loading revenue data:', error);
+      console.error('Error loading revenue data:', error);
       setTotalRevenueFromProfit(0);
-      setNilaiPencapaian(0); // Reset pencapaian
-      const { salesData: fallbackSales, monthlyData: fallbackMonthly } = generateFallbackData();
+      setNilaiPencapaian(0);
       setSalesData(fallbackSales);
       setMonthlyData(fallbackMonthly);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
-  // Generate monthly data with realistic trends
+  // Generate monthly data (keep your existing logic)
   const generateMonthlyData = (monthlyRevenueMap, monthlyPencapaianMap, userTargetNR) => {
-    const currentYear = new Date().getFullYear();
     const monthlyData = [];
     
-    console.log('📊 [GENERATE MONTHLY DATA] Starting generation for year:', currentYear);
-    console.log('📊 [GENERATE MONTHLY DATA] User Target NR:', userTargetNR);
-    console.log('📊 [GENERATE MONTHLY DATA] Revenue Map entries:', monthlyRevenueMap.size);
-    console.log('📊 [GENERATE MONTHLY DATA] Pencapaian Map entries:', monthlyPencapaianMap.size);
-    
-    for (let month = 1; month <= 12; month++) {
-      const monthKey = `${currentYear}-${month.toString().padStart(2, '0')}`;
-      
-      // Get actual data from maps
+    for (let month = 0; month < 12; month++) {
+      const monthKey = monthNames[month];
       const actualRevenue = monthlyRevenueMap.get(monthKey) || 0;
       const actualPencapaian = monthlyPencapaianMap.get(monthKey) || 0;
-      
-      // Use user's target from database (target_nr) if available
       const target = userTargetNR && userTargetNR > 0 ? userTargetNR : (actualRevenue * 1.15);
-      
-      // Calculate achievement percentage (Revenue vs Target)
       const achievement = target > 0 ? (actualRevenue / target) * 100 : 0;
-      
-      // Calculate growth (compared to previous month)
-      const growth = month > 1 ? 
-        ((actualRevenue - (monthlyData[month-2]?.revenue || actualRevenue * 0.9)) / (monthlyData[month-2]?.revenue || actualRevenue * 0.9)) * 100 
+      const growth = month > 0 ? 
+        ((actualRevenue - (monthlyData[month-1]?.revenue || actualRevenue * 0.9)) / (monthlyData[month-1]?.revenue || actualRevenue * 0.9)) * 100 
         : 0;
 
-      console.log(`📊 [GENERATE MONTHLY DATA] ${monthNames[month - 1]} (${monthKey}):`);
-      console.log(`   - Revenue: Rp ${actualRevenue.toLocaleString('id-ID')}`);
-      console.log(`   - Pencapaian: Rp ${actualPencapaian.toLocaleString('id-ID')}`);
-      console.log(`   - Target: Rp ${target.toLocaleString('id-ID')}`);
-      console.log(`   - Achievement: ${achievement.toFixed(1)}%`);
-      console.log(`   - Growth: ${growth.toFixed(1)}%`);
-
       monthlyData.push({
-        month: month,
-        monthName: monthNames[month - 1],
+        month: month + 1,
+        monthName: monthNames[month],
         revenue: Math.round(actualRevenue),
-        pencapaian: Math.round(actualPencapaian), // NEW: Real pencapaian data
+        pencapaian: Math.round(actualPencapaian),
         target: Math.round(target),
         achievement: parseFloat(achievement.toFixed(1)),
         growth: parseFloat(growth.toFixed(1))
       });
     }
     
-    console.log('✅ [GENERATE MONTHLY DATA] Generation complete. Total months:', monthlyData.length);
     return monthlyData;
-  };
-
-  // Generate fallback data dengan data bulanan
-  const generateFallbackData = () => {
-    const salesData = [
-      { id: 1, nama: 'Avgui', penawaran: 28000, target: 25000, komisi: 2800, growth: 15, lastMonth: 24350 },
-      { id: 2, nama: 'Pay', penawaran: 1500, target: 2000, komisi: 150, growth: -25, lastMonth: 2000 },
-      { id: 3, nama: 'Yapen', penawaran: 3000, target: 3500, komisi: 300, growth: 8, lastMonth: 2778 },
-      { id: 4, nama: 'Dinos', penawaran: 1800, target: 2500, komisi: 180, growth: -10, lastMonth: 2000 },
-      { id: 5, nama: 'Adis', penawaran: 3200, target: 3000, komisi: 320, growth: 20, lastMonth: 2667 }
-    ];
-
-    const monthlyData = [];
-    for (let month = 1; month <= 12; month++) {
-      const baseRevenue = Math.random() * 50000 + 10000;
-      const target = baseRevenue * 1.15;
-      const achievement = (baseRevenue / target) * 100;
-      const growth = month > 1 ? Math.random() * 40 - 20 : 0;
-
-      monthlyData.push({
-        month: month,
-        monthName: monthNames[month - 1],
-        revenue: Math.round(baseRevenue),
-        target: Math.round(target),
-        achievement: parseFloat(achievement.toFixed(1)),
-        growth: parseFloat(growth.toFixed(1))
-      });
-    }
-
-    return { salesData, monthlyData };
   };
 
   // Fetch sales data from API
@@ -443,44 +237,25 @@ const LaporanLaba = () => {
   // Year fixed to 2025 — use all monthly data
   const filteredMonthlyData = monthlyData;
 
-  // Get current month data for stats
-  const currentMonth = new Date().getMonth();
-  const currentMonthData = filteredMonthlyData.find(item => item.month === currentMonth + 1) || filteredMonthlyData[0];
-
-  // Hitung statistik (year fixed to 2025)
+  // Calculate statistics
   const totalRevenue = totalRevenueFromProfit > 0 ? totalRevenueFromProfit : salesData.reduce((sum, sales) => sum + sales.penawaran, 0);
-
   const totalKomisi = salesData.reduce((sum, sales) => sum + sales.komisi, 0);
-
   const totalPencapaian = nilaiPencapaian > 0 ? nilaiPencapaian : salesData.reduce((sum, sales) => sum + (sales.pencapaian || 0), 0);
-
-  // NEW: Achievement rate based on target (1x)
-  // Status tercapai jika Pencapaian >= Target
-  const achievementRate = salesData.length > 0 ? (salesData.filter(sales => sales.isAchieved).length / salesData.length) * 100 : 0;
-
+  const achievementRate = salesData.length > 0 && salesData[0].target > 0 ? (totalPencapaian / salesData[0].target) * 100 : 0;  
   const averageGrowth = salesData.length > 0 ? salesData.reduce((sum, sales) => sum + (sales.growth || 0), 0) / salesData.length : 0;
-  
-  console.log('📊 [LAPORAN LABA] Display Statistics:');
-  console.log('  - Year fixed to: 2025');
-  console.log('  - Total Revenue (from profit):', totalRevenue.toLocaleString('id-ID'));
-  console.log('  - Total Pencapaian (from total_per_bulan):', totalPencapaian.toLocaleString('id-ID'));
-  console.log('  - Total Komisi:', totalKomisi.toLocaleString('id-ID'));
-  console.log('  - Achievement Rate:', achievementRate.toFixed(2) + '%');
-  console.log('  - Average Growth:', averageGrowth.toFixed(2) + '%');
 
   // Data untuk chart performa bulanan
   const monthlyPerformanceData = filteredMonthlyData.map(item => ({
     name: item.monthName,
     revenue: item.revenue,
-    pencapaian: item.pencapaian || 0, // NEW: Add pencapaian to chart data
+    pencapaian: item.pencapaian || 0,
     target: item.target,
     achievement: item.achievement,
     growth: item.growth
   }));
 
   const formatNumber = (num) => {
-    // Format to full number with thousand separators like Dashboard Sales
-    return 'Rp ' + Math.round(num).toLocaleString('id-ID') + ',-';
+    return 'Rp ' + Math.round(num).toLocaleString('id-ID') ;
   };
 
   const formatPercent = (num) => {
@@ -493,20 +268,21 @@ const LaporanLaba = () => {
         <div style={{
           backgroundColor: colors.white,
           padding: '16px',
-          border: `1px solid ${colors.gray200}`,
-          borderRadius: '12px',
-          boxShadow: `0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)`,
+          border: `2px solid ${colors.primary}`,
+          borderRadius: '16px',
+          boxShadow: '0 25px 50px rgba(3, 91, 113, 0.2)',
           fontSize: '14px',
-          color: colors.gray700,
-          minWidth: '180px'
+          color: colors.primary,
+          minWidth: '200px',
+          backdropFilter: 'blur(10px)'
         }}>
-          <p style={{ color: colors.primary, fontWeight: 'bold', marginBottom: '8px', fontSize: '16px' }}>{label}</p>
+          <p style={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '16px', color: colors.primary }}>{label}</p>
           {payload.map((entry, index) => (
-            <div key={index} style={{ marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: entry.color, fontWeight: '600', fontSize: '13px' }}>
+            <div key={index} style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: entry.color, fontWeight: '600', fontSize: '14px' }}>
                 {entry.name}:
               </span>
-              <span style={{ color: entry.color, fontWeight: 'bold', marginLeft: '8px' }}>
+              <span style={{ color: entry.color, fontWeight: 'bold', marginLeft: '12px', fontSize: '14px' }}>
                 {formatNumber(entry.value)}
               </span>
             </div>
@@ -518,705 +294,727 @@ const LaporanLaba = () => {
   };
 
   const handleRefresh = () => {
+    setIsRefreshing(true);
     setActiveChart('performance');
     loadRevenueData();
   };
 
   const chartTabs = [
-    { id: 'performance', label: 'Performa Bulanan', icon: BarChart3 }
+    { id: 'performance', label: 'Performa', icon: BarChart3 }
+  ];
+
+  const stats = [
+    {
+      title: 'Target',
+      value: formatNumber(salesData && salesData.length > 0 ? salesData[0].target : 0),
+      icon: Target,
+      color: colors.primary,
+      gradient: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`
+    },
+    {
+      title: 'Pencapaian Target',
+      value: formatNumber(totalPencapaian),
+      icon: Award,
+      color: colors.secondary,
+      gradient: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`
+    },
+    {
+      title: 'Progress ke Target',
+      value: `${averageGrowth.toFixed(1)}%`,
+      icon: averageGrowth >= 100 ? Award : (averageGrowth > 0 ? TrendingUp : TrendingDown),
+      color: averageGrowth >= 100 ? colors.success : (averageGrowth > 0 ? colors.warning : colors.danger),
+      gradient: averageGrowth >= 100
+        ? `linear-gradient(135deg, ${colors.success} 0%, #10b981 100%)`
+        : averageGrowth > 0 
+          ? `linear-gradient(135deg, ${colors.warning} 0%, #fbbf24 100%)`
+          : `linear-gradient(135deg, ${colors.danger} 0%, #f87171 100%)`
+    },
+    {
+      title: 'Sisa Target',
+      value: formatNumber(Math.max((salesData && salesData.length > 0 ? salesData[0].target : 0) - totalPencapaian, 0)),
+      icon: DollarSign,
+      color: colors.accent1,
+      gradient: `linear-gradient(135deg, ${colors.accent1} 0%, ${colors.accent2} 100%)`
+    }
   ];
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #e7f3f5 0%, #f0f9ff 100%)',
-      padding: '24px',
-      fontFamily: "'Open Sans', sans-serif !important",
-      position: 'relative'
+      background: '#e7f3f5ff',
+      padding: '60px 48px 10px 48px'
     }}>
-      
+
       <style>
         {`
+          @keyframes loading {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(200%); }
+            100% { transform: translateX(-100%); }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-10px) translateX(10px); }
+          }
+          @keyframes glow {
+            0%, 100% { 
+              box-shadow: 0 0 20px rgba(3, 91, 113, 0.1);
+              opacity: 1;
+            }
+            50% { 
+              box-shadow: 0 0 30px rgba(3, 91, 113, 0.3);
+              opacity: 0.7;
+            }
+          }
           @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
           }
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-          }
-          @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 0.8; }
         `}
       </style>
       
-      {/* Animated Background Pattern */}
       <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundImage: `
-          radial-gradient(circle at 20% 20%, ${colors.secondary}08 0%, transparent 50%),
-          radial-gradient(circle at 80% 80%, ${colors.success}06 0%, transparent 50%),
-          radial-gradient(circle at 40% 60%, ${colors.primary}04 0%, transparent 50%)
-        `,
-        pointerEvents: 'none',
-        animation: 'pulse 4s ease-in-out infinite'
-      }} />
+        maxWidth: '1800px',
+        margin: '0 auto'
+      }}>
 
-      <div style={{ maxWidth: '85rem', margin: '0 auto', position: 'relative' }}>
-        {/* Enhanced Stats Cards */}
+        {/* Header Stats Cards */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '20px',
-          marginBottom: '32px'
+          gap: '24px',
+          marginBottom: '40px'
         }}>
-          {[
-              {
-                title: 'Target',
-                // Use target from salesData (which is populated from data_user.target_nr) if available
-                value: formatNumber(salesData && salesData.length > 0 ? salesData[0].target : 0),
-                icon: Target,
-                gradient: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent1} 100%)`,
-                bgGradient: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.accent1}10 100%)`
-              },
-            {
-              title: 'Pencapaian Target',
-              // show total pencapaian (Rp)
-              value: formatNumber(totalPencapaian),
-              icon: Target,
-              gradient: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
-              bgGradient: `linear-gradient(135deg, ${colors.secondary}15 0%, ${colors.tertiary}10 100%)`
-            },
-            {
-              title: 'Progress ke Target',
-              // show percentage progress (growth) where 100% means pencapaian == target
-              value: `${averageGrowth.toFixed(1)}%`,
-              icon: averageGrowth >= 100 ? Award : (averageGrowth > 0 ? TrendingUp : TrendingDown),
-              gradient: averageGrowth >= 100
-                ? `linear-gradient(135deg, #10b981 0%, ${colors.success} 100%)`
-                : averageGrowth > 0 
-                  ? `linear-gradient(135deg, ${colors.warning} 0%, #fbbf24 100%)`
-                  : `linear-gradient(135deg, ${colors.danger} 0%, #f87171 100%)`,
-              bgGradient: averageGrowth >= 100
-                ? `linear-gradient(135deg, #10b98115 0%, ${colors.success}10 100%)`
-                : averageGrowth > 0
-                  ? `linear-gradient(135deg, ${colors.warning}15 0%, #fbbf2410 100%)`
-                  : `linear-gradient(135deg, ${colors.danger}15 0%, #f8717110 100%)`
-            },
-            {
-              title: 'Progress Pencapaian',
-              // remaining amount to reach target: target - pencapaian (show 0 if already met/exceeded)
-              value: formatNumber(Math.max((salesData && salesData.length > 0 ? salesData[0].target : 0) - totalPencapaian, 0)),
-              icon: DollarSign,
-              gradient: `linear-gradient(135deg, ${colors.accent1} 0%, ${colors.accent2} 100%)`,
-              bgGradient: `linear-gradient(135deg, ${colors.accent1}15 0%, ${colors.accent2}10 100%)`
-            }
-          ].map((stat, index) => (
-            <div key={index} style={{
-              background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-              border: '1px solid #035b71',
-              borderRadius: '20px',
-              padding: '24px',
-              boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)`,
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = `0 20px 35px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08)`;
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)`;
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: '120px',
-                height: '120px',
-                background: stat.bgGradient,
-                borderRadius: '50%',
-                transform: 'translate(40%, -40%)',
-                opacity: 0.6
-              }} />
+          {stats.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              style={{
+                background: 'linear-gradient(135deg, #035b71 0%, #00a2b9 100%)',
+                borderRadius: '24px',
+                padding: '32px',
+                color: 'white',
+                boxShadow: '0 25px 50px rgba(3, 91, 113, 0.2)',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                animation: 'glow 3s ease-in-out infinite'
+              }}
+              whileHover={{ y: -8, scale: 1.02 }}
+              onHoverStart={(e) => {
+                e.currentTarget.style.boxShadow = '0 35px 60px rgba(3, 91, 113, 0.3)';
+              }}
+              onHoverEnd={(e) => {
+                e.currentTarget.style.boxShadow = '0 25px 50px rgba(3, 91, 113, 0.2)';
+              }}
+            >
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '16px',
-                position: 'relative'
+                justifyContent: 'space-between',
+                position: 'relative',
+                zIndex: 2
               }}>
-                <div style={{
-                  width: '56px',
-                  height: '56px',
-                  background: stat.gradient,
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  boxShadow: `0 8px 25px ${stat.gradient.includes('success') ? colors.success : stat.gradient.includes('danger') ? colors.danger : colors.primary}30`
-                }}>
-                  <stat.icon size={28} />
-                </div>
                 <div>
-                  <p style={{
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    marginBottom: '16px'
+                  }}>
+                    <div style={{
+                      padding: '12px',
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      borderRadius: '14px',
+                      backdropFilter: 'blur(10px)'
+                    }}>
+                      <stat.icon style={{ width: '24px', height: '24px' }} />
+                    </div>
+                    <span style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      opacity: '0.9'
+                    }}>{stat.title}</span>
+                  </div>
+                  <div style={{
                     fontSize: '28px',
-                    fontWeight: '800',
-                    color: colors.primary,
-                    margin: '0 0 4px 0',
-                    lineHeight: '1'
+                    fontWeight: 'bold',
+                    minHeight: '40px',
+                    display: 'flex',
+                    alignItems: 'center'
                   }}>
                     {stat.value}
-                  </p>
-                  <p style={{
-                    fontSize: '14px',
-                    color: colors.gray600,
-                    margin: 0,
-                    fontWeight: '600'
-                  }}>
-                    {stat.title}
-                  </p>
+                  </div>
+                </div>
+                <div style={{
+                  animation: 'float 3s ease-in-out infinite',
+                  animationDelay: `${index * 0.5}s`
+                }}>
+                  <stat.icon style={{ width: '48px', height: '48px', opacity: '0.8' }} />
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        {/* Simplified Filter Section - Hanya Tahun */}
-        <div style={{
-          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-          border: '1px solid #035b71',
-          borderRadius: '24px',
-          padding: '32px',
-          boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1)`,
-          marginBottom: '32px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
+        {/* Filter and Controls Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          style={{
+            background: 'white',
+            borderRadius: '24px',
+            padding: '32px',
+            boxShadow: '0 25px 50px rgba(3, 91, 113, 0.1)',
+            border: '1px solid rgba(3, 91, 113, 0.1)',
+            marginBottom: '40px',
+            transition: 'all 0.3s ease'
+          }}
+          whileHover={{ y: -4 }}
+        >
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'flex-start',
+            alignItems: 'center',
             flexWrap: 'wrap',
             gap: '20px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '40px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '32px', flexWrap: 'wrap' }}>
               {/* Chart Type Tabs */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <label style={{
                   fontSize: '14px',
                   fontWeight: '700',
                   color: colors.primary,
-                  marginBottom: '8px',
+                  marginBottom: '12px',
                   height: '24px',
                   display: 'flex',
                   alignItems: 'center'
                 }}>
                   Jenis Grafik
                 </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
                   {chartTabs.map((tab) => (
-                    <button
+                    <motion.button
                       key={tab.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setActiveChart(tab.id)}
                       style={{
-                        padding: '14px 16px',
-                        borderRadius: '10px',
+                        padding: '16px 20px',
+                        borderRadius: '14px',
                         border: 'none',
-                        fontSize: '13px',
-                        fontWeight: '600',
+                        fontSize: '14px',
+                        fontWeight: '700',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        border: `2px solid ${colors.primary}`,
-                        gap: '6px',
+                        gap: '8px',
                         transition: 'all 0.3s ease',
                         background: activeChart === tab.id 
                           ? `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`
-                          : colors.gray100,
-                        color: activeChart === tab.id ? colors.white : colors.gray700,
+                          : 'rgba(3, 91, 113, 0.1)',
+                        color: activeChart === tab.id ? colors.white : colors.primary,
                         boxShadow: activeChart === tab.id 
-                          ? `0 6px 20px ${colors.primary}30`
+                          ? `0 8px 25px ${colors.primary}30`
                           : 'none'
                       }}
                     >
-                      <tab.icon size={14} />
+                      <tab.icon size={18} />
                       {tab.label}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
             </div>
-
-            {/* Refresh Button */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'flex-end',
-              height: '100%',
-              paddingTop: '24px',
-              marginTop: '12px'
-            }}>
-              <button
-                onClick={handleRefresh}
-                style={{
-                  background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent2} 100%)`,
-                  color: 'white',
-                  padding: '14px 24px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: `0 8px 25px ${colors.primary}30`,
-                  height: '48px'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.transform = 'translateY(-3px)';
-                  e.target.style.boxShadow = `0 12px 30px ${colors.primary}40`;
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = `0 8px 25px ${colors.primary}30`;
-                }}
-              >
-                <RotateCcw size={16} />
-              </button>
-            </div>
           </div>
+        </motion.div>
+
+        {/* Main Chart Section */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '40px',
+          marginBottom: '40px'
+        }}>
+          
+          {/* Full Width Chart */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+            style={{
+              background: 'white',
+              borderRadius: '28px',
+              padding: '40px',
+              boxShadow: '0 25px 50px rgba(3, 91, 113, 0.1)',
+              border: '1px solid rgba(3, 91, 113, 0.1)',
+              transition: 'all 0.3s ease'
+            }}
+            whileHover={{ y: -6 }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '40px'
+            }}>
+              <h3 style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                color: colors.primary,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '20px'
+              }}>
+                <div style={{
+                  padding: '14px 14px 10px 14px',
+                  background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                  borderRadius: '16px',
+                  color: 'white'
+                }}>
+                  <BarChart3 size={24} />
+                </div>
+                Performa Anda
+              </h3>
+              <div style={{
+                padding: '12px 20px',
+                background: 'rgba(3, 91, 113, 0.1)',
+                borderRadius: '16px',
+                border: `1px solid ${colors.primary}30`,
+                fontSize: '14px',
+                fontWeight: '600',
+                color: colors.primary
+              }}>
+                Real-time
+              </div>
+            </div>
+            
+            <div style={{ height: '480px' }}>
+              {isLoading ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    border: `5px solid ${colors.primary}20`,
+                    borderTop: `5px solid ${colors.primary}`,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                  <p style={{
+                    color: colors.primary,
+                    fontWeight: '600',
+                    fontSize: '18px'
+                  }}>
+                    Memuat data performa...
+                  </p>
+                </div>
+              ) : filteredMonthlyData.length === 0 ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%',
+                  gap: '20px'
+                }}>
+                  <TrendingUp size={80} color={colors.primary} opacity={0.3} />
+                  <div style={{
+                    fontSize: '22px',
+                    fontWeight: '700',
+                    color: colors.primary,
+                    textAlign: 'center',
+                    opacity: 0.7
+                  }}>
+                    Tidak Ada Data Performa
+                  </div>
+                  <div style={{
+                    fontSize: '16px',
+                    color: colors.primary,
+                    textAlign: 'center',
+                    maxWidth: '400px',
+                    opacity: 0.5
+                  }}>
+                    Belum ada data performa untuk tahun 2025
+                  </div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart 
+                    data={monthlyPerformanceData}
+                    margin={{ top: 25, right: 35, left: 45, bottom: 70 }}
+                  >
+                    <CartesianGrid 
+                      strokeDasharray="3 3" 
+                      stroke="rgba(3, 91, 113, 0.1)" 
+                      horizontal={true}
+                      vertical={false}
+                    />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 14, fill: colors.primary, fontWeight: '600' }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={70}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 14, fill: colors.primary, fontWeight: '600' }}
+                      tickFormatter={formatNumber}
+                      width={120}
+                    />
+                    <Tooltip content={renderCustomTooltip} />
+                    <Legend 
+                      wrapperStyle={{ 
+                        paddingTop: '25px', 
+                        fontSize: '15px',
+                        fontWeight: '600'
+                      }}
+                      iconType="rect"
+                      iconSize={14}
+                    />
+                    <Bar 
+                      dataKey="pencapaian" 
+                      fill={colors.warning}
+                      name="Pencapaian"
+                      radius={[10, 10, 0, 0]}
+                      barSize={28}
+                    />
+                    <Bar 
+                      dataKey="revenue" 
+                      fill={colors.primary}
+                      name="Revenue"
+                      radius={[10, 10, 0, 0]}
+                      barSize={28}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="target" 
+                      stroke={colors.secondary}
+                      strokeWidth={4}
+                      dot={{ fill: colors.secondary, strokeWidth: 2, r: 6 }}
+                      strokeDasharray="5 5"
+                      name="Target"
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </motion.div>
         </div>
 
-        {/* Enhanced Charts Section - Grafik Bulanan */}
-        <div style={{
-          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-          border: '1px solid #035b71',
-          borderRadius: '24px',
-          padding: '32px',
-          boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1)`,
-          marginBottom: '32px',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            right: '0',
-            width: '200px',
-            height: '200px',
-            background: `conic-gradient(from 45deg, ${colors.success}08, ${colors.secondary}06, ${colors.primary}04)`,
-            borderRadius: '50%',
-            transform: 'translate(50%, -50%)',
-            animation: 'float 8s ease-in-out infinite'
-          }} />
-          
+        {/* Performance Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          style={{
+            background: 'white',
+            borderRadius: '24px',
+            padding: '40px',
+            boxShadow: '0 25px 50px rgba(3, 91, 113, 0.1)',
+            border: '1px solid rgba(3, 91, 113, 0.1)',
+            transition: 'all 0.3s ease'
+          }}
+          whileHover={{ y: -4 }}
+        >
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '32px',
-            position: 'relative',
+            marginBottom: '32px'
           }}>
             <h3 style={{
               fontSize: '24px',
-              fontWeight: '800',
+              fontWeight: '700',
               color: colors.primary,
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              margin: 0
+              gap: '20px'
             }}>
               <div style={{
-                padding: '8px',
+                padding: '14px 14px 10px 14px',
                 background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
-                borderRadius: '10px',
+                borderRadius: '16px',
                 color: 'white'
               }}>
-                <BarChart3 size={20} />
+                <Users size={24} />
               </div>
-              Analisis Performa
+              Data Performa Sales
             </h3>
+            
             <div style={{
-              padding: '8px 16px',
-              background: `linear-gradient(135deg, ${colors.success}20 0%, ${colors.tertiary}15 100%)`,
-              borderRadius: '12px',
-              border: `2px solid ${colors.success}30`,
+              padding: '12px 20px',
+              background: 'rgba(3, 91, 113, 0.1)',
+              borderRadius: '16px',
+              border: `1px solid ${colors.primary}30`,
               fontSize: '14px',
-              fontWeight: '700',
-              color: colors.success
-            }}> 
-              Tahun 2025
-            </div>
-          </div>
-          
-    <div style={{ height: '500px' }}>
-            {isLoading ? (
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100%',
-                flexDirection: 'column',
-                gap: '16px'
-              }}>
-                <div style={{
-                  width: '50px',
-                  height: '50px',
-                  border: `4px solid ${colors.primary}20`,
-                  borderTop: `4px solid ${colors.primary}`,
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }} />
-                <p style={{
-                  color: colors.primary,
-                  fontWeight: '600',
-                  fontSize: '16px'
-                }}>
-                  Memuat data revenue bulanan...
-                </p>
-              </div>
-            ) : filteredMonthlyData.length === 0 ? (
-              // Tampilkan pesan jika tidak ada data
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100%',
-                gap: '16px'
-              }}>
-                <TrendingUp size={64} color={colors.gray300} />
-                <div style={{
-                  fontSize: '20px',
-                  fontWeight: '700',
-                  color: colors.gray500,
-                  textAlign: 'center'
-                }}>
-                  Tidak Ada Data Performa
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: colors.gray400,
-                  textAlign: 'center',
-                  maxWidth: '400px'
-                }}>
-                  Belum ada data performa untuk tahun 2025. Data performa hanya tersedia untuk tahun 2025.
-                </div>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart 
-                  data={monthlyPerformanceData}
-                  margin={{ top: 20, right: 30, left: 30, bottom: 80 }}
-                >
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    stroke={colors.gray200} 
-                    horizontal={true}
-                    vertical={false}
-                  />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: colors.gray600, fontWeight: '600' }}
-                    tickFormatter={formatNumber}
-                    width={100}
-                  />
-                  <Tooltip content={renderCustomTooltip} />
-                  <Legend 
-                    wrapperStyle={{ paddingTop: '20px' }}
-                    iconType="rect"
-                  />
-                  <Bar 
-                    dataKey="pencapaian" 
-                    fill={colors.warning}
-                    name="Pencapaian"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="revenue" 
-                    fill={colors.primary}
-                    name="Revenue"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar 
-                    dataKey="target" 
-                    fill={colors.tertiary}
-                    name="Target"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-
-        {/* Enhanced Sales Data Table */}
-        <div style={{
-          background: 'linear-gradient(135deg, #d7f2f5ff 0%, #f0faff 100%)',
-          border: '1px solid #035b71',
-          borderRadius: '24px',
-          padding: '32px',
-          boxShadow: `0 10px 25px -5px rgba(0, 0, 0, 0.1)`,
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: '0',
-            left: '0',
-            width: '150px',
-            height: '150px',
-            background: `radial-gradient(circle, ${colors.tertiary}06 0%, transparent 70%)`,
-            borderRadius: '50%',
-            transform: 'translate(-30%, -30%)'
-          }} />
-
-          <h3 style={{
-            fontSize: '24px',
-            fontWeight: '800',
-            color: colors.primary,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            margin: 0
-          }}>
-            <div style={{
-              padding: '8px',
-              background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.tertiary} 100%)`,
-              borderRadius: '10px',
-              color: 'white'
+              fontWeight: '600',
+              color: colors.primary,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
             }}>
-              <Users size={20} />
+              <Users size={16} />
+              {salesData.length} Sales
             </div>
-            Data Performa
-          </h3>
-          
+          </div>
+
           <div style={{ overflowX: 'auto' }}>
-            {filteredMonthlyData.length === 0 ? (
-              // Tampilkan pesan jika tidak ada data
+            {salesData.length === 0 ? (
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
                 padding: '60px 20px',
-                gap: '16px'
+                gap: '20px'
               }}>
-                <Users size={64} color={colors.gray300} />
+                <Users size={80} color={colors.primary} opacity={0.3} />
                 <div style={{
-                  fontSize: '20px',
+                  fontSize: '22px',
                   fontWeight: '700',
-                  color: colors.gray500,
-                  textAlign: 'center'
+                  color: colors.primary,
+                  textAlign: 'center',
+                  opacity: 0.7
                 }}>
-                  Tidak Ada Data Performa
+                  Tidak Ada Data Sales
                 </div>
                 <div style={{
-                  fontSize: '14px',
-                  color: colors.gray400,
+                  fontSize: '16px',
+                  color: colors.primary,
                   textAlign: 'center',
-                  maxWidth: '400px'
+                  maxWidth: '400px',
+                  opacity: 0.5
                 }}>
-                  Belum ada data performa untuk tahun 2025. Data hanya tersedia untuk tahun 2025.
+                  Belum ada data performa sales untuk ditampilkan
                 </div>
               </div>
             ) : (
               <table style={{
-              width: '100%',
-              borderCollapse: 'separate',
-              borderSpacing: 0,
-              borderRadius: '16px',
-              overflow: 'hidden'
-            }}>
-              <thead>
-                <tr style={{
-                  background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.tertiary}10 100%)`
-                }}>
-                  {[
-                    { label: 'Nama Sales', align: 'left' },
-                    { label: 'Revenue', align: 'right' },
-                    { label: 'Target', align: 'right' },
-                    { label: 'Pencapaian', align: 'center' },
-                    { label: 'Growth', align: 'center' },
-                    { label: 'Status', align: 'center' }
-                  ].map((header, index) => (
-                    <th key={index} style={{
-                      padding: '18px 16px',
-                      textAlign: header.align,
-                      fontSize: '14px',
-                      fontWeight: '800',
-                      color: colors.primary,
-                      borderBottom: `3px solid ${colors.primary}`,
-                      background: index === 0 ? `${colors.primary}08` : 'transparent'
-                    }}>
-                      {header.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {salesData.map((sales, index) => (
-                  <tr key={sales.id} style={{
-                    background: index % 2 === 0 
-                      ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}30 100%)`
-                      : colors.white,
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.background = `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.primary}05 100%)`;
-                    e.currentTarget.style.transform = 'scale(1.01)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = index % 2 === 0 
-                      ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.gray50}30 100%)`
-                      : colors.white;
-                    e.currentTarget.style.transform = 'scale(1)';
+                width: '100%',
+                borderCollapse: 'separate',
+                borderSpacing: 0,
+                borderRadius: '16px',
+                overflow: 'hidden'
+              }}>
+                <thead>
+                  <tr style={{
+                    background: `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.tertiary}10 100%)`
                   }}>
-                    <td style={{
-                      padding: '18px 16px',
-                      fontSize: '15px',
-                      fontWeight: '700',
-                      color: colors.primary,
-                      borderBottom: `1px solid ${colors.gray200}`
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {[
+                      { label: 'Nama Sales', align: 'left' },
+                      { label: 'Revenue', align: 'center' },
+                      { label: 'Target', align: 'center' },
+                      { label: 'Pencapaian', align: 'center' },
+                      { label: 'Sisa Target', align: 'center' },
+                      { label: 'Growth', align: 'center' },
+                      { label: 'Status', align: 'center' }
+                    ].map((header, index) => (
+                      <th key={index} style={{
+                        padding: '20px 16px',
+                        textAlign: header.align,
+                        fontSize: '15px',
+                        fontWeight: '800',
+                        color: colors.primary,
+                        borderBottom: `3px solid ${colors.primary}`,
+                        background: index === 0 ? `${colors.primary}08` : 'transparent'
+                      }}>
+                        {header.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {salesData.map((sales, index) => (
+                    <motion.tr 
+                      key={sales.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1 + index * 0.1 }}
+                      style={{
+                        background: index % 2 === 0 
+                          ? `linear-gradient(135deg, ${colors.white} 0%, ${colors.light}30 100%)`
+                          : colors.white,
+                        transition: 'all 0.3s ease'
+                      }}
+                      whileHover={{ 
+                        background: `linear-gradient(135deg, ${colors.secondary}10 0%, ${colors.primary}05 100%)`,
+                        scale: 1.01
+                      }}
+                    >
+                      <td style={{
+                        padding: '20px 16px',
+                        fontSize: '15px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `1px solid ${colors.light}`
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{
+                            width: '44px',
+                            height: '44px',
+                            background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '16px',
+                            fontWeight: '700',
+                            boxShadow: '0 8px 20px rgba(3, 91, 113, 0.2)'
+                          }}>
+                            {sales.nama.charAt(0)}
+                          </div>
+                          {sales.nama}
+                        </div>
+                      </td>
+                      <td style={{
+                        padding: '20px 16px',
+                        fontSize: '15px',
+                        fontWeight: '700',
+                        color: colors.primary,
+                        borderBottom: `1px solid ${colors.light}`,
+                        textAlign: 'center'
+                      }}>
+                        {formatNumber(sales.penawaran)}
+                      </td>
+                      <td style={{
+                        padding: '20px 16px',
+                        fontSize: '15px',
+                        fontWeight: '600',
+                        color: colors.primary,
+                        borderBottom: `1px solid ${colors.light}`,
+                        textAlign: 'center'
+                      }}>
+                        {formatNumber(sales.target)}
+                      </td>
+                      <td style={{
+                        padding: '20px 16px',
+                        fontSize: '15px',
+                        fontWeight: '700',
+                        borderBottom: `1px solid ${colors.light}`,
+                        textAlign: 'right'
+                      }}>
                         <div style={{
-                          width: '40px',
-                          height: '40px',
-                          background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.primary} 100%)`,
+                          padding: '8px 16px',
                           borderRadius: '10px',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          color: (sales.pencapaian >= sales.target) ? colors.success : colors.warning,
+                          background: (sales.pencapaian >= sales.target) ? `${colors.success}20` : `${colors.warning}20`,
+                          border: `2px solid ${(sales.pencapaian >= sales.target) ? colors.success : colors.warning}30`,
+                          display: 'inline-block'
+                        }}>
+                          {formatNumber(sales.pencapaian || 0)}
+                        </div>
+                      </td>
+                      <td style={{
+                        padding: '20px 16px',
+                        fontSize: '15px',
+                        fontWeight: '700',
+                        borderBottom: `1px solid ${colors.light}`,
+                        textAlign: 'center'
+                      }}>
+                        <div style={{
+                          padding: '8px 16px',
+                          borderRadius: '10px',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          color: sales.sisaTarget <= 0 ? colors.success : colors.danger,
+                          background: sales.sisaTarget <= 0 ? `${colors.success}20` : `${colors.danger}20`,
+                          border: `2px solid ${sales.sisaTarget <= 0 ? colors.success : colors.danger}30`,
+                          display: 'inline-block'
+                        }}>
+                          {formatNumber(sales.sisaTarget || 0)}
+                        </div>
+                      </td>
+                      <td style={{
+                        padding: '20px 16px',
+                        fontSize: '15px',
+                        fontWeight: '700',
+                        borderBottom: `1px solid ${colors.light}`,
+                        textAlign: 'center'
+                      }}>
+                        <div style={{
+                          padding: '8px 16px',
+                          borderRadius: '10px',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          color: (sales.growth || 0) >= 100 ? colors.success : (sales.growth || 0) > 0 ? colors.warning : colors.danger,
+                          background: (sales.growth || 0) >= 100 ? `${colors.success}20` : (sales.growth || 0) > 0 ? `${colors.warning}20` : `${colors.danger}20`,
+                          border: `2px solid ${(sales.growth || 0) >= 100 ? colors.success : (sales.growth || 0) > 0 ? colors.warning : colors.danger}30`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: 'white',
-                          fontSize: '14px',
-                          fontWeight: '700'
+                          gap: '6px'
                         }}>
-                          {sales.nama.charAt(0)}
+                          {(sales.growth || 0) >= 100 ? <Award size={14} /> : (sales.growth || 0) >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                          {(sales.growth || 0).toFixed(1)}%
                         </div>
-                        {sales.nama}
-                      </div>
-                    </td>
-                    <td style={{
-                      padding: '18px 16px',
-                      fontSize: '15px',
-                      fontWeight: '700',
-                      color: colors.gray700,
-                      borderBottom: `1px solid ${colors.gray200}`,
-                      textAlign: 'right'
-                    }}>
-                      {formatNumber(sales.penawaran)}
-                    </td>
-                    <td style={{
-                      padding: '18px 16px',
-                      fontSize: '15px',
-                      fontWeight: '600',
-                      color: colors.gray600,
-                      borderBottom: `1px solid ${colors.gray200}`,
-                      textAlign: 'right'
-                    }}>
-                      {formatNumber(sales.target)}
-                    </td>
-                    <td style={{
-                      padding: '18px 16px',
-                      fontSize: '15px',
-                      fontWeight: '700',
-                      borderBottom: `1px solid ${colors.gray200}`,
-                      textAlign: 'right'
-                    }}>
-                      <div style={{
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        fontSize: '14px',
+                      </td>
+                      <td style={{
+                        padding: '20px 16px',
+                        fontSize: '15px',
                         fontWeight: '700',
-                        color: (sales.pencapaian >= sales.target) ? colors.success : colors.warning,
-                        background: (sales.pencapaian >= sales.target) ? `${colors.success}20` : `${colors.warning}20`,
-                        border: `1px solid ${(sales.pencapaian >= sales.target) ? colors.success : colors.warning}30`,
-                        display: 'inline-block'
+                        borderBottom: `1px solid ${colors.light}`,
+                        textAlign: 'center'
                       }}>
-                        {formatNumber(sales.pencapaian || 0)}
-                      </div>
-                    </td>
-                    <td style={{
-                      padding: '18px 16px',
-                      fontSize: '15px',
-                      fontWeight: '700',
-                      borderBottom: `1px solid ${colors.gray200}`,
-                      textAlign: 'center'
-                    }}>
-                      <div style={{
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        fontSize: '13px',
-                        fontWeight: '700',
-                        color: (sales.growth || 0) >= 100 ? colors.success : (sales.growth || 0) > 0 ? colors.warning : colors.danger,
-                        background: (sales.growth || 0) >= 100 ? `${colors.success}20` : (sales.growth || 0) > 0 ? `${colors.warning}20` : `${colors.danger}20`,
-                        border: `1px solid ${(sales.growth || 0) >= 100 ? colors.success : (sales.growth || 0) > 0 ? colors.warning : colors.danger}30`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '4px'
-                      }}>
-                        {(sales.growth || 0) >= 100 ? <Award size={12} /> : (sales.growth || 0) >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                        {(sales.growth || 0).toFixed(1)}%
-                      </div>
-                    </td>
-                    <td style={{
-                      padding: '18px 16px',
-                      fontSize: '15px',
-                      fontWeight: '700',
-                      borderBottom: `1px solid ${colors.gray200}`,
-                      textAlign: 'center'
-                    }}>
-                      <span style={{
-                        padding: '8px 16px',
-                        borderRadius: '20px',
-                        fontSize: '13px',
-                        fontWeight: '800',
-                        backgroundColor: sales.isAchieved 
-                          ? `${colors.success}25` 
-                          : `${colors.warning}25`,
-                        color: sales.isAchieved 
-                          ? colors.success 
-                          : colors.warning,
-                        border: `2px solid ${sales.isAchieved 
-                          ? colors.success 
-                          : colors.warning}40`,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}>
-                        {sales.isAchieved ? <Award size={14} /> : <Target size={14} />}
-                        {sales.isAchieved ? 'Tercapai' : 'Belum Tercapai'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        <span style={{
+                          padding: '10px 20px',
+                          borderRadius: '20px',
+                          fontSize: '14px',
+                          fontWeight: '800',
+                          backgroundColor: sales.isAchieved 
+                            ? `${colors.success}25` 
+                            : `${colors.warning}25`,
+                          color: sales.isAchieved 
+                            ? colors.success 
+                            : colors.warning,
+                          border: `2px solid ${sales.isAchieved 
+                            ? colors.success 
+                            : colors.warning}40`,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          {sales.isAchieved ? <Award size={16} /> : <Target size={16} />}
+                          {sales.isAchieved ? 'Tercapai' : 'Belum Tercapai'}
+                        </span>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
-        </div>
+        </motion.div>
+      </div>
+
+      {/* Footer */}
+      <div style={{
+        textAlign: 'center',
+        padding: '20px',
+        color: colors.primary,
+        fontSize: '14px',
+        opacity: 0.7,
+        marginTop: '40px'
+      }}>
+        © {new Date().getFullYear()} PLN Icon Plus • Financial Network Feasibility System 
       </div>
     </div>
   );
