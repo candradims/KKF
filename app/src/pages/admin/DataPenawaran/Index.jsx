@@ -399,6 +399,7 @@ const Index = () => {
         total_pengeluaran_lain_lain: updatedData.total_pengeluaran_lain_lain || 0,
         selectedLayananId: updatedData.selectedLayananId,
         hjtWilayah: updatedData.hjtWilayah,
+        status: 'Menunggu', // Reset status ke Menunggu ketika admin melakukan edit
         // Include layananItems and pengeluaranItems so backend can update them
         layananItems: updatedData.layananItems || [],
         pengeluaranItems: updatedData.pengeluaranItems || []
