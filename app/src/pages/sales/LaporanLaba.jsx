@@ -908,7 +908,7 @@ const LaporanLaba = () => {
                         fontSize: '15px',
                         fontWeight: '700',
                         borderBottom: `1px solid ${colors.light}`,
-                        textAlign: 'right'
+                        textAlign: 'center'
                       }}>
                         <div style={{
                           padding: '8px 16px',
