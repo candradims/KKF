@@ -62,6 +62,12 @@ const LaporanLaba = () => {
               continue;
             }
 
+            // Filter: hanya ambil data dengan status Menunggu atau Disetujui
+            const status = penawaran.status?.toLowerCase();
+            if (status === 'ditolak') {
+              continue;
+            }
+
             const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
             if (hasilResponse.success && hasilResponse.data) {
@@ -108,13 +114,11 @@ const LaporanLaba = () => {
             if (hasilResponse.success && hasilResponse.data) {
               const profit = parseFloat(hasilResponse.data.profit_dari_hjt_excl_ppn) || 0;
               const totalPerBulan = parseFloat(hasilResponse.data.total_per_bulan_harga_final_sebelum_ppn) || 0;
+              const status = penawaran.status?.toLowerCase();
               
               if (profit > 0) {
+                // Target tetap dihitung untuk semua status (termasuk ditolak)
                 totalRevenueAccumulated += profit;
-                
-                if (totalPerBulan > 0) {
-                  totalPencapaianAccumulated += totalPerBulan;
-                }
                 
                 const salesPerson = penawaran.nama_sales || penawaran.sales_person || 'Sales';
                 const dateString = penawaran.tanggal_dibuat || penawaran.created_at;
@@ -128,11 +132,16 @@ const LaporanLaba = () => {
                 const currentMonthlyRevenue = monthlyRevenueMap.get(monthKey) || 0;
                 monthlyRevenueMap.set(monthKey, currentMonthlyRevenue + profit);
                 
-                const currentMonthlyPencapaian = monthlyPencapaianMap.get(monthKey) || 0;
-                monthlyPencapaianMap.set(monthKey, currentMonthlyPencapaian + totalPerBulan);
-                
                 if (!salesTargetMap.has(salesPerson)) {
                   salesTargetMap.set(salesPerson, profit * 1.2);
+                }
+                
+                // Pencapaian hanya dihitung untuk status Menunggu dan Disetujui
+                if (status !== 'ditolak' && totalPerBulan > 0) {
+                  totalPencapaianAccumulated += totalPerBulan;
+                  
+                  const currentMonthlyPencapaian = monthlyPencapaianMap.get(monthKey) || 0;
+                  monthlyPencapaianMap.set(monthKey, currentMonthlyPencapaian + totalPerBulan);
                 }
               }
             }
