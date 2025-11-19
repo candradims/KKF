@@ -40,8 +40,9 @@ const Penawaran = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State baru untuk modal sukses ekspor
+  // State baru untuk modal sukses ekspor dan modal no data
   const [showExportSuccessModal, setShowExportSuccessModal] = useState(false);
+  const [showNoDataModal, setShowNoDataModal] = useState(false);
 
   // Color palette
   const colors = {
@@ -201,6 +202,11 @@ const Penawaran = () => {
     setShowExportSuccessModal(false);
   };
 
+  // Fungsi untuk menutup modal no data
+  const handleCloseNoDataModal = () => {
+    setShowNoDataModal(false);
+  };
+
   const handleExportPDF = async () => {
     try {
       console.log('Starting comprehensive PDF export...');
@@ -210,7 +216,7 @@ const Penawaran = () => {
       console.log('Filtered data (approved only):', approvedData);
       
       if (approvedData.length === 0) {
-        alert('Tidak ada data penawaran dengan status "Disetujui" untuk diekspor');
+        setShowNoDataModal(true);
         return;
       }
       
@@ -2113,6 +2119,161 @@ const Penawaran = () => {
                   }}
                 >
                   <X size={22} color={colors.primary} />
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* Modal No Data */}
+          {showNoDataModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(3, 91, 113, 0.3)',
+                backdropFilter: 'blur(2px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                padding: '20px'
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0.5, opacity: 0, rotate: 10 }}
+                transition={{ 
+                  duration: 0.5, 
+                  ease: [0.4, 0, 0.2, 1],
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 20
+                }}
+                style={{
+                  background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                  borderRadius: '24px',
+                  padding: '40px',
+                  textAlign: 'center',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  position: 'relative',
+                  width: '100%',
+                  maxWidth: '400px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                {/* Warning Icon */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring', stiffness: 400, damping: 15 }}
+                  style={{
+                    background: `linear-gradient(135deg, #f59e0b 0%, #d97706 100%)`,
+                    borderRadius: '50%',
+                    width: '100px',
+                    height: '100px',
+                    margin: '0 auto 24px auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 20px 40px rgba(245, 158, 11, 0.4)'
+                  }}
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.5, type: 'spring', stiffness: 600, damping: 20 }}
+                  >
+                    <X style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      color: 'white',
+                      strokeWidth: 3
+                    }} />
+                  </motion.div>
+                </motion.div>
+
+                <motion.h3 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  style={{
+                    margin: '0 0 12px 0',
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    color: '#d97706'
+                  }}
+                >
+                  Tidak Ada Data
+                </motion.h3>
+                
+                <motion.p 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  style={{
+                    margin: '0 0 32px 0',
+                    fontSize: '16px',
+                    color: colors.accent1,
+                    lineHeight: '1.5',
+                    opacity: 0.9
+                  }}
+                >
+                  Tidak ada data penawaran dengan status "Disetujui" untuk diekspor
+                </motion.p>
+                
+                <motion.button
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCloseNoDataModal}
+                  style={{
+                    background: `linear-gradient(135deg, #f59e0b 0%, #d97706 100%)`,
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '16px 32px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 25px rgba(245, 158, 11, 0.3)',
+                    transition: 'all 0.3s ease',
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  OK
+                </motion.button>
+
+                {/* Close button */}
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleCloseNoDataModal}
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    background: 'rgba(3, 91, 113, 0.1)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '36px',
+                    height: '36px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <X size={18} color={colors.primary} />
                 </motion.button>
               </motion.div>
             </motion.div>
