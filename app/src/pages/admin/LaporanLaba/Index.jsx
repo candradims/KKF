@@ -132,16 +132,17 @@ const LaporanLaba = () => {
 
               const salesData = salesDataMap.get(salesId);
               
-              // Target/Revenue tetap dihitung untuk semua status (termasuk ditolak)
-              salesData.totalRevenue += profit;
-              salesData.penawaranCount += 1;
-
-              // Pencapaian hanya dihitung untuk status Menunggu dan Disetujui
-              if (status !== 'ditolak' && pencapaian > 0) {
-                salesData.totalPencapaian += pencapaian;
-                console.log(`   ✅ Pencapaian dihitung (status: ${status})`);
-              } else if (status === 'ditolak') {
-                console.log(`   ❌ Pencapaian tidak dihitung (status: ditolak)`);
+              // Revenue dan Pencapaian hanya dihitung untuk status Menunggu dan Disetujui
+              if (status !== 'ditolak') {
+                salesData.totalRevenue += profit;
+                salesData.penawaranCount += 1;
+                
+                if (pencapaian > 0) {
+                  salesData.totalPencapaian += pencapaian;
+                }
+                console.log(`   ✅ Revenue dan Pencapaian dihitung (status: ${status})`);
+              } else {
+                console.log(`   ❌ Revenue dan Pencapaian tidak dihitung (status: ditolak)`);
               }
 
               salesDataMap.set(salesId, salesData);
