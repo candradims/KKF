@@ -111,6 +111,12 @@ const Dashboard = () => {
         let totalRevenue = 0;
 
         for (const penawaran of penawaranList) {
+          // Filter: hanya hitung dari status Menunggu dan Disetujui
+          const status = (penawaran.status || '').toLowerCase();
+          if (status !== 'menunggu' && status !== 'disetujui' && status !== 'setuju') {
+            continue;
+          }
+          
           try {
             const hasilData = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
@@ -166,6 +172,12 @@ const Dashboard = () => {
         let totalPencapaianAccumulated = 0;
 
         for (const penawaran of penawaranList) {
+          // Filter: hanya hitung dari status Menunggu dan Disetujui
+          const status = (penawaran.status || '').toLowerCase();
+          if (status !== 'menunggu' && status !== 'disetujui' && status !== 'setuju') {
+            continue;
+          }
+          
           try {
             const hasilData = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
@@ -224,6 +236,12 @@ const Dashboard = () => {
         });
 
         for (const penawaran of response.data) {
+          // Filter: hanya hitung dari status Menunggu dan Disetujui
+          const status = (penawaran.status || '').toLowerCase();
+          if (status !== 'menunggu' && status !== 'disetujui' && status !== 'setuju') {
+            continue;
+          }
+          
           try {
             const hasilResponse = await penawaranAPI.getHasil(penawaran.id_penawaran);
             
