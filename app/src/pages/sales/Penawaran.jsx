@@ -238,7 +238,7 @@ const Penawaran = () => {
         doc.setFontSize(18);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(3, 91, 113); // Primary color
-        doc.text('DETAIL DATA PENAWARAN', doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
+        doc.text('LAPORAN DATA PENAWARAN', doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
         
         yPosition += 10;
         doc.setFontSize(9);
