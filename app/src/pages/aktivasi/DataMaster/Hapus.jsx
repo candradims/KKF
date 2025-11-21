@@ -507,7 +507,6 @@ const Hapus = ({ isOpen, onClose, onDelete, initialData }) => {
                           color: colors.primary,
                           marginBottom: '16px',
                           letterSpacing: '0.02em',
-                          display: 'flex',
                           alignItems: 'center',
                           gap: '12px'
                         }}

@@ -178,7 +178,6 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
             style={{
               padding: '10px',
               borderRadius: '12px',
-              border: 'none',
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               cursor: 'pointer',
               marginRight: '1.5rem',
@@ -278,7 +277,6 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
               alignItems: 'center',
               gap: '0.9rem',
               justifyContent: 'center',
-              alignItems: 'center',
               padding: '8px 0',
               borderRadius: '20px',
               background: 'rgba(255,255,255,0.12)',

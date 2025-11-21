@@ -1063,7 +1063,6 @@ const Index = () => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    display: 'flex',
                     alignItems: 'center',
                     gap: '6px'
                   }}>
@@ -1104,7 +1103,6 @@ const Index = () => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    display: 'flex',
                     alignItems: 'center',
                     gap: '6px'
                   }}>

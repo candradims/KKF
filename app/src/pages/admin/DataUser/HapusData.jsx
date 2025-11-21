@@ -571,7 +571,6 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
                               color: colors.primary,
                               marginBottom: '16px',
                               letterSpacing: '0.02em',
-                              display: 'flex',
                               alignItems: 'center',
                               gap: '12px'
                             }}
@@ -590,7 +589,6 @@ const HapusData = ({ isOpen, onClose, onDelete, initialData }) => {
                                 background: `linear-gradient(135deg, ${colors.secondary} 0%, ${colors.tertiary} 100%)`,
                                 borderRadius: '10px',
                                 padding: '8px',
-                                display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center'
                               }}

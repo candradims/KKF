@@ -968,7 +968,6 @@ const Penawaran = () => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    display: 'flex',
                     alignItems: 'center',
                     gap: '6px'
                   }}>
@@ -1009,7 +1008,6 @@ const Penawaran = () => {
                     fontWeight: '600',
                     color: colors.primary,
                     marginBottom: '8px',
-                    display: 'flex',
                     alignItems: 'center',
                     gap: '6px'
                   }}>
